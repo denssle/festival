@@ -28,6 +28,8 @@
 declare module '$env/static/private' {
 	export const ALLUSERSPROFILE: string;
 	export const APPDATA: string;
+	export const ChocolateyInstall: string;
+	export const ChocolateyLastPathUpdate: string;
 	export const COLOR: string;
 	export const CommonProgramFiles: string;
 	export const CommonProgramW6432: string;
@@ -72,7 +74,7 @@ declare module '$env/static/private' {
 	export const NPM_PREFIX_NPM_CLI_JS: string;
 	export const NUMBER_OF_PROCESSORS: string;
 	export const OneDrive: string;
-	export const OneDriveCommercial: string;
+	export const OneDriveConsumer: string;
 	export const OS: string;
 	export const Path: string;
 	export const PATHEXT: string;
@@ -97,7 +99,6 @@ declare module '$env/static/private' {
 	export const USERPROFILE: string;
 	export const WebStorm: string;
 	export const windir: string;
-	export const ZES_ENABLE_SYSMAN: string;
 }
 
 /**
@@ -129,6 +130,8 @@ declare module '$env/dynamic/private' {
 	export const env: {
 		ALLUSERSPROFILE: string;
 		APPDATA: string;
+		ChocolateyInstall: string;
+		ChocolateyLastPathUpdate: string;
 		COLOR: string;
 		CommonProgramFiles: string;
 		CommonProgramW6432: string;
@@ -173,7 +176,7 @@ declare module '$env/dynamic/private' {
 		NPM_PREFIX_NPM_CLI_JS: string;
 		NUMBER_OF_PROCESSORS: string;
 		OneDrive: string;
-		OneDriveCommercial: string;
+		OneDriveConsumer: string;
 		OS: string;
 		Path: string;
 		PATHEXT: string;
@@ -198,7 +201,6 @@ declare module '$env/dynamic/private' {
 		USERPROFILE: string;
 		WebStorm: string;
 		windir: string;
-		ZES_ENABLE_SYSMAN: string;
 		[key: `PUBLIC_${string}`]: undefined;
 		[key: string]: string | undefined;
 	}

@@ -1,8 +1,13 @@
 // In a real app, this data would live in a database,
 // rather than in memory. But for now, we cheat.
-import { FestivalEvent } from '../models/FestivalEvent';
+import { FestivalEvent } from '../../routes/FestivalEvent';
 
-const festivalEvents: FestivalEvent[] = [];
+const festivalEvents: FestivalEvent[] = [{
+	id: crypto.randomUUID(),
+	name: 'From Backend',
+	error: false
+}
+];
 
 export function get(): FestivalEvent[] {
 	return festivalEvents;

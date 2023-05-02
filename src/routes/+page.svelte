@@ -1,20 +1,13 @@
 <script>
-	export let form;
+	import { FestivalEvent } from './FestivalEvent.ts';
+	import Festival from './Festival.svelte';
+
+	export let data;
+	console.log('data', data);
 </script>
 
-{#if form?.error}
-	<p class='error'>{form.error}</p>
-{/if}
-
-<form method='POST'>
-	<label>
-		Name
-		<input name='name'
-					 autocomplete='off'
-					 required
-					 value={form?.name ?? ''}
-		/>
-	</label>
-
-	<button type='submit'>Ok</button>
-</form>
+<div>
+	{#each data.loadedEvents as thing}
+		<Festival data={thing} />
+	{/each}
+</div>

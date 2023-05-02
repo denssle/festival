@@ -1,12 +1,17 @@
 import * as db from './../lib/server/database';
-import { FestivalEvent } from '$lib/models/FestivalEvent';
 import type { Actions } from '@sveltejs/kit';
 
 export function load() {
 	const loaded = db.get();
 	console.log('load', loaded);
+	loaded.push({
+		id: crypto.randomUUID(),
+		name: ''
+	});
 	return {
-		festivalEvents: loaded.map(value => new FestivalEvent(value.id, value.name))
+		loadedEvents: loaded.map((value) => {
+			return { id: value.id, name: value.name };
+		})
 	};
 }
 
@@ -14,8 +19,9 @@ export const actions = {
 
 	default: async ({ cookies, request }) => {
 		console.log('actions default');
-		console.log(cookies);
-		console.log(request);
+		console.log('cookies', cookies);
+		console.log('request', request);
+
 		/*
 		const data = await request.formData();
 		console.log(data);
@@ -25,10 +31,10 @@ export const actions = {
 
 	/*
 	delete: async ({ cookies, request }) => {
-		console.log(cookies);
-		console.log(request);
-		const data = await request.formData();
-		// db.deleteTodo(cookies.get('userid'), data.get('id'));
+			console.log(cookies);
+			console.log(request);
+			const data = await request.formData();
+			// db.deleteTodo(cookies.get('userid'), data.get('id'));
 	}
 	 */
 } satisfies Actions;
