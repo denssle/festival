@@ -15,10 +15,10 @@ export const options = {
 	root,
 	service_worker: false,
 	templates: {
-		app: ({ head, body, assets, nonce, env }) => "<!DOCTYPE html>\n<html lang=\"en\">\n\t<head>\n\t\t<meta charset=\"utf-8\" />\n\t\t<link rel=\"icon\" href=\"" + assets + "/favicon.png\" />\n\t\t<meta name=\"viewport\" content=\"width=device-width\" />\n\t\t" + head + "\n\t</head>\n\t<title>Domis-Festival</title>\n\t<body data-sveltekit-preload-data=\"hover\">\n\t\t<div style=\"display: contents\">" + body + "</div>\n\t</body>\n</html>\n",
+		app: ({ head, body, assets, nonce, env }) => "<!DOCTYPE html>\r\n<html lang='en'>\r\n<head>\r\n\t<meta charset='utf-8' />\r\n\t<link rel='icon' href='" + assets + "/favicon.png' />\r\n\t<meta name='viewport' content='width=device-width' />\r\n\t" + head + "\r\n</head>\r\n<title>hello svelte</title>\r\n<body data-sveltekit-preload-data='hover'>\r\n<div style='display: contents'>" + body + "</div>\r\n</body>\r\n</html>\r\n",
 		error: ({ status, message }) => "<h2>ERROR!</h2>"
 	},
-	version_hash: "1xauc8s"
+	version_hash: "1f7fe2j"
 };
 
 export function get_hooks() {

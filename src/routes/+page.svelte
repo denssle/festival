@@ -1,10 +1,15 @@
 <script>
-	import { FestivalEvent } from './FestivalEvent.ts';
-	import Festival from './Festival.svelte';
+	import Festival from '$lib/components/Festival.svelte';
 
 	export let data;
-	console.log('data', data);
+	if (data.authorized) {
+		console.log('authorized!');
+	} else {
+		console.log('not logged in');
+	}
 </script>
+
+<h1>Home</h1>
 
 <div>
 	{#each data.loadedEvents as thing}

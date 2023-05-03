@@ -1,4 +1,4 @@
-export class FestivalEvent {
+export interface FestivalEvent {
 	id?: string;
 	name?: string;
 	error?: boolean;
