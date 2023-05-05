@@ -22,6 +22,6 @@ export const actions = {
 				throw redirect(302, '/');
 			}
 		}
-		return { success: false, errorMessage: 'Password and / or Email missing' };
+		return { success: false, authorized: false, errorMessage: 'Password and / or Email missing' };
 	}
 } satisfies Actions;

@@ -3,9 +3,9 @@
 
 	export let data;
 	if (data.authorized) {
-		console.log('authorized!');
+		console.log('root: page: authorized!');
 	} else {
-		console.log('not logged in');
+		console.log('root: page: not logged in');
 	}
 </script>
 
@@ -16,3 +16,5 @@
 		<Festival data={thing} />
 	{/each}
 </div>
+
+<style></style>
