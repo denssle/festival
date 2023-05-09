@@ -1,19 +1,17 @@
 <script>
 	import Festival from '$lib/components/Festival.svelte';
+	import { authorized } from '$lib/stores/authorized-store.ts';
 
 	export let data;
-	if (data.authorized) {
-		console.log('root: page: authorized!');
-	} else {
-		console.log('root: page: not logged in');
-	}
+	authorized.set(data.authorized);
+	console.log('root data', data);
 </script>
 
 <h1>Home</h1>
 
 <div>
-	{#each data.loadedEvents as thing}
-		<Festival data={thing} />
+	{#each data.loadedEvents as loadedEvent}
+		<Festival data={loadedEvent} />
 	{/each}
 </div>
 
