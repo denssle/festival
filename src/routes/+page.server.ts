@@ -17,7 +17,7 @@ export const load = (({ cookies, request }) => {
 	}
 	return {
 		loadedEvents: [],
-		success: false,
+		success: true,
 		authorized: false
 	};
 }) satisfies PageServerLoad;

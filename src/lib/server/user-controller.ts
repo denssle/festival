@@ -1,5 +1,4 @@
 import type { User } from '$lib/models/User';
-import { saveUser } from '../database';
 import { compareSync, hashSync } from 'bcrypt-ts';
 
 const userMap: Map<string, User> = new Map<string, User>();
@@ -8,8 +7,7 @@ export function register(email: string, password: string): void {
 	console.log('register: ', email, password);
 	if (!emailInvalid(email)) {
 		userMap.set(email, { email: email, password: hashSync(password) }); // , genSaltSync(24)
-		saveUser(email, password);
-	}
+		}
 }
 
 export function login(email: string, password: string): User | null {
