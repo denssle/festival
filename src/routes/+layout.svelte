@@ -3,16 +3,18 @@
 
 	function logout() {
 		console.log('go out');
+		console.log(document.cookie);
+		// TODO Remove session cookie
 		authorized.set(false);
 	}
 
 </script>
 
 <nav>
-	<a href='/'>Home</a>
-	<a href='/about'>About</a>
 	{#if $authorized}
+		<a href='/'>Home</a>
 		<a href='/settings'>Settings</a>
+		<a href='/about'>About</a>
 		<a href='/login' on:click|trusted={logout}>Logout</a>
 	{:else}
 		<a href='/login'>Login</a>

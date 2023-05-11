@@ -2,16 +2,14 @@ import * as userController from '$lib/server/user-controller';
 import type { Actions } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
 import type { User } from '$lib/models/User';
-import type { PageServerLoad } from '../../.svelte-kit/types/src/routes/$types';
+import type { PageServerLoad } from '../../../.svelte-kit/types/src/routes/$types';
 
-export const load = (({ cookies, request }) => {
+export const load = (async ({ cookies, request }) => {
 	console.log('login cookies: ', cookies.get('session'));
-	if (userController.validateSessionToken(cookies.get('session'))) {
+	const valid = await userController.validateSessionToken(cookies.get('session'));
+	if (valid) {
 		console.log('login session token valid');
-		return {
-			success: true,
-			authorized: true
-		};
+		throw redirect(303, '/');
 	}
 	console.log('login session token invalid');
 	return {
@@ -30,7 +28,7 @@ export const actions = {
 		if (emailValue && passwordValue) {
 			const email = String(emailValue);
 			const password = String(passwordValue);
-			const user: User | null = userController.login(email, password);
+			const user: User | null = await userController.login(email, password);
 			if (user) {
 				cookies.set('session', JSON.stringify(user), {
 					path: '/',

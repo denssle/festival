@@ -1,6 +1,5 @@
-// In a real app, this data would live in a database,
-// rather than in memory. But for now, we cheat.
-import { FestivalEvent } from '../models/FestivalEvent';
+import type { FestivalEvent } from '$lib/models/FestivalEvent';
+
 
 const festivalEvents: FestivalEvent[] = [{
 	id: crypto.randomUUID(),
@@ -15,5 +14,5 @@ export function get(): FestivalEvent[] {
 
 export function create(name: string) {
 	console.log('add new entry', name);
-	festivalEvents.push(new FestivalEvent(), { id: crypto.randomUUID(), name: name, error: false });
+	festivalEvents.push({ id: crypto.randomUUID(), name: name, error: false });
 }

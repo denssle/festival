@@ -33,6 +33,7 @@
   },
   "type": "module",
   "dependencies": {
-    "bcrypt-ts": "^3.0.1"
+    "bcrypt-ts": "^3.0.1",
+    "ioredis": "^5.3.2"
   }
 }
