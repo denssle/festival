@@ -3,7 +3,7 @@ import type { Actions } from '@sveltejs/kit';
 import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from '../../../.svelte-kit/types/src/routes/$types';
 
-export const load = (async ({ cookies, request }) => {
+export const load = (async ({ cookies, locals, request }) => {
 	console.log('registration cookies: ', cookies.get('session'));
 	const valid = await userController.validateSessionToken(cookies.get('session'));
 	if (valid) {

@@ -1,10 +1,10 @@
 import * as userController from "$lib/server/user-controller";
-import type { Actions, Cookies } from "@sveltejs/kit";
+import type { Actions } from "@sveltejs/kit";
 import { redirect } from "@sveltejs/kit";
 import type { User } from "$lib/models/User";
 import type { PageServerLoad } from "../../../.svelte-kit/types/src/routes/$types";
 
-export const load = (async ({ cookies, request }) => {
+export const load = (async ({ cookies, request, locals }) => {
   console.log("login cookies: ", cookies.get("session"));
   const valid = await userController.validateSessionToken(cookies.get("session"));
   if (valid) {

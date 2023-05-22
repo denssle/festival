@@ -26,36 +26,42 @@ export async function login(email: string, password: string): Promise<User | nul
 export async function validateSessionToken(userString: string | undefined): Promise<boolean> {
   // TODO Check token age
   console.log("session validation: userString: ", userString);
-  if (userString) {
-    try {
-      const user: User = JSON.parse(userString) as User;
-      if (user.email && user.password) {
-        const found: User | null = await loadUser(user?.email);
-        if (found && found.password) {
-          console.log("session validation: compare", found.password === user.password, found.password, user.password);
-          return found.password === user.password;
-        } else {
-          console.log("session validation: no user in db found", found);
-        }
-      } else {
-        console.log("session validation: token user invalid", user);
-      }
-    } catch (e) {
-      console.error("session validation error", e);
+  const user: User | null = extractUser(userString);
+  if (user) {
+    const found: User | null = await loadUser(user.email);
+    if (found && found.password) {
+      console.log("session validation: compare", found.password === user.password, found.password, user.password);
+      return found.password === user.password;
+    } else {
+      console.log("session validation: no user in db found", found);
     }
   }
   return false;
+}
+
+export function extractUser(sessionToken: string | undefined) {
+  if (sessionToken) {
+    try {
+      const maybeUser: User = JSON.parse(sessionToken) as User;
+      if (maybeUser.password && maybeUser.email) {
+        return maybeUser;
+      }
+    } catch (e) {
+      console.error("error parsing session token", e);
+    }
+  }
+  return null;
 }
 
 export function emailInvalid(email: string): boolean {
   return !email || email.length === 0; // || userMap.has(email);
 }
 
-const saveUser = (user: User): Promise<string> => {
+function saveUser(user: User): Promise<string> {
   return redis.set(user.email, JSON.stringify(user));
 };
 
-const loadUser = (email: string): Promise<User | null> => {
+function loadUser(email: string): Promise<User | null> {
   return redis.get(email).then(value => {
     if (value) {
       return JSON.parse(value) as User;

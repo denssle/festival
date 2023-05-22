@@ -3,14 +3,14 @@ import type { Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "../../.svelte-kit/types/src/routes/$types";
 import type { FestivalEvent } from "../lib/models/FestivalEvent";
 
-export const load = (({ cookies, request }) => {
+export const load = (({ cookies, request, locals }) => {
+  console.log("locals", locals);
   const loaded: FestivalEvent[] = festivalController.get();
+  console.log("root: return loaded events", loaded.length);
   return {
     loadedEvents: loaded.map((value) => {
       return { id: value.id, name: value.name };
-    }),
-    success: true,
-    authorized: true
+    })
   };
 }) satisfies PageServerLoad;
 

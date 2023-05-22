@@ -6,6 +6,10 @@
       method: "POST"
     });
   }
+
+  export let data;
+  console.log(data);
+  authorized.set(data.currentUser.isAuthenticated);
 </script>
 
 <nav>
