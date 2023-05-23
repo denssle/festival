@@ -8,8 +8,7 @@
   }
 
   export let data;
-  console.log(data);
-  authorized.set(data.currentUser.isAuthenticated);
+  authorized.set(data.currentUser?.isAuthenticated);
 </script>
 
 <nav>
@@ -37,5 +36,20 @@
     :global(body) {
         color: var(--white);
         background-color: black;
+    }
+
+    :global(button) {
+        width: 5vw;
+        padding: 1%;
+    }
+
+    button.valid {
+        background-color: var(--green);
+    }
+
+    nav {
+        display: flex;
+        justify-content: center;
+        gap: 3vw;
     }
 </style>

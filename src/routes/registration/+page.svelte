@@ -1,9 +1,7 @@
 <script>
-	import EmailPasswordForm from '$lib/components/EmailPasswordForm.svelte';
+  import EmailPasswordForm from "$lib/components/EmailPasswordForm.svelte";
 
-	export let data;
+  export let data;
 </script>
 
-<h1>Registration</h1>
-
-<EmailPasswordForm data={data} />
+<EmailPasswordForm data={data} headline={"Registration"} />
