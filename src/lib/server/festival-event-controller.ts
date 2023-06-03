@@ -2,8 +2,18 @@ import type { FestivalListItem } from '$lib/models/FestivalListItem';
 import redis from '$lib/redis';
 import type { FestivalEvent } from '$lib/models/FestivalEvent';
 
-export function getAllListItems(): FestivalListItem[] {
-	return [];
+export async function getAllListItems() {
+	const keys: string[] = await redis.keys('festival:*');
+	const result: FestivalEvent[] = [];
+	for (const key of keys) {
+		if (key) {
+			const newVar: string | null = await redis.get(key);
+			if (newVar) {
+				result.push(JSON.parse(newVar));
+			}
+		}
+	}
+	return result;
 }
 
 export async function getFestival(id: string): Promise<FestivalEvent | null> {
@@ -15,8 +25,8 @@ export async function getFestival(id: string): Promise<FestivalEvent | null> {
 	return null;
 }
 
-export function create(name: string) {
+export function create(name: string): void {
 	console.log('add new entry', name);
-	const newFestival: FestivalEvent = { id: crypto.randomUUID(), name: name, description: '' };
+	const newFestival: FestivalEvent = { id: `festival:${crypto.randomUUID()}`, name: name, description: '' };
 	redis.set(newFestival.id, JSON.stringify(newFestival));
 }

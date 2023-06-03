@@ -6,7 +6,7 @@
 </script>
 
 <div>
-	<h4>Test</h4>
+	<h4>{data.name}</h4>
 </div>
 
 <style></style>
