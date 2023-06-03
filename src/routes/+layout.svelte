@@ -1,10 +1,13 @@
 <script>
   import { authorized } from "$lib/stores/authorized-store.ts";
+  import { goto } from "$app/navigation";
 
   async function logout() {
     await fetch("/logout", {
       method: "POST"
     });
+    await goto("/login");
+    authorized.set(false);
   }
 
   export let data;
