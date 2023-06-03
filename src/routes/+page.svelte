@@ -1,20 +1,16 @@
 <script>
-  import Festival from "$lib/components/Festival.svelte";
+	import Festival from '$lib/components/Festival.svelte';
 
-  export let data;
-  // console.log('root data', data);
-  // #D81E30
-  // #439E8F
-  // #FDF8E1
-  // #FD904D
+	export let data;
 </script>
 
 <h1>Home</h1>
 
 <div>
-  {#each data.loadedEvents as loadedEvent}
-    <Festival data={loadedEvent} />
-  {/each}
+	<p>Festivals:</p>
+	{#each data.loadedEvents as loadedEvent}
+		<a href="/festival/{loadedEvent.id}">{loadedEvent.name}</a>
+	{/each}
 </div>
 
 <style></style>

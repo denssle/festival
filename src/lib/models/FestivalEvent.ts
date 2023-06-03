@@ -1,5 +1,5 @@
 export interface FestivalEvent {
-	id?: string;
-	name?: string;
-	error?: boolean;
+	id: string;
+	name: string;
+	description: string;
 }

@@ -1,18 +1,22 @@
+import type { FestivalListItem } from '$lib/models/FestivalListItem';
+import redis from '$lib/redis';
 import type { FestivalEvent } from '$lib/models/FestivalEvent';
 
-
-const festivalEvents: FestivalEvent[] = [{
-	id: crypto.randomUUID(),
-	name: 'From Backend',
-	error: false
+export function getAllListItems(): FestivalListItem[] {
+	return [];
 }
-];
 
-export function get(): FestivalEvent[] {
-	return festivalEvents;
+export async function getFestival(id: string): Promise<FestivalEvent | null> {
+	console.log('get', id);
+	const mayBeFestival: string | null = await redis.get(id);
+	if (mayBeFestival) {
+		return JSON.parse(mayBeFestival);
+	}
+	return null;
 }
 
 export function create(name: string) {
 	console.log('add new entry', name);
-	festivalEvents.push({ id: crypto.randomUUID(), name: name, error: false });
+	const newFestival: FestivalEvent = { id: crypto.randomUUID(), name: name, description: '' };
+	redis.set(newFestival.id, JSON.stringify(newFestival));
 }
