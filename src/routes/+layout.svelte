@@ -17,6 +17,7 @@
 <nav>
 	{#if $authorized}
 		<a href="/">Home</a>
+		<a href="/festival/new">Neu</a>
 		<a href="/settings">Settings</a>
 		<a href="/about">About</a>
 		<button on:click|trusted={logout}>Logout</button>

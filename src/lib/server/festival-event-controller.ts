@@ -25,8 +25,8 @@ export async function getFestival(id: string): Promise<FestivalEvent | null> {
 	return null;
 }
 
-export function create(name: string): void {
+export function create(name: string, description: string): void {
 	console.log('add new entry', name);
-	const newFestival: FestivalEvent = { id: `festival:${crypto.randomUUID()}`, name: name, description: '' };
+	const newFestival: FestivalEvent = { id: `festival:${crypto.randomUUID()}`, name: name, description: description };
 	redis.set(newFestival.id, JSON.stringify(newFestival));
 }

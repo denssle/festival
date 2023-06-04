@@ -5,8 +5,8 @@ import redis from '$lib/redis';
 export function register(email: string, password: string): void {
 	console.log('register: ', email, password);
 	if (!emailInvalid(email)) {
-		const user: User = { email: email, password: hashSync(password) }; // , genSaltSync(7)
-		saveUser(user).then((value) => {
+		const user: User = { id: `user:${crypto.randomUUID()}`, email: email, password: hashSync(password) }; // , genSaltSync(7)
+		saveUser(user).then((value: string) => {
 			console.log('saved user', value);
 		});
 	}
@@ -14,7 +14,7 @@ export function register(email: string, password: string): void {
 
 export async function login(email: string, password: string): Promise<User | null> {
 	console.log('login', email, password);
-	const user = await loadUser(email);
+	const user: User | null = await loadUser(email);
 	if (user && user.password) {
 		if (compareSync(password, user.password)) {
 			return user;
