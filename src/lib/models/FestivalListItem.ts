@@ -1,4 +1,4 @@
 export interface FestivalListItem {
-  id: string;
-  name: string;
+	id: string;
+	name: string;
 }
