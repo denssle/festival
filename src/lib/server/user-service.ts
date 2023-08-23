@@ -58,6 +58,7 @@ export function emailInvalid(email: string): boolean {
 }
 
 function saveUser(user: User): Promise<string> {
+	// TODO switch to user: + user id as primary key
 	return redis.set(user.email, JSON.stringify(user));
 }
 
