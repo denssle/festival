@@ -12,6 +12,7 @@
 		"prettier format": "prettier --plugin-search-dir . --write .",
 		"npm i": "npm install",
 		"npm ci": "npm ci",
+		"npm outdated": "npm outdated",
 		"npm update": "npm update",
 		"npm audit fix": "npm audit --fix",
 		"run dev": "npm run dev"
