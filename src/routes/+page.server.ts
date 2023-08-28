@@ -3,9 +3,7 @@ import type { PageServerLoad } from '../../.svelte-kit/types/src/routes/$types';
 import type { FestivalListItem } from '$lib/models/FestivalListItem';
 
 export const load = (async ({ cookies, request, locals }) => {
-	console.log('locals', locals);
 	const festivalEvents: FestivalListItem[] = await festivalController.getAllFestivals();
-	console.log('root: return loaded events', festivalEvents.length);
 	return {
 		// TODO why the mapping?
 		loadedEvents: festivalEvents.map((value) => {

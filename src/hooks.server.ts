@@ -6,12 +6,10 @@ import type { User } from '$lib/models/User';
 
 export const handle = (async ({ event, resolve }): Promise<Response> => {
 	const pathname: string = event.url.pathname;
-	console.log('handle pathname', pathname);
 	if (!pathname.includes('login') && !pathname.includes('registration')) {
 		const sessionCookie: string | undefined = event.cookies.get('session');
 		const valid: boolean = await userController.validateSessionToken(sessionCookie);
 		authorized.set(true);
-		console.log('handle session valid ', valid);
 		if (valid) {
 			const currentUser: User | null = userController.extractUser(sessionCookie);
 			if (currentUser) {

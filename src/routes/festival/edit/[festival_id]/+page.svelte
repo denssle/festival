@@ -1,7 +1,6 @@
 <script>
 	import { page } from '$app/stores';
 
-	console.log(page);
 	export let data;
 </script>
 

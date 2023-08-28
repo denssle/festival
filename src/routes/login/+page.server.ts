@@ -5,13 +5,10 @@ import type { User } from '$lib/models/User';
 import type { PageServerLoad } from '../../../.svelte-kit/types/src/routes/$types';
 
 export const load = (async ({ cookies, request, locals }) => {
-	console.log('login cookies: ', cookies.get('session'));
 	const valid = await userController.validateSessionToken(cookies.get('session'));
 	if (valid) {
-		console.log('login session token valid');
 		throw redirect(303, '/');
 	}
-	console.log('login session token invalid');
 	return {
 		success: true,
 		authorized: false
@@ -23,7 +20,6 @@ export const actions = {
 		const values: FormData = await request.formData();
 		const emailValue: FormDataEntryValue | null = values.get('email');
 		const passwordValue: FormDataEntryValue | null = values.get('password');
-		console.log('login default action: ', emailValue, passwordValue);
 		if (emailValue && passwordValue) {
 			const user: User | null = await userController.login(emailValue.toString(), passwordValue.toString());
 			if (user) {

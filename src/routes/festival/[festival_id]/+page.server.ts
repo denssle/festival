@@ -4,7 +4,6 @@ import { error } from '@sveltejs/kit';
 
 export const load = (async ({ cookies, request, locals, params }) => {
 	const festival_id: string = params.festival_id;
-	console.log('festival url', festival_id);
 	if (festival_id) {
 		const festival = await festivalController.getFestival(festival_id);
 		if (festival) {
