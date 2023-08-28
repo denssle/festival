@@ -1,5 +1,5 @@
 <script>
-	import { authorized } from '$lib/stores/authorized-store.ts';
+	import { authorized } from '$lib/stores/authorized-store';
 	import { goto } from '$app/navigation';
 
 	async function logout() {

@@ -1,5 +1,5 @@
 import * as festivalController from '$lib/server/festival-event-service';
-import { error } from '@sveltejs/kit';
+import { Actions, error, redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from '../../../../../.svelte-kit/types/src/routes/$types';
 
 export const load = (async ({ cookies, request, locals, params }) => {
@@ -12,3 +12,18 @@ export const load = (async ({ cookies, request, locals, params }) => {
 	}
 	throw error(404, 'Not Found');
 }) satisfies PageServerLoad;
+
+export const actions = {
+	default: async ({ cookies, request }) => {
+		const festivalId: string | undefined = request.url.split('/').pop();
+		const values = await request.formData();
+		const name = values.get('name');
+		const description = values.get('description');
+		if (festivalId && name && description) {
+			festivalController.updateFestival(festivalId, String(name), String(description)).then(() => {
+				throw redirect(302, '/');
+			});
+		}
+		return { success: false, errorMessage: 'Mop' };
+	}
+} satisfies Actions;

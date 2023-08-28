@@ -1,7 +1,18 @@
 import redis from '$lib/redis';
 import type { FestivalEvent } from '$lib/models/FestivalEvent';
 
-export async function getAllFestivals() {
+export function updateFestival(festivalId: string, name: string, description: string) {
+	return redis.set(
+		festivalId,
+		JSON.stringify({
+			id: festivalId,
+			name: name,
+			description: description
+		})
+	);
+}
+
+export async function getAllFestivals(): Promise<FestivalEvent[]> {
 	const keys: string[] = await redis.keys('festival:*');
 	const result: FestivalEvent[] = [];
 	for (const key of keys) {
