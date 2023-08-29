@@ -2,14 +2,16 @@
 	export let data;
 </script>
 
-<h1>Home</h1>
+<h1>Festivals</h1>
 
 <div>
-	<p>Festivals:</p>
+	<p>List:</p>
 	{#each data.loadedEvents as loadedEvent}
-		<div>
-			<a href="/festival/{loadedEvent.id}">{loadedEvent.name}</a>
-		</div>
+		<ul>
+			<li>
+				<a href="/festival/{loadedEvent.id}">{loadedEvent.name}</a>
+			</li>
+		</ul>
 	{/each}
 </div>
 

@@ -16,14 +16,14 @@
 
 <nav>
 	{#if $authorized}
-		<a href="/">Home</a>
-		<a href="/festival/new">Neu</a>
-		<a href="/settings">Settings</a>
-		<a href="/about">About</a>
+		<a class="button" href="/">Festivals</a>
+		<a class="button" href="/festival/new">Neu</a>
+		<a class="button" href="/settings">Settings</a>
+		<a class="button" href="/about">About</a>
 		<button on:click|trusted={logout}>Logout</button>
 	{:else}
-		<a href="/login">Login</a>
-		<a href="/registration">Registration</a>
+		<a class="button" href="/login">Login</a>
+		<a class="button" href="/registration">Registration</a>
 	{/if}
 </nav>
 
@@ -40,20 +40,5 @@
 	:global(body) {
 		color: var(--white);
 		background-color: black;
-	}
-
-	:global(button) {
-		width: 5vw;
-		padding: 1%;
-	}
-
-	button.valid {
-		background-color: var(--green);
-	}
-
-	nav {
-		display: flex;
-		justify-content: center;
-		gap: 3vw;
 	}
 </style>
