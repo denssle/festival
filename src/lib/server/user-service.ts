@@ -33,7 +33,7 @@ export async function validateSessionToken(userString: string | undefined): Prom
 	return false;
 }
 
-export function extractUser(sessionToken: string | undefined) {
+export function extractUser(sessionToken: string | undefined): User | null {
 	if (sessionToken) {
 		try {
 			const maybeUser: User = JSON.parse(sessionToken) as User;
