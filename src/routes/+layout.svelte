@@ -18,16 +18,16 @@
 	{#if $authorized}
 		<a class="button" href="/">Festivals</a>
 		<a class="button" href="/festival/new">Neu</a>
-		<a class="button" href="/settings">Settings</a>
+		<a class="button" href="/settings">Einstellungen</a>
 		<a class="button" href="/about">About</a>
+		<!-- TODO: Add guestbook -->
 		<button on:click|trusted={logout}>Logout</button>
-	{:else}
-		<a class="button" href="/login">Login</a>
-		<a class="button" href="/registration">Registration</a>
 	{/if}
 </nav>
 
-<slot />
+<main>
+	<slot />
+</main>
 
 <style global>
 	:global(:root) {

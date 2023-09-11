@@ -3,40 +3,31 @@
 	export let headline;
 </script>
 
-<div id="form-container">
-	<span>{headline}</span>
+<article>
+	<h3>{headline}</h3>
 
 	<form method="POST">
-		<label>
-			Email
-			<input name="email" required value={data?.email ?? ''} type="email" />
-		</label>
+		<section>
+			<p>
+				<input name="email" required value={data?.email ?? ''} type="email" placeholder="Email" />
+			</p>
 
-		<label>
-			Passwort
-			<input name="password" required value={data?.password ?? ''} type="password" />
-		</label>
+			<p>
+				<input name="password" required value={data?.password ?? ''} type="password" placeholder="Passwort" />
+			</p>
 
-		<button type="submit">Ok</button>
+			<p>
+				<button type="submit">Los gehts!</button>
+			</p>
+		</section>
+
+		<section>
+			<p>
+				<slot />
+			</p>
+		</section>
 	</form>
-</div>
+</article>
 
 <style>
-	span {
-		font-size: larger;
-		text-decoration: underline var(--orange);
-	}
-
-	#form-container {
-		border: solid thin var(--orange);
-		padding: 2%;
-		margin-top: 2%;
-		margin-left: 25vw;
-		margin-right: 25vw;
-	}
-
-	label {
-		display: block;
-		padding: 2%;
-	}
 </style>
