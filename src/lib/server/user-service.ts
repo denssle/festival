@@ -52,12 +52,11 @@ export function emailInvalid(email: string): boolean {
 }
 
 function saveUser(user: User): Promise<string> {
-	// TODO switch to user: + user id as primary key
-	return redis.set(user.email, JSON.stringify(user));
+	return redis.set('user:' + user.email, JSON.stringify(user));
 }
 
 function loadUser(email: string): Promise<User | null> {
-	return redis.get(email).then((value) => {
+	return redis.get('user:' + email).then((value) => {
 		if (value) {
 			return JSON.parse(value) as User;
 		}

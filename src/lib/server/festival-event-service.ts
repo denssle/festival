@@ -3,7 +3,7 @@ import type { FestivalEvent } from '$lib/models/FestivalEvent';
 
 export function updateFestival(festivalId: string, name: string, description: string) {
 	return redis.set(
-		festivalId,
+		`festival:${festivalId}`,
 		JSON.stringify({
 			id: festivalId,
 			name: name,
@@ -27,7 +27,7 @@ export async function getAllFestivals(): Promise<FestivalEvent[]> {
 }
 
 export async function getFestival(id: string): Promise<FestivalEvent | null> {
-	const mayBeFestival: string | null = await redis.get(id);
+	const mayBeFestival: string | null = await redis.get(`festival:${id}`);
 	if (mayBeFestival) {
 		return JSON.parse(mayBeFestival);
 	}
@@ -35,6 +35,6 @@ export async function getFestival(id: string): Promise<FestivalEvent | null> {
 }
 
 export function create(name: string, description: string): void {
-	const newFestival: FestivalEvent = { id: `festival:${crypto.randomUUID()}`, name: name, description: description };
-	redis.set(newFestival.id, JSON.stringify(newFestival));
+	const newFestival: FestivalEvent = { id: crypto.randomUUID(), name: name, description: description };
+	redis.set(`festival:${newFestival.id}`, JSON.stringify(newFestival));
 }

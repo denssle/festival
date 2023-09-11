@@ -6,39 +6,50 @@
 		await fetch('/logout', {
 			method: 'POST'
 		});
-		await goto('/login');
 		authorized.set(false);
+		await goto('/login');
 	}
 
 	export let data;
 	authorized.set(data.currentUser?.isAuthenticated);
 </script>
 
-<nav>
-	{#if $authorized}
-		<a class="button" href="/">Festivals</a>
-		<a class="button" href="/festival/new">Neu</a>
-		<a class="button" href="/settings">Einstellungen</a>
-		<a class="button" href="/about">About</a>
-		<!-- TODO: Add guestbook -->
-		<button on:click|trusted={logout}>Logout</button>
-	{/if}
-</nav>
+<header>
+	<nav>
+		{#if $authorized}
+			<a href="/">Festivals</a>
+			<a href="/festival/new">Neu</a>
+			<a href="/settings">Einstellungen</a>
+			<a href="/about">About</a>
+			<!-- TODO: Add guestbook -->
+			<button on:click|trusted={logout}>Logout</button>
+		{/if}
+	</nav>
+</header>
 
-<main>
-	<slot />
-</main>
+<slot />
 
 <style global>
 	:global(:root) {
 		--red: #d81e30;
 		--green: #439e8f;
+		--dark-green: #2c685e;
 		--white: #fdf8e1;
 		--orange: #fd904d;
+		--light-orange: #feaf7f;
 	}
 
-	:global(body) {
-		color: var(--white);
-		background-color: black;
+	:root {
+		--accent: var(--green);
+		--accent-bg: var(--dark-green);
+		--bg: #212121;
+		--text: var(--orange);
+		--text-light: var(--light-orange);
+		--border: var(--dark-green);
+		--accent-light: var(--red);
+		--code: var(--red);
+		--preformatted: #444;
+		--marked: #ffdd33;
+		--disabled: #efefef;
 	}
 </style>
