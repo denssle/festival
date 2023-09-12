@@ -8,17 +8,16 @@
 
 <h1>Neu anlegen</h1>
 <form method="POST">
-	<label>
-		Name
-		<input name="name" autocomplete="off" required value={data?.name ?? ''} />
-	</label>
+	<p>
+		<input name="name" autocomplete="off" required value={data?.name ?? ''} placeholder="Name der Veranstaltung" />
+		<textarea name="description" placeholder="Kurze Beschreibung" />
+	</p>
 
-	<div>
-		<label>
-			Beschreibung
-			<textarea name="description" />
-		</label>
-	</div>
+	<p>
+		<input name='startDate' type="date" placeholder="date" />
+		<input name='startTime' type="time" placeholder="time" />
+	</p>
 
-	<button type="submit">Ok</button>
+	<button type="submit">Speichern</button>
+	<a class="button" href="/">Zurück</a>
 </form>

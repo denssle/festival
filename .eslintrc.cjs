@@ -14,7 +14,7 @@ module.exports = {
 		}
 	],
 	env: {
-		'browser': true,
-		'node': true
+		browser: true,
+		node: true
 	}
 };

@@ -1,5 +1,5 @@
-<script>
-	export let data;
+<script lang="ts">
+	export let data: { name: string; description: string };
 </script>
 
 <form method="POST">

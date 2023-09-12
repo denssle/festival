@@ -65,7 +65,6 @@ async function loadUserById(userId: string): Promise<User | null> {
 	return null;
 }
 
-
 function parseUserToString(user: User): string {
 	return JSON.stringify(user);
 }

@@ -24,7 +24,7 @@ export async function getFestival(id: string): Promise<FestivalEvent | null> {
 	return null;
 }
 
-export function create(user: User | null, name: string, description: string): FestivalEvent | null {
+export function create(user: User | null, name: string, description: string, startDate: number): FestivalEvent | null {
 	if (user) {
 		const newFestival: FestivalEvent = {
 			id: crypto.randomUUID(),
@@ -33,7 +33,8 @@ export function create(user: User | null, name: string, description: string): Fe
 			createdBy: user.id,
 			createdAt: Date.now(),
 			updatedBy: undefined,
-			updatedAt: undefined
+			updatedAt: undefined,
+			startDate: startDate
 		};
 		redis.set(`festival:${newFestival.id}`, parseFestivalToString(newFestival));
 		return newFestival;

@@ -3,7 +3,7 @@ import { Actions, error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from '../../../../../.svelte-kit/types/src/routes/$types';
 import { extractUser } from '$lib/server/user-service';
 
-export const load = (async ({ cookies, request, locals, params }) => {
+export const load = (async ({ params }) => {
 	const festival_id: string = params.festival_id;
 	if (festival_id) {
 		const festival = await festivalController.getFestival(festival_id);
@@ -21,7 +21,12 @@ export const actions = {
 		const name = values.get('name');
 		const description = values.get('description');
 		if (festivalId && name && description) {
-			festivalController.updateFestival(extractUser(cookies.get('session')), festivalId, String(name), String(description));
+			festivalController.updateFestival(
+				extractUser(cookies.get('session')),
+				festivalId,
+				String(name),
+				String(description)
+			);
 			throw redirect(302, '/festival/' + festivalId);
 		} else {
 			return { success: false, errorMessage: 'Mop' };

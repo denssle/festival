@@ -6,4 +6,5 @@ export interface FestivalEvent {
 	createdAt: number;
 	updatedBy: string | undefined;
 	updatedAt: number | undefined;
+	startDate?: number;
 }
