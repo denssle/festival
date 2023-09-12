@@ -55,11 +55,10 @@ export async function updateFestival(user: User | null, festivalId: string, name
 }
 
 export async function deleteFestival(user: User | null, festivalId: string) {
-	console.log(user, festivalId);
 	if (user && festivalId) {
 		const festival = await getFestival(festivalId);
 		if (festival && festival.createdBy === user.id) {
-			redis.del(festivalId);
+			redis.del(`festival:${festivalId}`);
 		} else {
 			console.error('festival missing or not authorized', festival, user.id);
 		}

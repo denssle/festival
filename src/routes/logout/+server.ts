@@ -1,8 +1,7 @@
-import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 /* Logout */
-export const POST = (async ({ cookies, request }) => {
+export const POST = (async ({ cookies }) => {
 	await cookies.delete('session');
-	throw redirect(302, '/login');
+	return new Response(null, { status: 303 });
 }) satisfies RequestHandler;

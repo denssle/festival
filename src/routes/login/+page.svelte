@@ -4,6 +4,6 @@
 	export let data;
 </script>
 
-<EmailPasswordForm {data} headline={'Login'}>
+<EmailPasswordForm {data} headline={'Anmeldung'}>
 	Noch kein Konto? <a href="/registration">Hier registrieren.</a>
 </EmailPasswordForm>
