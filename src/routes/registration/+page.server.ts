@@ -24,7 +24,7 @@ export const actions = {
 			if (userController.emailInvalid(email)) {
 				return fail(409, { success: false, errorMessage: 'Email already existing' });
 			} else {
-				const password = String(passwordValue);
+				const password: string = String(passwordValue);
 				userController.register(email, password);
 				throw redirect(303, '/login');
 			}

@@ -5,5 +5,5 @@
 </script>
 
 <EmailPasswordForm {data} headline={'Login'}>
-	Noch kein Konto? <a class="button" href="/registration">Registration</a>
+	Noch kein Konto? <a href="/registration">Hier registrieren.</a>
 </EmailPasswordForm>

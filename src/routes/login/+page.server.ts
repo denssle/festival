@@ -23,6 +23,7 @@ export const actions = {
 		if (emailValue && passwordValue) {
 			const user: User | null = await userController.login(emailValue.toString(), passwordValue.toString());
 			if (user) {
+				// TODO: nicht den ganzen User speichern
 				cookies.set('session', JSON.stringify(user), {
 					path: '/',
 					sameSite: 'strict',

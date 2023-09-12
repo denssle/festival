@@ -4,13 +4,13 @@ import redis from '$lib/redis';
 
 export function register(email: string, password: string): void {
 	if (!emailInvalid(email)) {
-		const user: User = { id: `user:${crypto.randomUUID()}`, email: email, password: hashSync(password) }; // , genSaltSync(7)
+		const user: User = { id: crypto.randomUUID(), email: email, password: hashSync(password) }; // , genSaltSync(7)
 		saveUser(user);
 	}
 }
 
 export async function login(email: string, password: string): Promise<User | null> {
-	const user: User | null = await loadUser(email);
+	const user: User | null = await loadUserByEmail(email);
 	if (user && user.password) {
 		if (compareSync(password, user.password)) {
 			return user;
@@ -23,7 +23,7 @@ export async function validateSessionToken(userString: string | undefined): Prom
 	// TODO Check token age
 	const user: User | null = extractUser(userString);
 	if (user) {
-		const found: User | null = await loadUser(user.email);
+		const found: User | null = await loadUserById(user.id);
 		if (found && found.password) {
 			return found.password === user.password;
 		} else {
@@ -35,14 +35,7 @@ export async function validateSessionToken(userString: string | undefined): Prom
 
 export function extractUser(sessionToken: string | undefined): User | null {
 	if (sessionToken) {
-		try {
-			const maybeUser: User = JSON.parse(sessionToken) as User;
-			if (maybeUser.password && maybeUser.email) {
-				return maybeUser;
-			}
-		} catch (e) {
-			console.error('error parsing session token', e);
-		}
+		return parseStringToUser(sessionToken);
 	}
 	return null;
 }
@@ -52,14 +45,39 @@ export function emailInvalid(email: string): boolean {
 }
 
 function saveUser(user: User): Promise<string> {
-	return redis.set('user:' + user.email, JSON.stringify(user));
+	redis.set(user.email, user.id); // damit man von der Email auf den User schließen kann
+	return redis.set('user:' + user.id, parseUserToString(user));
 }
 
-function loadUser(email: string): Promise<User | null> {
-	return redis.get('user:' + email).then((value) => {
-		if (value) {
-			return JSON.parse(value) as User;
+async function loadUserByEmail(email: string): Promise<User | null> {
+	const userId: string | null = await redis.get(email);
+	if (userId) {
+		return loadUserById(userId);
+	}
+	return null;
+}
+
+async function loadUserById(userId: string): Promise<User | null> {
+	const value: string | null = await redis.get('user:' + userId);
+	if (value) {
+		return parseStringToUser(value);
+	}
+	return null;
+}
+
+
+function parseUserToString(user: User): string {
+	return JSON.stringify(user);
+}
+
+function parseStringToUser(data: string): User | null {
+	try {
+		const maybeUser: User = JSON.parse(data);
+		if (maybeUser.password && maybeUser.email) {
+			return maybeUser;
 		}
-		return null;
-	});
+	} catch (e) {
+		console.error('error parsing user', e);
+	}
+	return null;
 }

@@ -7,9 +7,9 @@ export async function getAllFestivals(): Promise<FestivalEvent[]> {
 	const result: FestivalEvent[] = [];
 	for (const key of keys) {
 		if (key) {
-			const newVar: string | null = await redis.get(key);
-			if (newVar) {
-				result.push(JSON.parse(newVar));
+			const festivalString: string | null = await redis.get(key);
+			if (festivalString) {
+				result.push(parseStringToFestival(festivalString));
 			}
 		}
 	}
@@ -19,12 +19,12 @@ export async function getAllFestivals(): Promise<FestivalEvent[]> {
 export async function getFestival(id: string): Promise<FestivalEvent | null> {
 	const mayBeFestival: string | null = await redis.get(`festival:${id}`);
 	if (mayBeFestival) {
-		return JSON.parse(mayBeFestival);
+		return parseStringToFestival(mayBeFestival);
 	}
 	return null;
 }
 
-export function create(user: User | null, name: string, description: string): void {
+export function create(user: User | null, name: string, description: string): FestivalEvent | null {
 	if (user) {
 		const newFestival: FestivalEvent = {
 			id: crypto.randomUUID(),
@@ -35,8 +35,10 @@ export function create(user: User | null, name: string, description: string): vo
 			updatedBy: undefined,
 			updatedAt: undefined
 		};
-		redis.set(`festival:${newFestival.id}`, JSON.stringify(newFestival));
+		redis.set(`festival:${newFestival.id}`, parseFestivalToString(newFestival));
+		return newFestival;
 	}
+	return null;
 }
 
 export async function updateFestival(user: User | null, festivalId: string, name: string, description: string) {
@@ -46,8 +48,34 @@ export async function updateFestival(user: User | null, festivalId: string, name
 		festival.description = description;
 		festival.updatedAt = Date.now();
 		festival.updatedBy = user.id;
-		return redis.set(`festival:${festivalId}`, JSON.stringify(festival));
+		return redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
 	} else {
-		// TODO create new?
+		// TODO create new? throw error?
 	}
+}
+
+export async function deleteFestival(user: User | null, festivalId: string) {
+	console.log(user, festivalId);
+	if (user && festivalId) {
+		const festival = await getFestival(festivalId);
+		if (festival && festival.createdBy === user.id) {
+			redis.del(festivalId);
+		} else {
+			console.error('festival missing or not authorized', festival, user.id);
+		}
+	} else {
+		console.error('user or festival id missing', user, festivalId);
+	}
+}
+
+function parseFestivalToString(festival: FestivalEvent): string {
+	return JSON.stringify(festival);
+}
+
+function parseStringToFestival(festival: string): FestivalEvent {
+	const parse: FestivalEvent = JSON.parse(festival);
+	if (!parse.createdAt) {
+		parse.createdAt = Date.now();
+	}
+	return parse;
 }
