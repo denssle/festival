@@ -1,7 +1,7 @@
-import * as userController from '$lib/server/user-service';
+import * as userController from '$lib/services/user-service';
 import type { Actions } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
-import type { User } from '$lib/models/User';
+import type { BackendUser } from '$lib/models/BackendUser';
 import type { PageServerLoad } from '../../../.svelte-kit/types/src/routes/$types';
 
 export const load = (async ({ cookies, request, locals }) => {
@@ -21,9 +21,9 @@ export const actions = {
 		const emailValue: FormDataEntryValue | null = values.get('email');
 		const passwordValue: FormDataEntryValue | null = values.get('password');
 		if (emailValue && passwordValue) {
-			const user: User | null = await userController.login(emailValue.toString(), passwordValue.toString());
+			const user: BackendUser | null = await userController.login(emailValue.toString(), passwordValue.toString());
 			if (user) {
-				// TODO: nicht den ganzen User speichern
+				// TODO: nicht den ganzen BackendUser speichern
 				cookies.set('session', JSON.stringify(user), {
 					path: '/',
 					sameSite: 'strict',

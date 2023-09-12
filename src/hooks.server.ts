@@ -1,8 +1,8 @@
 // https://kit.svelte.dev/docs/hooks
 import type { Handle } from '@sveltejs/kit';
-import * as userController from '$lib/server/user-service';
+import * as userController from '$lib/services/user-service';
 import { authorized } from '$lib/stores/authorized-store';
-import type { User } from '$lib/models/User';
+import type { BackendUser } from '$lib/models/BackendUser';
 
 export const handle = (async ({ event, resolve }): Promise<Response> => {
 	const pathname: string = event.url.pathname;
@@ -11,7 +11,7 @@ export const handle = (async ({ event, resolve }): Promise<Response> => {
 		const valid: boolean = await userController.validateSessionToken(sessionCookie);
 		authorized.set(true);
 		if (valid) {
-			const currentUser: User | null = userController.extractUser(sessionCookie);
+			const currentUser: BackendUser | null = userController.extractUser(sessionCookie);
 			if (currentUser) {
 				event.locals.currentUser = {
 					isAuthenticated: true,

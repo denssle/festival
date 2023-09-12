@@ -1,5 +1,7 @@
 <script lang="ts">
-	export let data: { name: string; description: string };
+	import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
+
+	export let data: FrontendFestivalEvent;
 </script>
 
 <form method="POST">

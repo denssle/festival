@@ -1,4 +1,4 @@
-export interface FestivalEvent {
+export interface BackendFestivalEvent {
 	id: string;
 	name: string;
 	description: string;

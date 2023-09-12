@@ -1,4 +1,4 @@
-import * as userController from '$lib/server/user-service';
+import * as userController from '$lib/services/user-service';
 import type { Actions } from '@sveltejs/kit';
 import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from '../../../.svelte-kit/types/src/routes/$types';

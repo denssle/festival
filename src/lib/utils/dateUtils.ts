@@ -12,3 +12,10 @@ export function createDateFromStrings(date: string, time: string): number | null
 	}
 	return null;
 }
+
+export function numberToDate(nbr: number | undefined): Date | null {
+	if (nbr) {
+		return new Date(nbr);
+	}
+	return null;
+}

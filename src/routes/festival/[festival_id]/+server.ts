@@ -1,5 +1,5 @@
-import { extractUser } from '$lib/server/user-service';
-import { deleteFestival } from '$lib/server/festival-event-service';
+import { extractUser } from '$lib/services/user-service';
+import { deleteFestival } from '$lib/services/festival-event-service';
 
 export function DELETE({ params, request, cookies }) {
 	deleteFestival(extractUser(cookies.get('session')), params.festival_id);

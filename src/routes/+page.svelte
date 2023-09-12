@@ -1,12 +1,14 @@
-<script>
-	export let data;
+<script lang="ts">
+	import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
+
+	export let data: FrontendFestivalEvent[];
 </script>
 
 <h1>Festivals</h1>
 
 <div>
 	<p>List:</p>
-	{#each data.loadedEvents as loadedEvent}
+	{#each data as loadedEvent}
 		<ul>
 			<li>
 				<a href="/festival/{loadedEvent.id}">{loadedEvent.name}</a>
