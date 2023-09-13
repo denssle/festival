@@ -3,6 +3,7 @@ import { Actions, error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from '../../../../../.svelte-kit/types/src/routes/$types';
 import { extractUser } from '$lib/services/user-service';
 import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
+import { createDateFromStrings } from '$lib/utils/dateUtils';
 
 export const load = (async ({ params }) => {
 	const festival_id: string = params.festival_id;
@@ -21,12 +22,13 @@ export const actions = {
 		const values = await request.formData();
 		const name = values.get('name');
 		const description = values.get('description');
-		if (festivalId && name && description) {
+		if (festivalId && name) {
 			festivalController.updateFestival(
 				extractUser(cookies.get('session')),
 				festivalId,
 				String(name),
-				String(description)
+				String(description),
+				createDateFromStrings(String(values.get('startDate')), String(values.get('startTime')))
 			);
 			throw redirect(302, '/festival/' + festivalId);
 		} else {

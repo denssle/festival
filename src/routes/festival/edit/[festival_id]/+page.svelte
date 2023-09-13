@@ -1,23 +1,21 @@
 <script lang="ts">
 	import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
+	import { dateToDateString, dateToTimeString } from '$lib/utils/dateUtils';
 
 	export let data: FrontendFestivalEvent;
 </script>
 
 <form method="POST">
-	<label>
-		Name
-		<input name="name" required value={data?.name ?? ''} />
-	</label>
+	<p>
+		<input name="name" autocomplete="off" required value={data?.name ?? ''} placeholder="Name der Veranstaltung" />
+		<textarea name="description" placeholder="Kurze Beschreibung" />
+	</p>
 
-	<div>
-		<label>
-			Beschreibung
-			<textarea name="description" value={data?.description ?? ''} />
-		</label>
-	</div>
+	<p>
+		<input name="startDate" type="date" placeholder="date" value={dateToDateString(data.startDate)} />
+		<input name="startTime" type="time" placeholder="time" value={dateToTimeString(data.startDate)} />
+	</p>
 
-	<button type="submit">Ok</button>
+	<button type="submit">Speichern</button>
+	<a class="button" href={'/festival/' + data.id}>Zurück</a>
 </form>
-
-<style></style>

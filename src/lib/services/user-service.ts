@@ -1,13 +1,14 @@
 import type { BackendUser } from '$lib/models/BackendUser';
-import { compareSync, hashSync } from 'bcrypt-ts';
+import { compareSync, genSaltSync, hashSync } from 'bcrypt-ts';
 import redis from '$lib/redis';
 import type { FrontendUser } from '$lib/models/FrontendUser';
 
-export function register(email: string, password: string): void {
+export function register(email: string, password: string): Promise<string> | null {
 	if (!emailInvalid(email)) {
-		const user: BackendUser = { id: crypto.randomUUID(), email: email, password: hashSync(password) }; // , genSaltSync(7)
-		saveUser(user);
+		const user: BackendUser = { id: crypto.randomUUID(), email: email, password: hashSync(password, genSaltSync(4)) };
+		return saveUser(user);
 	}
+	return null;
 }
 
 export async function login(email: string, password: string): Promise<BackendUser | null> {

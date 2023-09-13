@@ -59,13 +59,20 @@ export async function create(
 	return null;
 }
 
-export async function updateFestival(user: BackendUser | null, festivalId: string, name: string, description: string) {
+export async function updateFestival(
+	user: BackendUser | null,
+	festivalId: string,
+	name: string,
+	description: string,
+	startDate: number | null
+) {
 	const festival: BackendFestivalEvent | null = await getFestival(festivalId);
 	if (festival && user) {
 		festival.name = name;
 		festival.description = description;
 		festival.updatedAt = Date.now();
 		festival.updatedBy = user.id;
+		festival.startDate = startDate ? startDate : undefined;
 		return redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
 	} else {
 		// TODO create new? throw error?
