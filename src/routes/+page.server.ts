@@ -5,5 +5,5 @@ import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
 
 export const load = (async () => {
 	const festivalEvents: FrontendFestivalEvent[] = await festivalController.getAllFestivals();
-	return {festivalEvents: festivalEvents};
+	return { festivalEvents: festivalEvents };
 }) satisfies PageServerLoad;
