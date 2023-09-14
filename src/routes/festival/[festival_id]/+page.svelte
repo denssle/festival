@@ -13,10 +13,14 @@
 	}
 
 	function joinFestival() {
-		fetch('/festival/' + data.festival.id + '/join', {
-			method: 'POST'
-		});
+		if (!data.visitor) {
+			fetch('/festival/' + data.festival.id + '/join', {
+				method: 'POST'
+			});
+		}
 	}
+
+	console.log(data);
 </script>
 
 <article>
@@ -35,6 +39,7 @@
 			<a class="button" href="/festival/edit/{data.festival.id}">Bearbeiten</a>
 			<button on:click|trusted={deleteFestival}>Löschen</button>
 		{:else}
+			<!-- TODO auch wieder austreten können -->
 			<button on:click={joinFestival} hidden={data.visitor}>Mitmachen</button>
 		{/if}
 		<a class="button" href="/">Zurück</a>
