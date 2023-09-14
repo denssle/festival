@@ -4,7 +4,8 @@ export interface BackendFestivalEvent {
 	description: string;
 	createdBy: string;
 	createdAt: number;
-	updatedBy: string | undefined;
-	updatedAt: number | undefined;
-	startDate?: number;
+	updatedBy: string | null;
+	updatedAt: number | null;
+	startDate: number | null;
+	visitors: string[];
 }

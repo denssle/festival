@@ -49,9 +49,10 @@ export async function create(
 			description: description,
 			createdBy: user.id,
 			createdAt: Date.now(),
-			updatedBy: undefined,
-			updatedAt: undefined,
-			startDate: startDate
+			updatedBy: null,
+			updatedAt: null,
+			startDate: startDate,
+			visitors: []
 		};
 		redis.set(`festival:${newFestival.id}`, parseFestivalToString(newFestival));
 		return await parseToFrontend(newFestival);
@@ -72,7 +73,7 @@ export async function updateFestival(
 		festival.description = description;
 		festival.updatedAt = Date.now();
 		festival.updatedBy = user.id;
-		festival.startDate = startDate ? startDate : undefined;
+		festival.startDate = startDate ? startDate : null;
 		return redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
 	} else {
 		// TODO create new? throw error?
@@ -92,6 +93,25 @@ export async function deleteFestival(user: BackendUser | null, festivalId: strin
 	}
 }
 
+export async function joinFestival(user: BackendUser | null, festivalId: string) {
+	if (user && festivalId) {
+		const maybeFestival: BackendFestivalEvent | null = await getFestival(festivalId);
+		if (maybeFestival) {
+			if (maybeFestival.visitors.includes(user.id)) {
+				console.log('Existing');
+			} else {
+				maybeFestival.visitors.push(user.id);
+				redis.set(`festival:${festivalId}`, parseFestivalToString(maybeFestival));
+			}
+		}
+	}
+}
+
+export function isVisitorOfFestival(festival: FrontendFestivalEvent, user: BackendUser) {
+	const find = festival.visitors.find((value) => value.id === user.id);
+	return Boolean(find);
+}
+
 function parseFestivalToString(festival: BackendFestivalEvent): string {
 	return JSON.stringify(festival);
 }
@@ -101,12 +121,26 @@ function parseStringToFestival(festival: string): BackendFestivalEvent {
 	if (!parse.createdAt) {
 		parse.createdAt = Date.now();
 	}
+	if (!parse.visitors) {
+		parse.visitors = [];
+	}
 	return parse;
 }
 
 async function parseToFrontend(festival: BackendFestivalEvent): Promise<FrontendFestivalEvent> {
 	const createdBy: FrontendUser | undefined = await loadFrontEndUserById(festival.createdBy);
 	const updatedBy: FrontendUser | undefined = await loadFrontEndUserById(festival.updatedBy);
+	const filteredVisitors: FrontendUser[] = [];
+	if (festival.visitors) {
+		const visitors: (FrontendUser | undefined)[] = await Promise.all(
+			festival.visitors.map((value: string) => loadFrontEndUserById(value))
+		);
+		visitors.forEach((value) => {
+			if (value && value.id) {
+				filteredVisitors.push(value);
+			}
+		});
+	}
 	return {
 		id: festival.id,
 		name: festival.name,
@@ -115,6 +149,7 @@ async function parseToFrontend(festival: BackendFestivalEvent): Promise<Frontend
 		createdAt: numberToDate(festival.createdAt),
 		updatedBy: updatedBy,
 		updatedAt: numberToDate(festival.updatedAt),
-		startDate: numberToDate(festival.startDate)
+		startDate: numberToDate(festival.startDate),
+		visitors: filteredVisitors
 	};
 }

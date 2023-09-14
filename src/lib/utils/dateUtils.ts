@@ -1,19 +1,33 @@
 export function createDateFromStrings(date: string, time: string): number | null {
-	const dates: string[] = date.split('-');
+	const dates: number[] = date.split('-').map((value) => Number(value));
 	if (time) {
-		const times: string[] = time.split(':');
+		const times: number[] = time.split(':').map((value) => Number(value));
 		if (dates.at(0) && dates.at(1) && dates.at(2) && times.at(0) && times.at(1)) {
-			return new Date(dates.at(0), dates.at(1), dates.at(2), times.at(0), times.at(1)).getTime();
+			return new Date(
+				getNumber(dates, 0),
+				getNumber(dates, 1),
+				getNumber(dates, 2),
+				times.at(0),
+				times.at(1)
+			).getTime();
 		}
 	} else {
 		if (dates.at(0) && dates.at(1) && dates.at(2)) {
-			return new Date(dates.at(0), dates.at(1), dates.at(2)).getTime();
+			return new Date(getNumber(dates, 0), getNumber(dates, 1), getNumber(dates, 2)).getTime();
 		}
 	}
 	return null;
 }
 
-export function numberToDate(nbr: number | undefined): Date | null {
+function getNumber(list: number[], index: number): number {
+	const number = list.at(index);
+	if (number) {
+		return number;
+	}
+	return 0;
+}
+
+export function numberToDate(nbr: number | undefined | null): Date | null {
 	if (nbr) {
 		return new Date(nbr);
 	}

@@ -67,7 +67,7 @@ async function loadUserById(userId: string): Promise<BackendUser | null> {
 	return null;
 }
 
-export async function loadFrontEndUserById(id: string | undefined): Promise<FrontendUser | undefined> {
+export async function loadFrontEndUserById(id: string | null): Promise<FrontendUser | undefined> {
 	if (id) {
 		const byId = await loadUserById(id);
 		if (byId) {

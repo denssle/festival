@@ -8,5 +8,6 @@ export interface FrontendFestivalEvent {
 	createdAt: Date | null;
 	updatedBy: FrontendUser | undefined;
 	updatedAt: Date | null;
-	startDate?: Date | null;
+	startDate: Date | null;
+	visitors: FrontendUser[];
 }

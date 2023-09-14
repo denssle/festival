@@ -3,13 +3,19 @@
 	import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
 	import { formateDate, formateDateTime } from '$lib/utils/dateUtils';
 
-	export let data: { festival: FrontendFestivalEvent; yourFestival: boolean };
+	export let data: { festival: FrontendFestivalEvent; yourFestival: boolean; visitor: boolean };
 
 	async function deleteFestival() {
 		await fetch('/festival/' + data.festival.id, {
 			method: 'DELETE'
 		});
 		await goto('/');
+	}
+
+	function joinFestival() {
+		fetch('/festival/' + data.festival.id + '/join', {
+			method: 'POST'
+		});
 	}
 </script>
 
@@ -28,6 +34,8 @@
 		{#if data.yourFestival}
 			<a class="button" href="/festival/edit/{data.festival.id}">Bearbeiten</a>
 			<button on:click|trusted={deleteFestival}>Löschen</button>
+		{:else}
+			<button on:click={joinFestival} hidden={data.visitor}>Mitmachen</button>
 		{/if}
 		<a class="button" href="/">Zurück</a>
 	</section>
