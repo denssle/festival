@@ -6,14 +6,12 @@
 
 	export let data: { festival: FrontendFestivalEvent; yourFestival: boolean; visitor: boolean };
 
-	async function deleteFestival() {
+	async function deleteFestival(): Promise<void> {
 		await fetch('/festival/' + data.festival.id, {
 			method: 'DELETE'
 		});
 		await goto('/');
 	}
-
-	console.log(data);
 </script>
 
 <article>
