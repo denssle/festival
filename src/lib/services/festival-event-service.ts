@@ -95,13 +95,25 @@ export async function deleteFestival(user: BackendUser | null, festivalId: strin
 
 export async function joinFestival(user: BackendUser | null, festivalId: string) {
 	if (user && festivalId) {
-		const maybeFestival: BackendFestivalEvent | null = await getFestival(festivalId);
-		if (maybeFestival) {
-			if (maybeFestival.visitors.includes(user.id)) {
+		const festival: BackendFestivalEvent | null = await getFestival(festivalId);
+		if (festival) {
+			if (festival.visitors.includes(user.id)) {
 				console.log('Existing');
 			} else {
-				maybeFestival.visitors.push(user.id);
-				redis.set(`festival:${festivalId}`, parseFestivalToString(maybeFestival));
+				festival.visitors.push(user.id);
+				redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
+			}
+		}
+	}
+}
+
+export async function leaveFestival(user: BackendUser | null, festivalId: string) {
+	if (user && festivalId) {
+		const festival: BackendFestivalEvent | null = await getFestival(festivalId);
+		if (festival) {
+			if (festival.visitors.includes(user.id)) {
+				festival.visitors.splice(festival.visitors.indexOf(user.id), 1);
+				redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
 			}
 		}
 	}

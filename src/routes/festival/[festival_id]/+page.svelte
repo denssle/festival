@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
 	import { formateDate, formateDateTime } from '$lib/utils/dateUtils';
+	import JoinFestivalButtons from './JoinFestivalButtons.svelte';
 
 	export let data: { festival: FrontendFestivalEvent; yourFestival: boolean; visitor: boolean };
 
@@ -10,14 +11,6 @@
 			method: 'DELETE'
 		});
 		await goto('/');
-	}
-
-	function joinFestival() {
-		if (!data.visitor) {
-			fetch('/festival/' + data.festival.id + '/join', {
-				method: 'POST'
-			});
-		}
 	}
 
 	console.log(data);
@@ -39,8 +32,7 @@
 			<a class="button" href="/festival/edit/{data.festival.id}">Bearbeiten</a>
 			<button on:click|trusted={deleteFestival}>Löschen</button>
 		{:else}
-			<!-- TODO auch wieder austreten können -->
-			<button on:click={joinFestival} hidden={data.visitor}>Mitmachen</button>
+			<JoinFestivalButtons data={{ visitor: data.visitor, festival: data.festival }} />
 		{/if}
 		<a class="button" href="/">Zurück</a>
 	</section>

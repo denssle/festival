@@ -1,5 +1,5 @@
 <script>
-	import EmailPasswordForm from '$lib/components/EmailPasswordForm.svelte';
+	import EmailPasswordForm from '$lib/sharedComponents/EmailPasswordForm.svelte';
 
 	export let data;
 </script>
