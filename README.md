@@ -5,3 +5,4 @@
 - Metadata <meta name="author" content="name">
 - Open Graph Protocol
 - CSS Animation: loading bar?
+- <marquee><blink>einbauen</blink></marquee>
