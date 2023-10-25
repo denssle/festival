@@ -1,9 +1,10 @@
-<script>
-	import EmailPasswordForm from '$lib/sharedComponents/EmailPasswordForm.svelte';
+<script lang="ts">
+  import EmailPasswordForm from "$lib/sharedComponents/EmailPasswordForm.svelte";
+  import type { EmailPasswordFormData } from "$lib/sharedComponents/EmailPasswordFormData";
 
-	export let data;
+  export let data: EmailPasswordFormData;
 </script>
 
 <EmailPasswordForm {data} headline={'Registration'}>
-	Bereits ein Konto? <a href="/login">Hier geht es zur Anmeldung.</a>
+  Bereits ein Konto? <a href="/login">Hier geht es zur Anmeldung.</a>
 </EmailPasswordForm>

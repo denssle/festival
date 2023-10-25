@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { authorized } from '$lib/stores/authorized-store';
 	import { goto } from '$app/navigation';
 

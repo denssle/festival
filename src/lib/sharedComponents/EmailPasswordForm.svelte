@@ -1,6 +1,8 @@
 <script lang="ts">
-	export let data;
-	export let headline;
+	import type { EmailPasswordFormData } from "$lib/sharedComponents/EmailPasswordFormData";
+
+	export let data: EmailPasswordFormData;
+	export let headline: string;
 </script>
 
 <article>
