@@ -1,19 +1,26 @@
+/**
+ * Erzeugt eine Zeit in ms für einen Tag und eine Uhrzeit
+ * @param date yyyy-MM-dd
+ * @param time hh:mm
+ */
 export function createDateFromStrings(date: string, time: string): number | null {
-	const dates: number[] = date.split('-').map((value) => Number(value));
-	if (time) {
-		const times: number[] = time.split(':').map((value) => Number(value));
-		if (dates.at(0) && dates.at(1) && dates.at(2) && times.at(0) && times.at(1)) {
-			return new Date(
-				getNumber(dates, 0),
-				getNumber(dates, 1),
-				getNumber(dates, 2),
-				times.at(0),
-				times.at(1)
-			).getTime();
-		}
-	} else {
-		if (dates.at(0) && dates.at(1) && dates.at(2)) {
-			return new Date(getNumber(dates, 0), getNumber(dates, 1), getNumber(dates, 2)).getTime();
+	if (date && time) {
+		const dates: number[] = date.split('-').map((value) => Number(value));
+		if (time) {
+			const times: number[] = time.split(':').map((value) => Number(value));
+			if (dates.at(0) && dates.at(1) && dates.at(2) && times.at(0) && times.at(1)) {
+				return new Date(
+					getNumber(dates, 0),
+					getNumber(dates, 1),
+					getNumber(dates, 2),
+					times.at(0),
+					times.at(1)
+				).getTime();
+			}
+		} else {
+			if (dates.at(0) && dates.at(1) && dates.at(2)) {
+				return new Date(getNumber(dates, 0), getNumber(dates, 1), getNumber(dates, 2)).getTime();
+			}
 		}
 	}
 	return null;
@@ -27,6 +34,10 @@ function getNumber(list: number[], index: number): number {
 	return 0;
 }
 
+/**
+ * Konvertiert eine Nummer in ein Date Objekt
+ * @param nbr Zeit in MS
+ */
 export function numberToDate(nbr: number | undefined | null): Date | null {
 	if (nbr) {
 		return new Date(nbr);

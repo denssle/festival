@@ -54,8 +54,11 @@ export async function create(
 			startDate: startDate,
 			visitors: []
 		};
+		console.log('festival service: create: date: ', startDate);
 		redis.set(`festival:${newFestival.id}`, parseFestivalToString(newFestival));
 		return await parseToFrontend(newFestival);
+	} else {
+		console.warn('festival service: create: no user found');
 	}
 	return null;
 }

@@ -6,7 +6,7 @@
 	<p class="error">Festival invalid</p>
 {/if}
 
-<h1>Neu anlegen</h1>
+<h2>Neue Veranstaltung anlegen</h2>
 <form method="POST">
 	<p>
 		<input name="name" autocomplete="off" required value={data?.name ?? ''} placeholder="Name der Veranstaltung" />
