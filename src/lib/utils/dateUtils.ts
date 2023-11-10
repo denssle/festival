@@ -4,8 +4,9 @@
  * @param time hh:mm
  */
 export function createDateFromStrings(date: string, time: string): number | null {
-	if (date && time) {
+	if (date) {
 		const dates: number[] = date.split('-').map((value) => Number(value));
+		console.log(dates);
 		if (time) {
 			const times: number[] = time.split(':').map((value) => Number(value));
 			if (dates.at(0) && dates.at(1) && dates.at(2) && times.at(0) && times.at(1)) {

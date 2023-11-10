@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { authorized } from '$lib/stores/authorized-store';
 	import { goto } from '$app/navigation';
+	import { authorized } from '$lib/stores/authorized-store';
 
 	async function logout() {
 		await fetch('/logout', {

@@ -1,10 +1,10 @@
-import * as userController from '$lib/services/user-service';
 import type { Actions } from '@sveltejs/kit';
 import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from '../../../.svelte-kit/types/src/routes/$types';
+import { emailInvalid, register, validateSessionToken } from '../../lib/services/user-service';
 
 export const load = (async ({ cookies, locals, request }) => {
-	const valid = await userController.validateSessionToken(cookies.get('session'));
+	const valid = await validateSessionToken(cookies.get('session'));
 	if (valid) {
 		throw redirect(303, '/');
 	}
@@ -21,11 +21,11 @@ export const actions = {
 		const passwordValue = values.get('password');
 		if (emailValue && passwordValue) {
 			const email = String(emailValue);
-			if (userController.emailInvalid(email)) {
+			if (emailInvalid(email)) {
 				return fail(409, { success: false, errorMessage: 'Email already existing' });
 			} else {
 				const password: string = String(passwordValue);
-				userController.register(email, password);
+				register(email, password);
 				throw redirect(303, '/login');
 			}
 		}

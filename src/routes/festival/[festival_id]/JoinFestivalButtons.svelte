@@ -1,4 +1,6 @@
 <script lang="ts">
+
+
 	import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
 
 	export let data: { visitor: boolean; festival: FrontendFestivalEvent };

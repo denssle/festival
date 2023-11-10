@@ -1,14 +1,14 @@
-import * as festivalController from '$lib/services/festival-event-service';
-import { Actions, error, redirect } from '@sveltejs/kit';
+import { type Actions, error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from '../../../../../.svelte-kit/types/src/routes/$types';
-import { extractUser } from '$lib/services/user-service';
-import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
-import { createDateFromStrings } from '$lib/utils/dateUtils';
+import { getFrontEndFestival, updateFestival } from '../../../../lib/services/festival-event-service';
+import { extractUser } from '../../../../lib/services/user-service';
+import { createDateFromStrings } from '../../../../lib/utils/dateUtils';
+import type { FrontendFestivalEvent } from '../../../../lib/models/FrontendFestivalEvent';
 
 export const load = (async ({ params }) => {
 	const festival_id: string = params.festival_id;
 	if (festival_id) {
-		const festival: FrontendFestivalEvent | null = await festivalController.getFrontEndFestival(festival_id);
+		const festival: FrontendFestivalEvent | null = await getFrontEndFestival(festival_id);
 		if (festival) {
 			return festival;
 		}
@@ -23,7 +23,7 @@ export const actions = {
 		const name = values.get('name');
 		const description = values.get('description');
 		if (festivalId && name) {
-			festivalController.updateFestival(
+			updateFestival(
 				extractUser(cookies.get('session')),
 				festivalId,
 				String(name),

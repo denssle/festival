@@ -1,4 +1,4 @@
-import type { FrontendUser } from '$lib/models/FrontendUser';
+import type { FrontendUser } from './FrontendUser';
 
 export interface FrontendFestivalEvent {
 	id: string;

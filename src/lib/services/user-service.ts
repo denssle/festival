@@ -1,7 +1,7 @@
-import type { BackendUser } from '$lib/models/BackendUser';
 import { compareSync, genSaltSync, hashSync } from 'bcrypt-ts';
-import redis from '$lib/redis';
-import type { FrontendUser } from '$lib/models/FrontendUser';
+import type { BackendUser } from '../models/BackendUser';
+import redis from '../redis';
+import type { FrontendUser } from '../models/FrontendUser';
 
 export function register(email: string, password: string): Promise<string> | null {
 	if (!emailInvalid(email)) {

@@ -1,10 +1,10 @@
-import redis from '$lib/redis';
-import type { BackendFestivalEvent } from '$lib/models/BackendFestivalEvent';
-import type { BackendUser } from '$lib/models/BackendUser';
-import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
-import { numberToDate } from '$lib/utils/dateUtils';
-import { loadFrontEndUserById } from '$lib/services/user-service';
-import type { FrontendUser } from '$lib/models/FrontendUser';
+import type { FrontendFestivalEvent } from '../models/FrontendFestivalEvent';
+import redis from '../redis';
+import type { BackendFestivalEvent } from '../models/BackendFestivalEvent';
+import type { BackendUser } from '../models/BackendUser';
+import type { FrontendUser } from '../models/FrontendUser';
+import { loadFrontEndUserById } from './user-service';
+import { numberToDate } from '../utils/dateUtils';
 
 export async function getAllFestivals(): Promise<FrontendFestivalEvent[]> {
 	const keys: string[] = await redis.keys('festival:*');
