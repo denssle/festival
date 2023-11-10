@@ -13,8 +13,16 @@ test('test createDateFromStrings with garbage as date', () => {
 	expect(createDateFromStrings('garbage', '16:00')).toBe(null);
 });
 
+test('test createDateFromStrings with garbage - as date', () => {
+	expect(createDateFromStrings('garbage', '16:00')).toBe(null);
+});
+
 test('test createDateFromStrings with garbage as time', () => {
-	expect(createDateFromStrings('2023-11-05', 'garbage')).toBe(null);
+	expect(createDateFromStrings('2023-11-05', 'ga-rb-ag-e')).toBe(null);
+});
+
+test('test createDateFromStrings with garbage and . as time', () => {
+	expect(createDateFromStrings('2023-11-05', 'ga.rbage')).toBe(null);
 });
 
 test('test createDateFromStrings with date and time', () => {
