@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto, invalidate, invalidateAll } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
 	import { formateDate, formateDateTime } from '$lib/utils/dateUtils';
 

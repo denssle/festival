@@ -1,9 +1,9 @@
 import { type Actions, error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from '../../../../../.svelte-kit/types/src/routes/$types';
-import { getFrontEndFestival, updateFestival } from '../../../../lib/services/festival-event-service';
-import { extractUser } from '../../../../lib/services/user-service';
-import { createDateFromStrings } from '../../../../lib/utils/dateUtils';
-import type { FrontendFestivalEvent } from '../../../../lib/models/FrontendFestivalEvent';
+import { getFrontEndFestival, updateFestival } from '$lib/services/festival-event-service';
+import { extractUser } from '$lib/services/user-service';
+import { createDateFromStrings } from '$lib/utils/dateUtils';
+import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
 
 export const load = (async ({ params }) => {
 	const festival_id: string = params.festival_id;

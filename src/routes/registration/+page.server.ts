@@ -1,7 +1,7 @@
 import type { Actions } from '@sveltejs/kit';
 import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from '../../../.svelte-kit/types/src/routes/$types';
-import { emailInvalid, register, validateSessionToken } from '../../lib/services/user-service';
+import { emailInvalid, register, validateSessionToken } from '$lib/services/user-service';
 
 export const load = (async ({ cookies, locals, request }) => {
 	const valid = await validateSessionToken(cookies.get('session'));

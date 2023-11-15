@@ -7,7 +7,6 @@ import { extractUser } from '$lib/services/user-service';
 
 export const load = (async ({ cookies, request, locals, params }) => {
 	const festival_id: string = params.festival_id;
-	console.log('LOAD DATA FOR FESTIVAL: ', params.festival_id);
 	if (festival_id) {
 		const festival: FrontendFestivalEvent | null = await getFrontEndFestival(festival_id);
 		if (festival) {
