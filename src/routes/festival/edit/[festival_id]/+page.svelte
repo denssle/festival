@@ -1,5 +1,4 @@
 <script lang="ts">
-
 	import { dateToDateString, dateToTimeString } from '$lib/utils/dateUtils';
 	import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
 
@@ -9,7 +8,7 @@
 <form method="POST">
 	<p>
 		<input name="name" autocomplete="off" required value={data?.name ?? ''} placeholder="Name der Veranstaltung" />
-		<textarea name="description" placeholder="Kurze Beschreibung" />
+		<textarea name="description" placeholder="Kurze Beschreibung" value={data?.description} />
 	</p>
 
 	<p>
