@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import JoinFestivalButtons from './JoinFestivalButtons.svelte';
+	import { goto, invalidate, invalidateAll } from '$app/navigation';
 	import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
 	import { formateDate, formateDateTime } from '$lib/utils/dateUtils';
 
@@ -11,6 +10,26 @@
 			method: 'DELETE'
 		});
 		await goto('/');
+	}
+
+	function joinFestival(): void {
+		if (!data.visitor) {
+			fetch('/festival/' + data.festival.id + '/join', {
+				method: 'POST'
+			}).then(() => {
+				invalidateAll();
+			});
+		}
+	}
+
+	function leaveFestival(): void {
+		if (data.visitor) {
+			fetch('/festival/' + data.festival.id + '/leave', {
+				method: 'POST'
+			}).then(() => {
+				invalidateAll();
+			});
+		}
 	}
 </script>
 
@@ -26,12 +45,25 @@
 	</section>
 
 	<section>
-		{#if data.yourFestival}
-			<a class="button" href="/festival/edit/{data.festival.id}">Bearbeiten</a>
-			<button on:click|trusted={deleteFestival}>Löschen</button>
+		{#if data.festival.visitors.length}
+			<p>Bisher haben sich angemeldet:</p>
+			<ul>
+				{#each data.festival.visitors as visitor}
+					<li>
+						<p>{visitor.email}</p>
+					</li>
+				{/each}
+			</ul>
 		{:else}
-			<JoinFestivalButtons data={{ visitor: data.visitor, festival: data.festival }} />
+			<p>Es hat sich noch niemand angemeldet.</p>
 		{/if}
+	</section>
+
+	<section>
+		<a class="button" href="/festival/edit/{data.festival.id}">Bearbeiten</a>
+		<button on:click|trusted={deleteFestival}>Löschen</button>
+		<button on:click={leaveFestival}>Absagen</button>
+		<button on:click={joinFestival}>Mitmachen</button>
 		<a class="button" href="/">Zurück</a>
 	</section>
 </article>

@@ -101,7 +101,7 @@ export async function joinFestival(user: BackendUser | null, festivalId: string)
 		const festival: BackendFestivalEvent | null = await getFestival(festivalId);
 		if (festival) {
 			if (festival.visitors.includes(user.id)) {
-				console.log('Existing');
+				console.log('Can´t add user because already existing!');
 			} else {
 				festival.visitors.push(user.id);
 				redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
