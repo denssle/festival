@@ -45,7 +45,7 @@ export function numberToDate(nbr: number | undefined | null): Date | null {
 	return null;
 }
 
-export function dateToDateString(date: Date): string {
+export function dateToDateString(date: Date | null): string {
 	if (date) {
 		const offset = date.getTimezoneOffset();
 		date = new Date(date.getTime() - offset * 60 * 1000);

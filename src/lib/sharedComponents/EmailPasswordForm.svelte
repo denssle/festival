@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { EmailPasswordFormData } from "$lib/sharedComponents/EmailPasswordFormData";
+	import type { EmailPasswordFormData } from '$lib/models/EmailPasswordFormData';
 
 	export let data: EmailPasswordFormData;
 	export let headline: string;
@@ -30,6 +30,3 @@
 		</section>
 	</form>
 </article>
-
-<style>
-</style>

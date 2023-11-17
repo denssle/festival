@@ -2,6 +2,7 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
 	import { formateDate, formateDateTime } from '$lib/utils/dateUtils';
+	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
 
 	export let data: { festival: FrontendFestivalEvent; yourFestival: boolean; visitor: boolean };
 
@@ -13,7 +14,10 @@
 	}
 
 	function joinFestival(): void {
-		if (!data.visitor) {
+		if (data.visitor) {
+			infoDialogText = 'Du bist bereits dabei!';
+			showInfoDialog = true;
+		} else {
 			fetch('/festival/' + data.festival.id + '/join', {
 				method: 'POST'
 			}).then(() => {
@@ -29,9 +33,16 @@
 			}).then(() => {
 				invalidateAll();
 			});
+		} else {
+			infoDialogText = 'Wärst du angemeldet gewesen, wärst du es jetzt nicht mehr.';
+			showInfoDialog = true;
 		}
 	}
+	let showInfoDialog = false;
+	let infoDialogText = '';
 </script>
+
+<InfoDialog bind:showInfoDialog bind:infoDialogText></InfoDialog>
 
 <article>
 	<section>

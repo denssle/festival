@@ -1,6 +1,6 @@
 <script lang="ts">
   import EmailPasswordForm from "$lib/sharedComponents/EmailPasswordForm.svelte";
-  import type { EmailPasswordFormData } from "$lib/sharedComponents/EmailPasswordFormData";
+  import type { EmailPasswordFormData } from "$lib/models/EmailPasswordFormData";
 
   export let data: EmailPasswordFormData;
 </script>
