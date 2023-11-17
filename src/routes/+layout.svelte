@@ -52,4 +52,11 @@
 		--marked: #ffdd33;
 		--disabled: #efefef;
 	}
+
+	:global(button) {
+		user-select: none;
+		-webkit-user-select: none; /*Safari*/
+		-moz-user-select: none; /*Firefox*/
+		caret-color: transparent;
+	}
 </style>

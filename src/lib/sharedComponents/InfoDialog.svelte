@@ -10,3 +10,9 @@
 	<p>{infoDialogText}</p>
 	<button on:click={() => dialog.close()}>Okay</button>
 </dialog>
+
+<style>
+	dialog {
+		padding: 2%;
+	}
+</style>
