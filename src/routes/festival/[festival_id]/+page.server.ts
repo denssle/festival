@@ -1,11 +1,15 @@
-import type { PageServerLoad } from '../../../../.svelte-kit/types/src/routes/festival/[festival_id]/$types';
+import type {
+	PageServerLoad,
+	RouteParams
+} from '../../../../.svelte-kit/types/src/routes/festival/[festival_id]/$types';
 import { error } from '@sveltejs/kit';
+import type { Cookies } from '@sveltejs/kit';
 import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
 import { getFrontEndFestival, isVisitorOfFestival } from '$lib/services/festival-event-service';
 import type { BackendUser } from '$lib/models/BackendUser';
 import { extractUser } from '$lib/services/user-service';
 
-export const load = (async ({ cookies, request, locals, params }) => {
+export const load: PageServerLoad = async ({ cookies, params }: { cookies: Cookies; params: RouteParams }) => {
 	const festival_id: string = params.festival_id;
 	if (festival_id) {
 		const festival: FrontendFestivalEvent | null = await getFrontEndFestival(festival_id);
@@ -21,4 +25,4 @@ export const load = (async ({ cookies, request, locals, params }) => {
 		}
 	}
 	throw error(404, 'Not Found');
-}) satisfies PageServerLoad;
+};

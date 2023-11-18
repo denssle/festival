@@ -1,10 +1,11 @@
-import type { Actions } from '@sveltejs/kit';
+import type { Actions, Cookies } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from '../../../.svelte-kit/types/src/routes/$types';
 import { login, validateSessionToken } from '$lib/services/user-service';
 import type { BackendUser } from '$lib/models/BackendUser';
+import type { StandardResponse } from '$lib/models/StandardResponse';
 
-export const load = (async ({ cookies, request, locals }) => {
+export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): Promise<StandardResponse> => {
 	const valid = await validateSessionToken(cookies.get('session'));
 	if (valid) {
 		throw redirect(303, '/');
@@ -13,10 +14,10 @@ export const load = (async ({ cookies, request, locals }) => {
 		success: true,
 		authorized: false
 	};
-}) satisfies PageServerLoad;
+};
 
-export const actions = {
-	default: async ({ cookies, request }) => {
+export const actions: Actions = {
+	default: async ({ cookies, request }): Promise<StandardResponse> => {
 		const values: FormData = await request.formData();
 		const emailValue: FormDataEntryValue | null = values.get('email');
 		const passwordValue: FormDataEntryValue | null = values.get('password');
@@ -32,6 +33,6 @@ export const actions = {
 				throw redirect(302, '/');
 			}
 		}
-		return { success: false, authorized: false, errorMessage: 'Password and / or Email missing' };
+		return { success: false, authorized: false, message: 'Password and / or Email missing' };
 	}
-} satisfies Actions;
+};

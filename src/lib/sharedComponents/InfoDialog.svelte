@@ -7,8 +7,10 @@
 </script>
 
 <dialog bind:this={dialog} on:close={() => (showInfoDialog = false)}>
-	<p>{infoDialogText}</p>
-	<button on:click={() => dialog.close()}>Okay</button>
+	<article>
+		<p>{infoDialogText}</p>
+		<button on:click={() => dialog.close()}>Okay</button>
+	</article>
 </dialog>
 
 <style>

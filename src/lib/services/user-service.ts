@@ -5,7 +5,12 @@ import type { FrontendUser } from '../models/FrontendUser';
 
 export function register(email: string, password: string): Promise<string> | null {
 	if (!emailInvalid(email)) {
-		const user: BackendUser = { id: crypto.randomUUID(), email: email, password: hashSync(password, genSaltSync(4)) };
+		const user: BackendUser = {
+			id: crypto.randomUUID(),
+			email: email,
+			nickname: '',
+			password: hashSync(password, genSaltSync(4))
+		};
 		return saveUser(user);
 	}
 	return null;
@@ -46,7 +51,7 @@ export function emailInvalid(email: string): boolean {
 	return !email || email.length === 0; // || userMap.has(email);
 }
 
-function saveUser(user: BackendUser): Promise<string> {
+export function saveUser(user: BackendUser): Promise<string> {
 	redis.set(user.email, user.id); // damit man von der Email auf den BackendUser schließen kann
 	return redis.set('user:' + user.id, parseUserToString(user));
 }
@@ -95,6 +100,7 @@ function parseStringToUser(data: string): BackendUser | null {
 function parseToFrontEnd(user: BackendUser): FrontendUser {
 	return {
 		id: user.id,
+		nickname: user.nickname,
 		email: user.email
 	};
 }

@@ -4,17 +4,19 @@
 	export let data: { festivalEvents: FrontendFestivalEvent[] };
 </script>
 
-<h1>Festivals</h1>
+<article>
+	<h2>Festivals</h2>
 
-<div>
-	<p>List:</p>
-	{#each data.festivalEvents as loadedEvent}
-		<ul>
-			<li>
-				<a href="/festival/{loadedEvent.id}">{loadedEvent.name}</a>
-			</li>
-		</ul>
-	{/each}
-</div>
+	<section>
+		<p>Alle Events:</p>
+		{#each data.festivalEvents as loadedEvent}
+			<ul>
+				<li>
+					<a href="/festival/{loadedEvent.id}">{loadedEvent.name}</a>
+				</li>
+			</ul>
+		{/each}
+	</section>
+</article>
 
 <style></style>

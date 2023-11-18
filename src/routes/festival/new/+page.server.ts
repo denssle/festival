@@ -3,9 +3,10 @@ import { extractUser } from '$lib/services/user-service';
 import { createDateFromStrings } from '$lib/utils/dateUtils';
 import { type Actions, redirect } from '@sveltejs/kit';
 import { create } from '$lib/services/festival-event-service';
+import type { StandardResponse } from '$lib/models/StandardResponse';
 
-export const actions = {
-	default: async ({ cookies, request }) => {
+export const actions: Actions = {
+	default: async ({ cookies, request }): Promise<StandardResponse | undefined> => {
 		const values = await request.formData();
 		const name: FormDataEntryValue | null = values.get('name');
 		if (name) {
@@ -20,7 +21,7 @@ export const actions = {
 				throw redirect(302, '/festival/' + newFestival?.id);
 			}
 		} else {
-			return { success: false };
+			return { success: false, authorized: true };
 		}
 	}
-} satisfies Actions;
+};
