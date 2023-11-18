@@ -2,6 +2,8 @@ import { compareSync, genSaltSync, hashSync } from 'bcrypt-ts';
 import type { BackendUser } from '../models/BackendUser';
 import redis from '../redis';
 import type { FrontendUser } from '../models/FrontendUser';
+import type { UserFormData } from '$lib/models/UserFormData';
+import type { Cookies } from '@sveltejs/kit';
 
 export function register(email: string, password: string): Promise<string> | null {
 	if (!emailInvalid(email)) {
@@ -9,11 +11,15 @@ export function register(email: string, password: string): Promise<string> | nul
 			id: crypto.randomUUID(),
 			email: email,
 			nickname: '',
-			password: hashSync(password, genSaltSync(4))
+			password: saltPassword(password)
 		};
 		return saveUser(user);
 	}
 	return null;
+}
+
+export function saltPassword(password: string): string {
+	return hashSync(password, genSaltSync(4));
 }
 
 export async function login(email: string, password: string): Promise<BackendUser | null> {
@@ -48,6 +54,7 @@ export function extractUser(sessionToken: string | undefined): BackendUser | nul
 }
 
 export function emailInvalid(email: string): boolean {
+	// TODO Check if email is already existing
 	return !email || email.length === 0; // || userMap.has(email);
 }
 
@@ -97,10 +104,44 @@ function parseStringToUser(data: string): BackendUser | null {
 	return null;
 }
 
-function parseToFrontEnd(user: BackendUser): FrontendUser {
+export function parseToFrontEnd(user: BackendUser): FrontendUser {
 	return {
 		id: user.id,
 		nickname: user.nickname,
 		email: user.email
 	};
+}
+
+export async function readFormDataFrontEndUser(data: Promise<FormData>): Promise<UserFormData> {
+	const values: FormData = await data;
+	return {
+		email: String(values.get('email')),
+		nickname: String(values.get('nickname')),
+		password: String(values.get('password'))
+	};
+}
+
+export function createSessionCookie(cookies: Cookies, user: BackendUser) {
+	// TODO: nicht den ganzen BackendUser speichern
+	cookies.set('session', JSON.stringify(user), {
+		path: '/',
+		sameSite: 'strict',
+		maxAge: 60 * 60 * 24 * 30
+	});
+}
+
+export async function updateUser(oldUser: BackendUser, formDataPromise: Promise<FormData>): Promise<BackendUser> {
+	const formData: UserFormData = await readFormDataFrontEndUser(formDataPromise);
+	if (formData.email) {
+		if (oldUser.email !== formData.email) {
+			redis.del(oldUser.email);
+			oldUser.email = formData.email;
+		}
+		oldUser.nickname = formData.nickname;
+		if (formData.password) {
+			oldUser.password = saltPassword(formData.password);
+		}
+		await saveUser(oldUser);
+	}
+	return oldUser;
 }

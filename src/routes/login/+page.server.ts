@@ -4,9 +4,11 @@ import type { PageServerLoad } from '../../../.svelte-kit/types/src/routes/$type
 import { login, validateSessionToken } from '$lib/services/user-service';
 import type { BackendUser } from '$lib/models/BackendUser';
 import type { StandardResponse } from '$lib/models/StandardResponse';
+import type { UserFormData } from '$lib/models/UserFormData';
+import * as userService from '$lib/services/user-service';
 
 export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): Promise<StandardResponse> => {
-	const valid = await validateSessionToken(cookies.get('session'));
+	const valid: boolean = await validateSessionToken(cookies.get('session'));
 	if (valid) {
 		throw redirect(303, '/');
 	}
@@ -18,18 +20,11 @@ export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): P
 
 export const actions: Actions = {
 	default: async ({ cookies, request }): Promise<StandardResponse> => {
-		const values: FormData = await request.formData();
-		const emailValue: FormDataEntryValue | null = values.get('email');
-		const passwordValue: FormDataEntryValue | null = values.get('password');
-		if (emailValue && passwordValue) {
-			const user: BackendUser | null = await login(emailValue.toString(), passwordValue.toString());
+		const formData: UserFormData = await userService.readFormDataFrontEndUser(request.formData());
+		if (formData.email && formData.password) {
+			const user: BackendUser | null = await login(formData.email, formData.password);
 			if (user) {
-				// TODO: nicht den ganzen BackendUser speichern
-				cookies.set('session', JSON.stringify(user), {
-					path: '/',
-					sameSite: 'strict',
-					maxAge: 60 * 60 * 24 * 30
-				});
+				userService.createSessionCookie(cookies, user);
 				throw redirect(302, '/');
 			}
 		}

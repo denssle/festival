@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { BackendUser } from '$lib/models/BackendUser';
+	import type { FrontendUser } from '$lib/models/FrontendUser';
 
-	export let data: BackendUser;
+	export let data: FrontendUser;
 </script>
 
 <article>
@@ -19,7 +19,7 @@
 				</p>
 
 				<p>
-					<input name="password" value={data?.password ?? ''} type="password" placeholder="Ändere dein Passwort" />
+					<input name="password" value={''} type="password" placeholder="Ändere dein Passwort" />
 				</p>
 
 				<p>

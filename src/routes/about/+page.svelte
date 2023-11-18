@@ -8,7 +8,7 @@
 		<p>
 			It is styled with <a href="https://simplecss.org/">simple css </a> and the Data is saved with
 			<a href="https://redis.io/">redis</a>
-			at <a href="https://upstash.com/">upstash</a>
+			at <a href="https://upstash.com/">upstash</a>.
 		</p>
 	</section>
 </article>
