@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { EmailPasswordFormData } from '$lib/models/EmailPasswordFormData';
+	import type { NicknamePasswordFormData } from '$lib/models/NicknamePasswordFormData';
 
-	export let data: EmailPasswordFormData;
+	export let data: NicknamePasswordFormData;
 	export let headline: string;
 </script>
 
@@ -11,7 +11,7 @@
 	<form method="POST">
 		<section>
 			<p>
-				<input name="email" required value={data?.email ?? ''} type="email" placeholder="Email" />
+				<input name="nickname" required value={data?.nickname ?? ''} type="text" placeholder="Nickname" />
 			</p>
 
 			<p>

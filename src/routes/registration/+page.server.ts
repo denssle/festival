@@ -1,7 +1,7 @@
 import type { Actions, Cookies } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from '../../../.svelte-kit/types/src/routes/$types';
-import { emailInvalid, register, validateSessionToken } from '$lib/services/user-service';
+import { nickNameInvalid, register, validateSessionToken } from '$lib/services/user-service';
 import type { StandardResponse } from '$lib/models/StandardResponse';
 import type { UserFormData } from '$lib/models/UserFormData';
 import * as userService from '$lib/services/user-service';
@@ -20,14 +20,14 @@ export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): P
 export const actions: Actions = {
 	default: async ({ request }): Promise<StandardResponse> => {
 		const formData: UserFormData = await userService.readFormDataFrontEndUser(request.formData());
-		if (formData.password && formData.password) {
-			if (emailInvalid(formData.email)) {
-				return { success: false, authorized: false, message: 'Email already existing' };
+		if (formData.nickname && formData.password) {
+			if (await nickNameInvalid(formData.nickname)) {
+				return { success: false, authorized: false, message: 'Invalid Nickname' };
 			} else {
-				register(formData.email, formData.password);
+				register(formData.nickname, formData.password);
 				throw redirect(303, '/login');
 			}
 		}
-		return { success: false, authorized: true, message: 'Password and / or Email missing' };
+		return { success: false, authorized: true, message: 'Password and / or Nickname missing' };
 	}
 };

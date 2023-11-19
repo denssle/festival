@@ -21,8 +21,8 @@ export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): P
 export const actions: Actions = {
 	default: async ({ cookies, request }): Promise<StandardResponse> => {
 		const formData: UserFormData = await userService.readFormDataFrontEndUser(request.formData());
-		if (formData.email && formData.password) {
-			const user: BackendUser | null = await login(formData.email, formData.password);
+		if (formData.nickname && formData.password) {
+			const user: BackendUser | null = await login(formData.nickname, formData.password);
 			if (user) {
 				userService.createSessionCookie(cookies, user);
 				throw redirect(302, '/');

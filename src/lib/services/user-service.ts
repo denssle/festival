@@ -5,12 +5,12 @@ import type { FrontendUser } from '../models/FrontendUser';
 import type { UserFormData } from '$lib/models/UserFormData';
 import type { Cookies } from '@sveltejs/kit';
 
-export function register(email: string, password: string): Promise<string> | null {
-	if (!emailInvalid(email)) {
+export function register(nickname: string, password: string): Promise<string> | null {
+	if (!nickNameInvalid(nickname)) {
 		const user: BackendUser = {
 			id: crypto.randomUUID(),
-			email: email,
-			nickname: '',
+			email: '',
+			nickname: nickname,
 			password: saltPassword(password)
 		};
 		return saveUser(user);
@@ -22,8 +22,8 @@ export function saltPassword(password: string): string {
 	return hashSync(password, genSaltSync(4));
 }
 
-export async function login(email: string, password: string): Promise<BackendUser | null> {
-	const user: BackendUser | null = await loadUserByEmail(email);
+export async function login(nickname: string, password: string): Promise<BackendUser | null> {
+	const user: BackendUser | null = await loadUserByNickname(nickname);
 	if (user && user.password) {
 		if (compareSync(password, user.password)) {
 			return user;
@@ -53,18 +53,18 @@ export function extractUser(sessionToken: string | undefined): BackendUser | nul
 	return null;
 }
 
-export function emailInvalid(email: string): boolean {
+export async function nickNameInvalid(email: string): Promise<boolean> {
 	// TODO Check if email is already existing
-	return !email || email.length === 0; // || userMap.has(email);
+	return !email || email.length === 0 || (await redis.exists(email)) > 0;
 }
 
 export function saveUser(user: BackendUser): Promise<string> {
-	redis.set(user.email, user.id); // damit man von der Email auf den BackendUser schließen kann
+	redis.set(user.nickname, user.id); // damit man von dem Nickname auf den BackendUser schließen kann
 	return redis.set('user:' + user.id, parseUserToString(user));
 }
 
-async function loadUserByEmail(email: string): Promise<BackendUser | null> {
-	const userId: string | null = await redis.get(email);
+async function loadUserByNickname(nickname: string): Promise<BackendUser | null> {
+	const userId: string | null = await redis.get(nickname);
 	if (userId) {
 		return loadUserById(userId);
 	}
@@ -132,12 +132,12 @@ export function createSessionCookie(cookies: Cookies, user: BackendUser) {
 
 export async function updateUser(oldUser: BackendUser, formDataPromise: Promise<FormData>): Promise<BackendUser> {
 	const formData: UserFormData = await readFormDataFrontEndUser(formDataPromise);
-	if (formData.email) {
-		if (oldUser.email !== formData.email) {
-			redis.del(oldUser.email);
-			oldUser.email = formData.email;
+	if (formData.nickname) {
+		if (oldUser.nickname !== formData.nickname) {
+			redis.del(oldUser.nickname);
+			oldUser.nickname = formData.nickname;
 		}
-		oldUser.nickname = formData.nickname;
+		oldUser.email = formData.email;
 		if (formData.password) {
 			oldUser.password = saltPassword(formData.password);
 		}

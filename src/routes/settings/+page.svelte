@@ -15,7 +15,7 @@
 				</p>
 
 				<p>
-					<input name="nickname" value={data?.nickname ?? ''} type="email" placeholder="Ändere deinen Nickname" />
+					<input name="nickname" value={data?.nickname ?? ''} type="text" placeholder="Ändere deinen Nickname" />
 				</p>
 
 				<p>

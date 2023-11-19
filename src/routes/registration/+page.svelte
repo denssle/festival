@@ -1,10 +1,10 @@
 <script lang="ts">
-	import EmailPasswordForm from '$lib/sharedComponents/EmailPasswordForm.svelte';
-	import type { EmailPasswordFormData } from '$lib/models/EmailPasswordFormData';
+	import type { NicknamePasswordFormData } from '$lib/models/NicknamePasswordFormData';
+	import NicknamePasswordForm from '$lib/sharedComponents/NicknamePasswordForm.svelte';
 
-	export let data: EmailPasswordFormData;
+	export let data: NicknamePasswordFormData;
 </script>
 
-<EmailPasswordForm {data} headline={'Registration'}>
+<NicknamePasswordForm {data} headline={'Registration'}>
 	Bereits ein Konto? <a href="/login">Hier geht es zur Anmeldung.</a>
-</EmailPasswordForm>
+</NicknamePasswordForm>
