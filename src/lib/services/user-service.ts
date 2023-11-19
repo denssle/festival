@@ -11,6 +11,8 @@ export function register(nickname: string, password: string): Promise<string> | 
 			id: crypto.randomUUID(),
 			email: '',
 			nickname: nickname,
+			forename: '',
+			lastname: '',
 			password: saltPassword(password)
 		};
 		return saveUser(user);
@@ -108,6 +110,8 @@ export function parseToFrontEnd(user: BackendUser): FrontendUser {
 	return {
 		id: user.id,
 		nickname: user.nickname,
+		forename: user.forename,
+		lastname: user.lastname,
 		email: user.email
 	};
 }
@@ -117,6 +121,8 @@ export async function readFormDataFrontEndUser(data: Promise<FormData>): Promise
 	return {
 		email: String(values.get('email')),
 		nickname: String(values.get('nickname')),
+		forename: String(values.get('forename')),
+		lastname: String(values.get('lastname')),
 		password: String(values.get('password'))
 	};
 }
@@ -138,6 +144,8 @@ export async function updateUser(oldUser: BackendUser, formDataPromise: Promise<
 			oldUser.nickname = formData.nickname;
 		}
 		oldUser.email = formData.email;
+		oldUser.forename = formData.forename;
+		oldUser.lastname = formData.lastname;
 		if (formData.password) {
 			oldUser.password = saltPassword(formData.password);
 		}
