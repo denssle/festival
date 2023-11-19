@@ -6,11 +6,25 @@
 
 	export let data: { festival: FrontendFestivalEvent; yourFestival: boolean; visitor: boolean };
 
+	async function editFestival(): Promise<void> {
+		if (data.yourFestival) {
+			goto('/festival/edit/' + data.festival.id);
+		} else {
+			infoDialogText = 'Das ist nicht dein Event. ';
+			showInfoDialog = true;
+		}
+	}
+
 	async function deleteFestival(): Promise<void> {
-		await fetch('/festival/' + data.festival.id, {
-			method: 'DELETE'
-		});
-		await goto('/');
+		if (data.yourFestival) {
+			await fetch('/festival/' + data.festival.id, {
+				method: 'DELETE'
+			});
+			await goto('/');
+		} else {
+			infoDialogText = 'Das ist nicht dein Event. ';
+			showInfoDialog = true;
+		}
 	}
 
 	function joinFestival(): void {
@@ -71,8 +85,8 @@
 	</section>
 
 	<section>
-		<a class="button" href="/festival/edit/{data.festival.id}">Bearbeiten</a>
-		<button on:click|trusted={deleteFestival}>Löschen</button>
+		<button on:click={editFestival}>Bearbeiten</button>
+		<button on:click={deleteFestival}>Löschen</button>
 		<button on:click={leaveFestival}>Absagen</button>
 		<button on:click={joinFestival}>Mitmachen</button>
 		<a class="button" href="/">Zurück</a>

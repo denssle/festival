@@ -9,7 +9,13 @@ import { getFrontEndFestival, isVisitorOfFestival } from '$lib/services/festival
 import type { BackendUser } from '$lib/models/BackendUser';
 import { extractUser } from '$lib/services/user-service';
 
-export const load: PageServerLoad = async ({ cookies, params }: { cookies: Cookies; params: RouteParams }) => {
+export const load: PageServerLoad = async ({
+	cookies,
+	params
+}: {
+	cookies: Cookies;
+	params: RouteParams;
+}): Promise<{ festival: FrontendFestivalEvent; yourFestival: boolean; visitor: boolean }> => {
 	const festival_id: string = params.festival_id;
 	if (festival_id) {
 		const festival: FrontendFestivalEvent | null = await getFrontEndFestival(festival_id);

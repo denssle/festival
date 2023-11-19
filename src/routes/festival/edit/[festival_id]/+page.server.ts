@@ -6,13 +6,26 @@ import { createDateFromStrings } from '$lib/utils/dateUtils';
 import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
 import type { RouteParams } from '../../../../../.svelte-kit/types/src/routes/festival/edit/[festival_id]/$types';
 import type { StandardResponse } from '$lib/models/StandardResponse';
+import type { BackendUser } from '$lib/models/BackendUser';
+import type { Cookies } from '@sveltejs/kit';
 
-export const load: PageServerLoad = async ({ params }: { params: RouteParams }): Promise<FrontendFestivalEvent> => {
+export const load: PageServerLoad = async ({
+	cookies,
+	params
+}: {
+	cookies: Cookies;
+	params: RouteParams;
+}): Promise<FrontendFestivalEvent> => {
 	const festival_id: string = params.festival_id;
 	if (festival_id) {
 		const festival: FrontendFestivalEvent | null = await getFrontEndFestival(festival_id);
 		if (festival) {
-			return festival;
+			const user: BackendUser | null = extractUser(cookies.get('session'));
+			if (user && user.id === festival.createdBy?.id) {
+				return festival;
+			} else {
+				throw redirect(303, '/');
+			}
 		}
 	}
 	throw error(404, 'Not Found');
