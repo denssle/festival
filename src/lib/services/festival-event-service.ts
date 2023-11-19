@@ -13,7 +13,10 @@ export async function getAllFestivals(): Promise<FrontendFestivalEvent[]> {
 		if (key) {
 			const festivalString: string | null = await redis.get(key);
 			if (festivalString) {
-				result.push(await parseToFrontend(parseStringToFestival(festivalString)));
+				const loaded: FrontendFestivalEvent | null = await parseToFrontend(parseStringToFestival(festivalString));
+				if (loaded) {
+					result.push(loaded);
+				}
 			}
 		}
 	}
@@ -142,29 +145,32 @@ function parseStringToFestival(festival: string): BackendFestivalEvent {
 	return parse;
 }
 
-async function parseToFrontend(festival: BackendFestivalEvent): Promise<FrontendFestivalEvent> {
+async function parseToFrontend(festival: BackendFestivalEvent): Promise<FrontendFestivalEvent | null> {
 	const createdBy: FrontendUser | undefined = await loadFrontEndUserById(festival.createdBy);
 	const updatedBy: FrontendUser | undefined = await loadFrontEndUserById(festival.updatedBy);
-	const filteredVisitors: FrontendUser[] = [];
-	if (festival.visitors) {
-		const visitors: (FrontendUser | undefined)[] = await Promise.all(
-			festival.visitors.map((value: string) => loadFrontEndUserById(value))
-		);
-		visitors.forEach((value) => {
-			if (value && value.id) {
-				filteredVisitors.push(value);
-			}
-		});
+	if (createdBy && updatedBy) {
+		const filteredVisitors: FrontendUser[] = [];
+		if (festival.visitors) {
+			const visitors: (FrontendUser | undefined)[] = await Promise.all(
+				festival.visitors.map((value: string) => loadFrontEndUserById(value))
+			);
+			visitors.forEach((value) => {
+				if (value && value.id) {
+					filteredVisitors.push(value);
+				}
+			});
+		}
+		return {
+			id: festival.id,
+			name: festival.name,
+			description: festival.description,
+			createdBy: createdBy,
+			createdAt: numberToDate(festival.createdAt),
+			updatedBy: updatedBy,
+			updatedAt: numberToDate(festival.updatedAt),
+			startDate: numberToDate(festival.startDate),
+			visitors: filteredVisitors
+		};
 	}
-	return {
-		id: festival.id,
-		name: festival.name,
-		description: festival.description,
-		createdBy: createdBy,
-		createdAt: numberToDate(festival.createdAt),
-		updatedBy: updatedBy,
-		updatedAt: numberToDate(festival.updatedAt),
-		startDate: numberToDate(festival.startDate),
-		visitors: filteredVisitors
-	};
+	return null;
 }

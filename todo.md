@@ -1,8 +1,9 @@
 ## TODO:
 
-- Ort des Events
 - Was man mitbringt
+- Styling Frontpage
+- Ort des Events
 - Liste an Events, zu denen man geht
+- Liste an Events, die man organisiert
 - Möglichkeit das Password zurückzusetzen wenn vergessen.
-- beim ändern des nicknames checken ob nicht schon vergeben
 - emails checken ob nicht schon vergeben

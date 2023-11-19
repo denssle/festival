@@ -10,11 +10,10 @@
 	<section>
 		<p>Alle Events:</p>
 		{#each data.festivalEvents as loadedEvent}
-			<ul>
-				<li>
-					<a href="/festival/{loadedEvent.id}">{loadedEvent.name}</a>
-				</li>
-			</ul>
+			<article>
+				<a href="/festival/{loadedEvent.id}">{loadedEvent.name}</a>
+				<p>Von {loadedEvent.createdBy.nickname} </p>
+			</article>
 		{/each}
 	</section>
 </article>

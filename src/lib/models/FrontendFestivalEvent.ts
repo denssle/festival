@@ -4,9 +4,9 @@ export interface FrontendFestivalEvent {
 	id: string;
 	name: string;
 	description: string;
-	createdBy: FrontendUser | undefined;
+	createdBy: FrontendUser;
 	createdAt: Date | null;
-	updatedBy: FrontendUser | undefined;
+	updatedBy: FrontendUser;
 	updatedAt: Date | null;
 	startDate: Date | null;
 	visitors: FrontendUser[];
