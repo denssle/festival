@@ -47,7 +47,7 @@ export const actions: Actions = {
 			);
 			throw redirect(302, '/festival/' + festivalId);
 		} else {
-			return { success: false, authorized: true, message: 'Festival update failed' };
+			return { success: false, message: 'Festival update failed' };
 		}
 	}
 };

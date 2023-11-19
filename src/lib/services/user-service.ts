@@ -5,8 +5,8 @@ import type { FrontendUser } from '../models/FrontendUser';
 import type { UserFormData } from '$lib/models/UserFormData';
 import type { Cookies } from '@sveltejs/kit';
 
-export function register(nickname: string, password: string): Promise<string> | null {
-	if (!nickNameInvalid(nickname)) {
+export async function register(nickname: string, password: string): Promise<BackendUser | null> {
+	if (!(await nickNameInvalid(nickname))) {
 		const user: BackendUser = {
 			id: crypto.randomUUID(),
 			email: '',
@@ -15,7 +15,8 @@ export function register(nickname: string, password: string): Promise<string> | 
 			lastname: '',
 			password: saltPassword(password)
 		};
-		return saveUser(user);
+		await saveUser(user);
+		return user;
 	}
 	return null;
 }
@@ -55,9 +56,8 @@ export function extractUser(sessionToken: string | undefined): BackendUser | nul
 	return null;
 }
 
-export async function nickNameInvalid(email: string): Promise<boolean> {
-	// TODO Check if email is already existing
-	return !email || email.length === 0 || (await redis.exists(email)) > 0;
+export async function nickNameInvalid(nickname: string): Promise<boolean> {
+	return !nickname || nickname.length === 0 || (await redis.exists(nickname)) > 0;
 }
 
 export function saveUser(user: BackendUser): Promise<string> {
@@ -140,8 +140,10 @@ export async function updateUser(oldUser: BackendUser, formDataPromise: Promise<
 	const formData: UserFormData = await readFormDataFrontEndUser(formDataPromise);
 	if (formData.nickname) {
 		if (oldUser.nickname !== formData.nickname) {
-			redis.del(oldUser.nickname);
-			oldUser.nickname = formData.nickname;
+			if (!(await nickNameInvalid(formData.nickname))) {
+				redis.del(oldUser.nickname);
+				oldUser.nickname = formData.nickname;
+			}
 		}
 		oldUser.email = formData.email;
 		oldUser.forename = formData.forename;

@@ -20,6 +20,6 @@ export const actions: Actions = {
 		if (oldUser) {
 			createSessionCookie(cookies, await userService.updateUser(oldUser, request.formData()));
 		}
-		return { success: false, authorized: true, message: 'User update failed' };
+		return { success: false, message: 'User update failed' };
 	}
 };

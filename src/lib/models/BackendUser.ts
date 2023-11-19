@@ -1,8 +1,6 @@
-export interface BackendUser {
+import type { BasisUser } from '$lib/models/BasisUser';
+
+export interface BackendUser extends BasisUser{
 	id: string;
-	nickname: string;
-	forename: string;
-	lastname: string;
-	email: string;
 	password: string;
 }

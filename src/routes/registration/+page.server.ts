@@ -11,23 +11,23 @@ export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): P
 	if (valid) {
 		throw redirect(303, '/');
 	}
-	return {
-		success: true,
-		authorized: false
-	};
+	return { success: true };
 };
 
 export const actions: Actions = {
-	default: async ({ request }): Promise<StandardResponse> => {
+	default: async ({ cookies, request }): Promise<StandardResponse> => {
 		const formData: UserFormData = await userService.readFormDataFrontEndUser(request.formData());
 		if (formData.nickname && formData.password) {
 			if (await nickNameInvalid(formData.nickname)) {
-				return { success: false, authorized: false, message: 'Invalid Nickname' };
+				return { success: false, message: 'Invalid Nickname' };
 			} else {
-				register(formData.nickname, formData.password);
-				throw redirect(303, '/login');
+				const user = await register(formData.nickname, formData.password);
+				if (user) {
+					userService.createSessionCookie(cookies, user);
+					throw redirect(302, '/');
+				}
 			}
 		}
-		return { success: false, authorized: true, message: 'Password and / or Nickname missing' };
+		return { success: false, message: 'Password and / or Nickname missing' };
 	}
 };

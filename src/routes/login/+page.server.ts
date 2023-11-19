@@ -14,7 +14,6 @@ export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): P
 	}
 	return {
 		success: true,
-		authorized: false
 	};
 };
 
@@ -28,6 +27,6 @@ export const actions: Actions = {
 				throw redirect(302, '/');
 			}
 		}
-		return { success: false, authorized: false, message: 'Password and / or Email missing' };
+		return { success: false, message: 'Password and / or Nickname missing' };
 	}
 };
