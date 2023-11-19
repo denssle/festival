@@ -67,6 +67,7 @@ export function saveUser(user: BackendUser): Promise<string> {
 
 async function loadUserByNickname(nickname: string): Promise<BackendUser | null> {
 	const userId: string | null = await redis.get(nickname);
+	console.log('loadUserByNickname', userId);
 	if (userId) {
 		return loadUserById(userId);
 	}
@@ -97,8 +98,10 @@ function parseUserToString(user: BackendUser): string {
 function parseStringToUser(data: string): BackendUser | null {
 	try {
 		const maybeUser: BackendUser = JSON.parse(data);
-		if (maybeUser.password && maybeUser.email) {
+		if (maybeUser.password && maybeUser.nickname) {
 			return maybeUser;
+		} else {
+			console.error('User parsing failed!');
 		}
 	} catch (e) {
 		console.error('error parsing user', e);
