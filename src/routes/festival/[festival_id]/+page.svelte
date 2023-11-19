@@ -66,7 +66,7 @@
 	</section>
 
 	<section>
-		<p>Erstellt am {formateDate(data.festival.createdAt)} von {data.festival.createdBy?.email}</p>
+		<p>Erstellt am {formateDate(data.festival.createdAt)} von {data.festival.createdBy?.nickname}</p>
 	</section>
 
 	<section>
@@ -75,7 +75,7 @@
 			<ul>
 				{#each data.festival.visitors as visitor}
 					<li>
-						<p>{visitor.email}</p>
+						<p>{visitor.nickname}</p>
 					</li>
 				{/each}
 			</ul>
