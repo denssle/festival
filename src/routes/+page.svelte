@@ -12,7 +12,7 @@
 		{#each data.festivalEvents as loadedEvent}
 			<article>
 				<a href="/festival/{loadedEvent.id}">{loadedEvent.name}</a>
-				<p>Von {loadedEvent.createdBy.nickname} </p>
+				<p>Von {loadedEvent.createdBy.nickname}</p>
 			</article>
 		{/each}
 	</section>

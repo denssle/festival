@@ -21,7 +21,7 @@ export const actions: Actions = {
 				throw redirect(302, '/festival/' + newFestival?.id);
 			}
 		} else {
-			return { success: false};
+			return { success: false };
 		}
 	}
 };
