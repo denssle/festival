@@ -83,6 +83,7 @@ export async function updateFestival(
 		return redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
 	} else {
 		// TODO create new? throw error?
+		console.error('cration failed!!!');
 	}
 }
 
@@ -148,7 +149,7 @@ function parseStringToFestival(festival: string): BackendFestivalEvent {
 async function parseToFrontend(festival: BackendFestivalEvent): Promise<FrontendFestivalEvent | null> {
 	const createdBy: FrontendUser | undefined = await loadFrontEndUserById(festival.createdBy);
 	const updatedBy: FrontendUser | undefined = await loadFrontEndUserById(festival.updatedBy);
-	if (createdBy && updatedBy) {
+	if (createdBy) {
 		const filteredVisitors: FrontendUser[] = [];
 		if (festival.visitors) {
 			const visitors: (FrontendUser | undefined)[] = await Promise.all(
@@ -166,7 +167,7 @@ async function parseToFrontend(festival: BackendFestivalEvent): Promise<Frontend
 			description: festival.description,
 			createdBy: createdBy,
 			createdAt: numberToDate(festival.createdAt),
-			updatedBy: updatedBy,
+			updatedBy: updatedBy ?? null,
 			updatedAt: numberToDate(festival.updatedAt),
 			startDate: numberToDate(festival.startDate),
 			visitors: filteredVisitors

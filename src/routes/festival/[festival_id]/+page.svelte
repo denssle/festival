@@ -75,7 +75,7 @@
 			<ul>
 				{#each data.festival.visitors as visitor}
 					<li>
-						<p>{visitor.nickname}</p>
+						<a href="/user/{visitor.id}">{visitor.nickname}</a>
 					</li>
 				{/each}
 			</ul>

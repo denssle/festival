@@ -6,7 +6,7 @@ export interface FrontendFestivalEvent {
 	description: string;
 	createdBy: FrontendUser;
 	createdAt: Date | null;
-	updatedBy: FrontendUser;
+	updatedBy: FrontendUser | null;
 	updatedAt: Date | null;
 	startDate: Date | null;
 	visitors: FrontendUser[];

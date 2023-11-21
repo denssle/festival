@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { authorized } from '$lib/stores/authorized-store';
+	import type { CurrentUser } from '$lib/models/CurrentUser';
 
 	async function logout() {
 		await fetch('/logout', {
@@ -10,7 +11,7 @@
 		await goto('/login');
 	}
 
-	export let data;
+	export let data: { currentUser: CurrentUser };
 	authorized.set(data.currentUser?.isAuthenticated);
 </script>
 
@@ -20,8 +21,8 @@
 			<a href="/">Festivals</a>
 			<a href="/festival/new">Neu</a>
 			<a href="/settings">Einstellungen</a>
+			<a href="/user/{data.currentUser.id}">{data.currentUser.nickname}</a>
 			<a href="/about">About</a>
-			<!-- TODO: Add guestbook -->
 			<button on:click|trusted={logout}>Logout</button>
 		{/if}
 	</nav>

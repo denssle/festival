@@ -67,7 +67,6 @@ export function saveUser(user: BackendUser): Promise<string> {
 
 async function loadUserByNickname(nickname: string): Promise<BackendUser | null> {
 	const userId: string | null = await redis.get(nickname);
-	console.log('loadUserByNickname', userId);
 	if (userId) {
 		return loadUserById(userId);
 	}
@@ -84,7 +83,7 @@ async function loadUserById(userId: string): Promise<BackendUser | null> {
 
 export async function loadFrontEndUserById(id: string | null): Promise<FrontendUser | undefined> {
 	if (id) {
-		const byId = await loadUserById(id);
+		const byId: BackendUser | null = await loadUserById(id);
 		if (byId) {
 			return parseToFrontEnd(byId);
 		}
