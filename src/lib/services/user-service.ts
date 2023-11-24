@@ -5,6 +5,9 @@ import type { FrontendUser } from '../models/FrontendUser';
 import type { UserFormData } from '$lib/models/UserFormData';
 import type { Cookies } from '@sveltejs/kit';
 
+const USER: string = 'user:';
+const USER_IMG: string = 'user-img:';
+
 export async function register(nickname: string, password: string): Promise<BackendUser | null> {
 	if (!(await nickNameInvalid(nickname))) {
 		const user: BackendUser = {
@@ -62,7 +65,7 @@ export async function nickNameInvalid(nickname: string): Promise<boolean> {
 
 export function saveUser(user: BackendUser): Promise<string> {
 	redis.set(user.nickname, user.id); // damit man von dem Nickname auf den BackendUser schließen kann
-	return redis.set('user:' + user.id, parseUserToString(user));
+	return redis.set(USER + user.id, parseUserToString(user));
 }
 
 async function loadUserByNickname(nickname: string): Promise<BackendUser | null> {
@@ -74,7 +77,7 @@ async function loadUserByNickname(nickname: string): Promise<BackendUser | null>
 }
 
 async function loadUserById(userId: string): Promise<BackendUser | null> {
-	const value: string | null = await redis.get('user:' + userId);
+	const value: string | null = await redis.get(USER + userId);
 	if (value) {
 		return parseStringToUser(value);
 	}
@@ -97,7 +100,7 @@ function parseUserToString(user: BackendUser): string {
 function parseStringToUser(data: string): BackendUser | null {
 	try {
 		const maybeUser: BackendUser = JSON.parse(data);
-		if (maybeUser.password && maybeUser.nickname) {
+		if (maybeUser) {
 			return maybeUser;
 		} else {
 			console.error('User parsing failed!');
@@ -156,4 +159,13 @@ export async function updateUser(oldUser: BackendUser, formDataPromise: Promise<
 		await saveUser(oldUser);
 	}
 	return oldUser;
+}
+
+export async function saveUserImage(userId: string, image: string): Promise<string> {
+	await redis.set(USER_IMG + userId, image);
+	return image;
+}
+
+export async function getUserImage(userId: string): Promise<string | null> {
+	return redis.get(USER_IMG + userId);
 }
