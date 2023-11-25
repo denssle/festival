@@ -24,13 +24,7 @@ export const POST: RequestHandler = async ({
 	return new Response(null, { status: 500 });
 };
 
-export const GET: RequestHandler = async ({
-	cookies,
-	request
-}: {
-	cookies: Cookies;
-	request: Request;
-}): Promise<Response> => {
+export const GET: RequestHandler = async ({ cookies }: { cookies: Cookies }): Promise<Response> => {
 	const extractUser: BackendUser | null = userService.extractUser(cookies.get('session'));
 	if (extractUser) {
 		const imageData: string | null = await getUserImage(extractUser.id);
