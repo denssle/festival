@@ -1,5 +1,5 @@
 import { type Actions, error, redirect } from '@sveltejs/kit';
-import type { PageServerLoad } from '../../../../../.svelte-kit/types/src/routes/$types';
+import type { PageServerLoad } from '../../../../../.svelte-kit/types/src/routes/festival/edit/[festival_id]/$types';
 import { getFrontEndFestival, updateFestival } from '$lib/services/festival-event-service';
 import { extractUser } from '$lib/services/user-service';
 import { createDateFromStrings } from '$lib/utils/dateUtils';
