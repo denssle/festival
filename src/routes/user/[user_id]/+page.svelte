@@ -8,7 +8,7 @@
 <article>
 	<h2>Benutzer</h2>
 	<section>
-		<AvatarImage />
+		<AvatarImage userId={data.user.id} />
 	</section>
 	<section>
 		<strong>{data.user.nickname}</strong>

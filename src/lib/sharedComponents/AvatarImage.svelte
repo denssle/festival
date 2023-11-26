@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import Spinner from '$lib/sharedComponents/Spinner.svelte';
 
+	export let userId: string = '';
 	let avatar: string;
 
 	async function load() {
-		await fetch('/user-image', {
+		await fetch('/user-image/' + userId, {
 			method: 'GET'
 		}).then((response) => {
 			response.blob().then((data) => {
@@ -23,7 +25,7 @@
 {#if avatar}
 	<img src={avatar} alt="alt avatar" class="avatar" />
 {:else}
-	<!-- <img src="../../../static/hat.png" alt="avatar" class="avatar" /> -->
+	<Spinner />
 {/if}
 
 <style>
