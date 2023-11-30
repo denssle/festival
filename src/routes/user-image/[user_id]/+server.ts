@@ -1,11 +1,10 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import { getUserImage } from '$lib/services/user-service';
-import type { RouteParams } from '../../user-image/[user_id]/$types';
 
-export const GET: RequestHandler = async ({ params }: { params: RouteParams }): Promise<Response> => {
-	const user_id: string = params.user_id;
-	if (user_id) {
-		const imageData: string | null = await getUserImage(user_id);
+// TODO Add Types to the parameters
+export const GET: RequestHandler = async ({ params }): Promise<Response> => {
+	if (params && params.user_id) {
+		const imageData: string | null = await getUserImage(params.user_id);
 		if (imageData) {
 			return new Response(imageData, { status: 200 });
 		}
