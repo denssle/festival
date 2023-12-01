@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { FrontendUser } from '$lib/models/FrontendUser';
-	import AvatarUpload from './AvatarUpload.svelte';
 
 	export let data: FrontendUser;
 </script>
@@ -39,9 +38,5 @@
 				</p>
 			</section>
 		</form>
-	</section>
-	<section>
-		<h4>Lade ein Profilbild hoch</h4>
-		<AvatarUpload />
 	</section>
 </article>

@@ -3,23 +3,36 @@
 	import Spinner from '$lib/sharedComponents/Spinner.svelte';
 
 	export let userId: string = '';
+	let prevUserId: string;
 	let avatar: string;
 
 	async function load() {
 		await fetch('/user-image/' + userId, {
 			method: 'GET'
-		}).then((response) => {
-			response.blob().then((data) => {
-				data.text().then((text) => {
-					avatar = text;
+		})
+			.then((response) => {
+				response.blob().then((data) => {
+					data.text().then((text: string) => {
+						avatar = text;
+					});
 				});
+			})
+			.catch((reason) => {
+				console.error(reason);
+				// TODO use some kind of placeholder
 			});
-		});
 	}
 
 	onMount(() => {
 		load();
 	});
+
+	$: {
+		if (prevUserId !== userId) {
+			prevUserId = userId;
+			load();
+		}
+	}
 </script>
 
 {#if avatar}
