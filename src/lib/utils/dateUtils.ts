@@ -3,7 +3,7 @@
  * @param date yyyy-MM-dd
  * @param time hh:mm
  */
-export function createDateFromStrings(date: string, time: string): number | null {
+export function createDateTimeFromStrings(date: string, time: string): number | null {
 	if (date) {
 		const dates: number[] = date.split('-').map((value) => Number(value));
 		if (time) {
@@ -27,7 +27,7 @@ export function createDateFromStrings(date: string, time: string): number | null
 }
 
 function getNumber(list: number[], index: number): number {
-	const number = list.at(index);
+	const number: number | undefined = list.at(index);
 	if (number) {
 		return number;
 	}
@@ -38,14 +38,14 @@ function getNumber(list: number[], index: number): number {
  * Konvertiert eine Nummer in ein Date Objekt
  * @param nbr Zeit in MS
  */
-export function numberToDate(nbr: number | undefined | null): Date | null {
+export function dateTimeToDate(nbr: number | undefined | null): Date | null {
 	if (nbr) {
 		return new Date(nbr);
 	}
 	return null;
 }
 
-export function dateToDateString(date: Date | null): string {
+export function dateToString(date: Date | null): string {
 	if (date) {
 		const offset = date.getTimezoneOffset();
 		date = new Date(date.getTime() - offset * 60 * 1000);

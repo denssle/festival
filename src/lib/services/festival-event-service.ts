@@ -4,7 +4,7 @@ import type { BackendFestivalEvent } from '../models/BackendFestivalEvent';
 import type { BackendUser } from '../models/BackendUser';
 import type { FrontendUser } from '../models/FrontendUser';
 import { loadFrontEndUserById } from './user-service';
-import { numberToDate } from '../utils/dateUtils';
+import { dateTimeToDate } from '../utils/dateUtils';
 
 export async function getAllFestivals(): Promise<FrontendFestivalEvent[]> {
 	const keys: string[] = await redis.keys('festival:*');
@@ -166,10 +166,10 @@ async function parseToFrontend(festival: BackendFestivalEvent): Promise<Frontend
 			name: festival.name,
 			description: festival.description,
 			createdBy: createdBy,
-			createdAt: numberToDate(festival.createdAt),
+			createdAt: dateTimeToDate(festival.createdAt),
 			updatedBy: updatedBy ?? null,
-			updatedAt: numberToDate(festival.updatedAt),
-			startDate: numberToDate(festival.startDate),
+			updatedAt: dateTimeToDate(festival.updatedAt),
+			startDate: dateTimeToDate(festival.startDate),
 			visitors: filteredVisitors
 		};
 	}
