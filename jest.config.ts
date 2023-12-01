@@ -5,7 +5,4 @@ const config: Config = {
 	testEnvironment: 'node',
 	verbose: true
 };
-
-export default config;
-
 module.exports = config;
