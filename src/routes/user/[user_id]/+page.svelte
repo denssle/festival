@@ -10,7 +10,7 @@
 	<h2>Benutzer</h2>
 	<section style="display: flex">
 		<AvatarImage userId={data.user.id} />
-		<AvatarUpload isOwnProfil={data.isOwnProfil}/>
+		<AvatarUpload isOwnProfil={data.isOwnProfil} />
 	</section>
 	<section>
 		<strong>{data.user.nickname}</strong>

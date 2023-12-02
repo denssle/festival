@@ -2,6 +2,14 @@
 
 ## Installation
 
-- add .env file for DB Connection
-- run npm install
-- run the "dev" script
+- add `.env` File for Connection to redis DB. Should look like this:
+
+```
+REDIS_TOKEN="rediss://*****"
+UPSTASH_REDIS_REST_URL="https://*****"
+UPSTASH_REDIS_REST_TOKEN="*****="
+```
+
+- run `npm install`
+- run `dev`
+- Application starts on http://localhost:5173
