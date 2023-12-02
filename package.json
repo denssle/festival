@@ -16,7 +16,8 @@
 		"npm ci": "npm ci",
 		"npm update": "npm update",
 		"npm audit fix": "npm audit --fix",
-		"test": "jest"
+		"test": "jest",
+		"cool": "npm i && npm update && npm ci && prettier --plugin-search-dir . --write ."
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.2",
