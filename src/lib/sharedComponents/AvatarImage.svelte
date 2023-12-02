@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { afterUpdate, onMount } from 'svelte';
 	import Spinner from '$lib/sharedComponents/Spinner.svelte';
+	import { FALLBACK_PICTURE } from '$lib/constants';
 
 	export let userId: string = '';
 	let prevUserId: string;
@@ -11,28 +12,38 @@
 			method: 'GET'
 		})
 			.then((response) => {
-				response.blob().then((data) => {
-					data.text().then((text: string) => {
-						avatar = text;
-					});
-				});
+				if (response.ok) {
+					response
+						.blob()
+						.then((data) => {
+							data.text().then((text: string) => {
+								avatar = text;
+							});
+						})
+						.catch((reason) => {
+							console.log('read blob failed', reason);
+						});
+				} else {
+					avatar = FALLBACK_PICTURE;
+				}
 			})
 			.catch((reason) => {
-				console.error(reason);
-				// TODO use some kind of placeholder
+				console.error('loading picture error', reason);
+				avatar = FALLBACK_PICTURE;
 			});
 	}
 
 	onMount(() => {
+		prevUserId = userId;
 		load();
 	});
 
-	$: {
+	afterUpdate(() => {
 		if (prevUserId !== userId) {
 			prevUserId = userId;
 			load();
 		}
-	}
+	});
 </script>
 
 {#if avatar}
