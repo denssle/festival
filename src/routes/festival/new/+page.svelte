@@ -6,13 +6,24 @@
 	<section>
 		<form method="POST">
 			<p>
-				<input name="name" autocomplete="off" required placeholder="Name der Veranstaltung" />
+				<input name="name" required placeholder="Name der Veranstaltung" />
 				<textarea name="description" placeholder="Kurze Beschreibung" />
 			</p>
 
 			<p>
 				<input name="startDate" type="date" placeholder="date" />
 				<input name="startTime" type="time" placeholder="time" />
+			</p>
+
+			<p>
+				<label>
+					<input type="checkbox" name="bringYourOwnFood" />
+					Gäste sollen etwas zu Essen mitbringen.
+				</label>
+				<label>
+					<input type="checkbox" name="bringYourOwnBottle" />
+					Gäste sollen etwas zu trinken mitbringen.
+				</label>
 			</p>
 
 			<button type="submit">Speichern</button>

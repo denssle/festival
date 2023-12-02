@@ -7,3 +7,4 @@
 - Liste an Events, die man organisiert
 - Möglichkeit das Password zurückzusetzen wenn vergessen.
 - emails checken ob nicht schon vergeben
+- Eigens geschriebene Response durch die richtige ersetzen.

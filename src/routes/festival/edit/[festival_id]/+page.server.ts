@@ -34,16 +34,18 @@ export const load: PageServerLoad = async ({
 export const actions: Actions = {
 	default: async ({ cookies, request }): Promise<StandardResponse> => {
 		const festivalId: string | undefined = request.url.split('/').pop();
-		const values = await request.formData();
-		const name = values.get('name');
-		const description = values.get('description');
+		const values: FormData = await request.formData();
+		const name: FormDataEntryValue | null = values.get('name');
+		const description: FormDataEntryValue | null = values.get('description');
 		if (festivalId && name) {
-			updateFestival(
+			await updateFestival(
 				extractUser(cookies.get('session')),
 				festivalId,
 				String(name),
 				String(description),
-				createDateTimeFromStrings(String(values.get('startDate')), String(values.get('startTime')))
+				createDateTimeFromStrings(String(values.get('startDate')), String(values.get('startTime'))),
+				Boolean(values.get('bringYourOwnBottle')),
+				Boolean(values.get('bringYourOwnFood'))
 			);
 			throw redirect(302, '/festival/' + festivalId);
 		} else {

@@ -43,7 +43,9 @@ export async function create(
 	user: BackendUser | null,
 	name: string,
 	description: string,
-	startDate: number | null
+	startDate: number | null,
+	bringYourOwnBottle: boolean,
+	bringYourOwnFood: boolean
 ): Promise<FrontendFestivalEvent | null> {
 	if (user) {
 		const newFestival: BackendFestivalEvent = {
@@ -55,7 +57,9 @@ export async function create(
 			updatedBy: null,
 			updatedAt: null,
 			startDate: startDate,
-			visitors: []
+			visitors: [],
+			bringYourOwnBottle: bringYourOwnBottle,
+			bringYourOwnFood: bringYourOwnFood
 		};
 		console.log('festival service: create: date: ', startDate);
 		redis.set(`festival:${newFestival.id}`, parseFestivalToString(newFestival));
@@ -71,8 +75,10 @@ export async function updateFestival(
 	festivalId: string,
 	name: string,
 	description: string,
-	startDate: number | null
-) {
+	startDate: number | null,
+	bringYourOwnBottle: boolean,
+	bringYourOwnFood: boolean
+): Promise<'OK' | undefined> {
 	const festival: BackendFestivalEvent | null = await getFestival(festivalId);
 	if (festival && user) {
 		festival.name = name;
@@ -80,6 +86,8 @@ export async function updateFestival(
 		festival.updatedAt = Date.now();
 		festival.updatedBy = user.id;
 		festival.startDate = startDate ? startDate : null;
+		festival.bringYourOwnBottle = bringYourOwnBottle;
+		festival.bringYourOwnFood = bringYourOwnFood;
 		return redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
 	} else {
 		// TODO create new? throw error?
@@ -170,7 +178,9 @@ async function parseToFrontend(festival: BackendFestivalEvent): Promise<Frontend
 			updatedBy: updatedBy ?? null,
 			updatedAt: dateTimeToDate(festival.updatedAt),
 			startDate: dateTimeToDate(festival.startDate),
-			visitors: filteredVisitors
+			visitors: filteredVisitors,
+			bringYourOwnFood: festival.bringYourOwnFood,
+			bringYourOwnBottle: festival.bringYourOwnBottle
 		};
 	}
 	return null;

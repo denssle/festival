@@ -7,7 +7,7 @@ import type { StandardResponse } from '$lib/models/StandardResponse';
 
 export const actions: Actions = {
 	default: async ({ cookies, request }): Promise<StandardResponse | undefined> => {
-		const values = await request.formData();
+		const values: FormData = await request.formData();
 		const name: FormDataEntryValue | null = values.get('name');
 		if (name) {
 			const description: FormDataEntryValue | null = values.get('description');
@@ -15,7 +15,9 @@ export const actions: Actions = {
 				extractUser(cookies.get('session')),
 				String(name),
 				String(description),
-				createDateTimeFromStrings(String(values.get('startDate')), String(values.get('startTime')))
+				createDateTimeFromStrings(String(values.get('startDate')), String(values.get('startTime'))),
+				Boolean(values.get('bringYourOwnBottle')),
+				Boolean(values.get('bringYourOwnFood'))
 			);
 			if (newFestival && newFestival.id) {
 				throw redirect(302, '/festival/' + newFestival?.id);

@@ -63,6 +63,14 @@
 		<h4>{data.festival.name}</h4>
 		<sub>Starting: {formateDateTime(data.festival.startDate)}</sub>
 		<p>{data.festival.description}</p>
+		<label>
+			<input type="checkbox" bind:checked={data.festival.bringYourOwnFood} name="bringYourOwnFood" disabled />
+			Gäste sollen etwas zu Essen mitbringen.
+		</label>
+		<label>
+			<input type="checkbox" bind:checked={data.festival.bringYourOwnBottle} name="bringYourOwnBottle" disabled />
+			Gäste sollen etwas zu trinken mitbringen.
+		</label>
 	</section>
 
 	<section>

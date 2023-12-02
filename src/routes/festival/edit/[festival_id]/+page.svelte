@@ -16,6 +16,17 @@
 		<input name="startTime" type="time" placeholder="time" value={dateToTimeString(data.startDate)} />
 	</p>
 
+	<p>
+		<label>
+			<input type="checkbox" bind:checked={data.bringYourOwnFood} name="bringYourOwnFood" />
+			Gäste sollen etwas zu Essen mitbringen.
+		</label>
+		<label>
+			<input type="checkbox" bind:checked={data.bringYourOwnBottle} name="bringYourOwnBottle" />
+			Gäste sollen etwas zu trinken mitbringen.
+		</label>
+	</p>
+
 	<button type="submit">Speichern</button>
 	<a class="button" href={'/festival/' + data.id}>Zurück</a>
 </form>
