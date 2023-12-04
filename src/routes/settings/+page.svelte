@@ -8,7 +8,7 @@
 	<h2>Einstellungen</h2>
 	<section>
 		<h4>Persönliche Einstellungen</h4>
-		<form method="POST">
+		<form method="POST" autocomplete='on'>
 			<section>
 				<p>
 					<label for="nickname">Deine Nickname: </label>
@@ -17,15 +17,15 @@
 
 				<p>
 					<label for="forename">Dein Vorname: </label>
-					<input name="forename" id="forename" value={data?.forename ?? ''} type="text" placeholder="Vorname" />
+					<input name="forename" id="forename" value={data?.forename ?? ''} type="text" placeholder="Vorname" autocomplete='given-name'/>
 
 					<label for="lastname">Dein Nachname: </label>
-					<input name="lastname" id="lastname" value={data?.lastname ?? ''} type="text" placeholder="Nachname" />
+					<input name="lastname" id="lastname" value={data?.lastname ?? ''} type="text" placeholder="Nachname" autocomplete='family-name'/>
 				</p>
 
 				<p>
 					<label for="email">Deine Email: </label>
-					<input name="email" id="email" value={data?.email ?? ''} type="email" placeholder="Email" />
+					<input name="email" id="email" value={data?.email ?? ''} type="email" placeholder="Email" autocomplete='email'/>
 				</p>
 
 				<p>
