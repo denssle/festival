@@ -6,5 +6,4 @@ export interface BackendFestivalEvent extends BaseFestivalEvent {
 	updatedBy: string | null;
 	updatedAt: number | null;
 	startDate: number | null;
-	visitors: string[];
 }
