@@ -130,7 +130,7 @@ export async function leaveFestival(user: BackendUser | null, festivalId: string
 	if (user && festivalId) {
 		const festival: BackendFestivalEvent | null = await getFestival(festivalId);
 		if (festival) {
-			const find: GuestInformation | undefined = festival.guestInformation.find(value => value.userId === user.id);
+			const find: GuestInformation | undefined = festival.guestInformation.find((value) => value.userId === user.id);
 			if (find) {
 				festival.guestInformation.splice(festival.guestInformation.indexOf(find), 1);
 				redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
@@ -140,7 +140,7 @@ export async function leaveFestival(user: BackendUser | null, festivalId: string
 }
 
 function isVisitor(festival: BackendFestivalEvent, userId: string): boolean {
-	return Boolean(festival.guestInformation.find(value => value.userId === userId));
+	return Boolean(festival.guestInformation.find((value) => value.userId === userId));
 }
 
 export function isVisitorOfFestival(festival: FrontendFestivalEvent, user: BackendUser) {
@@ -169,7 +169,7 @@ async function getVisitors(festival: BackendFestivalEvent): Promise<FrontendUser
 		const visitors: (FrontendUser | undefined)[] = await Promise.all(
 			festival.guestInformation
 				.map((value: GuestInformation) => loadFrontEndUserById(value.userId))
-				.filter(value => Boolean(value))
+				.filter((value) => Boolean(value))
 		);
 		visitors.forEach((value) => {
 			if (value && value.id) {
