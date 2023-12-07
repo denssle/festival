@@ -3,6 +3,7 @@
 	import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
 	import { formateDate, formateDateTime } from '$lib/utils/dateUtils';
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
+	import JoinEventDialog from './JoinEventDialog.svelte';
 
 	export let data: { festival: FrontendFestivalEvent; yourFestival: boolean; visitor: boolean };
 
@@ -32,11 +33,14 @@
 			infoDialogText = 'Du bist bereits dabei!';
 			showInfoDialog = true;
 		} else {
+			/*
 			fetch('/festival/' + data.festival.id + '/join', {
 				method: 'POST'
 			}).then(() => {
 				invalidateAll();
 			});
+			 */
+			showJoinDialog = true;
 		}
 	}
 
@@ -54,9 +58,11 @@
 	}
 	let showInfoDialog = false;
 	let infoDialogText = '';
+	let showJoinDialog = false;
 </script>
 
-<InfoDialog bind:showInfoDialog bind:infoDialogText></InfoDialog>
+<InfoDialog bind:showInfoDialog bind:infoDialogText />
+<JoinEventDialog bind:showJoinDialog />
 
 <article>
 	<section>
