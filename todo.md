@@ -9,3 +9,4 @@
 - emails checken ob nicht schon vergeben
 - Eigens geschriebene Response durch die richtige ersetzen.
 - Wetten anbieten???
+- HUGO AI?
