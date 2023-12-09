@@ -7,6 +7,7 @@ import { loadFrontEndUserById } from './user-service';
 import { dateTimeToDate } from '../utils/dateUtils';
 import type { GuestInformation } from '$lib/models/GuestInformation';
 import type { JoinEventData } from '$lib/models/JoinEventData';
+import type { FrontendGuestInformation } from '$lib/models/FrontendGuestInformation';
 
 export async function getAllFestivals(): Promise<FrontendFestivalEvent[]> {
 	const keys: string[] = await redis.keys('festival:*');
@@ -151,7 +152,7 @@ function isVisitor(festival: BackendFestivalEvent, userId: string): boolean {
 }
 
 export function isVisitorOfFestival(festival: FrontendFestivalEvent, user: BackendUser) {
-	const find = festival.visitors.find((value) => value.id === user.id);
+	const find: GuestInformation | undefined = festival.guestInformation.find((value) => value.userId === user.id);
 	return Boolean(find);
 }
 
@@ -170,21 +171,17 @@ function parseStringToFestival(festival: string): BackendFestivalEvent {
 	return parse;
 }
 
-async function getVisitors(festival: BackendFestivalEvent): Promise<FrontendUser[]> {
-	const filteredVisitors: FrontendUser[] = [];
-	if (festival.guestInformation) {
-		const visitors: (FrontendUser | undefined)[] = await Promise.all(
-			festival.guestInformation
-				.map((value: GuestInformation) => loadFrontEndUserById(value.userId))
-				.filter((value) => Boolean(value))
-		);
-		visitors.forEach((value) => {
-			if (value && value.id) {
-				filteredVisitors.push(value);
-			}
-		});
+async function mapGuestInformationToFrontendGuestInformation(
+	guestInformation: GuestInformation[]
+): Promise<FrontendGuestInformation[]> {
+	const result: FrontendGuestInformation[] = [];
+	for (const information of guestInformation) {
+		const userById = await loadFrontEndUserById(information.userId);
+		if (userById) {
+			result.push({ user: userById, ...information });
+		}
 	}
-	return filteredVisitors;
+	return result;
 }
 
 async function parseToFrontend(festival: BackendFestivalEvent): Promise<FrontendFestivalEvent | null> {
@@ -200,10 +197,10 @@ async function parseToFrontend(festival: BackendFestivalEvent): Promise<Frontend
 			updatedBy: updatedBy ?? null,
 			updatedAt: dateTimeToDate(festival.updatedAt),
 			startDate: dateTimeToDate(festival.startDate),
-			visitors: await getVisitors(festival),
 			bringYourOwnFood: festival.bringYourOwnFood,
 			bringYourOwnBottle: festival.bringYourOwnBottle,
-			guestInformation: festival.guestInformation
+			guestInformation: festival.guestInformation,
+			frontendGuestInformation: await mapGuestInformationToFrontendGuestInformation(festival.guestInformation)
 		};
 	}
 	return null;
