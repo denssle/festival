@@ -1,6 +1,7 @@
 <script lang="ts">
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
 	import { error } from '@sveltejs/kit';
+	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
 
 	export let isOwnProfil: boolean;
 	let fileInput: HTMLElement;
@@ -10,8 +11,8 @@
 		if (isOwnProfil) {
 			fileInput.click();
 		} else {
-			infoDialogText = 'Leider kannst du nur dein eigenes Profil ändern. ';
-			showInfoDialog = true;
+			infoDialogData.infoDialogText = 'Leider kannst du nur dein eigenes Profil ändern. ';
+			infoDialogData.showDialog = true;
 		}
 	}
 
@@ -36,19 +37,22 @@
 		})
 			.then((value: Response) => {
 				if (value.ok) {
-					infoDialogText = 'Bild erfolgreich hochgeladen und gespeichert. ';
-					showInfoDialog = true;
+					infoDialogData.infoDialogText = 'Bild erfolgreich hochgeladen und gespeichert. ';
+					infoDialogData.showDialog = true;
 				}
 			})
 			.catch((reason) => error(reason));
 	}
 
-	let infoDialogText = '';
-	let showInfoDialog = false;
+	let infoDialogData: InfoDialogData = {
+		showDialog: false,
+		infoDialogText: '',
+		dialog: undefined
+	};
 </script>
 
 <div>
-	<InfoDialog bind:showInfoDialog bind:infoDialogText></InfoDialog>
+	<InfoDialog bind:infoDialogData />
 	<input
 		style="display: none"
 		type="file"

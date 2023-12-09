@@ -4,6 +4,8 @@
 	import { formateDate, formateDateTime } from '$lib/utils/dateUtils';
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
 	import JoinEventDialog from './JoinEventDialog.svelte';
+	import type { JoinEventDialogData } from '$lib/models/dialogData/JoinEventDialogData';
+	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
 
 	export let data: { festival: FrontendFestivalEvent; yourFestival: boolean; visitor: boolean };
 
@@ -11,8 +13,8 @@
 		if (data.yourFestival) {
 			goto('/festival/edit/' + data.festival.id);
 		} else {
-			infoDialogText = 'Das ist nicht dein Event. ';
-			showInfoDialog = true;
+			infoDialogData.infoDialogText = 'Das ist nicht dein Event. ';
+			infoDialogData.showDialog = true;
 		}
 	}
 
@@ -23,15 +25,15 @@
 			});
 			await goto('/');
 		} else {
-			infoDialogText = 'Das ist nicht dein Event. ';
-			showInfoDialog = true;
+			infoDialogData.infoDialogText = 'Das ist nicht dein Event. ';
+			infoDialogData.showDialog = true;
 		}
 	}
 
 	function joinFestival(): void {
 		if (data.visitor) {
-			infoDialogText = 'Du bist bereits dabei!';
-			showInfoDialog = true;
+			infoDialogData.infoDialogText = 'Du bist bereits dabei!';
+			infoDialogData.showDialog = true;
 		} else {
 			/*
 			fetch('/festival/' + data.festival.id + '/join', {
@@ -40,7 +42,7 @@
 				invalidateAll();
 			});
 			 */
-			showJoinDialog = true;
+			joinDialogData.showDialog = true;
 		}
 	}
 
@@ -52,17 +54,28 @@
 				invalidateAll();
 			});
 		} else {
-			infoDialogText = 'Wärst du angemeldet gewesen, wärst du es jetzt nicht mehr.';
-			showInfoDialog = true;
+			infoDialogData.infoDialogText = 'Wärst du angemeldet gewesen, wärst du es jetzt nicht mehr.';
+			infoDialogData.showDialog = true;
 		}
 	}
-	let showInfoDialog = false;
-	let infoDialogText = '';
-	let showJoinDialog = false;
+	let infoDialogData: InfoDialogData = {
+		showDialog: false,
+		infoDialogText: '',
+		dialog: undefined
+	};
+	let joinDialogData: JoinEventDialogData = {
+		showDialog: false,
+		bringYourOwnBottle: data.festival.bringYourOwnBottle,
+		bringYourOwnFood: data.festival.bringYourOwnFood,
+		food: '',
+		drink: '',
+		numberOfOtherGuests: 0,
+		dialog: undefined
+	};
 </script>
 
-<InfoDialog bind:showInfoDialog bind:infoDialogText />
-<JoinEventDialog bind:showJoinDialog />
+<InfoDialog bind:infoDialogData />
+<JoinEventDialog bind:joinDialogData />
 
 <article>
 	<section>
