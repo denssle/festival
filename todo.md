@@ -12,3 +12,5 @@
 - Summe aller Gäste anzeigen
 - Vielleicht und Nein als Optionen anbieten
 - Gruppen
+- Wetten anbieten
+- HUGO AI
