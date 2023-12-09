@@ -60,4 +60,18 @@
 		-moz-user-select: none; /*Firefox*/
 		caret-color: transparent;
 	}
+
+	:global(input::-webkit-outer-spin-button) {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+
+	:global(input::-webkit-inner-spin-button) {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+
+	:global(input[type='number']) {
+		-moz-appearance: textfield;
+	}
 </style>

@@ -1,5 +1,6 @@
 import type { FrontendUser } from './FrontendUser';
 import type { BaseFestivalEvent } from '$lib/models/BaseFestivalEvent';
+import type { FrontendGuestInformation } from '$lib/models/FrontendGuestInformation';
 
 export interface FrontendFestivalEvent extends BaseFestivalEvent {
 	createdBy: FrontendUser;
@@ -7,5 +8,5 @@ export interface FrontendFestivalEvent extends BaseFestivalEvent {
 	updatedBy: FrontendUser | null;
 	updatedAt: Date | null;
 	startDate: Date | null;
-	visitors: FrontendUser[];
+	frontendGuestInformation: FrontendGuestInformation[];
 }

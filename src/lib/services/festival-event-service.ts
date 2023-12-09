@@ -5,6 +5,9 @@ import type { BackendUser } from '../models/BackendUser';
 import type { FrontendUser } from '../models/FrontendUser';
 import { loadFrontEndUserById } from './user-service';
 import { dateTimeToDate } from '../utils/dateUtils';
+import type { GuestInformation } from '$lib/models/GuestInformation';
+import type { JoinEventData } from '$lib/models/JoinEventData';
+import type { FrontendGuestInformation } from '$lib/models/FrontendGuestInformation';
 
 export async function getAllFestivals(): Promise<FrontendFestivalEvent[]> {
 	const keys: string[] = await redis.keys('festival:*');
@@ -57,7 +60,7 @@ export async function create(
 			updatedBy: null,
 			updatedAt: null,
 			startDate: startDate,
-			visitors: [],
+			guestInformation: [],
 			bringYourOwnBottle: bringYourOwnBottle,
 			bringYourOwnFood: bringYourOwnFood
 		};
@@ -108,34 +111,48 @@ export async function deleteFestival(user: BackendUser | null, festivalId: strin
 	}
 }
 
-export async function joinFestival(user: BackendUser | null, festivalId: string) {
+export async function joinFestival(
+	user: BackendUser | null,
+	festivalId: string,
+	eventData: JoinEventData
+): Promise<void> {
 	if (user && festivalId) {
 		const festival: BackendFestivalEvent | null = await getFestival(festivalId);
 		if (festival) {
-			if (festival.visitors.includes(user.id)) {
+			if (isVisitor(festival, user.id)) {
 				console.log('Can´t add user because already existing!');
 			} else {
-				festival.visitors.push(user.id);
+				festival.guestInformation.push({
+					userId: user.id,
+					food: eventData.food,
+					drink: eventData.drink,
+					numberOfOtherGuests: eventData.numberOfOtherGuests
+				});
 				redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
 			}
 		}
 	}
 }
 
-export async function leaveFestival(user: BackendUser | null, festivalId: string) {
+export async function leaveFestival(user: BackendUser | null, festivalId: string): Promise<void> {
 	if (user && festivalId) {
 		const festival: BackendFestivalEvent | null = await getFestival(festivalId);
 		if (festival) {
-			if (festival.visitors.includes(user.id)) {
-				festival.visitors.splice(festival.visitors.indexOf(user.id), 1);
+			const find: GuestInformation | undefined = festival.guestInformation.find((value) => value.userId === user.id);
+			if (find) {
+				festival.guestInformation.splice(festival.guestInformation.indexOf(find), 1);
 				redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
 			}
 		}
 	}
+}
+
+function isVisitor(festival: BackendFestivalEvent, userId: string): boolean {
+	return Boolean(festival.guestInformation.find((value) => value.userId === userId));
 }
 
 export function isVisitorOfFestival(festival: FrontendFestivalEvent, user: BackendUser) {
-	const find = festival.visitors.find((value) => value.id === user.id);
+	const find: GuestInformation | undefined = festival.guestInformation.find((value) => value.userId === user.id);
 	return Boolean(find);
 }
 
@@ -148,27 +165,29 @@ function parseStringToFestival(festival: string): BackendFestivalEvent {
 	if (!parse.createdAt) {
 		parse.createdAt = Date.now();
 	}
-	if (!parse.visitors) {
-		parse.visitors = [];
+	if (!parse.guestInformation) {
+		parse.guestInformation = [];
 	}
 	return parse;
 }
 
+async function mapGuestInformationToFrontendGuestInformation(
+	guestInformation: GuestInformation[]
+): Promise<FrontendGuestInformation[]> {
+	const result: FrontendGuestInformation[] = [];
+	for (const information of guestInformation) {
+		const userById = await loadFrontEndUserById(information.userId);
+		if (userById) {
+			result.push({ user: userById, ...information });
+		}
+	}
+	return result;
+}
+
 async function parseToFrontend(festival: BackendFestivalEvent): Promise<FrontendFestivalEvent | null> {
 	const createdBy: FrontendUser | undefined = await loadFrontEndUserById(festival.createdBy);
-	const updatedBy: FrontendUser | undefined = await loadFrontEndUserById(festival.updatedBy);
 	if (createdBy) {
-		const filteredVisitors: FrontendUser[] = [];
-		if (festival.visitors) {
-			const visitors: (FrontendUser | undefined)[] = await Promise.all(
-				festival.visitors.map((value: string) => loadFrontEndUserById(value))
-			);
-			visitors.forEach((value) => {
-				if (value && value.id) {
-					filteredVisitors.push(value);
-				}
-			});
-		}
+		const updatedBy: FrontendUser | undefined = await loadFrontEndUserById(festival.updatedBy);
 		return {
 			id: festival.id,
 			name: festival.name,
@@ -178,9 +197,10 @@ async function parseToFrontend(festival: BackendFestivalEvent): Promise<Frontend
 			updatedBy: updatedBy ?? null,
 			updatedAt: dateTimeToDate(festival.updatedAt),
 			startDate: dateTimeToDate(festival.startDate),
-			visitors: filteredVisitors,
 			bringYourOwnFood: festival.bringYourOwnFood,
-			bringYourOwnBottle: festival.bringYourOwnBottle
+			bringYourOwnBottle: festival.bringYourOwnBottle,
+			guestInformation: festival.guestInformation,
+			frontendGuestInformation: await mapGuestInformationToFrontendGuestInformation(festival.guestInformation)
 		};
 	}
 	return null;

@@ -1,15 +1,11 @@
 <script lang="ts">
-	export let showInfoDialog: boolean;
-	export let infoDialogText: string;
+	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
+	export let infoDialogData: InfoDialogData;
 
-	let dialog: HTMLDialogElement;
-	$: if (dialog && showInfoDialog) dialog.showModal();
+	$: if (infoDialogData.dialog && infoDialogData.showDialog) infoDialogData.dialog.showModal();
 </script>
 
-<dialog bind:this={dialog} on:close={() => (showInfoDialog = false)}>
-	<p>{infoDialogText}</p>
-	<button on:click={() => dialog.close()}>Okay</button>
+<dialog bind:this={infoDialogData.dialog} on:close={() => (infoDialogData.showDialog = false)}>
+	<p>{infoDialogData.infoDialogText}</p>
+	<button on:click={() => infoDialogData.dialog?.close()}>Okay</button>
 </dialog>
-
-<style>
-</style>
