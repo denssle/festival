@@ -35,14 +35,18 @@
 			infoDialogData.infoDialogText = 'Du bist bereits dabei!';
 			infoDialogData.showDialog = true;
 		} else {
-			/*
-			fetch('/festival/' + data.festival.id + '/join', {
-				method: 'POST'
-			}).then(() => {
-				invalidateAll();
-			});
-			 */
 			joinDialogData.showDialog = true;
+			if (joinDialogData.dialog) {
+				joinDialogData.dialog.onclose = () => {
+					/*
+					fetch('/festival/' + data.festival.id + '/join', {
+						method: 'POST'
+					}).then(() => {
+						invalidateAll();
+					});
+					 */
+				};
+			}
 		}
 	}
 

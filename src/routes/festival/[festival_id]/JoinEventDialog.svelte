@@ -42,5 +42,5 @@
 		{/if}
 	</section>
 
-	<button on:click={() => joinDialogData.dialog.close()}> Beitreten </button>
+	<button on:click={() => joinDialogData.dialog?.close()}> Beitreten </button>
 </dialog>
