@@ -6,6 +6,7 @@ import type { FrontendUser } from '../models/FrontendUser';
 import { loadFrontEndUserById } from './user-service';
 import { dateTimeToDate } from '../utils/dateUtils';
 import type { GuestInformation } from '$lib/models/GuestInformation';
+import type { JoinEventData } from '$lib/models/JoinEventData';
 
 export async function getAllFestivals(): Promise<FrontendFestivalEvent[]> {
 	const keys: string[] = await redis.keys('festival:*');
@@ -109,7 +110,11 @@ export async function deleteFestival(user: BackendUser | null, festivalId: strin
 	}
 }
 
-export async function joinFestival(user: BackendUser | null, festivalId: string): Promise<void> {
+export async function joinFestival(
+	user: BackendUser | null,
+	festivalId: string,
+	eventData: JoinEventData
+): Promise<void> {
 	if (user && festivalId) {
 		const festival: BackendFestivalEvent | null = await getFestival(festivalId);
 		if (festival) {
@@ -118,7 +123,9 @@ export async function joinFestival(user: BackendUser | null, festivalId: string)
 			} else {
 				festival.guestInformation.push({
 					userId: user.id,
-					additionalPeople: 0
+					food: eventData.food,
+					drink: eventData.drink,
+					numberOfOtherGuests: eventData.numberOfOtherGuests
 				});
 				redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
 			}

@@ -6,6 +6,7 @@
 	import JoinEventDialog from './JoinEventDialog.svelte';
 	import type { JoinEventDialogData } from '$lib/models/dialogData/JoinEventDialogData';
 	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
+	import type { JoinEventData } from '$lib/models/JoinEventData';
 
 	export let data: { festival: FrontendFestivalEvent; yourFestival: boolean; visitor: boolean };
 
@@ -38,13 +39,17 @@
 			joinDialogData.showDialog = true;
 			if (joinDialogData.dialog) {
 				joinDialogData.dialog.onclose = () => {
-					/*
+					const eventData: JoinEventData = {
+						food: joinDialogData.food,
+						drink: joinDialogData.drink,
+						numberOfOtherGuests: joinDialogData.numberOfOtherGuests
+					};
 					fetch('/festival/' + data.festival.id + '/join', {
-						method: 'POST'
+						method: 'POST',
+						body: JSON.stringify(eventData)
 					}).then(() => {
 						invalidateAll();
 					});
-					 */
 				};
 			}
 		}
