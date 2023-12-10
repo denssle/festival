@@ -7,6 +7,8 @@
 	import type { JoinEventDialogData } from '$lib/models/dialogData/JoinEventDialogData';
 	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
 	import type { JoinEventData } from '$lib/models/JoinEventData';
+	import QuestionDialog from '$lib/sharedComponents/QuestionDialog.svelte';
+	import type { QuestionDialogData } from '$lib/models/dialogData/QuestionDialogData';
 
 	export let data: { festival: FrontendFestivalEvent; yourFestival: boolean; visitor: boolean };
 
@@ -21,10 +23,19 @@
 
 	async function deleteFestival(): Promise<void> {
 		if (data.yourFestival) {
-			await fetch('/festival/' + data.festival.id, {
-				method: 'DELETE'
-			});
-			await goto('/');
+			questionDialogData.questionText = 'Bist du dir sicher?';
+			questionDialogData.showDialog = true;
+			if (questionDialogData.dialog) {
+				questionDialogData.dialog.onclose = () => {
+					if (questionDialogData.answerYes) {
+						fetch('/festival/' + data.festival.id, {
+							method: 'DELETE'
+						}).then(() => {
+							goto('/');
+						});
+					}
+				};
+			}
 		} else {
 			infoDialogData.infoDialogText = 'Das ist nicht dein Event. ';
 			infoDialogData.showDialog = true;
@@ -81,10 +92,16 @@
 		numberOfOtherGuests: 0,
 		dialog: undefined
 	};
+	let questionDialogData: QuestionDialogData = {
+		showDialog: false,
+		dialog: undefined,
+		questionText: ''
+	};
 </script>
 
 <InfoDialog bind:infoDialogData />
 <JoinEventDialog bind:joinDialogData />
+<QuestionDialog bind:questionDialogData />
 
 <article>
 	<section>
