@@ -1,6 +1,5 @@
 ## TODO:
 
-- Styling Frontpage
 - Ort des Events
 - Liste an Events, zu denen man geht
 - Liste an Events, die man organisiert

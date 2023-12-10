@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
 	import { formateDateTime } from '$lib/utils/dateUtils';
+	import { getTotalNumberOfGuests } from '$lib/utils/festivalEventUtils';
 
 	export let data: { festivalEvents: FrontendFestivalEvent[] };
 </script>
@@ -15,9 +16,7 @@
 				<a href="/festival/{loadedEvent.id}">{loadedEvent.name}</a>
 				<p>
 					Von <a href="/user/{loadedEvent.createdBy.id}">{loadedEvent.createdBy.nickname}</a>
-					{#if loadedEvent.updatedAt}
-						<span>Letztes Update war {formateDateTime(loadedEvent.updatedAt)}</span>
-					{/if}
+					<span>Bisherige Gäste: {getTotalNumberOfGuests(loadedEvent)}</span>
 				</p>
 			</article>
 		{/each}

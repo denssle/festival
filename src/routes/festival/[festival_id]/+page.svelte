@@ -9,6 +9,7 @@
 	import type { JoinEventData } from '$lib/models/JoinEventData';
 	import QuestionDialog from '$lib/sharedComponents/QuestionDialog.svelte';
 	import type { QuestionDialogData } from '$lib/models/dialogData/QuestionDialogData';
+	import { getTotalNumberOfGuests } from '$lib/utils/festivalEventUtils';
 
 	export let data: { festival: FrontendFestivalEvent; yourFestival: boolean; visitor: boolean };
 
@@ -96,7 +97,7 @@
 		showDialog: false,
 		dialog: undefined,
 		questionText: '',
-		answerYes: false,
+		answerYes: false
 	};
 </script>
 
@@ -125,28 +126,40 @@
 		{#if data.festival.guestInformation.length}
 			<p>Bisher haben sich angemeldet:</p>
 			<table style="width: 100%">
-				<tr>
-					<th>Name</th>
-					<th>Essen</th>
-					<th>Trinken</th>
-					<th>Weitere Gäste</th>
-				</tr>
-				{#each data.festival.frontendGuestInformation as guest}
+				<thead>
 					<tr>
-						<td>
-							<a href="/user/{guest.userId}">{guest.user.nickname}</a>
-						</td>
-						<td>
-							{guest.food}
-						</td>
-						<td>
-							{guest.drink}
-						</td>
-						<td>
-							{guest.numberOfOtherGuests}
-						</td>
+						<th>Name</th>
+						<th>Essen</th>
+						<th>Trinken</th>
+						<th>Weitere Gäste</th>
 					</tr>
-				{/each}
+				</thead>
+				<tbody>
+					{#each data.festival.frontendGuestInformation as guest}
+						<tr>
+							<td>
+								<a href="/user/{guest.userId}">{guest.user.nickname}</a>
+							</td>
+							<td>
+								{guest.food}
+							</td>
+							<td>
+								{guest.drink}
+							</td>
+							<td>
+								{guest.numberOfOtherGuests}
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+				<tfoot>
+					<tr>
+						<td>Summe</td>
+						<td></td>
+						<td></td>
+						<td>{getTotalNumberOfGuests(data.festival)}</td>
+					</tr>
+				</tfoot>
 			</table>
 		{:else}
 			<p>Es hat sich noch niemand angemeldet.</p>
