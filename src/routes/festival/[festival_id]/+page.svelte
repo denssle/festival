@@ -106,7 +106,7 @@
 	<section>
 		{#if data.festival.guestInformation.length}
 			<p>Bisher haben sich angemeldet:</p>
-			<table style='width: 100%'>
+			<table style="width: 100%">
 				<tr>
 					<th>Name</th>
 					<th>Essen</th>
