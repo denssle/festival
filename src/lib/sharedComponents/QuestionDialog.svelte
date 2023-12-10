@@ -8,10 +8,15 @@
 		questionDialogData.answerYes = true;
 		questionDialogData.dialog?.close();
 	}
+
+	function onNo() {
+		questionDialogData.answerYes = false;
+		questionDialogData.dialog?.close();
+	}
 </script>
 
 <dialog bind:this={questionDialogData.dialog} on:close={() => (questionDialogData.showDialog = false)}>
 	<p>{questionDialogData.questionText}</p>
-	<button on:click={() => questionDialogData.dialog?.close()}>Nope</button>
+	<button on:click={() => onNo()}>Nope</button>
 	<button on:click={() => onYes()}>Ja</button>
 </dialog>

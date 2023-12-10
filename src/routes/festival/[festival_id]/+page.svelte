@@ -95,7 +95,8 @@
 	let questionDialogData: QuestionDialogData = {
 		showDialog: false,
 		dialog: undefined,
-		questionText: ''
+		questionText: '',
+		answerYes: false,
 	};
 </script>
 
