@@ -30,5 +30,5 @@ export const load: PageServerLoad = async ({
 			}
 		}
 	}
-	throw error(404, 'Not Found');
+	error(404, 'Not Found');
 };

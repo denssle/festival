@@ -24,11 +24,11 @@ export const load: PageServerLoad = async ({
 			if (user && user.id === festival.createdBy?.id) {
 				return festival;
 			} else {
-				throw redirect(303, '/');
+				redirect(303, '/');
 			}
 		}
 	}
-	throw error(404, 'Not Found');
+	error(404, 'Not Found');
 };
 
 export const actions: Actions = {
@@ -47,7 +47,7 @@ export const actions: Actions = {
 				Boolean(values.get('bringYourOwnBottle')),
 				Boolean(values.get('bringYourOwnFood'))
 			);
-			throw redirect(302, '/festival/' + festivalId);
+			redirect(302, '/festival/' + festivalId);
 		} else {
 			return { success: false, message: 'Festival update failed' };
 		}

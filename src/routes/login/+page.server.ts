@@ -11,7 +11,7 @@ export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): P
 	const valid: boolean = await validateSessionToken(cookies.get('session'));
 	console.log('LOGIN valid', valid);
 	if (valid) {
-		throw redirect(303, '/');
+		redirect(303, '/');
 	}
 	return {
 		success: true
@@ -26,7 +26,7 @@ export const actions: Actions = {
 			console.log(user, formData.nickname, formData.password);
 			if (user) {
 				userService.createSessionCookie(cookies, user);
-				throw redirect(302, '/');
+				redirect(302, '/');
 			}
 		}
 		return { success: false, message: 'Password and / or Nickname missing' };

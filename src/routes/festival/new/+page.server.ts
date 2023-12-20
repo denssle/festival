@@ -20,7 +20,7 @@ export const actions: Actions = {
 				Boolean(values.get('bringYourOwnFood'))
 			);
 			if (newFestival && newFestival.id) {
-				throw redirect(302, '/festival/' + newFestival?.id);
+				redirect(302, '/festival/' + newFestival?.id);
 			}
 		} else {
 			return { success: false };

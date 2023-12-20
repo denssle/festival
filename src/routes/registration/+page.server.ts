@@ -9,7 +9,7 @@ import * as userService from '$lib/services/user-service';
 export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): Promise<StandardResponse> => {
 	const valid: boolean = await validateSessionToken(cookies.get('session'));
 	if (valid) {
-		throw redirect(303, '/');
+		redirect(303, '/');
 	}
 	return { success: true };
 };
@@ -24,7 +24,7 @@ export const actions: Actions = {
 				const user = await register(formData.nickname, formData.password);
 				if (user) {
 					userService.createSessionCookie(cookies, user);
-					throw redirect(302, '/');
+					redirect(302, '/');
 				}
 			}
 		}
