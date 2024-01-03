@@ -34,28 +34,24 @@ test('test createDateFromStrings with date and time', () => {
 });
 
 test('test numberToDate', () => {
-	const date: Date | null = dateTimeToDate(1701730800000);
+	const date: Date | null = dateTimeToDate(1701777600000);
 	expect(date?.getFullYear()).toBe(2023);
 	expect(date?.getMonth()).toBe(11);
 	expect(date?.getDate()).toBe(5);
 });
 
 test('test numberToDate with null', () => {
-	const date: Date | null = dateTimeToDate(null);
-	expect(date).toBe(null);
+	expect(dateTimeToDate(null)).toBe(null);
 });
 
 test('test numberToDate with undefined', () => {
-	const date: Date | null = dateTimeToDate(undefined);
-	expect(date).toBe(null);
+	expect(dateTimeToDate(undefined)).toBe(null);
 });
 
 test('test dateToDateString', () => {
-	const date: string = dateToString(dateTimeToDate(1701730800000));
-	expect(date).toBe('2023-12-05');
+	expect(dateToString(dateTimeToDate(1701777600000))).toBe('2023-12-05');
 });
 
 test('test dateToDateString with null', () => {
-	const date: string = dateToString(null);
-	expect(date).toBe('');
+	expect(dateToString(null)).toBe('');
 });
