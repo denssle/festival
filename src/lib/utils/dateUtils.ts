@@ -9,22 +9,22 @@ export function createDateTimeFromStrings(date: string, time: string): number | 
 		if (time) {
 			const times: number[] = time.split(':').map((value) => Number(value));
 			if (datesValid(dates) && times.at(0)) {
-				return new Date(
+				return new Date(Date.UTC(
 					getNumber(dates, 0),
 					getNumber(dates, 1),
 					getNumber(dates, 2),
 					getNumber(times, 0),
 					getNumber(times, 1)
-				).getTime();
+				)).getTime();
 			}
 		} else {
 			if (datesValid(dates)) {
-				return new Date(
+				return new Date(Date.UTC(
 					getNumber(dates, 0),
 					getNumber(dates, 1),
 					getNumber(dates, 2),
 					12
-				).getTime();
+				)).getTime();
 			}
 		}
 	}

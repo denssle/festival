@@ -6,7 +6,7 @@ test('test createDateFromStrings empty', () => {
 });
 
 test('test createDateFromStrings with just a date', () => {
-	expect(createDateTimeFromStrings('2023-11-05', '')).toBe(1701774000000);
+	expect(createDateTimeFromStrings('2023-11-05', '')).toBe(1701777600000);
 });
 
 test('test createDateFromStrings with garbage as date', () => {
@@ -30,7 +30,7 @@ test('test createDateFromStrings with garbage and : as time', () => {
 });
 
 test('test createDateFromStrings with date and time', () => {
-	expect(createDateTimeFromStrings('2023-11-05', '16:00')).toBe(1701788400000);
+	expect(createDateTimeFromStrings('2023-11-05', '16:00')).toBe(1701792000000);
 });
 
 test('test numberToDate', () => {
