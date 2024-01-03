@@ -49,7 +49,7 @@ function getNumber(list: number[], index: number): number {
  */
 export function dateTimeToDate(nbr: number | undefined | null): Date | null {
 	if (nbr) {
-		return new Date(nbr);
+		return new Date(Date.UTC(nbr));
 	}
 	return null;
 }
@@ -57,7 +57,7 @@ export function dateTimeToDate(nbr: number | undefined | null): Date | null {
 export function dateToString(date: Date | null): string {
 	if (date) {
 		const offset = date.getTimezoneOffset();
-		date = new Date(date.getTime() - offset * 60 * 1000);
+		date = new Date(Date.UTC(date.getTime() - offset * 60 * 1000));
 		return date.toISOString().split('T')[0];
 	}
 	return '';
@@ -66,7 +66,7 @@ export function dateToString(date: Date | null): string {
 export function dateToTimeString(date: Date | null): string {
 	if (date) {
 		const offset = date.getTimezoneOffset();
-		date = new Date(date.getTime() - offset * 60 * 1000);
+		date = new Date(Date.UTC(date.getTime() - offset * 60 * 1000));
 		return date.toISOString().split('T')[1].replace(':00.000Z', '');
 	}
 	return '';
