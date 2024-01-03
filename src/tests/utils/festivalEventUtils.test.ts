@@ -5,7 +5,6 @@ import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
 import type { FrontendUser } from '$lib/models/FrontendUser';
 import type { FrontendGuestInformation } from '$lib/models/FrontendGuestInformation';
 
-
 function getTestUser(): FrontendUser {
 	return {
 		id: '',
@@ -40,24 +39,28 @@ test('0 visitors', () => {
 
 test('1 visitors', () => {
 	const festival: FrontendFestivalEvent = getTestFestival();
-	festival.frontendGuestInformation = [{
-		userId: '',
-		drink: '',
-		food: '',
-		numberOfOtherGuests: 0,
-		user: getTestUser()
-	}];
+	festival.frontendGuestInformation = [
+		{
+			userId: '',
+			drink: '',
+			food: '',
+			numberOfOtherGuests: 0,
+			user: getTestUser()
+		}
+	];
 	expect(getTotalNumberOfGuests(festival)).toBe(1);
 });
 
 test('3 visitors', () => {
 	const festival: FrontendFestivalEvent = getTestFestival();
-	festival.frontendGuestInformation = [{
-		userId: '',
-		drink: '',
-		food: '',
-		numberOfOtherGuests: 2,
-		user: getTestUser()
-	}];
+	festival.frontendGuestInformation = [
+		{
+			userId: '',
+			drink: '',
+			food: '',
+			numberOfOtherGuests: 2,
+			user: getTestUser()
+		}
+	];
 	expect(getTotalNumberOfGuests(festival)).toBe(3);
 });

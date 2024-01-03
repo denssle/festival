@@ -1,6 +1,6 @@
 name: run-tests-on-push
 
-on: [ push ]
+on: [push]
 jobs:
   run-jest-tests:
     runs-on: ubuntu-latest
