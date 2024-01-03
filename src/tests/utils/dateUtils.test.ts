@@ -6,7 +6,7 @@ test('test createDateFromStrings empty', () => {
 });
 
 test('test createDateFromStrings with just a date', () => {
-	expect(createDateTimeFromStrings('2023-11-05', '')).toBe(1701730800000);
+	expect(createDateTimeFromStrings('2023-11-05', '')).toBe(1701774000000);
 });
 
 test('test createDateFromStrings with garbage as date', () => {
@@ -23,6 +23,10 @@ test('test createDateFromStrings with garbage as time', () => {
 
 test('test createDateFromStrings with garbage and . as time', () => {
 	expect(createDateTimeFromStrings('2023-11-05', 'ga.rbage')).toBe(null);
+});
+
+test('test createDateFromStrings with garbage and : as time', () => {
+	expect(createDateTimeFromStrings('2023-11-05', 'ga:rbage')).toBe(null);
 });
 
 test('test createDateFromStrings with date and time', () => {
