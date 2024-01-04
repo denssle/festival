@@ -8,22 +8,28 @@ export function createDateTimeFromStrings(date: string, time: string): number | 
 		const dates: number[] = date.split('-').map((value) => Number(value));
 		if (time) {
 			const times: number[] = time.split(':').map((value) => Number(value));
-			if (dates.at(0) && dates.at(1) && dates.at(2) && times.at(0)) {
+			if (datesValid(dates) && times.at(0)) {
 				return new Date(
-					getNumber(dates, 0),
-					getNumber(dates, 1),
-					getNumber(dates, 2),
-					times.at(0),
-					times.at(1)
+					Date.UTC(
+						getNumber(dates, 0),
+						getNumber(dates, 1),
+						getNumber(dates, 2),
+						getNumber(times, 0),
+						getNumber(times, 1)
+					)
 				).getTime();
 			}
 		} else {
-			if (dates.at(0) && dates.at(1) && dates.at(2)) {
-				return new Date(getNumber(dates, 0), getNumber(dates, 1), getNumber(dates, 2)).getTime();
+			if (datesValid(dates)) {
+				return new Date(Date.UTC(getNumber(dates, 0), getNumber(dates, 1), getNumber(dates, 2), 12)).getTime();
 			}
 		}
 	}
 	return null;
+}
+
+function datesValid(dates: number[]): boolean {
+	return Boolean(dates.at(0) && dates.at(1) && dates.at(2));
 }
 
 function getNumber(list: number[], index: number): number {
@@ -57,7 +63,7 @@ export function dateToString(date: Date | null): string {
 export function dateToTimeString(date: Date | null): string {
 	if (date) {
 		const offset = date.getTimezoneOffset();
-		date = new Date(date.getTime() - offset * 60 * 1000);
+		date = new Date(Date.UTC(date.getTime() - offset * 60 * 1000));
 		return date.toISOString().split('T')[1].replace(':00.000Z', '');
 	}
 	return '';

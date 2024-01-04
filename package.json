@@ -1,6 +1,6 @@
 {
 	"name": "festival",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",
@@ -17,7 +17,7 @@
 		"npm update": "npm update",
 		"npm audit fix": "npm audit --fix",
 		"test": "jest",
-		"cool": "npm i && npm update && npm ci && prettier --plugin-search-dir . --write ."
+		"start-server": "npm install && vite dev"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.2",
