@@ -6,7 +6,7 @@
 - Möglichkeit das Password zurückzusetzen wenn vergessen.
 - emails checken ob nicht schon vergeben
 - Eigens geschriebene Response durch die richtige ersetzen.
-- Erstellungsdatum von usern festhalen
+- Erstellungsdatum von usern festhalten
 - GuestInformationen bearbeiten können. Das man Essen und Trinken anpassen kann.
 - Summe aller Gäste anzeigen
 - Vielleicht und Nein als Optionen anbieten
