@@ -17,7 +17,7 @@ jobs:
       - name: rsync deployments
         uses: burnett01/rsync-deployments@6.0.0
         with:
-          switches: -avzr --delete
+          switches: -avzr --delete --exclude=".env"
           path: /
           remote_path: /home/${{ secrets.UBERSPACE_USER }}/html/
           remote_host: ${{ secrets.UBERSPACE_HOST }}
