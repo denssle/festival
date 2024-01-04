@@ -17,7 +17,7 @@
 		"npm update": "npm update",
 		"npm audit fix": "npm audit --fix",
 		"test": "jest",
-		"start server": "npm install && vite dev"
+		"start-server": "npm install && vite dev"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.2",
