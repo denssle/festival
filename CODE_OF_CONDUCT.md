@@ -4,7 +4,6 @@ Verhaltenskodex (Code of Conduct) für das **festival** GitHub-Repository
 
 Das Ziel dieses Verhaltenskodex ist es, eine offene und einladende Umgebung für alle Mitwirkenden zu schaffen, unabhängig von Geschlecht, Geschlechtsidentität, sexueller Orientierung, Behinderung, physischem Erscheinungsbild, Körpergröße, Ethnizität, Staatsangehörigkeit, Religion oder Erfahrung.
 
-
 ### Akzeptables Verhalten
 
     Respektvoller Umgang und Höflichkeit gegenüber anderen Mitwirkenden.

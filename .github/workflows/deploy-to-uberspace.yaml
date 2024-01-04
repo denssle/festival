@@ -2,7 +2,7 @@ name: deploy to uberspace
 
 on:
   workflow_run:
-    workflows: ["run-tests-on-push"]
+    workflows: ['run-tests-on-push']
     types:
       - completed
 
