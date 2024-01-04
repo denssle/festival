@@ -1,12 +1,10 @@
 name: deploy to uberspace
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["run-tests-on-push"]
+    types:
+      - completed
 
 jobs:
   deploy:
