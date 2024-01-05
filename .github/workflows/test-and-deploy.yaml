@@ -1,3 +1,5 @@
+name: test-and-deploy
+
 on:
   push:
     branches:
