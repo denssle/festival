@@ -6,7 +6,7 @@ import type {
 } from '../../../../../.svelte-kit/types/src/routes/festival/[festival_id]/edit/$types';
 import { getFrontEndFestival, updateFestival } from '$lib/services/festival-event-service';
 import { extractUser } from '$lib/services/user-service';
-import { createDateTimeFromStrings } from '$lib/utils/dateUtils';
+import { getUTCFromString } from '$lib/utils/dateUtils';
 import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
 import type { BackendUser } from '$lib/models/BackendUser';
 
@@ -44,7 +44,7 @@ export const actions: Actions = {
 				festivalId,
 				String(name),
 				String(description),
-				createDateTimeFromStrings(String(values.get('startDate')), String(values.get('startTime'))),
+				getUTCFromString(String(values.get('startDate')), String(values.get('startTime'))),
 				Boolean(values.get('bringYourOwnBottle')),
 				Boolean(values.get('bringYourOwnFood')),
 				String(values.get('location'))

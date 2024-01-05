@@ -3,29 +3,41 @@
  * @param date yyyy-MM-dd
  * @param time hh:mm
  */
-export function createDateTimeFromStrings(date: string, time: string): number | null {
+export function getUTCFromString(date: string, time: string): number | null {
 	if (date) {
 		const dates: number[] = date.split('-').map((value) => Number(value));
 		if (time) {
 			const times: number[] = time.split(':').map((value) => Number(value));
 			if (datesValid(dates) && times.at(0)) {
 				return new Date(
-					Date.UTC(
-						getNumber(dates, 0),
-						getNumber(dates, 1),
-						getNumber(dates, 2),
-						getNumber(times, 0),
-						getNumber(times, 1)
-					)
+					getNumber(dates, 0),
+					getNumber(dates, 1) - 1,
+					getNumber(dates, 2),
+					getNumber(times, 0),
+					getNumber(times, 1)
 				).getTime();
 			}
 		} else {
 			if (datesValid(dates)) {
-				return new Date(Date.UTC(getNumber(dates, 0), getNumber(dates, 1), getNumber(dates, 2), 12)).getTime();
+				return new Date(
+					getNumber(dates, 0),
+					getNumber(dates, 1) - 1,
+					getNumber(dates, 2),
+					12
+				).getTime();
 			}
 		}
 	}
 	return null;
+}
+
+export function getUTCNow(): number {
+	const now = new Date;
+	/*
+	return Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(),
+		now.getHours(), now.getMinutes());
+	 */
+	return new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes()).getTime();
 }
 
 function datesValid(dates: number[]): boolean {
@@ -42,19 +54,17 @@ function getNumber(list: number[], index: number): number {
 
 /**
  * Konvertiert eine Nummer in ein Date Objekt
- * @param nbr Zeit in MS
+ * @param utcMS Zeit in MS
  */
-export function dateTimeToDate(nbr: number | undefined | null): Date | null {
-	if (nbr) {
-		return new Date(nbr);
+export function convertUTCToLocalDate(utcMS: number | undefined | null): Date | null {
+	if (utcMS) {
+		return new Date(utcMS);
 	}
 	return null;
 }
 
 export function dateToString(date: Date | null): string {
 	if (date) {
-		const offset = date.getTimezoneOffset();
-		date = new Date(date.getTime() - offset * 60 * 1000);
 		return date.toISOString().split('T')[0];
 	}
 	return '';
@@ -62,9 +72,7 @@ export function dateToString(date: Date | null): string {
 
 export function dateToTimeString(date: Date | null): string {
 	if (date) {
-		const offset = date.getTimezoneOffset();
-		date = new Date(Date.UTC(date.getTime() - offset * 60 * 1000));
-		return date.toISOString().split('T')[1].replace(':00.000Z', '');
+		return addLeadingZero(date.getHours()) + ':' + addLeadingZero(date.getMinutes());
 	}
 	return '';
 }
@@ -88,4 +96,11 @@ export function formateTime(date: Date | null): string {
 		return date.toLocaleTimeString();
 	}
 	return '';
+}
+
+function addLeadingZero(nbr: number): string {
+	if (nbr <= 9) {
+		return '0' + nbr;
+	}
+	return String(nbr);
 }

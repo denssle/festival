@@ -1,57 +1,91 @@
 import { expect, test } from '@jest/globals';
-import { createDateTimeFromStrings, dateToString, dateTimeToDate } from '../../lib/utils/dateUtils';
+import {
+	convertUTCToLocalDate,
+	dateToString,
+	dateToTimeString,
+	formateDate,
+	formateDateTime,
+	formateTime,
+	getUTCFromString,
+	getUTCNow
+} from '../../lib/utils/dateUtils';
 
-test('test createDateFromStrings empty', () => {
-	expect(createDateTimeFromStrings('', '')).toBe(null);
+const fiveOfDecember: string = '2023-12-05';
+
+test('test getUTCFromString empty', () => {
+	expect(getUTCFromString('', '')).toBe(null);
 });
 
-test('test createDateFromStrings with just a date', () => {
-	expect(createDateTimeFromStrings('2023-11-05', '')).toBe(1701777600000);
+test('test getUTCFromString with just a date', () => {
+	expect(getUTCFromString(fiveOfDecember, '')).toBe(1701777600000);
 });
 
-test('test createDateFromStrings with garbage as date', () => {
-	expect(createDateTimeFromStrings('garbage', '16:00')).toBe(null);
+test('test getUTCFromString with garbage as date', () => {
+	expect(getUTCFromString('garbage', '16:00')).toBe(null);
 });
 
-test('test createDateFromStrings with garbage - as date', () => {
-	expect(createDateTimeFromStrings('garbage', '16:00')).toBe(null);
+test('test getUTCFromString with garbage - as date', () => {
+	expect(getUTCFromString('garbage', '16:00')).toBe(null);
 });
 
-test('test createDateFromStrings with garbage as time', () => {
-	expect(createDateTimeFromStrings('2023-11-05', 'ga-rb-ag-e')).toBe(null);
+test('test getUTCFromString with garbage as time', () => {
+	expect(getUTCFromString(fiveOfDecember, 'ga-rb-ag-e')).toBe(null);
 });
 
-test('test createDateFromStrings with garbage and . as time', () => {
-	expect(createDateTimeFromStrings('2023-11-05', 'ga.rbage')).toBe(null);
+test('test getUTCFromString with garbage and . as time', () => {
+	expect(getUTCFromString(fiveOfDecember, 'ga.rbage')).toBe(null);
 });
 
-test('test createDateFromStrings with garbage and : as time', () => {
-	expect(createDateTimeFromStrings('2023-11-05', 'ga:rbage')).toBe(null);
+test('test getUTCFromString with garbage and : as time', () => {
+	expect(getUTCFromString(fiveOfDecember, 'ga:rbage')).toBe(null);
 });
 
-test('test createDateFromStrings with date and time', () => {
-	expect(createDateTimeFromStrings('2023-11-05', '16:00')).toBe(1701792000000);
+test('test getUTCFromString with date and time', () => {
+	expect(getUTCFromString(fiveOfDecember, '16:00')).toBe(1701792000000);
 });
 
-test('test numberToDate', () => {
-	const date: Date | null = dateTimeToDate(1701777600000);
+test('test convertUTCToDate', () => {
+	const date: Date | null = convertUTCToLocalDate(1701777600000);
 	expect(date?.getFullYear()).toBe(2023);
 	expect(date?.getMonth()).toBe(11);
 	expect(date?.getDate()).toBe(5);
 });
 
-test('test numberToDate with null', () => {
-	expect(dateTimeToDate(null)).toBe(null);
+test('test convertUTCToDate with null', () => {
+	expect(convertUTCToLocalDate(null)).toBe(null);
 });
 
-test('test numberToDate with undefined', () => {
-	expect(dateTimeToDate(undefined)).toBe(null);
+test('test convertUTCToDate with undefined', () => {
+	expect(convertUTCToLocalDate(undefined)).toBe(null);
 });
 
-test('test dateToDateString', () => {
-	expect(dateToString(dateTimeToDate(1701777600000))).toBe('2023-12-05');
+test('test dateToString', () => {
+	expect(dateToString(convertUTCToLocalDate(1701777600000))).toBe(fiveOfDecember);
 });
 
-test('test dateToDateString with null', () => {
+test('test dateToString with null', () => {
 	expect(dateToString(null)).toBe('');
+});
+
+test('test dateToTimeString', () => {
+	expect(dateToTimeString(convertUTCToLocalDate(1701777600000))).toBe('13:00');
+});
+
+test('test formateDateTime', () => {
+	expect(formateDateTime(convertUTCToLocalDate(1701777600000))).toBe('5.12.2023 13:00:00');
+});
+
+test('test formateDate', () => {
+	expect(formateDate(convertUTCToLocalDate(1701777600000))).toBe('5.12.2023');
+});
+
+test('test formateTime', () => {
+	expect(formateTime(convertUTCToLocalDate(1701777600000))).toBe('13:00:00');
+});
+
+test('test getUTCNow', () => {
+	const now: Date = new Date();
+	const nowTime: number = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes()).getTime();
+	const utcTime: number = getUTCNow();
+	expect(convertUTCToLocalDate(utcTime)?.getTime()).toBe(nowTime);
 });
