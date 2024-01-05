@@ -16,7 +16,8 @@ export async function register(nickname: string, password: string): Promise<Back
 			nickname: nickname,
 			forename: '',
 			lastname: '',
-			password: saltPassword(password)
+			password: saltPassword(password),
+			created: Date.now()
 		};
 		await saveUser(user);
 		return user;
