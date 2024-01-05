@@ -5,7 +5,7 @@ import type { BackendUser } from '../models/BackendUser';
 import type { FrontendUser } from '../models/FrontendUser';
 import { loadFrontEndUserById } from './user-service';
 import { dateTimeToDate } from '../utils/dateUtils';
-import type { GuestInformation } from '$lib/models/GuestInformation';
+import type { BackendGuestInformation } from '$lib/models/BackendGuestInformation';
 import type { JoinEventData } from '$lib/models/JoinEventData';
 import type { FrontendGuestInformation } from '$lib/models/FrontendGuestInformation';
 
@@ -138,7 +138,7 @@ export async function leaveFestival(user: BackendUser | null, festivalId: string
 	if (user && festivalId) {
 		const festival: BackendFestivalEvent | null = await getFestival(festivalId);
 		if (festival) {
-			const find: GuestInformation | undefined = festival.guestInformation.find((value) => value.userId === user.id);
+			const find: BackendGuestInformation | undefined = festival.guestInformation.find((value) => value.userId === user.id);
 			if (find) {
 				festival.guestInformation.splice(festival.guestInformation.indexOf(find), 1);
 				redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
@@ -152,7 +152,7 @@ function isVisitor(festival: BackendFestivalEvent, userId: string): boolean {
 }
 
 export function isVisitorOfFestival(festival: FrontendFestivalEvent, user: BackendUser) {
-	const find: GuestInformation | undefined = festival.guestInformation.find((value) => value.userId === user.id);
+	const find: BackendGuestInformation | undefined = festival.frontendGuestInformation.find((value) => value.userId === user.id);
 	return Boolean(find);
 }
 
@@ -172,7 +172,7 @@ function parseStringToFestival(festival: string): BackendFestivalEvent {
 }
 
 async function mapGuestInformationToFrontendGuestInformation(
-	guestInformation: GuestInformation[]
+	guestInformation: BackendGuestInformation[]
 ): Promise<FrontendGuestInformation[]> {
 	const result: FrontendGuestInformation[] = [];
 	for (const information of guestInformation) {
@@ -199,7 +199,6 @@ async function parseToFrontend(festival: BackendFestivalEvent): Promise<Frontend
 			startDate: dateTimeToDate(festival.startDate),
 			bringYourOwnFood: festival.bringYourOwnFood,
 			bringYourOwnBottle: festival.bringYourOwnBottle,
-			guestInformation: festival.guestInformation,
 			frontendGuestInformation: await mapGuestInformationToFrontendGuestInformation(festival.guestInformation)
 		};
 	}

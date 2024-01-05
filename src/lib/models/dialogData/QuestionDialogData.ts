@@ -1,6 +1,6 @@
-import type { BasicDialogData } from '$lib/models/dialogData/BasicDialogData';
+import type { BaseDialogData } from '$lib/models/dialogData/BaseDialogData';
 
-export interface QuestionDialogData extends BasicDialogData {
+export interface QuestionDialogData extends BaseDialogData {
 	questionText: string;
 	answerYes: boolean;
 }

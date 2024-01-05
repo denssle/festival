@@ -1,5 +1,5 @@
-import type { BasicDialogData } from '$lib/models/dialogData/BasicDialogData';
+import type { BaseDialogData } from '$lib/models/dialogData/BaseDialogData';
 
-export interface InfoDialogData extends BasicDialogData {
+export interface InfoDialogData extends BaseDialogData {
 	infoDialogText: string;
 }

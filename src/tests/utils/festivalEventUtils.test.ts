@@ -23,7 +23,6 @@ function getTestFestival(): FrontendFestivalEvent {
 		description: '',
 		bringYourOwnBottle: false,
 		bringYourOwnFood: false,
-		guestInformation: [],
 		createdBy: getTestUser(),
 		createdAt: null,
 		updatedBy: null,
