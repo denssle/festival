@@ -17,7 +17,7 @@ export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): P
 };
 
 export const actions: Actions = {
-	default: async ({ cookies, request }: { cookies: Cookies, request: Request }): Promise<StandardResponse> => {
+	default: async ({ cookies, request }: { cookies: Cookies; request: Request }): Promise<StandardResponse> => {
 		const formData: UserFormData = await userService.readFormDataFrontEndUser(request.formData());
 		if (formData.nickname && formData.password) {
 			const user: BackendUser | null = await login(formData.nickname, formData.password);
