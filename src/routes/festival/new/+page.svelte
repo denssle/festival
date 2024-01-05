@@ -16,6 +16,10 @@
 			</p>
 
 			<p>
+				<textarea name="location" placeholder="Ort" />
+			</p>
+
+			<p>
 				<label>
 					<input type="checkbox" name="bringYourOwnFood" />
 					Gäste sollen etwas zu Essen mitbringen.

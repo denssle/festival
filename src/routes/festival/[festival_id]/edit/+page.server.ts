@@ -1,13 +1,14 @@
+import type { Cookies } from '@sveltejs/kit';
 import { type Actions, error, redirect } from '@sveltejs/kit';
-import type { PageServerLoad } from '../../../../../.svelte-kit/types/src/routes/festival/edit/[festival_id]/$types';
+import type {
+	PageServerLoad,
+	RouteParams
+} from '../../../../../.svelte-kit/types/src/routes/festival/[festival_id]/edit/$types';
 import { getFrontEndFestival, updateFestival } from '$lib/services/festival-event-service';
 import { extractUser } from '$lib/services/user-service';
 import { createDateTimeFromStrings } from '$lib/utils/dateUtils';
 import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
-import type { RouteParams } from '../../../../../.svelte-kit/types/src/routes/festival/edit/[festival_id]/$types';
-import type { StandardResponse } from '$lib/models/StandardResponse';
 import type { BackendUser } from '$lib/models/BackendUser';
-import type { Cookies } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({
 	cookies,
@@ -32,8 +33,8 @@ export const load: PageServerLoad = async ({
 };
 
 export const actions: Actions = {
-	default: async ({ cookies, request }): Promise<StandardResponse> => {
-		const festivalId: string | undefined = request.url.split('/').pop();
+	default: async ({ cookies, request, params }): Promise<Response> => {
+		const festivalId: string | undefined = params.festival_id;
 		const values: FormData = await request.formData();
 		const name: FormDataEntryValue | null = values.get('name');
 		const description: FormDataEntryValue | null = values.get('description');
@@ -45,11 +46,12 @@ export const actions: Actions = {
 				String(description),
 				createDateTimeFromStrings(String(values.get('startDate')), String(values.get('startTime'))),
 				Boolean(values.get('bringYourOwnBottle')),
-				Boolean(values.get('bringYourOwnFood'))
+				Boolean(values.get('bringYourOwnFood')),
+				String(values.get('location'))
 			);
 			redirect(302, '/festival/' + festivalId);
 		} else {
-			return { success: false, message: 'Festival update failed' };
+			return new Response(null, { status: 404 });
 		}
 	}
 };

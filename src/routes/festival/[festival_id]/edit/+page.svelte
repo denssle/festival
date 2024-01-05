@@ -17,6 +17,10 @@
 	</p>
 
 	<p>
+		<textarea name="location" placeholder="Ort" value={data.location} />
+	</p>
+
+	<p>
 		<label>
 			<input type="checkbox" bind:checked={data.bringYourOwnFood} name="bringYourOwnFood" />
 			Gäste sollen etwas zu Essen mitbringen.

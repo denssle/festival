@@ -1,7 +1,7 @@
-import type { BasicDialogData } from '$lib/models/dialogData/BasicDialogData';
+import type { BaseDialogData } from '$lib/models/dialogData/BaseDialogData';
 import type { JoinEventData } from '$lib/models/JoinEventData';
 
-export interface JoinEventDialogData extends BasicDialogData, JoinEventData {
+export interface JoinEventDialogData extends BaseDialogData, JoinEventData {
 	bringYourOwnBottle: boolean;
 	bringYourOwnFood: boolean;
 }

@@ -1,4 +1,4 @@
-export interface BasicDialogData {
+export interface BaseDialogData {
 	dialog: HTMLDialogElement | undefined;
 	showDialog: boolean;
 }

@@ -23,13 +23,13 @@ function getTestFestival(): FrontendFestivalEvent {
 		description: '',
 		bringYourOwnBottle: false,
 		bringYourOwnFood: false,
-		guestInformation: [],
 		createdBy: getTestUser(),
 		createdAt: null,
 		updatedBy: null,
 		updatedAt: null,
 		startDate: null,
-		frontendGuestInformation: testInfo
+		frontendGuestInformation: testInfo,
+		location: ''
 	};
 }
 
