@@ -28,7 +28,8 @@ function getTestFestival(): FrontendFestivalEvent {
 		updatedBy: null,
 		updatedAt: null,
 		startDate: null,
-		frontendGuestInformation: testInfo
+		frontendGuestInformation: testInfo,
+		location: ''
 	};
 }
 

@@ -4,4 +4,5 @@ export interface BaseFestivalEvent {
 	description: string;
 	bringYourOwnBottle: boolean;
 	bringYourOwnFood: boolean;
+	location: string;
 }

@@ -48,7 +48,8 @@ export async function create(
 	description: string,
 	startDate: number | null,
 	bringYourOwnBottle: boolean,
-	bringYourOwnFood: boolean
+	bringYourOwnFood: boolean,
+	location: string
 ): Promise<FrontendFestivalEvent | null> {
 	if (user) {
 		const newFestival: BackendFestivalEvent = {
@@ -62,7 +63,8 @@ export async function create(
 			startDate: startDate,
 			guestInformation: [],
 			bringYourOwnBottle: bringYourOwnBottle,
-			bringYourOwnFood: bringYourOwnFood
+			bringYourOwnFood: bringYourOwnFood,
+			location: location
 		};
 		console.log('festival service: create: date: ', startDate);
 		redis.set(`festival:${newFestival.id}`, parseFestivalToString(newFestival));
@@ -80,7 +82,8 @@ export async function updateFestival(
 	description: string,
 	startDate: number | null,
 	bringYourOwnBottle: boolean,
-	bringYourOwnFood: boolean
+	bringYourOwnFood: boolean,
+	location: string
 ): Promise<'OK' | undefined> {
 	const festival: BackendFestivalEvent | null = await getFestival(festivalId);
 	if (festival && user) {
@@ -91,6 +94,7 @@ export async function updateFestival(
 		festival.startDate = startDate ? startDate : null;
 		festival.bringYourOwnBottle = bringYourOwnBottle;
 		festival.bringYourOwnFood = bringYourOwnFood;
+		festival.location = location;
 		return redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
 	} else {
 		// TODO create new? throw error?
@@ -138,7 +142,9 @@ export async function leaveFestival(user: BackendUser | null, festivalId: string
 	if (user && festivalId) {
 		const festival: BackendFestivalEvent | null = await getFestival(festivalId);
 		if (festival) {
-			const find: BackendGuestInformation | undefined = festival.guestInformation.find((value) => value.userId === user.id);
+			const find: BackendGuestInformation | undefined = festival.guestInformation.find(
+				(value) => value.userId === user.id
+			);
 			if (find) {
 				festival.guestInformation.splice(festival.guestInformation.indexOf(find), 1);
 				redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
@@ -152,7 +158,9 @@ function isVisitor(festival: BackendFestivalEvent, userId: string): boolean {
 }
 
 export function isVisitorOfFestival(festival: FrontendFestivalEvent, user: BackendUser) {
-	const find: BackendGuestInformation | undefined = festival.frontendGuestInformation.find((value) => value.userId === user.id);
+	const find: BackendGuestInformation | undefined = festival.frontendGuestInformation.find(
+		(value) => value.userId === user.id
+	);
 	return Boolean(find);
 }
 
@@ -199,7 +207,8 @@ async function parseToFrontend(festival: BackendFestivalEvent): Promise<Frontend
 			startDate: dateTimeToDate(festival.startDate),
 			bringYourOwnFood: festival.bringYourOwnFood,
 			bringYourOwnBottle: festival.bringYourOwnBottle,
-			frontendGuestInformation: await mapGuestInformationToFrontendGuestInformation(festival.guestInformation)
+			frontendGuestInformation: await mapGuestInformationToFrontendGuestInformation(festival.guestInformation),
+			location: festival.location
 		};
 	}
 	return null;

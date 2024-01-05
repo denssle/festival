@@ -15,7 +15,7 @@
 
 	async function editFestival(): Promise<void> {
 		if (data.yourFestival) {
-			goto('/festival/edit/' + data.festival.id);
+			goto('/festival/' + data.festival.id + '/edit');
 		} else {
 			infoDialogData.infoDialogText = 'Das ist nicht dein Event. ';
 			infoDialogData.showDialog = true;
@@ -79,6 +79,7 @@
 			infoDialogData.showDialog = true;
 		}
 	}
+
 	let infoDialogData: InfoDialogData = {
 		showDialog: false,
 		infoDialogText: '',
@@ -112,6 +113,9 @@
 		<sub>Erstellt am {formateDate(data.festival.createdAt)} von {data.festival.createdBy?.nickname}</sub>
 
 		<p>{data.festival.description}</p>
+
+		<p>{data.festival.location}</p>
+
 		<label>
 			<input type="checkbox" bind:checked={data.festival.bringYourOwnFood} name="bringYourOwnFood" disabled />
 			Gäste sollen etwas zu Essen mitbringen.
@@ -123,7 +127,7 @@
 	</section>
 
 	<section>
-		{#if data.festival.guestInformation.length}
+		{#if data.festival.frontendGuestInformation.length}
 			<p>Bisher haben sich angemeldet:</p>
 			<table style="width: 100%">
 				<thead>

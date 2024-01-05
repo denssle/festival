@@ -2,7 +2,7 @@ import { deleteFestival } from '$lib/services/festival-event-service';
 import { extractUser } from '$lib/services/user-service';
 import type { RequestHandler } from '@sveltejs/kit';
 
-// TODO Add Types to the parameters
+// TODO Add Types to the parameters like : {cookies: Cookies, params: RouteParams}
 export const DELETE: RequestHandler = async ({ cookies, params }): Promise<Response> => {
 	if (params && params.festival_id) {
 		await deleteFestival(extractUser(cookies.get('session')), params.festival_id);
