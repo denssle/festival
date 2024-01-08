@@ -66,7 +66,6 @@ export async function create(
 			bringYourOwnFood: bringYourOwnFood,
 			location: location
 		};
-		console.log('festival service: create: date: ', startDate);
 		redis.set(`festival:${newFestival.id}`, parseFestivalToString(newFestival));
 		return await parseToFrontend(newFestival);
 	} else {
@@ -98,7 +97,7 @@ export async function updateFestival(
 		return redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
 	} else {
 		// TODO create new? throw error?
-		console.error('cration failed!!!');
+		console.error('updateFestival failed!', festival);
 	}
 }
 

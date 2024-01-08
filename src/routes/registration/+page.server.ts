@@ -5,6 +5,7 @@ import * as userService from '$lib/services/user-service';
 import { nickNameInvalid, register, validateSessionToken } from '$lib/services/user-service';
 import type { UserFormData } from '$lib/models/UserFormData';
 import { StandardResponse } from '$lib/models/StandardResponse';
+import { BackendUser } from '$lib/models/BackendUser';
 
 export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): Promise<StandardResponse> => {
 	const valid: boolean = await validateSessionToken(cookies.get('session'));
@@ -22,7 +23,7 @@ export const actions: Actions = {
 				console.log('User already existing');
 				return { success: false, message: 'Invalid Nickname' };
 			} else {
-				const user = await register(formData.nickname, formData.password);
+				const user: BackendUser | null = await register(formData.nickname, formData.password);
 				if (user) {
 					userService.createSessionCookie(cookies, user);
 					redirect(302, '/');

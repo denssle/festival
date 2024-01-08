@@ -11,11 +11,18 @@
 	<form method="POST">
 		<section>
 			<p>
-				<input name="nickname" required value={data?.nickname ?? ''} type="text" placeholder="Nickname" />
+				<input name="nickname" required value={data?.nickname ?? ''} type="text" placeholder="Nickname" minlength="3" />
 			</p>
 
 			<p>
-				<input name="password" required value={data?.password ?? ''} type="password" placeholder="Passwort" />
+				<input
+					name="password"
+					required
+					value={data?.password ?? ''}
+					type="password"
+					placeholder="Passwort"
+					minlength="3"
+				/>
 			</p>
 
 			<p>

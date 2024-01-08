@@ -9,7 +9,6 @@ import { StandardResponse } from '$lib/models/StandardResponse';
 
 export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): Promise<StandardResponse> => {
 	const valid: boolean = await validateSessionToken(cookies.get('session'));
-	console.log('LOGIN valid', valid);
 	if (valid) {
 		redirect(303, '/');
 	}
@@ -21,7 +20,6 @@ export const actions: Actions = {
 		const formData: UserFormData = await userService.readFormDataFrontEndUser(request.formData());
 		if (formData.nickname && formData.password) {
 			const user: BackendUser | null = await login(formData.nickname, formData.password);
-			console.log(user, formData.nickname, formData.password);
 			if (user) {
 				userService.createSessionCookie(cookies, user);
 				redirect(302, '/');
