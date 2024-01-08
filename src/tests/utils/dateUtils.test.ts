@@ -85,7 +85,13 @@ test('test formateTime', () => {
 
 test('test getUTCNow', () => {
 	const now: Date = new Date();
-	const nowTime: number = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes()).getTime();
+	const nowTime: number = new Date(
+		now.getFullYear(),
+		now.getMonth(),
+		now.getDate(),
+		now.getHours(),
+		now.getMinutes()
+	).getTime();
 	const utcTime: number = getUTCNow();
 	expect(convertUTCToLocalDate(utcTime)?.getTime()).toBe(nowTime);
 });
