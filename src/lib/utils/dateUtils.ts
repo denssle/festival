@@ -10,20 +10,22 @@ export function getUTCFromString(date: string, time: string): number | null {
 			const times: number[] = time.split(':').map((value) => Number(value));
 			if (datesValid(dates) && times.at(0)) {
 				return new Date(
-					getNumber(dates, 0),
-					getNumber(dates, 1) - 1,
-					getNumber(dates, 2),
-					getNumber(times, 0),
-					getNumber(times, 1)
+					Date.UTC(getNumber(dates, 0),
+						getNumber(dates, 1) - 1,
+						getNumber(dates, 2),
+						getNumber(times, 0),
+						getNumber(times, 1))
 				).getTime();
 			}
 		} else {
 			if (datesValid(dates)) {
 				return new Date(
-					getNumber(dates, 0),
-					getNumber(dates, 1) - 1,
-					getNumber(dates, 2),
-					12
+					Date.UTC(
+						getNumber(dates, 0),
+						getNumber(dates, 1) - 1,
+						getNumber(dates, 2),
+						12
+					)
 				).getTime();
 			}
 		}
@@ -32,11 +34,8 @@ export function getUTCFromString(date: string, time: string): number | null {
 }
 
 export function getUTCNow(): number {
-	const now = new Date;
-	/*
-	return Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(),
-		now.getHours(), now.getMinutes());
-	 */
+	const now: Date = new Date;
+	// return Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes());
 	return new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes()).getTime();
 }
 
