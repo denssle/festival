@@ -30,8 +30,8 @@ export function getUTCFromString(date: string, time: string): number | null {
 
 export function getUTCNow(): number {
 	const now: Date = new Date();
-	// return Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes());
-	return new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes()).getTime();
+	return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes());
+	// return new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes()).getTime();
 }
 
 function datesValid(dates: number[]): boolean {
@@ -52,6 +52,8 @@ function getNumber(list: number[], index: number): number {
  */
 export function convertUTCToLocalDate(utcMS: number | undefined | null): Date | null {
 	if (utcMS) {
+		// const dateLocal = new Date(utcMS);
+		// return new Date(utcMS - dateLocal.getTimezoneOffset() * 60 * 1000);
 		return new Date(utcMS);
 	}
 	return null;
