@@ -3,7 +3,7 @@
  * @param date yyyy-MM-dd
  * @param time hh:mm
  */
-export function createDateTimeFromStrings(date: string, time: string): number | null {
+export function getUTCFromString(date: string, time: string): number | null {
 	if (date) {
 		const dates: number[] = date.split('-').map((value) => Number(value));
 		if (time) {
@@ -12,7 +12,7 @@ export function createDateTimeFromStrings(date: string, time: string): number | 
 				return new Date(
 					Date.UTC(
 						getNumber(dates, 0),
-						getNumber(dates, 1),
+						getNumber(dates, 1) - 1,
 						getNumber(dates, 2),
 						getNumber(times, 0),
 						getNumber(times, 1)
@@ -21,11 +21,17 @@ export function createDateTimeFromStrings(date: string, time: string): number | 
 			}
 		} else {
 			if (datesValid(dates)) {
-				return new Date(Date.UTC(getNumber(dates, 0), getNumber(dates, 1), getNumber(dates, 2), 12)).getTime();
+				return new Date(Date.UTC(getNumber(dates, 0), getNumber(dates, 1) - 1, getNumber(dates, 2), 12)).getTime();
 			}
 		}
 	}
 	return null;
+}
+
+export function getUTCNow(): number {
+	const now: Date = new Date();
+	return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes());
+	// return new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes()).getTime();
 }
 
 function datesValid(dates: number[]): boolean {
@@ -42,50 +48,61 @@ function getNumber(list: number[], index: number): number {
 
 /**
  * Konvertiert eine Nummer in ein Date Objekt
- * @param nbr Zeit in MS
+ * @param utcMS Zeit in MS
  */
-export function dateTimeToDate(nbr: number | undefined | null): Date | null {
-	if (nbr) {
-		return new Date(nbr);
+export function convertUTCToLocalDate(utcMS: number | undefined | null): Date | null {
+	if (utcMS) {
+		// const dateLocal = new Date(utcMS);
+		// return new Date(utcMS - dateLocal.getTimezoneOffset() * 60 * 1000);
+		return new Date(utcMS);
 	}
 	return null;
 }
 
 export function dateToString(date: Date | null): string {
 	if (date) {
-		const offset = date.getTimezoneOffset();
-		date = new Date(date.getTime() - offset * 60 * 1000);
 		return date.toISOString().split('T')[0];
 	}
 	return '';
 }
 
-export function dateToTimeString(date: Date | null): string {
+export function dateToDDMMYYYY(date: Date | null): string {
 	if (date) {
-		const offset = date.getTimezoneOffset();
-		date = new Date(Date.UTC(date.getTime() - offset * 60 * 1000));
-		return date.toISOString().split('T')[1].replace(':00.000Z', '');
+		return addLeadingZero(date.getDate()) + '.' + addLeadingZero(date.getMonth() + 1) + '.' + date.getFullYear();
 	}
 	return '';
 }
 
 export function formateDateTime(date: Date | null): string {
 	if (date) {
-		return formateDate(date) + ' ' + formateTime(date);
+		return dateToDDMMYYYY(date) + ' ' + dateToHHMMSS(date);
 	}
 	return '';
 }
 
-export function formateDate(date: Date | null): string {
+export function dateToHHMM(date: Date | null): string {
 	if (date) {
-		return date.toLocaleDateString();
+		return addLeadingZero(date.getHours()) + ':' + addLeadingZero(date.getMinutes());
 	}
 	return '';
 }
 
-export function formateTime(date: Date | null): string {
+export function dateToHHMMSS(date: Date | null): string {
 	if (date) {
-		return date.toLocaleTimeString();
+		return (
+			addLeadingZero(date.getHours()) +
+			':' +
+			addLeadingZero(date.getMinutes()) +
+			':' +
+			addLeadingZero(date.getSeconds())
+		);
 	}
 	return '';
+}
+
+function addLeadingZero(nbr: number): string {
+	if (nbr <= 9) {
+		return '0' + nbr;
+	}
+	return String(nbr);
 }

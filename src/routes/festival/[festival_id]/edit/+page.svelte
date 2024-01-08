@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { dateToString, dateToTimeString } from '$lib/utils/dateUtils';
+	import { dateToString, dateToHHMM } from '$lib/utils/dateUtils';
 	import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
 
 	export let data: FrontendFestivalEvent;
@@ -13,7 +13,7 @@
 
 	<p>
 		<input name="startDate" type="date" placeholder="date" value={dateToString(data.startDate)} />
-		<input name="startTime" type="time" placeholder="time" value={dateToTimeString(data.startDate)} />
+		<input name="startTime" type="time" placeholder="time" value={dateToHHMM(data.startDate)} />
 	</p>
 
 	<p>

@@ -4,7 +4,7 @@ import type { BackendFestivalEvent } from '../models/BackendFestivalEvent';
 import type { BackendUser } from '../models/BackendUser';
 import type { FrontendUser } from '../models/FrontendUser';
 import { loadFrontEndUserById } from './user-service';
-import { dateTimeToDate } from '../utils/dateUtils';
+import { getUTCNow, convertUTCToLocalDate } from '../utils/dateUtils';
 import type { BackendGuestInformation } from '$lib/models/BackendGuestInformation';
 import type { JoinEventData } from '$lib/models/JoinEventData';
 import type { FrontendGuestInformation } from '$lib/models/FrontendGuestInformation';
@@ -57,7 +57,7 @@ export async function create(
 			name: name,
 			description: description,
 			createdBy: user.id,
-			createdAt: Date.now(),
+			createdAt: getUTCNow(),
 			updatedBy: null,
 			updatedAt: null,
 			startDate: startDate,
@@ -89,7 +89,7 @@ export async function updateFestival(
 	if (festival && user) {
 		festival.name = name;
 		festival.description = description;
-		festival.updatedAt = Date.now();
+		festival.updatedAt = getUTCNow();
 		festival.updatedBy = user.id;
 		festival.startDate = startDate ? startDate : null;
 		festival.bringYourOwnBottle = bringYourOwnBottle;
@@ -171,7 +171,7 @@ function parseFestivalToString(festival: BackendFestivalEvent): string {
 function parseStringToFestival(festival: string): BackendFestivalEvent {
 	const parse: BackendFestivalEvent = JSON.parse(festival);
 	if (!parse.createdAt) {
-		parse.createdAt = Date.now();
+		parse.createdAt = getUTCNow();
 	}
 	if (!parse.guestInformation) {
 		parse.guestInformation = [];
@@ -201,10 +201,10 @@ async function parseToFrontend(festival: BackendFestivalEvent): Promise<Frontend
 			name: festival.name,
 			description: festival.description,
 			createdBy: createdBy,
-			createdAt: dateTimeToDate(festival.createdAt),
+			createdAt: convertUTCToLocalDate(festival.createdAt),
 			updatedBy: updatedBy ?? null,
-			updatedAt: dateTimeToDate(festival.updatedAt),
-			startDate: dateTimeToDate(festival.startDate),
+			updatedAt: convertUTCToLocalDate(festival.updatedAt),
+			startDate: convertUTCToLocalDate(festival.startDate),
 			bringYourOwnFood: festival.bringYourOwnFood,
 			bringYourOwnBottle: festival.bringYourOwnBottle,
 			frontendGuestInformation: await mapGuestInformationToFrontendGuestInformation(festival.guestInformation),

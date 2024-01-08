@@ -4,6 +4,7 @@ import redis from '../redis';
 import type { FrontendUser } from '../models/FrontendUser';
 import type { UserFormData } from '$lib/models/UserFormData';
 import type { Cookies } from '@sveltejs/kit';
+import { getUTCNow } from '$lib/utils/dateUtils';
 
 const USER: string = 'user:';
 const USER_IMG: string = 'user-img:';
@@ -16,7 +17,8 @@ export async function register(nickname: string, password: string): Promise<Back
 			nickname: nickname,
 			forename: '',
 			lastname: '',
-			password: saltPassword(password)
+			password: saltPassword(password),
+			created: getUTCNow()
 		};
 		await saveUser(user);
 		return user;
