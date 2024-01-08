@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto, invalidateAll } from '$app/navigation';
 	import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
-	import { formateDate, formateDateTime } from '$lib/utils/dateUtils';
+	import { dateToDDMMYYYY, formateDateTime } from '$lib/utils/dateUtils';
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
 	import JoinEventDialog from './JoinEventDialog.svelte';
 	import type { JoinEventDialogData } from '$lib/models/dialogData/JoinEventDialogData';
@@ -110,7 +110,7 @@
 	<section>
 		<h4>{data.festival.name}</h4>
 		<sub>Starting: {formateDateTime(data.festival.startDate)}</sub>
-		<sub>Erstellt am {formateDate(data.festival.createdAt)} von {data.festival.createdBy?.nickname}</sub>
+		<sub>Erstellt am {dateToDDMMYYYY(data.festival.createdAt)} von {data.festival.createdBy?.nickname}</sub>
 
 		<p>{data.festival.description}</p>
 

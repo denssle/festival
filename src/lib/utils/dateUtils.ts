@@ -66,30 +66,36 @@ export function dateToString(date: Date | null): string {
 	return '';
 }
 
-export function dateToTimeString(date: Date | null): string {
+export function dateToDDMMYYYY(date: Date | null): string {
 	if (date) {
-		return addLeadingZero(date.getHours()) + ':' + addLeadingZero(date.getMinutes());
+		return addLeadingZero(date.getDate()) + '.' + addLeadingZero(date.getMonth() + 1) + '.' + date.getFullYear();
 	}
 	return '';
 }
 
 export function formateDateTime(date: Date | null): string {
 	if (date) {
-		return formateDate(date) + ' ' + formateTime(date);
+		return dateToDDMMYYYY(date) + ' ' + dateToHHMMSS(date);
 	}
 	return '';
 }
 
-export function formateDate(date: Date | null): string {
+export function dateToHHMM(date: Date | null): string {
 	if (date) {
-		return date.toLocaleDateString();
+		return addLeadingZero(date.getHours()) + ':' + addLeadingZero(date.getMinutes());
 	}
 	return '';
 }
 
-export function formateTime(date: Date | null): string {
+export function dateToHHMMSS(date: Date | null): string {
 	if (date) {
-		return date.toLocaleTimeString();
+		return (
+			addLeadingZero(date.getHours()) +
+			':' +
+			addLeadingZero(date.getMinutes()) +
+			':' +
+			addLeadingZero(date.getSeconds())
+		);
 	}
 	return '';
 }
