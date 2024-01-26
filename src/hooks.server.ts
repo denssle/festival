@@ -4,9 +4,11 @@ import * as userController from '$lib/services/user-service';
 import { authorized } from '$lib/stores/authorized-store';
 import type { BackendUser } from '$lib/models/BackendUser';
 
+const noAuthURLs = ['/login', '/registration'];
 export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 	const pathname: string = event.url.pathname;
-	if (!pathname.includes('login') && !pathname.includes('registration')) {
+	console.log(pathname);
+	if (!noAuthURLs.includes(pathname)) {
 		const sessionCookie: string | undefined = event.cookies.get('session');
 		const valid: boolean = await userController.validateSessionToken(sessionCookie);
 		authorized.set(valid);
