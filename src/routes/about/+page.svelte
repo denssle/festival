@@ -1,5 +1,8 @@
 <script lang="ts">
 	import uberspaceBanner from '$lib/assets/uberspace_badge_dark.png';
+
+	export let data: { version: string };
+	console.log(data);
 </script>
 
 <article>
@@ -16,6 +19,7 @@
 		</p>
 		<img src={uberspaceBanner} alt="uberspace Banner" class="center" />
 	</section>
+	<p>Version: {data.version}</p>
 </article>
 
 <style>
