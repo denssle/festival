@@ -57,5 +57,5 @@
 		der Seiten behalten sich ausdrücklich rechtliche Schritte im Falle der unverlangten Zusendung von Werbeinformationen,
 		etwa durch Spam-Mails, vor.
 	</section>
-	Website Impressum von <a href="https://www.impressum-generator.de">impressum-generator.de</a>
+	Website Impressum von<a href="https://www.impressum-generator.de">impressum-generator.de</a>
 </article>

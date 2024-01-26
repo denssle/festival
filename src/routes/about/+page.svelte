@@ -1,8 +1,7 @@
 <script lang="ts">
-	import uberspaceBanner from '$lib/assets/uberspace_badge_dark.png';
+	import uberspaceBanner from '../../images/uberspace_badge_dark.png';
 
 	export let data: { version: string };
-	console.log(data);
 </script>
 
 <article>
