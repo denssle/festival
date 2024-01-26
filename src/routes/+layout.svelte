@@ -22,13 +22,22 @@
 			<a href="/festival/new">Neu</a>
 			<a href="/settings">Einstellungen</a>
 			<a href="/user/{data.currentUser.id}">{data.currentUser.nickname}</a>
-			<a href="/about">About</a>
 			<button on:click|trusted={logout}>Logout</button>
+		{:else}
+			<a href="/login">Anmelden</a>
+			<a href="/registration">Registrieren</a>
 		{/if}
 	</nav>
 </header>
 
 <slot />
+
+<footer>
+	<nav>
+		<a href="/about">About</a>
+		<a href="/impressum">Impressum</a>
+	</nav>
+</footer>
 
 <style global>
 	:global(:root) {

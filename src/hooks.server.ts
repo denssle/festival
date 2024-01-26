@@ -4,7 +4,7 @@ import * as userController from '$lib/services/user-service';
 import { authorized } from '$lib/stores/authorized-store';
 import type { BackendUser } from '$lib/models/BackendUser';
 
-const noAuthURLs = ['/login', '/registration'];
+const noAuthURLs: string[] = ['/login', '/registration', '/about', '/impressum'];
 export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 	const pathname: string = event.url.pathname;
 	console.log(pathname);
