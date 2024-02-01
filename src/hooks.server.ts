@@ -1,10 +1,10 @@
-// https://kit.svelte.dev/docs/hooks
 import type { Handle } from '@sveltejs/kit';
 import * as userController from '$lib/services/user-service';
-import { authorized } from '$lib/stores/authorized-store';
 import type { BackendUser } from '$lib/models/BackendUser';
 
-const noAuthURLs: string[] = ['/login', '/registration', '/about', '/impressum', '/favicon.ico'];
+// https://kit.svelte.dev/docs/hooks
+const noAuthURLs: string[] = ['/login', '/registration', '/about', '/impressum'];
+
 export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 	const pathname: string = event.url.pathname;
 	console.log('Pathname: ', pathname);
@@ -13,7 +13,6 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 		const sessionCookie: string | undefined = event.cookies.get('session');
 		const valid: boolean = await userController.validateSessionToken(sessionCookie);
 		const currentUser: BackendUser | null = userController.extractUser(sessionCookie);
-		authorized.set(valid);
 		if (valid && currentUser) {
 			event.locals.currentUser = {
 				isAuthenticated: valid,

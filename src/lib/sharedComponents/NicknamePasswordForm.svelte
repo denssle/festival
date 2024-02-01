@@ -6,7 +6,7 @@
 </script>
 
 <article>
-	<h3>{headline}</h3>
+	<h2>{headline}</h2>
 
 	<form method="POST">
 		<section>

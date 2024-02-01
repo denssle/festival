@@ -5,7 +5,7 @@ import type { CurrentUser } from '$lib/models/CurrentUser';
 declare global {
 	namespace App {
 		interface Locals {
-			currentUser: CurrentUser;
+			currentUser: CurrentUser | undefined;
 		}
 
 		// interface Error {}
