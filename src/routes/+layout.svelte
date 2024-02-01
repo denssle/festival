@@ -1,23 +1,21 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { authorized } from '$lib/stores/authorized-store';
 	import type { CurrentUser } from '$lib/models/CurrentUser';
 
 	async function logout() {
 		await fetch('/logout', {
 			method: 'POST'
 		});
-		authorized.set(false);
+		data.currentUser = undefined;
 		await goto('/login');
 	}
 
-	export let data: { currentUser: CurrentUser };
-	authorized.set(data.currentUser?.isAuthenticated);
+	export let data: { currentUser: CurrentUser | undefined };
 </script>
 
 <header>
 	<nav>
-		{#if $authorized}
+		{#if data?.currentUser?.isAuthenticated}
 			<a href="/">Festivals</a>
 			<a href="/festival/new">Neu</a>
 			<a href="/settings">Einstellungen</a>

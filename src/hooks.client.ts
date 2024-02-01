@@ -1,7 +1,7 @@
-// https://kit.svelte.dev/docs/hooks
 import type { HandleClientError } from '@sveltejs/kit';
 
-export const handleError = (async ({ error, event }) => {
+// https://kit.svelte.dev/docs/hooks
+export const handleError = (async ({ error }) => {
 	const errorId = crypto.randomUUID();
 	console.error(error);
 	return {
