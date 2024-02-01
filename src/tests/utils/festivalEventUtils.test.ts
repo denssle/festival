@@ -45,7 +45,9 @@ test('1 visitors', () => {
 			drink: '',
 			food: '',
 			numberOfOtherGuests: 0,
-			user: getTestUser()
+			user: getTestUser(),
+			coming: true,
+			comment: ''
 		}
 	];
 	expect(getTotalNumberOfGuests(festival)).toBe(1);
@@ -59,7 +61,9 @@ test('3 visitors', () => {
 			drink: '',
 			food: '',
 			numberOfOtherGuests: 2,
-			user: getTestUser()
+			user: getTestUser(),
+			coming: false,
+			comment: ''
 		}
 	];
 	expect(getTotalNumberOfGuests(festival)).toBe(3);

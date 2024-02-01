@@ -3,13 +3,14 @@
 	import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
 	import { dateToDDMMYYYY, formateDateTime } from '$lib/utils/dateUtils';
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
-	import JoinEventDialog from './JoinEventDialog.svelte';
+	import JoinEventDialog from './join/JoinEventDialog.svelte';
 	import type { JoinEventDialogData } from '$lib/models/dialogData/JoinEventDialogData';
 	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
-	import type { JoinEventData } from '$lib/models/JoinEventData';
+	import type { BaseGuestInformation } from '$lib/models/BaseGuestInformation';
 	import QuestionDialog from '$lib/sharedComponents/QuestionDialog.svelte';
 	import type { QuestionDialogData } from '$lib/models/dialogData/QuestionDialogData';
 	import { getTotalNumberOfGuests } from '$lib/utils/festivalEventUtils';
+	import { CancelInvitationDialogData } from '$lib/models/dialogData/CancelInvitationDialogData';
 
 	export let data: { festival: FrontendFestivalEvent; yourFestival: boolean; visitor: boolean };
 
@@ -45,16 +46,22 @@
 
 	function joinFestival(): void {
 		if (data.visitor) {
-			infoDialogData.infoDialogText = 'Du bist bereits dabei!';
-			infoDialogData.showDialog = true;
+			cancelInvitationDialog.showDialog = true;
+			if (cancelInvitationDialog.dialog) {
+				cancelInvitationDialog.onclose = () => {
+					console.log('cancel close ');
+				};
+			}
 		} else {
 			joinDialogData.showDialog = true;
 			if (joinDialogData.dialog) {
 				joinDialogData.dialog.onclose = () => {
-					const eventData: JoinEventData = {
+					const eventData: BaseGuestInformation = {
 						food: joinDialogData.food,
 						drink: joinDialogData.drink,
-						numberOfOtherGuests: joinDialogData.numberOfOtherGuests
+						numberOfOtherGuests: joinDialogData.numberOfOtherGuests,
+						coming: true,
+						comment: ''
 					};
 					fetch('/festival/' + data.festival.id + '/join', {
 						method: 'POST',
@@ -79,7 +86,11 @@
 			infoDialogData.showDialog = true;
 		}
 	}
-
+	let cancelInvitationDialog: CancelInvitationDialogData = {
+		showDialog: false,
+		dialog: undefined,
+		comment: ''
+	};
 	let infoDialogData: InfoDialogData = {
 		showDialog: false,
 		infoDialogText: '',
@@ -92,7 +103,9 @@
 		food: '',
 		drink: '',
 		numberOfOtherGuests: 0,
-		dialog: undefined
+		dialog: undefined,
+		coming: true,
+		comment: ''
 	};
 	let questionDialogData: QuestionDialogData = {
 		showDialog: false,
