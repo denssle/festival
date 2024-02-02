@@ -1,14 +1,12 @@
 <script lang="ts">
 	import type { CancelInvitationDialogData } from '$lib/models/dialogData/CancelInvitationDialogData';
+	import BaseDialog from '$lib/sharedComponents/BaseDialog.svelte';
 
 	export let cancelInvitationDialogData: CancelInvitationDialogData;
-
-	$: if (cancelInvitationDialogData.dialog && cancelInvitationDialogData.showDialog)
-		cancelInvitationDialogData.dialog.showModal();
 </script>
 
-<dialog bind:this={cancelInvitationDialogData.dialog} on:close={() => (cancelInvitationDialogData.showDialog = false)}>
-	<h4>Leider bin ich bei dem Event nicht dabei</h4>
+<BaseDialog bind:dialogData={cancelInvitationDialogData}>
+	<h4>Leider bin ich / sind wir bei dem Event nicht dabei.</h4>
 
 	<section>
 		<label>
@@ -16,6 +14,4 @@
 			<input type="text" id="comment" bind:value={cancelInvitationDialogData.comment} />
 		</label>
 	</section>
-
-	<button on:click={() => cancelInvitationDialogData.dialog?.close()}> Absagen </button>
-</dialog>
+</BaseDialog>
