@@ -12,7 +12,7 @@
 
 	<section>
 		<label>
-			Ich bringe weitere Gäste mit (die hier nicht angemeldet sind):
+			Kommentar:
 			<input type="text" id="comment" bind:value={cancelInvitationDialogData.comment} />
 		</label>
 	</section>
