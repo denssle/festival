@@ -5,13 +5,11 @@
 	export let cancelInvitationDialogData: CancelInvitationDialogData;
 </script>
 
-<BaseDialog bind:dialogData={cancelInvitationDialogData}>
-	<h4>Leider bin ich / sind wir bei dem Event nicht dabei.</h4>
+<BaseDialog bind:dialogData={cancelInvitationDialogData} buttonLabels={{ yes: 'Absagen', no: 'Zurück' }}>
+	<p>Leider bin ich / sind wir bei dem Event nicht dabei.</p>
 
 	<section>
-		<label>
-			Kommentar:
-			<input type="text" id="comment" bind:value={cancelInvitationDialogData.comment} />
-		</label>
+		<label for="comment">Kommentar (optional):</label>
+		<input type="text" id="comment" bind:value={cancelInvitationDialogData.comment} />
 	</section>
 </BaseDialog>

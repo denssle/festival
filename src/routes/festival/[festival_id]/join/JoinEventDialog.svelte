@@ -5,7 +5,7 @@
 	export let joinDialogData: JoinEventDialogData;
 </script>
 
-<BaseDialog bind:dialogData={joinDialogData}>
+<BaseDialog bind:dialogData={joinDialogData} buttonLabels={{ yes: 'Beitreten', no: 'Zurück' }}>
 	<h4>Bei dem Event bin ich dabei!</h4>
 
 	<section>
@@ -24,7 +24,7 @@
 		{#if joinDialogData.bringYourOwnFood}
 			<span>Hinweis: Das ist eine Mitbringparty.</span>
 		{:else}
-			<span>Hinweis: Das ist <strong>keine</strong> Mitbringparty.</span>
+			<span>Hinweis: Das ist <mark>keine</mark> Mitbringparty.</span>
 		{/if}
 	</section>
 
@@ -37,7 +37,7 @@
 		{#if joinDialogData.bringYourOwnBottle}
 			<span>Hinweis: Das ist eine Mitbringparty.</span>
 		{:else}
-			<span>Hinweis: Das ist <strong>keine</strong> Mitbringparty.</span>
+			<span>Hinweis: Das ist <mark>keine</mark> Mitbringparty.</span>
 		{/if}
 	</section>
 </BaseDialog>
