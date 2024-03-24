@@ -9,12 +9,11 @@
 	import type { BaseGuestInformation } from '$lib/models/BaseGuestInformation';
 	import QuestionDialog from '$lib/sharedComponents/QuestionDialog.svelte';
 	import type { QuestionDialogData } from '$lib/models/dialogData/QuestionDialogData';
-	import { getTotalNumberOfGuests } from '$lib/utils/festivalEventUtils';
+	import { getTotalNumberOfComingGuests } from '$lib/utils/festivalEventUtils';
 	import type { CancelInvitationDialogData } from '$lib/models/dialogData/CancelInvitationDialogData';
 	import CancelInvitationDialog from './cancel-invitation/CancelInvitationDialog.svelte';
 
 	export let data: { festival: FrontendFestivalEvent; yourFestival: boolean; visitor: boolean };
-
 	async function editFestival(): Promise<void> {
 		if (data.yourFestival) {
 			goto('/festival/' + data.festival.id + '/edit');
@@ -46,49 +45,41 @@
 	}
 
 	function joinFestival(): void {
-		if (data.visitor) {
-			// TODO Zeige die Zusage um sie zu bearbeiten
-			infoDialogData.infoDialogText = 'Du bist bereits dabei!';
-			infoDialogData.showDialog = true;
-		} else {
-			joinDialogData.showDialog = true;
-			if (joinDialogData.dialog) {
-				joinDialogData.dialog.onclose = () => {
-					if (joinDialogData.answerYes) {
-						const eventData: BaseGuestInformation = {
-							food: joinDialogData.food,
-							drink: joinDialogData.drink,
-							numberOfOtherGuests: joinDialogData.numberOfOtherGuests,
-							coming: true,
-							comment: ''
-						};
-						fetch('/festival/' + data.festival.id + '/join', {
-							method: 'POST',
-							body: JSON.stringify(eventData)
-						}).then(() => {
-							invalidateAll();
-						});
-					}
-				};
-			}
+		joinDialogData.showDialog = true;
+		if (joinDialogData.dialog) {
+			joinDialogData.dialog.onclose = () => {
+				if (joinDialogData.answerYes) {
+					const eventData: BaseGuestInformation = {
+						food: joinDialogData.food,
+						drink: joinDialogData.drink,
+						numberOfOtherGuests: joinDialogData.numberOfOtherGuests,
+						coming: true,
+						comment: ''
+					};
+					fetch('/festival/' + data.festival.id + '/join', {
+						method: 'POST',
+						body: JSON.stringify(eventData)
+					}).then(() => {
+						invalidateAll();
+					});
+				}
+			};
 		}
 	}
 
 	function leaveFestival(): void {
-		if (data.visitor) {
-			// TODO Wechel Zusage gegen Absage aus
-			fetch('/festival/' + data.festival.id + '/leave', {
-				method: 'POST'
-			}).then(() => {
-				invalidateAll();
-			});
-		} else {
-			cancelInvitationDialogData.showDialog = true;
-			if (cancelInvitationDialogData.dialog) {
-				cancelInvitationDialogData.dialog.onclose = () => {
-					console.log('cancel close ', cancelInvitationDialogData.answerYes);
-				};
-			}
+		cancelInvitationDialogData.showDialog = true;
+		if (cancelInvitationDialogData.dialog) {
+			cancelInvitationDialogData.dialog.onclose = () => {
+				if (cancelInvitationDialogData.answerYes) {
+					fetch('/festival/' + data.festival.id + '/cancel-invitation', {
+						method: 'POST',
+						body: cancelInvitationDialogData.comment
+					}).then(() => {
+						invalidateAll();
+					});
+				}
+			};
 		}
 	}
 
@@ -150,7 +141,8 @@
 	</section>
 
 	<section>
-		{#if data.festival.frontendGuestInformation.length}
+		<h5>Zusagen:</h5>
+		{#if getTotalNumberOfComingGuests(data.festival)}
 			<p>Bisher haben sich angemeldet:</p>
 			<table style="width: 100%">
 				<thead>
@@ -162,7 +154,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#each data.festival.frontendGuestInformation as guest}
+					{#each data.festival.frontendGuestInformation.filter(value => value.coming) as guest}
 						<tr>
 							<td>
 								<a href="/user/{guest.userId}">{guest.user.nickname}</a>
@@ -184,13 +176,39 @@
 						<td>Summe</td>
 						<td></td>
 						<td></td>
-						<td>{getTotalNumberOfGuests(data.festival)}</td>
+						<td>{getTotalNumberOfComingGuests(data.festival)}</td>
 					</tr>
 				</tfoot>
 			</table>
+
 		{:else}
-			<p>Es hat sich noch niemand angemeldet.</p>
+			<p>Es hat noch niemand zugesagt.</p>
 		{/if}
+	</section>
+
+	<section>
+		<h5>Absagen:</h5>
+		<table style="width: 100%">
+				<thead>
+				<tr>
+					<th>Name</th>
+					<th>Kommentar</th>
+				</tr>
+				</thead>
+			<tbody>
+			{#each data.festival.frontendGuestInformation.filter(value => !value.coming) as guest}
+				<tr>
+					<td>
+						<a href="/user/{guest.userId}">{guest.user.nickname}</a>
+					</td>
+					<td>
+						{guest.comment}
+					</td>
+				</tr>
+			{/each}
+			</tbody>
+		</table>
+
 	</section>
 
 	<section>

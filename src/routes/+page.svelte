@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
 	import { formateDateTime } from '$lib/utils/dateUtils';
-	import { getTotalNumberOfGuests } from '$lib/utils/festivalEventUtils';
+	import { getTotalNumberOfComingGuests } from '$lib/utils/festivalEventUtils';
 
 	export let data: { festivalEvents: FrontendFestivalEvent[] };
 </script>
@@ -16,7 +16,7 @@
 				<a href="/festival/{loadedEvent.id}">{loadedEvent.name}</a>
 				<p>
 					Von <a href="/user/{loadedEvent.createdBy.id}">{loadedEvent.createdBy.nickname}</a>
-					<span>Bisherige Gäste: {getTotalNumberOfGuests(loadedEvent)}</span>
+					<span>Bisherige Gäste: {getTotalNumberOfComingGuests(loadedEvent)}</span>
 				</p>
 			</article>
 		{/each}

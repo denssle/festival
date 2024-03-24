@@ -1,8 +1,10 @@
 import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
+import { FrontendGuestInformation } from '$lib/models/FrontendGuestInformation';
 
-export function getTotalNumberOfGuests(festival: FrontendFestivalEvent): number {
-	let result: number = festival.frontendGuestInformation.length;
-	for (const information of festival.frontendGuestInformation) {
+export function getTotalNumberOfComingGuests(festival: FrontendFestivalEvent): number {
+	const filtered: FrontendGuestInformation[] = festival.frontendGuestInformation.filter((value) => value.coming);
+	let result: number = filtered.length;
+	for (const information of filtered) {
 		result += information.numberOfOtherGuests;
 	}
 	return result;
