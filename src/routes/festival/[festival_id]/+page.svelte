@@ -148,8 +148,20 @@
 	<section>
 		<button on:click={editFestival}>Bearbeiten</button>
 		<button on:click={deleteFestival}>Löschen</button>
-		<button on:click={leaveFestival}>Absagen</button>
-		<button on:click={joinFestival}>Mitmachen</button>
+		<button on:click={leaveFestival}>
+			{#if data.guestInformation?.coming}
+				Absagen
+			{:else}
+				Absage bearbeiten
+			{/if}
+		</button>
+		<button on:click={joinFestival}>
+			{#if data.guestInformation?.coming}
+				Zusage bearbeiten
+			{:else}
+				Zusagen
+			{/if}
+		</button>
 		<a class="button" href="/">Zurück</a>
 	</section>
 </article>
