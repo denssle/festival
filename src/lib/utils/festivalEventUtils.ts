@@ -9,3 +9,7 @@ export function getTotalNumberOfComingGuests(festival: FrontendFestivalEvent): n
 	}
 	return result;
 }
+
+export function getTotalNumberOfNotComingGuests(festival: FrontendFestivalEvent): number {
+	return festival.frontendGuestInformation.filter((value) => !value.coming).length;
+}
