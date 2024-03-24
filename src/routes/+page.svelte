@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
-	import { formateDateTime } from '$lib/utils/dateUtils';
 	import { getTotalNumberOfComingGuests } from '$lib/utils/festivalEventUtils';
 
 	export let data: { festivalEvents: FrontendFestivalEvent[] };

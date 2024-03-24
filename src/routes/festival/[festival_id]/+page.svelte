@@ -15,6 +15,7 @@
 	import type { FestivalTransferData } from '$lib/models/FestivalTransferData';
 
 	export let data: FestivalTransferData;
+
 	async function editFestival(): Promise<void> {
 		if (data.yourFestival) {
 			goto('/festival/' + data.festival.id + '/edit');
@@ -61,7 +62,7 @@
 						method: 'POST',
 						body: JSON.stringify(eventData)
 					}).then(() => {
-						invalidateAll();
+						afterRequest();
 					});
 				}
 			};
@@ -77,10 +78,30 @@
 						method: 'POST',
 						body: cancelInvitationDialogData.comment
 					}).then(() => {
-						invalidateAll();
+						afterRequest();
 					});
 				}
 			};
+		}
+	}
+
+	function afterRequest(): void {
+		invalidateAll().then(() => {
+			updateButtonLabels()
+		});
+	}
+	let joinFestivalButtonText = 'Anmelden';
+	let leaveFestivalButtonText = 'Absagen';
+	updateButtonLabels();
+	function updateButtonLabels() {
+		joinFestivalButtonText = 'Anmelden';
+		leaveFestivalButtonText = 'Absagen';
+		if (data.guestInformation) {
+			if (data.guestInformation.coming) {
+				joinFestivalButtonText = 'Anmeldung bearbeiten';
+			} else {
+				leaveFestivalButtonText = 'Absagen bearbeiten';
+			}
 		}
 	}
 
@@ -148,20 +169,8 @@
 	<section>
 		<button on:click={editFestival}>Bearbeiten</button>
 		<button on:click={deleteFestival}>Löschen</button>
-		<button on:click={leaveFestival}>
-			{#if data.guestInformation?.coming}
-				Absagen
-			{:else}
-				Absage bearbeiten
-			{/if}
-		</button>
-		<button on:click={joinFestival}>
-			{#if data.guestInformation?.coming}
-				Zusage bearbeiten
-			{:else}
-				Zusagen
-			{/if}
-		</button>
+		<button on:click={leaveFestival}>{leaveFestivalButtonText}</button>
+		<button on:click={joinFestival}>{joinFestivalButtonText}</button>
 		<a class="button" href="/">Zurück</a>
 	</section>
 </article>
