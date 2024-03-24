@@ -11,19 +11,22 @@
 		if (isOwnProfil) {
 			fileInput.click();
 		} else {
-			infoDialogData.infoDialogText = 'Leider kannst du nur dein eigenes Profil ändern. ';
-			infoDialogData.showDialog = true;
+			openDialog('Leider kannst du nur dein eigenes Profil ändern. ');
 		}
 	}
 
 	function getBase64(image: File): void {
-		const reader = new FileReader();
-		reader.readAsDataURL(image);
-		reader.onload = (e: ProgressEvent<FileReader>) => {
-			if (e.target && e.target.result && typeof e.target.result === 'string') {
-				uploadFunction(e.target.result);
-			}
-		};
+		if (image.size < 1048576) {
+			const reader = new FileReader();
+			reader.readAsDataURL(image);
+			reader.onload = (e: ProgressEvent<FileReader>) => {
+				if (e.target && e.target.result && typeof e.target.result === 'string') {
+					uploadFunction(e.target.result);
+				}
+			};
+		} else {
+			openDialog('Bild zu groß. ');
+		}
 	}
 
 	async function uploadFunction(imgBase64: string): Promise<void> {
@@ -37,17 +40,24 @@
 		})
 			.then((value: Response) => {
 				if (value.ok) {
-					infoDialogData.infoDialogText = 'Bild erfolgreich hochgeladen und gespeichert. ';
-					infoDialogData.showDialog = true;
+					openDialog('Bild erfolgreich hochgeladen und gespeichert. ');
+				} else {
+					openDialog('Bildupload gescheitert. ');
 				}
 			})
 			.catch((reason) => error(reason));
 	}
 
+	function openDialog(msg: string) {
+		infoDialogData.infoDialogText = msg;
+		infoDialogData.showDialog = true;
+	}
+
 	let infoDialogData: InfoDialogData = {
 		showDialog: false,
 		infoDialogText: '',
-		dialog: undefined
+		dialog: undefined,
+		answerYes: false
 	};
 </script>
 
