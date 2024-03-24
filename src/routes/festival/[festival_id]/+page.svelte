@@ -87,7 +87,7 @@
 
 	function afterRequest(): void {
 		invalidateAll().then(() => {
-			updateButtonLabels()
+			updateButtonLabels();
 		});
 	}
 	let joinFestivalButtonText = 'Anmelden';
@@ -146,7 +146,10 @@
 	<section>
 		<h4>{data.festival.name}</h4>
 		<sub>Starting: {formateDateTime(data.festival.startDate)}</sub>
-		<sub>Erstellt am {dateToDDMMYYYY(data.festival.createdAt)} von {data.festival.createdBy?.nickname}</sub>
+		<sub
+			>Erstellt am {dateToDDMMYYYY(data.festival.createdAt)} von
+			<a href="/user/{data.festival.createdBy?.id}">{data.festival.createdBy?.nickname}</a>
+		</sub>
 
 		<p>{data.festival.description}</p>
 

@@ -62,7 +62,7 @@ test('3 visitors', () => {
 			food: '',
 			numberOfOtherGuests: 2,
 			user: getTestUser(),
-			coming: false,
+			coming: true,
 			comment: ''
 		}
 	];
