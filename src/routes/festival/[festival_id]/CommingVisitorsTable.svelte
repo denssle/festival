@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getTotalNumberOfComingGuests } from '$lib/utils/festivalEventUtils.js';
-	import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent.js';
-	export let data: { festival: FrontendFestivalEvent; yourFestival: boolean; visitor: boolean };
+	import type { FestivalTransferData } from '$lib/models/FestivalTransferData';
+	export let data: FestivalTransferData;
 </script>
 
 <section>

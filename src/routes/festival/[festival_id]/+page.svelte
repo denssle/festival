@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { goto, invalidateAll } from '$app/navigation';
-	import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
 	import { dateToDDMMYYYY, formateDateTime } from '$lib/utils/dateUtils';
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
 	import JoinEventDialog from './join/JoinEventDialog.svelte';
@@ -13,8 +12,9 @@
 	import CancelInvitationDialog from './cancel-invitation/CancelInvitationDialog.svelte';
 	import ComingVisitorsTable from './CommingVisitorsTable.svelte';
 	import NotComingVisitorsTable from './NotCommingVisitorsTable.svelte';
+	import type { FestivalTransferData } from '$lib/models/FestivalTransferData';
 
-	export let data: { festival: FrontendFestivalEvent; yourFestival: boolean; visitor: boolean };
+	export let data: FestivalTransferData;
 	async function editFestival(): Promise<void> {
 		if (data.yourFestival) {
 			goto('/festival/' + data.festival.id + '/edit');
@@ -87,7 +87,7 @@
 	let cancelInvitationDialogData: CancelInvitationDialogData = {
 		showDialog: false,
 		dialog: undefined,
-		comment: '',
+		comment: data.guestInformation?.comment ?? '',
 		answerYes: false
 	};
 	let infoDialogData: InfoDialogData = {
@@ -100,12 +100,12 @@
 		showDialog: false,
 		bringYourOwnBottle: data.festival.bringYourOwnBottle,
 		bringYourOwnFood: data.festival.bringYourOwnFood,
-		food: '',
-		drink: '',
-		numberOfOtherGuests: 0,
+		food: data.guestInformation?.food ?? '',
+		drink: data.guestInformation?.drink ?? '',
+		numberOfOtherGuests: data.guestInformation?.numberOfOtherGuests ?? 0,
 		dialog: undefined,
 		coming: true,
-		comment: '',
+		comment: data.guestInformation?.comment ?? '',
 		answerYes: false
 	};
 	let questionDialogData: QuestionDialogData = {
