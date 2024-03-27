@@ -90,17 +90,17 @@
 			updateButtonLabels();
 		});
 	}
-	let joinFestivalButtonText = 'Anmelden';
+	let joinFestivalButtonText = 'Zusagen';
 	let leaveFestivalButtonText = 'Absagen';
 	updateButtonLabels();
 	function updateButtonLabels() {
-		joinFestivalButtonText = 'Anmelden';
+		joinFestivalButtonText = 'Zusagen';
 		leaveFestivalButtonText = 'Absagen';
 		if (data.guestInformation) {
 			if (data.guestInformation.coming) {
-				joinFestivalButtonText = 'Anmeldung bearbeiten';
+				joinFestivalButtonText = 'Zusage bearbeiten';
 			} else {
-				leaveFestivalButtonText = 'Absagen bearbeiten';
+				leaveFestivalButtonText = 'Absage bearbeiten';
 			}
 		}
 	}
