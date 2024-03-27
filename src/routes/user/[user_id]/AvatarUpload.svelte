@@ -71,5 +71,5 @@
 		bind:this={fileInput}
 		on:change={() => getBase64(files[0])}
 	/>
-	<button on:click={() => onUpload()}>Upload</button>
+	<button on:click={() => onUpload()}>Bild hochladen</button>
 </div>
