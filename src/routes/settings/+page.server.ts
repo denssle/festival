@@ -2,8 +2,10 @@ import type { PageServerLoad } from '../../../.svelte-kit/types/src/routes/$type
 import type { Actions, Cookies } from '@sveltejs/kit';
 import type { BackendUser } from '$lib/models/BackendUser';
 import * as userService from '$lib/services/user-service';
-import { createSessionCookie } from '$lib/services/user-service';
+import { createSessionCookie, nickNameInvalid, readFormDataFrontEndUser } from '$lib/services/user-service';
 import type { FrontendUser } from '$lib/models/FrontendUser';
+import type { UserFormData } from '$lib/models/UserFormData';
+import { StandardResponse } from '$lib/models/StandardResponse';
 
 export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): Promise<FrontendUser | null> => {
 	const extractUser: BackendUser | null = userService.extractUser(cookies.get('session'));
@@ -14,11 +16,20 @@ export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): P
 };
 
 export const actions: Actions = {
-	default: async ({ cookies, request }): Promise<Response> => {
+	default: async ({ cookies, request }): Promise<StandardResponse> => {
 		const oldUser: BackendUser | null = userService.extractUser(cookies.get('session'));
 		if (oldUser) {
-			createSessionCookie(cookies, await userService.updateUser(oldUser, request.formData()));
+			const formData: UserFormData = await readFormDataFrontEndUser(request.formData());
+			if (oldUser.nickname !== formData.nickname) {
+				const invalidNickname: boolean = await nickNameInvalid(formData.nickname);
+				console.log('invalid nick', invalidNickname);
+				if (invalidNickname) {
+					return { success: false, message: 'Nickname invalid!' };
+				}
+			}
+			createSessionCookie(cookies, await userService.updateUser(oldUser, formData));
+			return { success: true, message: 'Updated user' };
 		}
-		return new Response(null, { status: 500 });
+		return { success: false, message: 'Update failed!' };
 	}
 };

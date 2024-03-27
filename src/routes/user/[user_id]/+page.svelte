@@ -7,14 +7,14 @@
 </script>
 
 <article>
-	<h2>Benutzer</h2>
+	<h2>Benutzer <strong>{data.user.nickname}</strong></h2>
 	<section style="display: flex">
 		<AvatarImage userId={data.user.id} />
 		<AvatarUpload isOwnProfil={data.isOwnProfil} />
 	</section>
 	<section>
-		<strong>{data.user.nickname}</strong>
 		<p>
+			<b>Name:</b>
 			{#if data.user.forename}
 				{data.user.forename}
 			{/if}

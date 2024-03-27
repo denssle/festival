@@ -134,7 +134,7 @@ export async function readFormDataFrontEndUser(data: Promise<FormData>): Promise
 	};
 }
 
-export function createSessionCookie(cookies: Cookies, user: BackendUser) {
+export function createSessionCookie(cookies: Cookies, user: BackendUser): void {
 	// TODO: nicht den ganzen BackendUser speichern
 	cookies.set('session', JSON.stringify(user), {
 		path: '/',
@@ -143,14 +143,11 @@ export function createSessionCookie(cookies: Cookies, user: BackendUser) {
 	});
 }
 
-export async function updateUser(oldUser: BackendUser, formDataPromise: Promise<FormData>): Promise<BackendUser> {
-	const formData: UserFormData = await readFormDataFrontEndUser(formDataPromise);
+export async function updateUser(oldUser: BackendUser, formData: UserFormData): Promise<BackendUser> {
 	if (formData.nickname) {
 		if (oldUser.nickname !== formData.nickname) {
-			if (!(await nickNameInvalid(formData.nickname))) {
-				redis.del(oldUser.nickname);
-				oldUser.nickname = formData.nickname;
-			}
+			redis.del(oldUser.nickname);
+			oldUser.nickname = formData.nickname;
 		}
 		oldUser.email = formData.email;
 		oldUser.forename = formData.forename;
@@ -159,6 +156,8 @@ export async function updateUser(oldUser: BackendUser, formDataPromise: Promise<
 			oldUser.password = saltPassword(formData.password);
 		}
 		await saveUser(oldUser);
+	} else {
+		console.log('updateUser: no nickname', formData);
 	}
 	return oldUser;
 }

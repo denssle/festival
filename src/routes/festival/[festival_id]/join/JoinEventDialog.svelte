@@ -1,12 +1,11 @@
 <script lang="ts">
 	import type { JoinEventDialogData } from '$lib/models/dialogData/JoinEventDialogData';
+	import BaseDialog from '$lib/sharedComponents/BaseDialog.svelte';
 
 	export let joinDialogData: JoinEventDialogData;
-
-	$: if (joinDialogData.dialog && joinDialogData.showDialog) joinDialogData.dialog.showModal();
 </script>
 
-<dialog bind:this={joinDialogData.dialog} on:close={() => (joinDialogData.showDialog = false)}>
+<BaseDialog bind:dialogData={joinDialogData} buttonLabels={{ yes: 'Beitreten', no: 'Zurück' }}>
 	<h4>Bei dem Event bin ich dabei!</h4>
 
 	<section>
@@ -25,7 +24,7 @@
 		{#if joinDialogData.bringYourOwnFood}
 			<span>Hinweis: Das ist eine Mitbringparty.</span>
 		{:else}
-			<span>Hinweis: Das ist <strong>keine</strong> Mitbringparty.</span>
+			<span>Hinweis: Das ist <mark>keine</mark> Mitbringparty.</span>
 		{/if}
 	</section>
 
@@ -38,9 +37,7 @@
 		{#if joinDialogData.bringYourOwnBottle}
 			<span>Hinweis: Das ist eine Mitbringparty.</span>
 		{:else}
-			<span>Hinweis: Das ist <strong>keine</strong> Mitbringparty.</span>
+			<span>Hinweis: Das ist <mark>keine</mark> Mitbringparty.</span>
 		{/if}
 	</section>
-
-	<button on:click={() => joinDialogData.dialog?.close()}> Beitreten </button>
-</dialog>
+</BaseDialog>

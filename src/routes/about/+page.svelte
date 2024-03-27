@@ -7,18 +7,23 @@
 <article>
 	<h2>Über diese Seite</h2>
 	<section>
-		<p>Diese Seite wurde erstellt mit <a href="https://kit.svelte.dev/">svelte</a>.</p>
 		<p>
-			Das Styling kommt von <a href="https://simplecss.org/">simple css </a> und die Daten werden gespeichert in einer
+			Diese Seite wurde erstellt mit <a href="https://kit.svelte.dev/">svelte</a>. Das Styling kommt von
+			<a href="https://simplecss.org/">simple css </a>
+			und die Daten werden gespeichert in einer
 			<a href="https://redis.io/">redis</a>
 			Datenbank auf <a href="https://upstash.com/">upstash</a>.
 		</p>
-		<p>
+	</section>
+	<section>
+		<img src={uberspaceBanner} alt="uberspace Banner" class="center" />
+		<p style="text-align: center">
 			Die Seite ist gehostet auf <a href="https://uberspace.de/">uberspace</a>.
 		</p>
-		<img src={uberspaceBanner} alt="uberspace Banner" class="center" />
 	</section>
-	<p>Version: {data.version}</p>
+	<section>
+		<p>Version: {data.version}</p>
+	</section>
 </article>
 
 <style>

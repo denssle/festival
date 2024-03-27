@@ -1,5 +1,5 @@
-import type { JoinEventData } from '$lib/models/JoinEventData';
+import type { BaseGuestInformation } from '$lib/models/BaseGuestInformation';
 
-export interface BackendGuestInformation extends JoinEventData {
+export interface BackendGuestInformation extends BaseGuestInformation {
 	userId: string;
 }

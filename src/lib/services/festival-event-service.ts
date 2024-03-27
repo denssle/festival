@@ -6,7 +6,7 @@ import type { FrontendUser } from '../models/FrontendUser';
 import { loadFrontEndUserById } from './user-service';
 import { getUTCNow, convertUTCToLocalDate } from '../utils/dateUtils';
 import type { BackendGuestInformation } from '$lib/models/BackendGuestInformation';
-import type { JoinEventData } from '$lib/models/JoinEventData';
+import type { BaseGuestInformation } from '$lib/models/BaseGuestInformation';
 import type { FrontendGuestInformation } from '$lib/models/FrontendGuestInformation';
 
 export async function getAllFestivals(): Promise<FrontendFestivalEvent[]> {
@@ -39,6 +39,7 @@ async function getFestival(id: string): Promise<BackendFestivalEvent | null> {
 	if (mayBeFestival) {
 		return parseStringToFestival(mayBeFestival);
 	}
+	console.log("getFestival: no festival found for id", id);
 	return null;
 }
 
@@ -117,45 +118,60 @@ export async function deleteFestival(user: BackendUser | null, festivalId: strin
 export async function joinFestival(
 	user: BackendUser | null,
 	festivalId: string,
-	eventData: JoinEventData
+	eventData: BaseGuestInformation
 ): Promise<void> {
 	if (user && festivalId) {
 		const festival: BackendFestivalEvent | null = await getFestival(festivalId);
 		if (festival) {
-			if (isVisitor(festival, user.id)) {
-				console.log('Can´t add user because already existing!');
+			const find: BackendGuestInformation | undefined = festival.guestInformation.find((value: BackendGuestInformation) => value.userId === user.id);
+			if (find) {
+				find.coming = true;
+				find.comment = eventData.comment;
+
+				find.food = eventData.food;
+				find.drink = eventData.drink;
+				find.numberOfOtherGuests = eventData.numberOfOtherGuests;
 			} else {
 				festival.guestInformation.push({
 					userId: user.id,
 					food: eventData.food,
 					drink: eventData.drink,
-					numberOfOtherGuests: eventData.numberOfOtherGuests
+					numberOfOtherGuests: eventData.numberOfOtherGuests,
+					comment: eventData.comment,
+					coming: true
 				});
-				redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
 			}
+			redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
 		}
+	} else {
+		console.log("joinFestival: no user and festivalId", user, festivalId);
 	}
 }
 
-export async function leaveFestival(user: BackendUser | null, festivalId: string): Promise<void> {
+export async function leaveFestival(user: BackendUser | null, festivalId: string, comment: string): Promise<void> {
 	if (user && festivalId) {
 		const festival: BackendFestivalEvent | null = await getFestival(festivalId);
 		if (festival) {
-			const find: BackendGuestInformation | undefined = festival.guestInformation.find(
-				(value) => value.userId === user.id
-			);
+			const find: BackendGuestInformation | undefined = festival.guestInformation.find((value: BackendGuestInformation) => value.userId === user.id);
 			if (find) {
-				festival.guestInformation.splice(festival.guestInformation.indexOf(find), 1);
-				redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
+				find.coming = false;
+				find.comment = comment;
+			} else {
+				festival.guestInformation.push({
+					userId: user.id,
+					food: '',
+					drink: '',
+					numberOfOtherGuests: 0,
+					comment: comment,
+					coming: false
+				});
 			}
+			redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
 		}
+	} else {
+		console.log("leaveFestival: no user and festivalId", user, festivalId);
 	}
 }
-
-function isVisitor(festival: BackendFestivalEvent, userId: string): boolean {
-	return Boolean(festival.guestInformation.find((value) => value.userId === userId));
-}
-
 export function isVisitorOfFestival(festival: FrontendFestivalEvent, user: BackendUser) {
 	const find: BackendGuestInformation | undefined = festival.frontendGuestInformation.find(
 		(value) => value.userId === user.id

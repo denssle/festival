@@ -5,9 +5,10 @@ import type {
 import { error } from '@sveltejs/kit';
 import type { Cookies } from '@sveltejs/kit';
 import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
-import { getFrontEndFestival, isVisitorOfFestival } from '$lib/services/festival-event-service';
+import { getFrontEndFestival } from '$lib/services/festival-event-service';
 import type { BackendUser } from '$lib/models/BackendUser';
 import { extractUser } from '$lib/services/user-service';
+import type { FestivalTransferData } from '$lib/models/FestivalTransferData';
 
 export const load: PageServerLoad = async ({
 	cookies,
@@ -15,7 +16,7 @@ export const load: PageServerLoad = async ({
 }: {
 	cookies: Cookies;
 	params: RouteParams;
-}): Promise<{ festival: FrontendFestivalEvent; yourFestival: boolean; visitor: boolean }> => {
+}): Promise<FestivalTransferData> => {
 	const festival_id: string = params.festival_id;
 	if (festival_id) {
 		const festival: FrontendFestivalEvent | null = await getFrontEndFestival(festival_id);
@@ -25,7 +26,7 @@ export const load: PageServerLoad = async ({
 				return {
 					festival: festival,
 					yourFestival: user.id === festival.createdBy?.id,
-					visitor: isVisitorOfFestival(festival, user)
+					guestInformation: festival.frontendGuestInformation.find(value => value.userId === user.id)
 				};
 			}
 		}

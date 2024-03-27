@@ -1,17 +1,20 @@
 <script lang="ts">
 	import { goto, invalidateAll } from '$app/navigation';
-	import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
 	import { dateToDDMMYYYY, formateDateTime } from '$lib/utils/dateUtils';
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
-	import JoinEventDialog from './JoinEventDialog.svelte';
+	import JoinEventDialog from './join/JoinEventDialog.svelte';
 	import type { JoinEventDialogData } from '$lib/models/dialogData/JoinEventDialogData';
 	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
-	import type { JoinEventData } from '$lib/models/JoinEventData';
+	import type { BaseGuestInformation } from '$lib/models/BaseGuestInformation';
 	import QuestionDialog from '$lib/sharedComponents/QuestionDialog.svelte';
 	import type { QuestionDialogData } from '$lib/models/dialogData/QuestionDialogData';
-	import { getTotalNumberOfGuests } from '$lib/utils/festivalEventUtils';
+	import type { CancelInvitationDialogData } from '$lib/models/dialogData/CancelInvitationDialogData';
+	import CancelInvitationDialog from './cancel-invitation/CancelInvitationDialog.svelte';
+	import ComingVisitorsTable from './CommingVisitorsTable.svelte';
+	import NotComingVisitorsTable from './NotCommingVisitorsTable.svelte';
+	import type { FestivalTransferData } from '$lib/models/FestivalTransferData';
 
-	export let data: { festival: FrontendFestivalEvent; yourFestival: boolean; visitor: boolean };
+	export let data: FestivalTransferData;
 
 	async function editFestival(): Promise<void> {
 		if (data.yourFestival) {
@@ -44,55 +47,87 @@
 	}
 
 	function joinFestival(): void {
-		if (data.visitor) {
-			infoDialogData.infoDialogText = 'Du bist bereits dabei!';
-			infoDialogData.showDialog = true;
-		} else {
-			joinDialogData.showDialog = true;
-			if (joinDialogData.dialog) {
-				joinDialogData.dialog.onclose = () => {
-					const eventData: JoinEventData = {
+		joinDialogData.showDialog = true;
+		if (joinDialogData.dialog) {
+			joinDialogData.dialog.onclose = () => {
+				if (joinDialogData.answerYes) {
+					const eventData: BaseGuestInformation = {
 						food: joinDialogData.food,
 						drink: joinDialogData.drink,
-						numberOfOtherGuests: joinDialogData.numberOfOtherGuests
+						numberOfOtherGuests: joinDialogData.numberOfOtherGuests,
+						coming: true,
+						comment: ''
 					};
 					fetch('/festival/' + data.festival.id + '/join', {
 						method: 'POST',
 						body: JSON.stringify(eventData)
 					}).then(() => {
-						invalidateAll();
+						afterRequest();
 					});
-				};
-			}
+				}
+			};
 		}
 	}
 
 	function leaveFestival(): void {
-		if (data.visitor) {
-			fetch('/festival/' + data.festival.id + '/leave', {
-				method: 'POST'
-			}).then(() => {
-				invalidateAll();
-			});
-		} else {
-			infoDialogData.infoDialogText = 'Wärst du angemeldet gewesen, wärst du es jetzt nicht mehr.';
-			infoDialogData.showDialog = true;
+		cancelInvitationDialogData.showDialog = true;
+		if (cancelInvitationDialogData.dialog) {
+			cancelInvitationDialogData.dialog.onclose = () => {
+				if (cancelInvitationDialogData.answerYes) {
+					fetch('/festival/' + data.festival.id + '/cancel-invitation', {
+						method: 'POST',
+						body: cancelInvitationDialogData.comment
+					}).then(() => {
+						afterRequest();
+					});
+				}
+			};
 		}
 	}
 
+	function afterRequest(): void {
+		invalidateAll().then(() => {
+			updateButtonLabels();
+		});
+	}
+	let joinFestivalButtonText = 'Anmelden';
+	let leaveFestivalButtonText = 'Absagen';
+	updateButtonLabels();
+	function updateButtonLabels() {
+		joinFestivalButtonText = 'Anmelden';
+		leaveFestivalButtonText = 'Absagen';
+		if (data.guestInformation) {
+			if (data.guestInformation.coming) {
+				joinFestivalButtonText = 'Anmeldung bearbeiten';
+			} else {
+				leaveFestivalButtonText = 'Absagen bearbeiten';
+			}
+		}
+	}
+
+	let cancelInvitationDialogData: CancelInvitationDialogData = {
+		showDialog: false,
+		dialog: undefined,
+		comment: data.guestInformation?.comment ?? '',
+		answerYes: false
+	};
 	let infoDialogData: InfoDialogData = {
 		showDialog: false,
 		infoDialogText: '',
-		dialog: undefined
+		dialog: undefined,
+		answerYes: false
 	};
 	let joinDialogData: JoinEventDialogData = {
 		showDialog: false,
 		bringYourOwnBottle: data.festival.bringYourOwnBottle,
 		bringYourOwnFood: data.festival.bringYourOwnFood,
-		food: '',
-		drink: '',
-		numberOfOtherGuests: 0,
-		dialog: undefined
+		food: data.guestInformation?.food ?? '',
+		drink: data.guestInformation?.drink ?? '',
+		numberOfOtherGuests: data.guestInformation?.numberOfOtherGuests ?? 0,
+		dialog: undefined,
+		coming: true,
+		comment: data.guestInformation?.comment ?? '',
+		answerYes: false
 	};
 	let questionDialogData: QuestionDialogData = {
 		showDialog: false,
@@ -105,12 +140,16 @@
 <InfoDialog bind:infoDialogData />
 <JoinEventDialog bind:joinDialogData />
 <QuestionDialog bind:questionDialogData />
+<CancelInvitationDialog bind:cancelInvitationDialogData />
 
 <article>
 	<section>
 		<h4>{data.festival.name}</h4>
 		<sub>Starting: {formateDateTime(data.festival.startDate)}</sub>
-		<sub>Erstellt am {dateToDDMMYYYY(data.festival.createdAt)} von {data.festival.createdBy?.nickname}</sub>
+		<sub
+			>Erstellt am {dateToDDMMYYYY(data.festival.createdAt)} von
+			<a href="/user/{data.festival.createdBy?.id}">{data.festival.createdBy?.nickname}</a>
+		</sub>
 
 		<p>{data.festival.description}</p>
 
@@ -126,55 +165,15 @@
 		</label>
 	</section>
 
-	<section>
-		{#if data.festival.frontendGuestInformation.length}
-			<p>Bisher haben sich angemeldet:</p>
-			<table style="width: 100%">
-				<thead>
-					<tr>
-						<th>Name</th>
-						<th>Essen</th>
-						<th>Trinken</th>
-						<th>Weitere Gäste</th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each data.festival.frontendGuestInformation as guest}
-						<tr>
-							<td>
-								<a href="/user/{guest.userId}">{guest.user.nickname}</a>
-							</td>
-							<td>
-								{guest.food}
-							</td>
-							<td>
-								{guest.drink}
-							</td>
-							<td>
-								{guest.numberOfOtherGuests}
-							</td>
-						</tr>
-					{/each}
-				</tbody>
-				<tfoot>
-					<tr>
-						<td>Summe</td>
-						<td></td>
-						<td></td>
-						<td>{getTotalNumberOfGuests(data.festival)}</td>
-					</tr>
-				</tfoot>
-			</table>
-		{:else}
-			<p>Es hat sich noch niemand angemeldet.</p>
-		{/if}
-	</section>
+	<ComingVisitorsTable {data} />
+
+	<NotComingVisitorsTable {data} />
 
 	<section>
 		<button on:click={editFestival}>Bearbeiten</button>
 		<button on:click={deleteFestival}>Löschen</button>
-		<button on:click={leaveFestival}>Absagen</button>
-		<button on:click={joinFestival}>Mitmachen</button>
+		<button on:click={leaveFestival}>{leaveFestivalButtonText}</button>
+		<button on:click={joinFestival}>{joinFestivalButtonText}</button>
 		<a class="button" href="/">Zurück</a>
 	</section>
 </article>

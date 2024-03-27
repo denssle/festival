@@ -66,6 +66,7 @@
 		-webkit-user-select: none; /*Safari*/
 		-moz-user-select: none; /*Firefox*/
 		caret-color: transparent;
+		min-width: 8vw;
 	}
 
 	:global(input::-webkit-outer-spin-button) {

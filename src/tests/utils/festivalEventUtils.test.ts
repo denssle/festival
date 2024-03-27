@@ -1,5 +1,5 @@
 import { test } from '@jest/globals';
-import { getTotalNumberOfGuests } from '../../lib/utils/festivalEventUtils';
+import { getTotalNumberOfComingGuests } from '../../lib/utils/festivalEventUtils';
 
 import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
 import type { FrontendUser } from '$lib/models/FrontendUser';
@@ -34,7 +34,7 @@ function getTestFestival(): FrontendFestivalEvent {
 }
 
 test('0 visitors', () => {
-	expect(getTotalNumberOfGuests(getTestFestival())).toBe(0);
+	expect(getTotalNumberOfComingGuests(getTestFestival())).toBe(0);
 });
 
 test('1 visitors', () => {
@@ -45,10 +45,12 @@ test('1 visitors', () => {
 			drink: '',
 			food: '',
 			numberOfOtherGuests: 0,
-			user: getTestUser()
+			user: getTestUser(),
+			coming: true,
+			comment: ''
 		}
 	];
-	expect(getTotalNumberOfGuests(festival)).toBe(1);
+	expect(getTotalNumberOfComingGuests(festival)).toBe(1);
 });
 
 test('3 visitors', () => {
@@ -59,8 +61,10 @@ test('3 visitors', () => {
 			drink: '',
 			food: '',
 			numberOfOtherGuests: 2,
-			user: getTestUser()
+			user: getTestUser(),
+			coming: true,
+			comment: ''
 		}
 	];
-	expect(getTotalNumberOfGuests(festival)).toBe(3);
+	expect(getTotalNumberOfComingGuests(festival)).toBe(3);
 });
