@@ -26,7 +26,7 @@ export const load: PageServerLoad = async ({
 				return {
 					festival: festival,
 					yourFestival: user.id === festival.createdBy?.id,
-					guestInformation: festival.frontendGuestInformation.find(value => value.userId === user.id)
+					guestInformation: festival.frontendGuestInformation.find((value) => value.userId === user.id)
 				};
 			}
 		}

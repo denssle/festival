@@ -39,7 +39,7 @@ async function getFestival(id: string): Promise<BackendFestivalEvent | null> {
 	if (mayBeFestival) {
 		return parseStringToFestival(mayBeFestival);
 	}
-	console.log("getFestival: no festival found for id", id);
+	console.log('getFestival: no festival found for id', id);
 	return null;
 }
 
@@ -123,7 +123,9 @@ export async function joinFestival(
 	if (user && festivalId) {
 		const festival: BackendFestivalEvent | null = await getFestival(festivalId);
 		if (festival) {
-			const find: BackendGuestInformation | undefined = festival.guestInformation.find((value: BackendGuestInformation) => value.userId === user.id);
+			const find: BackendGuestInformation | undefined = festival.guestInformation.find(
+				(value: BackendGuestInformation) => value.userId === user.id
+			);
 			if (find) {
 				find.coming = true;
 				find.comment = eventData.comment;
@@ -144,7 +146,7 @@ export async function joinFestival(
 			redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
 		}
 	} else {
-		console.log("joinFestival: no user and festivalId", user, festivalId);
+		console.log('joinFestival: no user and festivalId', user, festivalId);
 	}
 }
 
@@ -152,7 +154,9 @@ export async function leaveFestival(user: BackendUser | null, festivalId: string
 	if (user && festivalId) {
 		const festival: BackendFestivalEvent | null = await getFestival(festivalId);
 		if (festival) {
-			const find: BackendGuestInformation | undefined = festival.guestInformation.find((value: BackendGuestInformation) => value.userId === user.id);
+			const find: BackendGuestInformation | undefined = festival.guestInformation.find(
+				(value: BackendGuestInformation) => value.userId === user.id
+			);
 			if (find) {
 				find.coming = false;
 				find.comment = comment;
@@ -169,7 +173,7 @@ export async function leaveFestival(user: BackendUser | null, festivalId: string
 			redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
 		}
 	} else {
-		console.log("leaveFestival: no user and festivalId", user, festivalId);
+		console.log('leaveFestival: no user and festivalId', user, festivalId);
 	}
 }
 export function isVisitorOfFestival(festival: FrontendFestivalEvent, user: BackendUser) {

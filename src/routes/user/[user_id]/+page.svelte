@@ -10,7 +10,14 @@
 	<h2>Benutzer <strong>{data.user.nickname}</strong></h2>
 	<section style="display: flex">
 		<AvatarImage userId={data.user.id} />
-		<AvatarUpload isOwnProfil={data.isOwnProfil} />
+		<div>
+			<AvatarUpload isOwnProfil={data.isOwnProfil} />
+			{#if !data.isOwnProfil}
+				<div>
+					<button>Anfreunden</button>
+				</div>
+			{/if}
+		</div>
 	</section>
 	<section>
 		<p>
