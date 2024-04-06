@@ -1,6 +1,7 @@
 import type { Handle } from '@sveltejs/kit';
 import * as userController from '$lib/services/user-service';
 import type { BackendUser } from '$lib/models/BackendUser';
+import { sequelize, startDB } from '$lib/db/db';
 
 // https://kit.svelte.dev/docs/hooks
 const noAuthURLs: string[] = ['/login', '/registration', '/about', '/impressum'];
@@ -34,3 +35,5 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 	}
 	return resolve(event);
 };
+
+startDB();
