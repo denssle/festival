@@ -1,5 +1,11 @@
 import { expect, test } from '@jest/globals';
-import { convertUTCToLocalDate, dateToString, getUTCFromString, getUTCNow } from '../../lib/utils/dateUtils';
+import {
+	convertUTCToLocalDate, dateToDDMMYYYY, dateToHHMM,
+	dateToHHMMSS,
+	dateToString, formateDateTime,
+	getUTCFromString,
+	getUTCNow
+} from '../../lib/utils/dateUtils';
 
 const fiveOfDecember: string = '2023-12-05';
 
@@ -58,7 +64,6 @@ test('test dateToString with null', () => {
 	expect(dateToString(null)).toBe('');
 });
 
-/* TODO Lösung finden die die lokale Zeit berücksichtigt
 test('test dateToTimeString', () => {
 	expect(dateToHHMM(convertUTCToLocalDate(1701777600000))).toBe('13:00');
 });
@@ -74,7 +79,6 @@ test('test formateDate', () => {
 test('test formateTime', () => {
 	expect(dateToHHMMSS(convertUTCToLocalDate(1701777600000))).toBe('13:00:00');
 });
- */
 
 test('test getUTCNow', () => {
 	const now: Date = new Date();

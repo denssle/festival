@@ -16,7 +16,7 @@ export type GuestInformationAttributes = {
 	UserId: string;
 };
 
-export async function convertToFrontendGuestInformation(
+export async function mapToFrontendGuestInformation(
 	dataValues: GuestInformationAttributes
 ): Promise<FrontendGuestInformation> {
 	return {
@@ -29,7 +29,7 @@ export async function convertToFrontendGuestInformation(
 	};
 }
 
-export function convertToBackendGuestInformation(dataValues: GuestInformationAttributes): BackendGuestInformation {
+export function mapToBackendGuestInformation(dataValues: GuestInformationAttributes): BackendGuestInformation {
 	return {
 		UserId: dataValues.UserId,
 		FestivalEventId: dataValues.festivalEventId,

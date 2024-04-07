@@ -8,8 +8,8 @@ import type { BaseGuestInformation } from '$lib/models/guestInformation/BaseGues
 import type { FrontendGuestInformation } from '$lib/models/guestInformation/FrontendGuestInformation';
 import { FestivalEvent, GuestInformation } from '$lib/db/db';
 import {
-	convertToBackendFestivalEvent,
-	convertToFrontendFestivalEvent,
+	mapToBackendFestivalEvent,
+	mapToFrontendFestivalEvent,
 	FestivalEventAttributes
 } from '$lib/db/attributes/FestivalEventAttributes';
 import { Model } from 'sequelize';
@@ -18,7 +18,7 @@ export async function getAllFestivals(): Promise<FrontendFestivalEvent[]> {
 	const allFestivals = await FestivalEvent.findAll({ include: GuestInformation });
 	return Promise.all(
 		allFestivals.map((value: Model<FestivalEventAttributes, any>) => {
-			return convertToFrontendFestivalEvent(value.dataValues);
+			return mapToFrontendFestivalEvent(value.dataValues);
 		})
 	);
 }
@@ -32,7 +32,7 @@ async function getFestivalModel(id: string) {
 async function getFestival(id: string): Promise<BackendFestivalEvent | null> {
 	const mayBeFestival = await getFestivalModel(id);
 	if (mayBeFestival) {
-		return convertToBackendFestivalEvent(mayBeFestival.dataValues);
+		return mapToBackendFestivalEvent(mayBeFestival.dataValues);
 	}
 	return null;
 }
@@ -65,7 +65,7 @@ export async function createFestival(
 			bringYourOwnFood: bringYourOwnFood,
 			location: location
 		});
-		return await convertToFrontendFestivalEvent(model.dataValues);
+		return await mapToFrontendFestivalEvent(model.dataValues);
 	} else {
 		console.warn('festival service: create: no user found');
 	}
