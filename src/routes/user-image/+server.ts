@@ -1,5 +1,5 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import type { BackendUser } from '$lib/models/BackendUser';
+import type { BackendUser } from '$lib/models/user/BackendUser';
 import * as userService from '$lib/services/user-service';
 import type { Cookies } from '@sveltejs/kit';
 import { getUserImage, saveUserImage } from '$lib/services/user-service';

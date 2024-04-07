@@ -3,8 +3,8 @@ import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from '../../../.svelte-kit/types/src/routes/$types';
 import * as userService from '$lib/services/user-service';
 import { login, validateSessionToken } from '$lib/services/user-service';
-import type { BackendUser } from '$lib/models/BackendUser';
-import type { UserFormData } from '$lib/models/UserFormData';
+import type { BackendUser } from '$lib/models/user/BackendUser';
+import type { UserFormData } from '$lib/models/user/UserFormData';
 import { StandardResponse } from '$lib/models/StandardResponse';
 
 export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): Promise<StandardResponse> => {

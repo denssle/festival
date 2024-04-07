@@ -1,6 +1,6 @@
 // See https://kit.svelte.dev/docs/types#app
 // for information about these interfaces
-import type { CurrentUser } from '$lib/models/CurrentUser';
+import type { CurrentUser } from '$lib/models/user/CurrentUser';
 
 declare global {
 	namespace App {

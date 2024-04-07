@@ -1,4 +1,4 @@
-import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
+import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 import { extractUser } from '$lib/services/user-service';
 import { getUTCFromString } from '$lib/utils/dateUtils';
 import { type Actions, Cookies, redirect } from '@sveltejs/kit';

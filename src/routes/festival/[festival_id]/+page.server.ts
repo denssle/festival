@@ -4,9 +4,9 @@ import type {
 } from '../../../../.svelte-kit/types/src/routes/festival/[festival_id]/$types';
 import { error } from '@sveltejs/kit';
 import type { Cookies } from '@sveltejs/kit';
-import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
+import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 import { getFrontEndFestival } from '$lib/services/festival-event-service';
-import type { BackendUser } from '$lib/models/BackendUser';
+import type { BackendUser } from '$lib/models/user/BackendUser';
 import { extractUser } from '$lib/services/user-service';
 import type { FestivalTransferData } from '$lib/models/FestivalTransferData';
 

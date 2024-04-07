@@ -5,7 +5,7 @@
 	import JoinEventDialog from './join/JoinEventDialog.svelte';
 	import type { JoinEventDialogData } from '$lib/models/dialogData/JoinEventDialogData';
 	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
-	import type { BaseGuestInformation } from '$lib/models/BaseGuestInformation';
+	import type { BaseGuestInformation } from '$lib/models/guestInformation/BaseGuestInformation';
 	import QuestionDialog from '$lib/sharedComponents/QuestionDialog.svelte';
 	import type { QuestionDialogData } from '$lib/models/dialogData/QuestionDialogData';
 	import type { CancelInvitationDialogData } from '$lib/models/dialogData/CancelInvitationDialogData';

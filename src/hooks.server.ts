@@ -1,7 +1,7 @@
 import type { Handle } from '@sveltejs/kit';
 import * as userController from '$lib/services/user-service';
-import type { BackendUser } from '$lib/models/BackendUser';
-import { sequelize, startDB } from '$lib/db/db';
+import type { BackendUser } from '$lib/models/user/BackendUser';
+import { startDB } from '$lib/db/db';
 
 // https://kit.svelte.dev/docs/hooks
 const noAuthURLs: string[] = ['/login', '/registration', '/about', '/impressum'];

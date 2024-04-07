@@ -1,8 +1,8 @@
 import { DataTypes, Model, ModelStatic, Sequelize } from 'sequelize';
 import { MARIA_DB_PASSWORD, MARIA_DB_USER } from '$env/static/private';
-import { GuestInformationAttributes } from '$lib/db/entities/GuestInformation';
-import { UserAttributes } from '$lib/db/entities/User';
-import { FestivalEventAttributes } from '$lib/db/entities/FestivalEvent';
+import { GuestInformationAttributes } from '$lib/db/entities/GuestInformationAttributes';
+import { UserAttributes } from '$lib/db/entities/UserAttributes';
+import { FestivalEventAttributes } from '$lib/db/entities/FestivalEventAttributes';
 
 const sequelize: Sequelize = new Sequelize({
 	dialect: 'mariadb',

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
+	import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 	import { getTotalNumberOfComingGuests } from '$lib/utils/festivalEventUtils';
 
 	export let data: { festivalEvents: FrontendFestivalEvent[] };

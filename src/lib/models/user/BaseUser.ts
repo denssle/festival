@@ -4,4 +4,6 @@ export interface BaseUser {
 	forename: string;
 	lastname: string;
 	email: string;
+	createdAt: Date;
+	updatedAt: Date;
 }

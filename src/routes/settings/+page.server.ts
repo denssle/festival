@@ -1,10 +1,10 @@
 import type { PageServerLoad } from '../../../.svelte-kit/types/src/routes/$types';
 import type { Actions, Cookies } from '@sveltejs/kit';
-import type { BackendUser } from '$lib/models/BackendUser';
+import type { BackendUser } from '$lib/models/user/BackendUser';
 import * as userService from '$lib/services/user-service';
 import { createSessionCookie, nickNameInvalid, readFormDataFrontEndUser } from '$lib/services/user-service';
-import type { FrontendUser } from '$lib/models/FrontendUser';
-import type { UserFormData } from '$lib/models/UserFormData';
+import type { FrontendUser } from '$lib/models/user/FrontendUser';
+import type { UserFormData } from '$lib/models/user/UserFormData';
 import { StandardResponse } from '$lib/models/StandardResponse';
 
 export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): Promise<FrontendUser | null> => {

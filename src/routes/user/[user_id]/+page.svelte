@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { FrontendUser } from '$lib/models/FrontendUser';
+	import type { FrontendUser } from '$lib/models/user/FrontendUser';
 	import AvatarImage from '$lib/sharedComponents/AvatarImage.svelte';
 	import AvatarUpload from './AvatarUpload.svelte';
 

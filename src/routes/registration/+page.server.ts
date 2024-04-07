@@ -3,9 +3,9 @@ import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from '../../../.svelte-kit/types/src/routes/$types';
 import * as userService from '$lib/services/user-service';
 import { nickNameInvalid, register, validateSessionToken } from '$lib/services/user-service';
-import type { UserFormData } from '$lib/models/UserFormData';
+import type { UserFormData } from '$lib/models/user/UserFormData';
 import { StandardResponse } from '$lib/models/StandardResponse';
-import { BackendUser } from '$lib/models/BackendUser';
+import { BackendUser } from '$lib/models/user/BackendUser';
 
 export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): Promise<StandardResponse> => {
 	const valid: boolean = await validateSessionToken(cookies.get('session'));

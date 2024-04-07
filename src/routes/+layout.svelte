@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import type { CurrentUser } from '$lib/models/CurrentUser';
+	import type { CurrentUser } from '$lib/models/user/CurrentUser';
 
 	async function logout() {
 		await fetch('/logout', {

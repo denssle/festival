@@ -1,13 +1,13 @@
-import type { FrontendFestivalEvent } from '../models/FrontendFestivalEvent';
-import type { BackendFestivalEvent } from '../models/BackendFestivalEvent';
-import type { BackendUser } from '../models/BackendUser';
-import type { FrontendUser } from '../models/FrontendUser';
+import type { FrontendFestivalEvent } from '../models/festivalEvent/FrontendFestivalEvent';
+import type { BackendFestivalEvent } from '../models/festivalEvent/BackendFestivalEvent';
+import type { BackendUser } from '../models/user/BackendUser';
+import type { FrontendUser } from '../models/user/FrontendUser';
 import { loadFrontEndUserById } from './user-service';
-import type { BackendGuestInformation } from '$lib/models/BackendGuestInformation';
-import type { BaseGuestInformation } from '$lib/models/BaseGuestInformation';
-import type { FrontendGuestInformation } from '$lib/models/FrontendGuestInformation';
+import type { BackendGuestInformation } from '$lib/models/guestInformation/BackendGuestInformation';
+import type { BaseGuestInformation } from '$lib/models/guestInformation/BaseGuestInformation';
+import type { FrontendGuestInformation } from '$lib/models/guestInformation/FrontendGuestInformation';
 import { FestivalEvent, GuestInformation } from '$lib/db/db';
-import { convertToBackendFestivalEvent, convertToFrontendFestivalEvent } from '$lib/db/entities/FestivalEvent';
+import { convertToBackendFestivalEvent, convertToFrontendFestivalEvent } from '$lib/db/entities/FestivalEventAttributes';
 
 export async function getAllFestivals(): Promise<FrontendFestivalEvent[]> {
 	const allFestivals = await FestivalEvent.findAll({ include: GuestInformation });

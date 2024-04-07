@@ -1,6 +1,6 @@
-import { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
+import { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 import { loadFrontEndUserById } from '$lib/services/user-service';
-import { BackendFestivalEvent } from '$lib/models/BackendFestivalEvent';
+import { BackendFestivalEvent } from '$lib/models/festivalEvent/BackendFestivalEvent';
 
 export type FestivalEventAttributes = {
 	id: string;
@@ -14,7 +14,7 @@ export type FestivalEventAttributes = {
 	createdAt: Date;
 	updatedAt: Date;
 	startDate: Date;
-	UserId: string
+	UserId: string;
 };
 
 export async function convertToFrontendFestivalEvent(event: FestivalEventAttributes): Promise<FrontendFestivalEvent> {
@@ -31,7 +31,7 @@ export async function convertToFrontendFestivalEvent(event: FestivalEventAttribu
 		location: event.location,
 		updatedBy: await loadFrontEndUserById(event.updatedBy) ?? null,
 		updatedAt: event.updatedAt,
-		frontendGuestInformation: []
+		frontendGuestInformation: [] // TODO
 	};
 }
 

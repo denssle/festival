@@ -1,27 +1,27 @@
 import { compareSync, genSaltSync, hashSync } from 'bcrypt-ts';
-import type { BackendUser } from '../models/BackendUser';
-import redis from '../redis';
-import type { FrontendUser } from '../models/FrontendUser';
-import type { UserFormData } from '$lib/models/UserFormData';
+import type { BackendUser } from '../models/user/BackendUser';
+import type { FrontendUser } from '../models/user/FrontendUser';
+import type { UserFormData } from '$lib/models/user/UserFormData';
 import type { Cookies } from '@sveltejs/kit';
-import { getUTCNow } from '$lib/utils/dateUtils';
+import { User } from '$lib/db/db';
+import { convertToBackendUser } from '$lib/db/entities/UserAttributes';
 
-const USER: string = 'user:';
-const USER_IMG: string = 'user-img:';
+async function getByNickname(nickname: string) {
+	return await User.findOne({
+		where: {
+			nickname: nickname
+		}
+	});
+}
 
 export async function register(nickname: string, password: string): Promise<BackendUser | null> {
 	if (!(await nickNameInvalid(nickname))) {
-		const user: BackendUser = {
+		const model = await User.create({
 			id: crypto.randomUUID(),
-			email: '',
 			nickname: nickname,
-			forename: '',
-			lastname: '',
-			password: saltPassword(password),
-			created: getUTCNow()
-		};
-		await saveUser(user);
-		return user;
+			password: saltPassword(password)
+		});
+		return convertToBackendUser(model.dataValues);
 	}
 	return null;
 }
@@ -62,26 +62,21 @@ export function extractUser(sessionToken: string | undefined): BackendUser | nul
 }
 
 export async function nickNameInvalid(nickname: string): Promise<boolean> {
-	return !nickname || nickname.length === 0 || (await redis.exists(nickname)) > 0;
-}
-
-export function saveUser(user: BackendUser): Promise<string> {
-	redis.set(user.nickname, user.id); // damit man von dem Nickname auf den BackendUser schließen kann
-	return redis.set(USER + user.id, parseUserToString(user));
+	return !nickname || nickname.length === 0 || Boolean(await getByNickname(nickname));
 }
 
 async function loadUserByNickname(nickname: string): Promise<BackendUser | null> {
-	const userId: string | null = await redis.get(nickname);
-	if (userId) {
-		return loadUserById(userId);
+	const model = await getByNickname(nickname);
+	if (model) {
+		return convertToBackendUser(model.dataValues);
 	}
 	return null;
 }
 
 async function loadUserById(userId: string): Promise<BackendUser | null> {
-	const value: string | null = await redis.get(USER + userId);
+	const value = await User.findByPk(userId);
 	if (value) {
-		return parseStringToUser(value);
+		return convertToBackendUser(value.dataValues);
 	}
 	return null;
 }
@@ -93,10 +88,6 @@ export async function loadFrontEndUserById(id: string | null): Promise<FrontendU
 			return parseToFrontEnd(byId);
 		}
 	}
-}
-
-function parseUserToString(user: BackendUser): string {
-	return JSON.stringify(user);
 }
 
 function parseStringToUser(data: string): BackendUser | null {
@@ -119,7 +110,9 @@ export function parseToFrontEnd(user: BackendUser): FrontendUser {
 		nickname: user.nickname,
 		forename: user.forename,
 		lastname: user.lastname,
-		email: user.email
+		email: user.email,
+		updatedAt: user.updatedAt,
+		createdAt: user.createdAt
 	};
 }
 
@@ -144,29 +137,25 @@ export function createSessionCookie(cookies: Cookies, user: BackendUser): void {
 }
 
 export async function updateUser(oldUser: BackendUser, formData: UserFormData): Promise<BackendUser> {
-	if (formData.nickname) {
-		if (oldUser.nickname !== formData.nickname) {
-			redis.del(oldUser.nickname);
-			oldUser.nickname = formData.nickname;
-		}
-		oldUser.email = formData.email;
-		oldUser.forename = formData.forename;
-		oldUser.lastname = formData.lastname;
-		if (formData.password) {
-			oldUser.password = saltPassword(formData.password);
-		}
-		await saveUser(oldUser);
-	} else {
-		console.log('updateUser: no nickname', formData);
+	const model = await User.findByPk(oldUser.id);
+	if (model) {
+		model.set({
+			email: formData.email,
+			lastname: formData.lastname,
+			forename: formData.forename,
+			password: formData.password ? saltPassword(formData.password) : oldUser.password
+		});
+		const saved = await model.save();
+		return convertToBackendUser(saved.dataValues);
 	}
-	return oldUser;
 }
 
 export async function saveUserImage(userId: string, image: string): Promise<string> {
-	await redis.set(USER_IMG + userId, image);
+	// TODO
 	return image;
 }
 
 export async function getUserImage(userId: string): Promise<string | null> {
-	return redis.get(USER_IMG + userId);
+	// TODO
+	return userId;
 }

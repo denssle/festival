@@ -7,8 +7,8 @@ import type {
 import { getFrontEndFestival, updateFestival } from '$lib/services/festival-event-service';
 import { extractUser } from '$lib/services/user-service';
 import { getUTCFromString } from '$lib/utils/dateUtils';
-import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
-import type { BackendUser } from '$lib/models/BackendUser';
+import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
+import type { BackendUser } from '$lib/models/user/BackendUser';
 
 export const load: PageServerLoad = async ({
 	cookies,

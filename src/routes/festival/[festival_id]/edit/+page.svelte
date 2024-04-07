@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { dateToString, dateToHHMM } from '$lib/utils/dateUtils';
-	import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
+	import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 
 	export let data: FrontendFestivalEvent;
 </script>
