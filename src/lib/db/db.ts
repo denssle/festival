@@ -16,11 +16,14 @@ const sequelize: Sequelize = new Sequelize({
 export const User: ModelStatic<Model<UserAttributes, any>> = sequelize.define('User', {
 	id: { type: DataTypes.STRING, primaryKey: true, allowNull: false },
 	password: { type: DataTypes.STRING, allowNull: false },
-	created: { type: DataTypes.DATE },
 	nickname: { type: DataTypes.STRING },
 	forename: { type: DataTypes.STRING },
 	lastname: { type: DataTypes.STRING },
 	email: { type: DataTypes.STRING }
+}, {
+	timestamps: true,
+	createdAt: true,
+	updatedAt: true
 });
 
 export const GuestInformation: ModelStatic<Model<GuestInformationAttributes, any>> = sequelize.define(
@@ -31,15 +34,15 @@ export const GuestInformation: ModelStatic<Model<GuestInformationAttributes, any
 			primaryKey: true,
 			allowNull: false
 		},
-		festivalEventId: {
-			type: DataTypes.STRING,
-			allowNull: false
-		},
 		food: { type: DataTypes.STRING },
 		drink: { type: DataTypes.STRING },
 		numberOfOtherGuests: { type: DataTypes.INTEGER },
 		coming: { type: DataTypes.BOOLEAN },
 		comment: { type: DataTypes.STRING }
+	}, {
+		timestamps: true,
+		createdAt: true,
+		updatedAt: true
 	}
 );
 
@@ -68,24 +71,26 @@ export const FestivalEvent: ModelStatic<Model<FestivalEventAttributes, any>> = s
 	createdBy: {
 		type: DataTypes.STRING
 	},
-	createdAt: {
-		type: DataTypes.DATE
-	},
 	updatedBy: {
 		type: DataTypes.STRING
-	},
-	updatedAt: {
-		type: DataTypes.DATE
 	},
 	startDate: {
 		type: DataTypes.DATE
 	}
+}, {
+	timestamps: true,
+	createdAt: true,
+	updatedAt: true
 });
 
-FestivalEvent.hasOne(GuestInformation, {
-	foreignKey: 'festivalEventId'
-});
+FestivalEvent.hasMany(GuestInformation);
 GuestInformation.belongsTo(FestivalEvent);
+
+User.hasMany(GuestInformation);
+GuestInformation.belongsTo(User);
+
+User.hasMany(FestivalEvent);
+FestivalEvent.belongsTo(User);
 
 export async function startDB() {
 	await sequelize.sync({ force: true });

@@ -2,7 +2,7 @@ import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
 import { extractUser } from '$lib/services/user-service';
 import { getUTCFromString } from '$lib/utils/dateUtils';
 import { type Actions, Cookies, redirect } from '@sveltejs/kit';
-import { create } from '$lib/services/festival-event-service';
+import { createFestival } from '$lib/services/festival-event-service';
 
 export const actions: Actions = {
 	default: async ({ cookies, request }: { cookies: Cookies; request: Request }): Promise<Response | undefined> => {
@@ -10,7 +10,7 @@ export const actions: Actions = {
 		const name: FormDataEntryValue | null = values.get('name');
 		if (name) {
 			const description: FormDataEntryValue | null = values.get('description');
-			const newFestival: FrontendFestivalEvent | null = await create(
+			const newFestival: FrontendFestivalEvent | null = await createFestival(
 				extractUser(cookies.get('session')),
 				String(name),
 				String(description),

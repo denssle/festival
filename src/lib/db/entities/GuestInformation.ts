@@ -6,4 +6,8 @@ export type GuestInformationAttributes = {
 	numberOfOtherGuests: number;
 	coming: boolean;
 	comment: string;
+	createdAt: Date;
+	updatedAt: Date;
+	FestivalEventId: string;
+	UserId: string;
 };

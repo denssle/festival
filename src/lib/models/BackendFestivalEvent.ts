@@ -3,9 +3,9 @@ import { BackendGuestInformation } from '$lib/models/BackendGuestInformation';
 
 export interface BackendFestivalEvent extends BaseFestivalEvent {
 	createdBy: string;
-	createdAt: number;
+	createdAt: Date;
 	updatedBy: string | null;
-	updatedAt: number | null;
-	startDate: number | null;
+	updatedAt: Date | null;
+	startDate: Date | null;
 	guestInformation: BackendGuestInformation[];
 }
