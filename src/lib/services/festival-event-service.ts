@@ -9,13 +9,15 @@ import type { FrontendGuestInformation } from '$lib/models/guestInformation/Fron
 import { FestivalEvent, GuestInformation } from '$lib/db/db';
 import {
 	convertToBackendFestivalEvent,
-	convertToFrontendFestivalEvent
+	convertToFrontendFestivalEvent,
+	FestivalEventAttributes
 } from '$lib/db/attributes/FestivalEventAttributes';
+import { Model } from 'sequelize';
 
 export async function getAllFestivals(): Promise<FrontendFestivalEvent[]> {
 	const allFestivals = await FestivalEvent.findAll({ include: GuestInformation });
 	return Promise.all(
-		allFestivals.map((value) => {
+		allFestivals.map((value: Model<FestivalEventAttributes, any>) => {
 			return convertToFrontendFestivalEvent(value.dataValues);
 		})
 	);
@@ -57,7 +59,7 @@ export async function createFestival(
 			id: crypto.randomUUID(),
 			name: name,
 			description: description,
-			createdBy: user.id,
+			UserId: user.id,
 			startDate: startDate,
 			bringYourOwnBottle: bringYourOwnBottle,
 			bringYourOwnFood: bringYourOwnFood,
@@ -143,7 +145,8 @@ export async function joinFestival(
 				comment: eventData.comment,
 				food: eventData.food,
 				drink: eventData.drink,
-				numberOfOtherGuests: eventData.numberOfOtherGuests
+				numberOfOtherGuests: eventData.numberOfOtherGuests,
+				FestivalEventId: festivalId
 			});
 		}
 	} else {

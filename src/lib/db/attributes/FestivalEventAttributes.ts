@@ -1,6 +1,12 @@
 import { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 import { loadFrontEndUserById } from '$lib/services/user-service';
 import { BackendFestivalEvent } from '$lib/models/festivalEvent/BackendFestivalEvent';
+import { Model } from 'sequelize';
+import {
+	convertToBackendGuestInformation,
+	convertToFrontendGuestInformation,
+	GuestInformationAttributes
+} from '$lib/db/attributes/GuestInformationAttributes';
 
 export type FestivalEventAttributes = {
 	id: string;
@@ -13,10 +19,10 @@ export type FestivalEventAttributes = {
 	updatedAt: Date;
 	startDate: Date;
 	UserId: string;
+	GuestInformations: Model<GuestInformationAttributes, any>[];
 };
 
 export async function convertToFrontendFestivalEvent(event: FestivalEventAttributes): Promise<FrontendFestivalEvent> {
-	console.log(event);
 	return {
 		id: event.id,
 		name: event.name,
@@ -28,12 +34,15 @@ export async function convertToFrontendFestivalEvent(event: FestivalEventAttribu
 		startDate: event.startDate,
 		location: event.location,
 		updatedAt: event.updatedAt,
-		frontendGuestInformation: [] // TODO
+		frontendGuestInformation: await Promise.all(
+			event.GuestInformations.map((value) => {
+				return convertToFrontendGuestInformation(value.dataValues);
+			})
+		)
 	};
 }
 
 export async function convertToBackendFestivalEvent(event: FestivalEventAttributes): Promise<BackendFestivalEvent> {
-	console.log(event);
 	return {
 		id: event.id,
 		name: event.name,
@@ -45,6 +54,8 @@ export async function convertToBackendFestivalEvent(event: FestivalEventAttribut
 		startDate: event.startDate,
 		UserId: event.UserId,
 		updatedAt: event.updatedAt,
-		guestInformation: []
+		guestInformation: event.GuestInformations.map((value) => {
+			return convertToBackendGuestInformation(value.dataValues);
+		})
 	};
 }

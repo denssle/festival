@@ -43,14 +43,12 @@ test('1 visitors', () => {
 	const festival: FrontendFestivalEvent = getTestFestival();
 	festival.frontendGuestInformation = [
 		{
-			UserId: '',
 			drink: '',
 			food: '',
 			numberOfOtherGuests: 0,
 			user: getTestUser(),
 			coming: true,
-			comment: '',
-			FestivalEventId: ''
+			comment: ''
 		}
 	];
 	expect(getTotalNumberOfComingGuests(festival)).toBe(1);
@@ -60,14 +58,12 @@ test('3 visitors', () => {
 	const festival: FrontendFestivalEvent = getTestFestival();
 	festival.frontendGuestInformation = [
 		{
-			UserId: '',
 			drink: '',
 			food: '',
 			numberOfOtherGuests: 2,
 			user: getTestUser(),
 			coming: true,
-			comment: '',
-			FestivalEventId: ''
+			comment: ''
 		}
 	];
 	expect(getTotalNumberOfComingGuests(festival)).toBe(3);
