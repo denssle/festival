@@ -2,12 +2,11 @@
 
 ## Installation
 
-- add `.env` File for Connection to redis DB. Should look like this:
-
+- add `.env` File for Connection to a Maria DB. Should look like this:
+- database name same as user name
 ```
-REDIS_TOKEN="rediss://*****"
-UPSTASH_REDIS_REST_URL="https://*****"
-UPSTASH_REDIS_REST_TOKEN="*****="
+MARIA_DB_USER="***"
+MARIA_DB_PASSWORD="***"
 ```
 
 - run `npm install`
