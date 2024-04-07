@@ -4,7 +4,7 @@ import type { FrontendUser } from '../models/user/FrontendUser';
 import type { UserFormData } from '$lib/models/user/UserFormData';
 import type { Cookies } from '@sveltejs/kit';
 import { User } from '$lib/db/db';
-import { convertToBackendUser } from '$lib/db/entities/UserAttributes';
+import { convertToBackendUser } from '$lib/db/attributes/UserAttributes';
 
 async function getByNickname(nickname: string) {
 	return await User.findOne({
@@ -112,7 +112,8 @@ export function parseToFrontEnd(user: BackendUser): FrontendUser {
 		lastname: user.lastname,
 		email: user.email,
 		updatedAt: user.updatedAt,
-		createdAt: user.createdAt
+		createdAt: user.createdAt,
+		image: user.image
 	};
 }
 
@@ -148,14 +149,21 @@ export async function updateUser(oldUser: BackendUser, formData: UserFormData): 
 		const saved = await model.save();
 		return convertToBackendUser(saved.dataValues);
 	}
+	return oldUser;
 }
 
 export async function saveUserImage(userId: string, image: string): Promise<string> {
-	// TODO
+	const model = await User.findByPk(userId);
+	if (model) {
+		model.set({
+			image: image
+		});
+		await model.save();
+	}
 	return image;
 }
 
 export async function getUserImage(userId: string): Promise<string | null> {
-	// TODO
-	return userId;
+	const model = await User.findByPk(userId);
+	return model ? model.dataValues.image : null;
 }

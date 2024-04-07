@@ -1,8 +1,7 @@
-import type { RequestHandler } from '@sveltejs/kit';
+import type { Cookies, RequestHandler } from '@sveltejs/kit';
 import type { BackendUser } from '$lib/models/user/BackendUser';
 import * as userService from '$lib/services/user-service';
-import type { Cookies } from '@sveltejs/kit';
-import { getUserImage, saveUserImage } from '$lib/services/user-service';
+import { saveUserImage } from '$lib/services/user-service';
 
 export const POST: RequestHandler = async ({
 	cookies,
@@ -27,10 +26,7 @@ export const POST: RequestHandler = async ({
 export const GET: RequestHandler = async ({ cookies }: { cookies: Cookies }): Promise<Response> => {
 	const extractUser: BackendUser | null = userService.extractUser(cookies.get('session'));
 	if (extractUser) {
-		const imageData: string | null = await getUserImage(extractUser.id);
-		if (imageData) {
-			return new Response(imageData, { status: 200 });
-		}
+		return new Response(extractUser.image, { status: 200 });
 	}
 	return new Response(null, { status: 404 });
 };

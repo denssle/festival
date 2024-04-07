@@ -7,13 +7,18 @@ import type { BackendGuestInformation } from '$lib/models/guestInformation/Backe
 import type { BaseGuestInformation } from '$lib/models/guestInformation/BaseGuestInformation';
 import type { FrontendGuestInformation } from '$lib/models/guestInformation/FrontendGuestInformation';
 import { FestivalEvent, GuestInformation } from '$lib/db/db';
-import { convertToBackendFestivalEvent, convertToFrontendFestivalEvent } from '$lib/db/entities/FestivalEventAttributes';
+import {
+	convertToBackendFestivalEvent,
+	convertToFrontendFestivalEvent
+} from '$lib/db/attributes/FestivalEventAttributes';
 
 export async function getAllFestivals(): Promise<FrontendFestivalEvent[]> {
 	const allFestivals = await FestivalEvent.findAll({ include: GuestInformation });
-	return Promise.all(allFestivals.map(value => {
-		return convertToFrontendFestivalEvent(value.dataValues);
-	}));
+	return Promise.all(
+		allFestivals.map((value) => {
+			return convertToFrontendFestivalEvent(value.dataValues);
+		})
+	);
 }
 
 async function getFestivalModel(id: string) {

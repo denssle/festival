@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { BaseDialogData } from '$lib/models/dialogData/BaseDialogData';
+
 	export let dialogData: BaseDialogData;
 	export let buttonLabels: { yes: string; no: string } = { yes: 'Ja', no: 'Nope' };
 	$: if (dialogData.dialog && dialogData.showDialog) dialogData.dialog.showModal();

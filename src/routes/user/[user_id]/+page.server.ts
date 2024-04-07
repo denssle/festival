@@ -1,6 +1,6 @@
 import type { Cookies } from '@sveltejs/kit';
-import type { FrontendUser } from '$lib/models/user/FrontendUser';
 import { error } from '@sveltejs/kit';
+import type { FrontendUser } from '$lib/models/user/FrontendUser';
 import { extractUser, loadFrontEndUserById, parseToFrontEnd } from '$lib/services/user-service';
 import type { BackendUser } from '$lib/models/user/BackendUser';
 import type { PageServerLoad, RouteParams } from '../../user/[user_id]/$types';

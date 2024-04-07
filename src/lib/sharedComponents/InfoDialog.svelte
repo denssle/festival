@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
+
 	export let infoDialogData: InfoDialogData;
 
 	$: if (infoDialogData.dialog && infoDialogData.showDialog) infoDialogData.dialog.showModal();

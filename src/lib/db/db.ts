@@ -1,8 +1,9 @@
 import { DataTypes, Model, ModelStatic, Sequelize } from 'sequelize';
 import { MARIA_DB_PASSWORD, MARIA_DB_USER } from '$env/static/private';
-import { GuestInformationAttributes } from '$lib/db/entities/GuestInformationAttributes';
-import { UserAttributes } from '$lib/db/entities/UserAttributes';
-import { FestivalEventAttributes } from '$lib/db/entities/FestivalEventAttributes';
+import { GuestInformationAttributes } from '$lib/db/attributes/GuestInformationAttributes';
+import { UserAttributes } from '$lib/db/attributes/UserAttributes';
+import { FestivalEventAttributes } from '$lib/db/attributes/FestivalEventAttributes';
+import { FALLBACK_PICTURE } from '$lib/constants';
 
 const sequelize: Sequelize = new Sequelize({
 	dialect: 'mariadb',
@@ -13,18 +14,23 @@ const sequelize: Sequelize = new Sequelize({
 	define: {}
 });
 
-export const User: ModelStatic<Model<UserAttributes, any>> = sequelize.define('User', {
-	id: { type: DataTypes.STRING, primaryKey: true, allowNull: false },
-	password: { type: DataTypes.STRING, allowNull: false },
-	nickname: { type: DataTypes.STRING },
-	forename: { type: DataTypes.STRING },
-	lastname: { type: DataTypes.STRING },
-	email: { type: DataTypes.STRING }
-}, {
-	timestamps: true,
-	createdAt: true,
-	updatedAt: true
-});
+export const User: ModelStatic<Model<UserAttributes, any>> = sequelize.define(
+	'User',
+	{
+		id: { type: DataTypes.STRING, primaryKey: true, allowNull: false },
+		password: { type: DataTypes.STRING, allowNull: false },
+		nickname: { type: DataTypes.STRING },
+		forename: { type: DataTypes.STRING },
+		lastname: { type: DataTypes.STRING },
+		email: { type: DataTypes.STRING },
+		image: { type: DataTypes.STRING(65000), defaultValue: FALLBACK_PICTURE }
+	},
+	{
+		timestamps: true,
+		createdAt: true,
+		updatedAt: true
+	}
+);
 
 export const GuestInformation: ModelStatic<Model<GuestInformationAttributes, any>> = sequelize.define(
 	'GuestInformation',
@@ -39,49 +45,54 @@ export const GuestInformation: ModelStatic<Model<GuestInformationAttributes, any
 		numberOfOtherGuests: { type: DataTypes.INTEGER },
 		coming: { type: DataTypes.BOOLEAN },
 		comment: { type: DataTypes.STRING }
-	}, {
+	},
+	{
 		timestamps: true,
 		createdAt: true,
 		updatedAt: true
 	}
 );
 
-export const FestivalEvent: ModelStatic<Model<FestivalEventAttributes, any>> = sequelize.define('FestivalEvent', {
-	id: {
-		type: DataTypes.STRING,
-		primaryKey: true,
-		allowNull: false
+export const FestivalEvent: ModelStatic<Model<FestivalEventAttributes, any>> = sequelize.define(
+	'FestivalEvent',
+	{
+		id: {
+			type: DataTypes.STRING,
+			primaryKey: true,
+			allowNull: false
+		},
+		name: {
+			type: DataTypes.STRING,
+			allowNull: false
+		},
+		description: {
+			type: DataTypes.STRING
+		},
+		location: {
+			type: DataTypes.STRING
+		},
+		bringYourOwnBottle: {
+			type: DataTypes.BOOLEAN
+		},
+		bringYourOwnFood: {
+			type: DataTypes.BOOLEAN
+		},
+		createdBy: {
+			type: DataTypes.STRING
+		},
+		updatedBy: {
+			type: DataTypes.STRING
+		},
+		startDate: {
+			type: DataTypes.DATE
+		}
 	},
-	name: {
-		type: DataTypes.STRING,
-		allowNull: false
-	},
-	description: {
-		type: DataTypes.STRING
-	},
-	location: {
-		type: DataTypes.STRING
-	},
-	bringYourOwnBottle: {
-		type: DataTypes.BOOLEAN
-	},
-	bringYourOwnFood: {
-		type: DataTypes.BOOLEAN
-	},
-	createdBy: {
-		type: DataTypes.STRING
-	},
-	updatedBy: {
-		type: DataTypes.STRING
-	},
-	startDate: {
-		type: DataTypes.DATE
+	{
+		timestamps: true,
+		createdAt: true,
+		updatedAt: true
 	}
-}, {
-	timestamps: true,
-	createdAt: true,
-	updatedAt: true
-});
+);
 
 FestivalEvent.hasMany(GuestInformation);
 GuestInformation.belongsTo(FestivalEvent);
