@@ -9,6 +9,7 @@ export type UserAttributes = {
 	email: string;
 	createdAt: Date;
 	updatedAt: Date;
+	image: string;
 };
 
 export function convertToBackendUser(dataValues: UserAttributes): BackendUser {
@@ -20,6 +21,7 @@ export function convertToBackendUser(dataValues: UserAttributes): BackendUser {
 		lastname: dataValues.lastname,
 		updatedAt: dataValues.updatedAt,
 		createdAt: dataValues.createdAt,
-		password: dataValues.password
+		password: dataValues.password,
+		image: dataValues.image
 	};
 }

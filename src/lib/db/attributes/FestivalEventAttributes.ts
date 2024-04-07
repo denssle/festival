@@ -9,8 +9,6 @@ export type FestivalEventAttributes = {
 	bringYourOwnBottle: boolean;
 	bringYourOwnFood: boolean;
 	location: string;
-	createdBy: string;
-	updatedBy: string;
 	createdAt: Date;
 	updatedAt: Date;
 	startDate: Date;
@@ -25,11 +23,10 @@ export async function convertToFrontendFestivalEvent(event: FestivalEventAttribu
 		bringYourOwnBottle: event.bringYourOwnBottle,
 		bringYourOwnFood: event.bringYourOwnFood,
 		createdAt: event.createdAt,
-		createdBy: await loadFrontEndUserById(event.createdBy) ?? null,
+		createdBy: (await loadFrontEndUserById(event.UserId)) ?? null,
 		description: event.description,
 		startDate: event.startDate,
 		location: event.location,
-		updatedBy: await loadFrontEndUserById(event.updatedBy) ?? null,
 		updatedAt: event.updatedAt,
 		frontendGuestInformation: [] // TODO
 	};
@@ -46,9 +43,8 @@ export async function convertToBackendFestivalEvent(event: FestivalEventAttribut
 		location: event.location,
 		description: event.description,
 		startDate: event.startDate,
-		createdBy: event.createdBy,
+		UserId: event.UserId,
 		updatedAt: event.updatedAt,
-		updatedBy: event.updatedBy ?? null,
 		guestInformation: []
 	};
 }

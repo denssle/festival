@@ -2,9 +2,8 @@ import type { BaseFestivalEvent } from '$lib/models/festivalEvent/BaseFestivalEv
 import { BackendGuestInformation } from '$lib/models/guestInformation/BackendGuestInformation';
 
 export interface BackendFestivalEvent extends BaseFestivalEvent {
-	createdBy: string;
+	UserId: string;
 	createdAt: Date;
-	updatedBy: string | null;
 	updatedAt: Date | null;
 	startDate: Date | null;
 	guestInformation: BackendGuestInformation[];

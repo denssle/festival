@@ -100,7 +100,7 @@ export async function updateFestival(
 export async function deleteFestival(user: BackendUser | null, festivalId: string): Promise<void> {
 	if (user && festivalId) {
 		const festivalModel = await getFestivalModel(festivalId);
-		if (festivalModel && festivalModel.dataValues.createdBy === user.id) {
+		if (festivalModel && festivalModel.dataValues.UserId === user.id) {
 			await festivalModel.destroy();
 		} else {
 			console.error('festival missing or not authorized', festivalModel, user.id);
@@ -137,6 +137,7 @@ export async function joinFestival(
 			await find.save();
 		} else {
 			await GuestInformation.create({
+				id: crypto.randomUUID(),
 				UserId: user.id,
 				coming: true,
 				comment: eventData.comment,
@@ -177,7 +178,7 @@ async function mapGuestInformationToFrontendGuestInformation(
 ): Promise<FrontendGuestInformation[]> {
 	const result: FrontendGuestInformation[] = [];
 	for (const information of guestInformation) {
-		const userById = await loadFrontEndUserById(information.userId);
+		const userById = await loadFrontEndUserById(information.UserId);
 		if (userById) {
 			result.push({ user: userById, ...information });
 		}
@@ -186,16 +187,14 @@ async function mapGuestInformationToFrontendGuestInformation(
 }
 
 async function parseToFrontend(festival: BackendFestivalEvent): Promise<FrontendFestivalEvent | null> {
-	const createdBy: FrontendUser | undefined = await loadFrontEndUserById(festival.createdBy);
+	const createdBy: FrontendUser | undefined = await loadFrontEndUserById(festival.UserId);
 	if (createdBy) {
-		const updatedBy: FrontendUser | undefined = await loadFrontEndUserById(festival.updatedBy);
 		return {
 			id: festival.id,
 			name: festival.name,
 			description: festival.description,
 			createdBy: createdBy,
 			createdAt: festival.createdAt,
-			updatedBy: updatedBy ?? null,
 			updatedAt: festival.updatedAt,
 			startDate: festival.startDate,
 			bringYourOwnFood: festival.bringYourOwnFood,

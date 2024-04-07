@@ -5,7 +5,6 @@ import type { FrontendGuestInformation } from '$lib/models/guestInformation/Fron
 export interface FrontendFestivalEvent extends BaseFestivalEvent {
 	createdBy: FrontendUser | null;
 	createdAt: Date | null;
-	updatedBy: FrontendUser | null;
 	updatedAt: Date | null;
 	startDate: Date | null;
 	frontendGuestInformation: FrontendGuestInformation[];

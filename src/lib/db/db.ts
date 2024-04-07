@@ -77,12 +77,6 @@ export const FestivalEvent: ModelStatic<Model<FestivalEventAttributes, any>> = s
 		bringYourOwnFood: {
 			type: DataTypes.BOOLEAN
 		},
-		createdBy: {
-			type: DataTypes.STRING
-		},
-		updatedBy: {
-			type: DataTypes.STRING
-		},
 		startDate: {
 			type: DataTypes.DATE
 		}
