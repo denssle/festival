@@ -3,9 +3,9 @@ import { loadFrontEndUserById } from '$lib/services/user-service';
 import { BackendFestivalEvent } from '$lib/models/festivalEvent/BackendFestivalEvent';
 import { Model } from 'sequelize';
 import {
+	GuestInformationAttributes,
 	mapToBackendGuestInformation,
-	mapToFrontendGuestInformation,
-	GuestInformationAttributes
+	mapToFrontendGuestInformation
 } from '$lib/db/attributes/GuestInformationAttributes';
 
 export type FestivalEventAttributes = {
@@ -34,11 +34,11 @@ export async function mapToFrontendFestivalEvent(event: FestivalEventAttributes)
 		startDate: event.startDate,
 		location: event.location,
 		updatedAt: event.updatedAt,
-		frontendGuestInformation: await Promise.all(
+		frontendGuestInformation: event.GuestInformations ? await Promise.all(
 			event.GuestInformations.map((value) => {
 				return mapToFrontendGuestInformation(value.dataValues);
 			})
-		)
+		) : []
 	};
 }
 

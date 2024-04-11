@@ -16,7 +16,7 @@
 		</p>
 	</section>
 	<section>
-		<img src={uberspaceBanner} alt="uberspace Banner" class="center" />
+		<img alt="uberspace Banner" class="center" src={uberspaceBanner} />
 		<p style="text-align: center">
 			Die Seite ist gehostet auf <a href="https://uberspace.de/">uberspace</a>.
 		</p>

@@ -64,12 +64,12 @@
 <div>
 	<InfoDialog bind:infoDialogData />
 	<input
-		style="display: none"
-		type="file"
 		accept=".png,.jpg"
 		bind:files
 		bind:this={fileInput}
 		on:change={() => getBase64(files[0])}
+		style="display: none"
+		type="file"
 	/>
 	<button on:click={() => onUpload()}>Bild hochladen</button>
 </div>

@@ -10,22 +10,22 @@
 	<form method="POST">
 		<section>
 			<p>
-				<input name="nickname" required bind:value={data.nickname} type="text" placeholder="Nickname" minlength="3" />
+				<input bind:value={data.nickname} minlength="3" name="nickname" placeholder="Nickname" required type="text" />
 			</p>
 
 			<p>
 				<input
-					name="password"
-					required
 					bind:value={data.password}
-					type="password"
-					placeholder="Passwort"
 					minlength="3"
+					name="password"
+					placeholder="Passwort"
+					required
+					type="password"
 				/>
 			</p>
 
 			<p>
-				<button type="submit" disabled={!data.nickname || !data.password}> Los gehts! </button>
+				<button disabled={!data.nickname || !data.password} type="submit"> Los gehts!</button>
 			</p>
 		</section>
 

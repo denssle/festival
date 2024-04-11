@@ -90,9 +90,11 @@
 			updateButtonLabels();
 		});
 	}
+
 	let joinFestivalButtonText = 'Zusagen';
 	let leaveFestivalButtonText = 'Absagen';
 	updateButtonLabels();
+
 	function updateButtonLabels() {
 		joinFestivalButtonText = 'Zusagen';
 		leaveFestivalButtonText = 'Absagen';
@@ -156,11 +158,11 @@
 		<p>{data.festival.location}</p>
 
 		<label>
-			<input type="checkbox" bind:checked={data.festival.bringYourOwnFood} name="bringYourOwnFood" disabled />
+			<input bind:checked={data.festival.bringYourOwnFood} disabled name="bringYourOwnFood" type="checkbox" />
 			Gäste sollen etwas zu Essen mitbringen.
 		</label>
 		<label>
-			<input type="checkbox" bind:checked={data.festival.bringYourOwnBottle} name="bringYourOwnBottle" disabled />
+			<input bind:checked={data.festival.bringYourOwnBottle} disabled name="bringYourOwnBottle" type="checkbox" />
 			Gäste sollen etwas zu trinken mitbringen.
 		</label>
 	</section>

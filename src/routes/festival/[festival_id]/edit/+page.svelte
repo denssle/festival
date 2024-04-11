@@ -7,13 +7,13 @@
 
 <form method="POST">
 	<p>
-		<input name="name" autocomplete="off" required value={data?.name ?? ''} placeholder="Name der Veranstaltung" />
+		<input autocomplete="off" name="name" placeholder="Name der Veranstaltung" required value={data?.name ?? ''} />
 		<textarea name="description" placeholder="Kurze Beschreibung" value={data?.description} />
 	</p>
 
 	<p>
-		<input name="startDate" type="date" placeholder="date" value={dateToString(data.startDate)} />
-		<input name="startTime" type="time" placeholder="time" value={dateToHHMM(data.startDate)} />
+		<input name="startDate" placeholder="date" type="date" value={dateToString(data.startDate)} />
+		<input name="startTime" placeholder="time" type="time" value={dateToHHMM(data.startDate)} />
 	</p>
 
 	<p>
@@ -22,11 +22,11 @@
 
 	<p>
 		<label>
-			<input type="checkbox" bind:checked={data.bringYourOwnFood} name="bringYourOwnFood" />
+			<input bind:checked={data.bringYourOwnFood} name="bringYourOwnFood" type="checkbox" />
 			Gäste sollen etwas zu Essen mitbringen.
 		</label>
 		<label>
-			<input type="checkbox" bind:checked={data.bringYourOwnBottle} name="bringYourOwnBottle" />
+			<input bind:checked={data.bringYourOwnBottle} name="bringYourOwnBottle" type="checkbox" />
 			Gäste sollen etwas zu trinken mitbringen.
 		</label>
 	</p>

@@ -28,12 +28,6 @@ export function getUTCFromString(date: string, time: string): number | null {
 	return null;
 }
 
-export function getUTCNow(): number {
-	const now: Date = new Date();
-	return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes());
-	// return new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes()).getTime();
-}
-
 function datesValid(dates: number[]): boolean {
 	return Boolean(dates.at(0) && dates.at(1) && dates.at(2));
 }
@@ -44,19 +38,6 @@ function getNumber(list: number[], index: number): number {
 		return number;
 	}
 	return 0;
-}
-
-/**
- * Konvertiert eine Nummer in ein Date Objekt
- * @param utcMS Zeit in MS
- */
-export function convertUTCToLocalDate(utcMS: number | undefined | null): Date | null {
-	if (utcMS) {
-		// const dateLocal = new Date(utcMS);
-		// return new Date(utcMS - dateLocal.getTimezoneOffset() * 60 * 1000);
-		return new Date(utcMS);
-	}
-	return null;
 }
 
 export function dateToString(date: Date | null): string {

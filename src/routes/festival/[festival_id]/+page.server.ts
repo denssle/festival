@@ -6,9 +6,9 @@ import type { Cookies } from '@sveltejs/kit';
 import { error } from '@sveltejs/kit';
 import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 import { getFrontEndFestival } from '$lib/services/festival-event-service';
-import type { BackendUser } from '$lib/models/user/BackendUser';
 import { extractUser } from '$lib/services/user-service';
 import type { FestivalTransferData } from '$lib/models/FestivalTransferData';
+import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 
 export const load: PageServerLoad = async ({
 	cookies,
@@ -21,7 +21,7 @@ export const load: PageServerLoad = async ({
 	if (festival_id) {
 		const festival: FrontendFestivalEvent | null = await getFrontEndFestival(festival_id);
 		if (festival) {
-			const user: BackendUser | null = extractUser(cookies.get('session'));
+			const user: SessionTokenUser | null = extractUser(cookies.get('session'));
 			if (user) {
 				return {
 					festival: festival,

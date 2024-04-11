@@ -78,6 +78,22 @@ export const FestivalEvent: ModelStatic<Model<FestivalEventAttributes, any>> = s
 	}
 );
 
+export const Friend: ModelStatic<Model<any, any>> = sequelize.define(
+	'Friend',
+	{
+		id: {
+			type: DataTypes.STRING,
+			primaryKey: true,
+			allowNull: false
+		}
+	},
+	{
+		timestamps: true,
+		createdAt: true,
+		updatedAt: true
+	}
+);
+
 FestivalEvent.hasMany(GuestInformation);
 GuestInformation.belongsTo(FestivalEvent);
 
@@ -87,6 +103,13 @@ GuestInformation.belongsTo(User);
 User.hasMany(FestivalEvent);
 FestivalEvent.belongsTo(User);
 
-export async function startDB() {
+User.hasMany(Friend, {
+	foreignKey: 'friend1Id'
+});
+Friend.belongsTo(User, {
+	as: 'friend2'
+});
+
+export async function startDB(): Promise<void> {
 	await sequelize.sync({ force: true });
 }

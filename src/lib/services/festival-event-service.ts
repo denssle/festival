@@ -8,11 +8,12 @@ import type { BaseGuestInformation } from '$lib/models/guestInformation/BaseGues
 import type { FrontendGuestInformation } from '$lib/models/guestInformation/FrontendGuestInformation';
 import { FestivalEvent, GuestInformation } from '$lib/db/db';
 import {
+	FestivalEventAttributes,
 	mapToBackendFestivalEvent,
-	mapToFrontendFestivalEvent,
-	FestivalEventAttributes
+	mapToFrontendFestivalEvent
 } from '$lib/db/attributes/FestivalEventAttributes';
 import { Model } from 'sequelize';
+import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 
 export async function getAllFestivals(): Promise<FrontendFestivalEvent[]> {
 	const allFestivals = await FestivalEvent.findAll({ include: GuestInformation });
@@ -46,7 +47,7 @@ export async function getFrontEndFestival(id: string): Promise<FrontendFestivalE
 }
 
 export async function createFestival(
-	user: BackendUser | null,
+	user: BackendUser | null | SessionTokenUser,
 	name: string,
 	description: string,
 	startDate: number | null,
@@ -73,7 +74,7 @@ export async function createFestival(
 }
 
 export async function updateFestival(
-	user: BackendUser | null,
+	user: BackendUser | null | SessionTokenUser,
 	festivalId: string,
 	name: string,
 	description: string,
@@ -99,7 +100,7 @@ export async function updateFestival(
 	}
 }
 
-export async function deleteFestival(user: BackendUser | null, festivalId: string): Promise<void> {
+export async function deleteFestival(user: BackendUser | null | SessionTokenUser, festivalId: string): Promise<void> {
 	if (user && festivalId) {
 		const festivalModel = await getFestivalModel(festivalId);
 		if (festivalModel && festivalModel.dataValues.UserId === user.id) {
@@ -122,7 +123,7 @@ async function getGuestInformationModel(userId: string, festivalId: string) {
 }
 
 export async function joinFestival(
-	user: BackendUser | null,
+	user: BackendUser | null | SessionTokenUser,
 	festivalId: string,
 	eventData: BaseGuestInformation
 ): Promise<void> {
@@ -154,7 +155,11 @@ export async function joinFestival(
 	}
 }
 
-export async function leaveFestival(user: BackendUser | null, festivalId: string, comment: string): Promise<void> {
+export async function leaveFestival(
+	user: BackendUser | null | SessionTokenUser,
+	festivalId: string,
+	comment: string
+): Promise<void> {
 	if (user && festivalId) {
 		const find = await getGuestInformationModel(user.id, festivalId);
 		if (find) {

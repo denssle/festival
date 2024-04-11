@@ -3,8 +3,10 @@ import type { BackendUser } from '../models/user/BackendUser';
 import type { FrontendUser } from '../models/user/FrontendUser';
 import type { UserFormData } from '$lib/models/user/UserFormData';
 import type { Cookies } from '@sveltejs/kit';
-import { User } from '$lib/db/db';
+import { Friend, User } from '$lib/db/db';
 import { convertToBackendUser } from '$lib/db/attributes/UserAttributes';
+import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
+import { Op } from 'sequelize';
 
 async function getByNickname(nickname: string) {
 	return await User.findOne({
@@ -42,21 +44,31 @@ export async function login(nickname: string, password: string): Promise<Backend
 
 export async function validateSessionToken(userString: string | undefined): Promise<boolean> {
 	// TODO Check token age
-	const user: BackendUser | null = extractUser(userString);
+	const user: SessionTokenUser | null = extractUser(userString);
 	if (user) {
 		const found: BackendUser | null = await loadUserById(user.id);
 		if (found && found.password) {
 			return found.password === user.password;
 		} else {
-			console.error('session validation: no user in db found', found);
+			console.error('session validation: no user in db found', user);
 		}
 	}
 	return false;
 }
 
-export function extractUser(sessionToken: string | undefined): BackendUser | null {
+export function extractUser(sessionToken: string | undefined): SessionTokenUser | null {
 	if (sessionToken) {
-		return parseStringToUser(sessionToken);
+		try {
+			const maybeUser: SessionTokenUser = JSON.parse(sessionToken);
+			if (maybeUser) {
+				return maybeUser;
+			} else {
+				console.error('User parsing failed!');
+			}
+		} catch (e) {
+			console.error('error parsing user', e);
+		}
+		return null;
 	}
 	return null;
 }
@@ -85,26 +97,12 @@ export async function loadFrontEndUserById(id: string | null): Promise<FrontendU
 	if (id) {
 		const byId: BackendUser | null = await loadUserById(id);
 		if (byId) {
-			return parseToFrontEnd(byId);
+			return parseBackendUserToFrontend(byId);
 		}
 	}
 }
 
-function parseStringToUser(data: string): BackendUser | null {
-	try {
-		const maybeUser: BackendUser = JSON.parse(data);
-		if (maybeUser) {
-			return maybeUser;
-		} else {
-			console.error('User parsing failed!');
-		}
-	} catch (e) {
-		console.error('error parsing user', e);
-	}
-	return null;
-}
-
-export function parseToFrontEnd(user: BackendUser): FrontendUser {
+export function parseBackendUserToFrontend(user: BackendUser): FrontendUser {
 	return {
 		id: user.id,
 		nickname: user.nickname,
@@ -114,6 +112,19 @@ export function parseToFrontEnd(user: BackendUser): FrontendUser {
 		updatedAt: user.updatedAt,
 		createdAt: user.createdAt,
 		image: user.image
+	};
+}
+
+export function parseSessionUserToFrontEnd(user: SessionTokenUser): FrontendUser {
+	return {
+		id: user.id,
+		nickname: user.nickname,
+		image: 'not set in token',
+		forename: 'not set in token',
+		lastname: 'not set in token',
+		email: 'not set in token',
+		createdAt: new Date(),
+		updatedAt: new Date()
 	};
 }
 
@@ -128,16 +139,24 @@ export async function readFormDataFrontEndUser(data: Promise<FormData>): Promise
 	};
 }
 
-export function createSessionCookie(cookies: Cookies, user: BackendUser): void {
-	// TODO: nicht den ganzen BackendUser speichern
-	cookies.set('session', JSON.stringify(user), {
-		path: '/',
-		sameSite: 'strict',
-		maxAge: 60 * 60 * 24 * 30
-	});
+export function createSessionCookie(cookies: Cookies, user: BackendUser | SessionTokenUser): void {
+	// TODO: Nicht das Password rausgeben
+	cookies.set(
+		'session',
+		JSON.stringify({
+			id: user.id,
+			password: user.password,
+			nickname: user.nickname
+		} as SessionTokenUser),
+		{
+			path: '/',
+			sameSite: 'strict',
+			maxAge: 60 * 60 * 24 * 30
+		}
+	);
 }
 
-export async function updateUser(oldUser: BackendUser, formData: UserFormData): Promise<BackendUser> {
+export async function updateUser(oldUser: SessionTokenUser, formData: UserFormData): Promise<SessionTokenUser> {
 	const model = await User.findByPk(oldUser.id);
 	if (model) {
 		model.set({
@@ -166,4 +185,28 @@ export async function saveUserImage(userId: string, image: string): Promise<stri
 export async function getUserImage(userId: string): Promise<string | null> {
 	const model = await User.findByPk(userId);
 	return model ? model.dataValues.image : null;
+}
+
+export async function addFriend(userId: string, userId2: string): Promise<void> {
+	await Friend.create({
+		id: crypto.randomUUID(),
+		friend1Id: userId,
+		friend2Id: userId2
+	});
+}
+
+export async function getFriends(userId: string): Promise<{ id: string, friend1Id: string, friend2Id: string }[]> {
+	const model = await Friend.findAll({
+		where: {
+			[Op.or]: [
+				{
+					friend1Id: userId
+				},
+				{
+					friend2Id: userId
+				}
+			]
+		}
+	});
+	return model.map(value => value.dataValues);
 }

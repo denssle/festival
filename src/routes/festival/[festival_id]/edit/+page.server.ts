@@ -8,7 +8,7 @@ import { getFrontEndFestival, updateFestival } from '$lib/services/festival-even
 import { extractUser } from '$lib/services/user-service';
 import { getUTCFromString } from '$lib/utils/dateUtils';
 import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
-import type { BackendUser } from '$lib/models/user/BackendUser';
+import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 
 export const load: PageServerLoad = async ({
 	cookies,
@@ -21,7 +21,7 @@ export const load: PageServerLoad = async ({
 	if (festival_id) {
 		const festival: FrontendFestivalEvent | null = await getFrontEndFestival(festival_id);
 		if (festival) {
-			const user: BackendUser | null = extractUser(cookies.get('session'));
+			const user: SessionTokenUser | null = extractUser(cookies.get('session'));
 			if (user && user.id === festival.createdBy?.id) {
 				return festival;
 			} else {
