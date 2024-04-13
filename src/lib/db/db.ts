@@ -111,5 +111,5 @@ Friend.belongsTo(User, {
 });
 
 export async function startDB(): Promise<void> {
-	await sequelize.sync({ force: true });
+	await sequelize.sync({ force: false });
 }

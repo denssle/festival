@@ -34,11 +34,13 @@ export async function mapToFrontendFestivalEvent(event: FestivalEventAttributes)
 		startDate: event.startDate,
 		location: event.location,
 		updatedAt: event.updatedAt,
-		frontendGuestInformation: event.GuestInformations ? await Promise.all(
-			event.GuestInformations.map((value) => {
-				return mapToFrontendGuestInformation(value.dataValues);
-			})
-		) : []
+		frontendGuestInformation: event.GuestInformations
+			? await Promise.all(
+					event.GuestInformations.map((value) => {
+						return mapToFrontendGuestInformation(value.dataValues);
+					})
+				)
+			: []
 	};
 }
 

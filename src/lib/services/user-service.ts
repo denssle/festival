@@ -195,7 +195,7 @@ export async function addFriend(userId: string, userId2: string): Promise<void> 
 	});
 }
 
-export async function getFriends(userId: string): Promise<{ id: string, friend1Id: string, friend2Id: string }[]> {
+export async function getFriends(userId: string): Promise<{ id: string; friend1Id: string; friend2Id: string }[]> {
 	const model = await Friend.findAll({
 		where: {
 			[Op.or]: [
@@ -208,5 +208,32 @@ export async function getFriends(userId: string): Promise<{ id: string, friend1I
 			]
 		}
 	});
-	return model.map(value => value.dataValues);
+	return model.map((value) => value.dataValues);
+}
+
+export async function getFriendList(userId: string): Promise<(FrontendUser | undefined)[]> {
+	const friends: { id: string; friend1Id: string; friend2Id: string }[] = await getFriends(userId);
+	return await Promise.all(friends.map(value => {
+		if (value.friend1Id === userId) {
+			return loadFrontEndUserById(value.friend2Id);
+		} else {
+			return loadFrontEndUserById(value.friend1Id);
+		}
+	}).filter(value => Boolean(value)));
+
+}
+
+export async function areFriends(userId: string, userId2: string): Promise<boolean> {
+	return Boolean(Friend.findOne({
+		where: {
+			[Op.or]: [
+				{
+					friend1Id: [userId, userId2]
+				},
+				{
+					friend2Id: [userId, userId2]
+				}
+			]
+		}
+	}));
 }

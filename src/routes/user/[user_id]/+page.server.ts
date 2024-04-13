@@ -3,8 +3,10 @@ import { error } from '@sveltejs/kit';
 import type { FrontendUser } from '$lib/models/user/FrontendUser';
 import * as userService from '$lib/services/user-service';
 import {
+	areFriends,
 	createSessionCookie,
 	extractUser,
+	getFriendList,
 	loadFrontEndUserById,
 	nickNameInvalid,
 	readFormDataFrontEndUser
@@ -13,14 +15,12 @@ import type { PageServerLoad, RouteParams } from '../../user/[user_id]/$types';
 import { StandardResponse } from '$lib/models/StandardResponse';
 import type { UserFormData } from '$lib/models/user/UserFormData';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
+import type { UserTransferData } from '$lib/models/user/UserTransferData';
 
-export const load: PageServerLoad = async ({
-	cookies,
-	params
-}: {
+export const load: PageServerLoad = async ({ cookies, params }: {
 	cookies: Cookies;
 	params: RouteParams;
-}): Promise<{ user: FrontendUser; isOwnProfil: boolean }> => {
+}): Promise<UserTransferData> => {
 	const userId: string = params.user_id;
 	if (userId) {
 		const user: SessionTokenUser | null = extractUser(cookies.get('session'));
@@ -28,7 +28,9 @@ export const load: PageServerLoad = async ({
 		if (user && loaded) {
 			return {
 				user: loaded,
-				isOwnProfil: user && userId === user.id
+				isOwnProfil: user && userId === user.id,
+				yourFriend: await areFriends(userId, user.id),
+				friends: await getFriendList(userId)
 			};
 		}
 	}
