@@ -4,6 +4,8 @@ import { GuestInformationAttributes } from '$lib/db/attributes/GuestInformationA
 import { UserAttributes } from '$lib/db/attributes/UserAttributes';
 import { FestivalEventAttributes } from '$lib/db/attributes/FestivalEventAttributes';
 import { FALLBACK_PICTURE } from '$lib/constants';
+import { FriendAttributes } from '$lib/db/attributes/FriendAttributes';
+import { FriendRequestAttributes } from '$lib/db/attributes/FriendRequestAttributes';
 
 const sequelize: Sequelize = new Sequelize({
 	dialect: 'mariadb',
@@ -78,8 +80,24 @@ export const FestivalEvent: ModelStatic<Model<FestivalEventAttributes, any>> = s
 	}
 );
 
-export const Friend: ModelStatic<Model<any, any>> = sequelize.define(
+export const Friend: ModelStatic<Model<FriendAttributes, any>> = sequelize.define(
 	'Friend',
+	{
+		id: {
+			type: DataTypes.STRING,
+			primaryKey: true,
+			allowNull: false
+		}
+	},
+	{
+		timestamps: true,
+		createdAt: true,
+		updatedAt: true
+	}
+);
+
+export const FriendRequest: ModelStatic<Model<FriendRequestAttributes, any>> = sequelize.define(
+	'FriendRequest',
 	{
 		id: {
 			type: DataTypes.STRING,
@@ -108,6 +126,13 @@ User.hasMany(Friend, {
 });
 Friend.belongsTo(User, {
 	as: 'friend2'
+});
+
+User.hasMany(FriendRequest, {
+	foreignKey: 'requesterId'
+});
+FriendRequest.belongsTo(User, {
+	as: 'requested'
 });
 
 export async function startDB(): Promise<void> {

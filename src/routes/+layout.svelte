@@ -20,6 +20,7 @@
 			<a href="/festival/new">Neu</a>
 			<a href="/settings">Einstellungen</a>
 			<a href="/user/{data.currentUser.id}">{data.currentUser.nickname}</a>
+			<a href="/updates">Updates</a>
 			<button on:click|trusted={logout}>Logout</button>
 		{:else}
 			<a href="/login">Anmelden</a>

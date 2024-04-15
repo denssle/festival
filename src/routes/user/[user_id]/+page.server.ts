@@ -17,7 +17,10 @@ import type { UserFormData } from '$lib/models/user/UserFormData';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import type { UserTransferData } from '$lib/models/user/UserTransferData';
 
-export const load: PageServerLoad = async ({ cookies, params }: {
+export const load: PageServerLoad = async ({
+	cookies,
+	params
+}: {
 	cookies: Cookies;
 	params: RouteParams;
 }): Promise<UserTransferData> => {

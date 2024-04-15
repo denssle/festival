@@ -3,10 +3,17 @@ import type { BackendUser } from '../models/user/BackendUser';
 import type { FrontendUser } from '../models/user/FrontendUser';
 import type { UserFormData } from '$lib/models/user/UserFormData';
 import type { Cookies } from '@sveltejs/kit';
-import { Friend, User } from '$lib/db/db';
+import { Friend, FriendRequest, User } from '$lib/db/db';
 import { convertToBackendUser } from '$lib/db/attributes/UserAttributes';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
-import { Op } from 'sequelize';
+import { Model, Op } from 'sequelize';
+import {
+	convertToIncomingFriendRequest,
+	convertToOutgoingFriendRequest,
+	FriendRequestAttributes
+} from '$lib/db/attributes/FriendRequestAttributes';
+import { IncomingFriendRequest } from '$lib/models/updates/IncomingFriendRequest';
+import { OutgoingFriendRequest } from '$lib/models/updates/OutgoingFriendRequest';
 
 async function getByNickname(nickname: string) {
 	return await User.findOne({
@@ -188,6 +195,7 @@ export async function getUserImage(userId: string): Promise<string | null> {
 }
 
 export async function addFriend(userId: string, userId2: string): Promise<void> {
+	// TODO check if Freundschaftsanfrage schon gestellt wurde.
 	await Friend.create({
 		id: crypto.randomUUID(),
 		friend1Id: userId,
@@ -213,27 +221,58 @@ export async function getFriends(userId: string): Promise<{ id: string; friend1I
 
 export async function getFriendList(userId: string): Promise<(FrontendUser | undefined)[]> {
 	const friends: { id: string; friend1Id: string; friend2Id: string }[] = await getFriends(userId);
-	return await Promise.all(friends.map(value => {
-		if (value.friend1Id === userId) {
-			return loadFrontEndUserById(value.friend2Id);
-		} else {
-			return loadFrontEndUserById(value.friend1Id);
-		}
-	}).filter(value => Boolean(value)));
-
+	return await Promise.all(
+		friends
+			.map((value) => {
+				if (value.friend1Id === userId) {
+					return loadFrontEndUserById(value.friend2Id);
+				} else {
+					return loadFrontEndUserById(value.friend1Id);
+				}
+			})
+			.filter((value) => Boolean(value))
+	);
 }
 
 export async function areFriends(userId: string, userId2: string): Promise<boolean> {
-	return Boolean(Friend.findOne({
+	return Boolean(
+		Friend.findOne({
+			where: {
+				[Op.or]: [
+					{
+						friend1Id: [userId, userId2]
+					},
+					{
+						friend2Id: [userId, userId2]
+					}
+				]
+			}
+		})
+	);
+}
+
+export async function createFriendRequest(requester: string, requested: string): Promise<void> {
+	await FriendRequest.create({
+		id: crypto.randomUUID(),
+		requesterId: requester,
+		requestedId: requested
+	});
+}
+
+export async function getIncomingFriendRequests(requestedId: string): Promise<IncomingFriendRequest[]> {
+	const model: Model<FriendRequestAttributes, any>[] = await FriendRequest.findAll({
 		where: {
-			[Op.or]: [
-				{
-					friend1Id: [userId, userId2]
-				},
-				{
-					friend2Id: [userId, userId2]
-				}
-			]
+			requestedId: requestedId
 		}
-	}));
+	});
+	return Promise.all(model.map((value) => convertToIncomingFriendRequest(value.dataValues)));
+}
+
+export async function getOutgoingFriendRequests(requesterId: string): Promise<OutgoingFriendRequest[]> {
+	const model: Model<FriendRequestAttributes, any>[] = await FriendRequest.findAll({
+		where: {
+			requesterId: requesterId
+		}
+	});
+	return Promise.all(model.map((value) => convertToOutgoingFriendRequest(value.dataValues)));
 }

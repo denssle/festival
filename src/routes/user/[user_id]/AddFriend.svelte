@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { error } from '@sveltejs/kit';
+	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
+	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
 
 	export let friends = false; // TODO
 	export let friendId: string;
@@ -9,8 +11,9 @@
 			.then((value: Response) => {
 				if (value.ok) {
 					console.log('value ok');
+					openDialog("Freundschaftsanfrage wurde geschickt.")
 				} else {
-					console.log('value not ok');
+					openDialog("Fehler bei Anfrage.")
 				}
 			})
 			.catch((reason) => error(reason));
@@ -19,8 +22,21 @@
 	function removeFriend(): void {
 		console.log('remove friend');
 	}
+
+	function openDialog(msg: string) {
+		infoDialogData.infoDialogText = msg;
+		infoDialogData.showDialog = true;
+	}
+
+	let infoDialogData: InfoDialogData = {
+		showDialog: false,
+		infoDialogText: '',
+		dialog: undefined,
+		answerYes: false
+	};
 </script>
 
+<InfoDialog bind:infoDialogData />
 <div>
 	{#if friends}
 		<button on:click={() => removeFriend()}> Freund entfernen</button>

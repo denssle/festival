@@ -4,6 +4,7 @@
 
 - add `.env` File for Connection to a Maria DB. Should look like this:
 - database name same as user name
+- the db should run on `localhost:3306`
 
 ```
 MARIA_DB_USER="***"
