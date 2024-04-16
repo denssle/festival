@@ -14,6 +14,7 @@ import {
 } from '$lib/db/attributes/FriendRequestAttributes';
 import { IncomingFriendRequest } from '$lib/models/updates/IncomingFriendRequest';
 import { OutgoingFriendRequest } from '$lib/models/updates/OutgoingFriendRequest';
+import { FriendAttributes } from '$lib/db/attributes/FriendAttributes';
 
 async function getByNickname(nickname: string) {
 	return await User.findOne({
@@ -235,20 +236,19 @@ export async function getFriendList(userId: string): Promise<(FrontendUser | und
 }
 
 export async function areFriends(userId: string, userId2: string): Promise<boolean> {
-	return Boolean(
-		Friend.findOne({
-			where: {
-				[Op.or]: [
-					{
-						friend1Id: [userId, userId2]
-					},
-					{
-						friend2Id: [userId, userId2]
-					}
-				]
-			}
-		})
-	);
+	const model: Model<FriendAttributes, any> | null = await Friend.findOne({
+		where: {
+			[Op.or]: [
+				{
+					friend1Id: [userId, userId2]
+				},
+				{
+					friend2Id: [userId, userId2]
+				}
+			]
+		}
+	});
+	return Boolean(model);
 }
 
 export async function createFriendRequest(requester: string, requested: string): Promise<void> {
@@ -275,4 +275,19 @@ export async function getOutgoingFriendRequests(requesterId: string): Promise<Ou
 		}
 	});
 	return Promise.all(model.map((value) => convertToOutgoingFriendRequest(value.dataValues)));
+}
+
+export async function removeFriend(id: string, params_id: string): Promise<void> {
+	await Friend.destroy({
+		where: {
+			[Op.or]: [
+				{
+					friend1Id: [id, params_id]
+				},
+				{
+					friend2Id: [id, params_id]
+				}
+			]
+		}
+	});
 }

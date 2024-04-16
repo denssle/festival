@@ -33,7 +33,7 @@ export const load: PageServerLoad = async ({
 				user: loaded,
 				isOwnProfil: user && userId === user.id,
 				yourFriend: await areFriends(userId, user.id),
-				friends: await getFriendList(userId)
+				friendList: await getFriendList(userId)
 			};
 		}
 	}

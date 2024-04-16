@@ -4,5 +4,5 @@ export interface UserTransferData {
 	user: FrontendUser;
 	isOwnProfil: boolean;
 	yourFriend: boolean;
-	friends: (FrontendUser | undefined)[];
+	friendList: (FrontendUser | undefined)[];
 }

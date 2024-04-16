@@ -2,9 +2,9 @@
 	import AvatarImage from '$lib/sharedComponents/AvatarImage.svelte';
 	import AvatarUpload from './AvatarUpload.svelte';
 	import UserDataForm from './UserDataForm.svelte';
-	import AddFriend from './AddFriend.svelte';
 	import type { UserTransferData } from '$lib/models/user/UserTransferData';
 	import FriendlistEntry from './FriendlistEntry.svelte';
+	import FriendButtons from './FriendButtons.svelte';
 
 	export let data: UserTransferData;
 </script>
@@ -17,7 +17,7 @@
 			{#if data.isOwnProfil}
 				<AvatarUpload isOwnProfil={data.isOwnProfil} />
 			{:else}
-				<AddFriend friendId={data.user.id} friends={data.yourFriend} />
+				<FriendButtons friendId={data.user.id} yourFriend={data.yourFriend} />
 			{/if}
 		</div>
 	</section>
@@ -39,7 +39,7 @@
 	</section>
 	<section>
 		<h4>Freunde:</h4>
-		{#each data.friends as friend}
+		{#each data.friendList as friend}
 			<FriendlistEntry user={friend} />
 		{/each}
 	</section>

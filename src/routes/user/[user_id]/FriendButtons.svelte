@@ -1,26 +1,33 @@
-<script lang="ts">
+<script lang='ts'>
 	import { error } from '@sveltejs/kit';
 	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
 
-	export let friends = false; // TODO
+	export let yourFriend = false;
 	export let friendId: string;
 
 	async function addFriend(): Promise<void> {
 		fetch(friendId + `/add-friend`, { method: 'POST' })
 			.then((value: Response) => {
 				if (value.ok) {
-					console.log('value ok');
-					openDialog("Freundschaftsanfrage wurde geschickt.")
+					openDialog('Freundschaftsanfrage wurde geschickt.');
 				} else {
-					openDialog("Fehler bei Anfrage.")
+					openDialog('Fehler bei Anfrage.');
 				}
 			})
 			.catch((reason) => error(reason));
 	}
 
 	function removeFriend(): void {
-		console.log('remove friend');
+		fetch(friendId + `/remove-friend`, { method: 'POST' })
+			.then((value: Response) => {
+				if (value.ok) {
+					openDialog('Freundschaft gekündigt.');
+				} else {
+					openDialog('Fehler bei Anfrage.');
+				}
+			})
+			.catch((reason) => error(reason));
 	}
 
 	function openDialog(msg: string) {
@@ -38,7 +45,7 @@
 
 <InfoDialog bind:infoDialogData />
 <div>
-	{#if friends}
+	{#if yourFriend}
 		<button on:click={() => removeFriend()}> Freund entfernen</button>
 	{:else}
 		<button on:click={() => addFriend()}> Anfreunden</button>
