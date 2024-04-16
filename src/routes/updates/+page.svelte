@@ -3,16 +3,16 @@
 
 	export let data: UpdateTransferData;
 
-	function addFriend() {
-		console.log('addFriend');
+	function acceptFriendRequest(id: string | undefined) {
+		fetch(`updates/accept-friend`, { method: 'POST', body: id });
 	}
 
-	function declineFriendRequest() {
-		console.log('declineFriendRequest');
+	function declineFriendRequest(id: string | undefined) {
+		fetch(`updates/cancel-request`, { method: 'POST', body: id });
 	}
 
-	function cancelFriendRequest() {
-		console.log('cancelFriendRequest');
+	function cancelFriendRequest(id: string | undefined) {
+		fetch(`updates/decline-friend`, { method: 'POST', body: id });
 	}
 </script>
 
@@ -26,16 +26,12 @@
 					{incomingRequest?.requestedBy?.nickname}
 				</a>
 				<div>
-					<button on:click={() => addFriend()}>
-						Annehmen
-					</button>
-					<button on:click={() => declineFriendRequest()}>
-						Ablehnen
-					</button>
+					<button on:click={() => acceptFriendRequest(incomingRequest?.requestedBy?.id)}> Annehmen</button>
+					<button on:click={() => declineFriendRequest(incomingRequest?.requestedBy?.id)}> Ablehnen</button>
 				</div>
 			</div>
 		{/each}
-		{#if (data.incoming.length === 0)}
+		{#if data.incoming.length === 0}
 			<p>Keine Anfragen</p>
 		{/if}
 	</section>
@@ -46,12 +42,10 @@
 				<a href='/user/{outgoingRequest?.requestedTo?.id}'>
 					{outgoingRequest?.requestedTo?.nickname}
 				</a>
-				<button on:click={() => cancelFriendRequest()}>
-					Zurückziehen
-				</button>
+				<button on:click={() => cancelFriendRequest(outgoingRequest?.requestedTo?.id)}> Zurückziehen</button>
 			</div>
 		{/each}
-		{#if (data.outgoing.length === 0)}
+		{#if data.outgoing.length === 0}
 			<p>Keine Anfragen</p>
 		{/if}
 	</section>

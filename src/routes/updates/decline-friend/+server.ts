@@ -1,0 +1,13 @@
+import { RequestHandler } from '@sveltejs/kit';
+import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
+import { declineFriendRequest, extractUser } from '$lib/services/user-service';
+
+export const POST: RequestHandler = async ({ cookies, request }): Promise<Response> => {
+	const user: SessionTokenUser | null = extractUser(cookies.get('session'));
+	const body_id = await request.text();
+	if (user && body_id) {
+		await declineFriendRequest(user.id, body_id);
+		return new Response(null, { status: 200 });
+	}
+	return new Response(null, { status: 404 });
+};

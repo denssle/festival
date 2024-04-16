@@ -195,15 +195,6 @@ export async function getUserImage(userId: string): Promise<string | null> {
 	return model ? model.dataValues.image : null;
 }
 
-export async function addFriend(userId: string, userId2: string): Promise<void> {
-	// TODO check if Freundschaftsanfrage schon gestellt wurde.
-	await Friend.create({
-		id: crypto.randomUUID(),
-		friend1Id: userId,
-		friend2Id: userId2
-	});
-}
-
 export async function getFriends(userId: string): Promise<{ id: string; friend1Id: string; friend2Id: string }[]> {
 	const model = await Friend.findAll({
 		where: {
@@ -251,12 +242,30 @@ export async function areFriends(userId: string, userId2: string): Promise<boole
 	return Boolean(model);
 }
 
-export async function createFriendRequest(requester: string, requested: string): Promise<void> {
-	await FriendRequest.create({
-		id: crypto.randomUUID(),
-		requesterId: requester,
-		requestedId: requested
+export async function friendRequestExisting(id: string, params_id: string): Promise<boolean> {
+	const model: Model<FriendRequestAttributes, any> | null = await FriendRequest.findOne({
+		where: {
+			[Op.or]: [
+				{
+					requestedId: [id, params_id]
+				},
+				{
+					requestedId: [id, params_id]
+				}
+			]
+		}
 	});
+	return Boolean(model);
+}
+
+export async function createFriendRequest(requester: string, requested: string): Promise<void> {
+	if (!(await friendRequestExisting(requester, requested))) {
+		await FriendRequest.create({
+			id: crypto.randomUUID(),
+			requesterId: requester,
+			requestedId: requested
+		});
+	}
 }
 
 export async function getIncomingFriendRequests(requestedId: string): Promise<IncomingFriendRequest[]> {
@@ -290,4 +299,42 @@ export async function removeFriend(id: string, params_id: string): Promise<void>
 			]
 		}
 	});
+}
+
+export async function acceptFriendRequest(id: string, params_id: string) {
+	if (await friendRequestExisting(id, params_id)) {
+		await deleteFriendRequest(id, params_id);
+		await addFriend(id, params_id);
+	}
+}
+
+export async function addFriend(userId: string, userId2: string): Promise<void> {
+	await Friend.create({
+		id: crypto.randomUUID(),
+		friend1Id: userId,
+		friend2Id: userId2
+	});
+}
+
+async function deleteFriendRequest(id: string, params_id: string): Promise<void> {
+	await FriendRequest.destroy({
+		where: {
+			[Op.or]: [
+				{
+					requesterId: [id, params_id]
+				},
+				{
+					requestedId: [id, params_id]
+				}
+			]
+		}
+	});
+}
+
+export async function cancelFriendRequest(id: string, params_id: string) {
+	await deleteFriendRequest(id, params_id);
+}
+
+export async function declineFriendRequest(id: string, params_id: string) {
+	await deleteFriendRequest(id, params_id);
 }

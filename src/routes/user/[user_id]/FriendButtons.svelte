@@ -1,4 +1,4 @@
-<script lang='ts'>
+<script lang="ts">
 	import { error } from '@sveltejs/kit';
 	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
