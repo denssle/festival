@@ -1,6 +1,6 @@
 import type { Cookies } from '@sveltejs/kit';
 import { PageServerLoad } from '../$types';
-import { extractUser, getIncomingFriendRequests, getOutgoingFriendRequests } from '$lib/services/user-service';
+import { extractUser, getReceivedFriendRequests, getSentFriendRequests } from '$lib/services/user-service';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import { UpdateTransferData } from '$lib/models/updates/UpdateTransferData';
 
@@ -8,12 +8,12 @@ export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): P
 	const user: SessionTokenUser | null = extractUser(cookies.get('session'));
 	if (user) {
 		return {
-			incoming: await getIncomingFriendRequests(user.id),
-			outgoing: await getOutgoingFriendRequests(user.id)
+			receivedFriendRequests: await getReceivedFriendRequests(user.id),
+			sentFriendRequests: await getSentFriendRequests(user.id)
 		};
 	}
 	return {
-		incoming: [],
-		outgoing: []
+		receivedFriendRequests: [],
+		sentFriendRequests: []
 	};
 };

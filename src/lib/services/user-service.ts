@@ -7,14 +7,9 @@ import { Friend, FriendRequest, User } from '$lib/db/db';
 import { convertToBackendUser } from '$lib/db/attributes/UserAttributes';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import { Model, Op } from 'sequelize';
-import {
-	convertToIncomingFriendRequest,
-	convertToOutgoingFriendRequest,
-	FriendRequestAttributes
-} from '$lib/db/attributes/FriendRequestAttributes';
-import { IncomingFriendRequest } from '$lib/models/updates/IncomingFriendRequest';
-import { OutgoingFriendRequest } from '$lib/models/updates/OutgoingFriendRequest';
+import { convertToFriendRequest, FriendRequestAttributes } from '$lib/db/attributes/FriendRequestAttributes';
 import { FriendAttributes } from '$lib/db/attributes/FriendAttributes';
+import { FriendRequestData } from '$lib/models/updates/FriendRequestData';
 
 async function getByNickname(nickname: string) {
 	return await User.findOne({
@@ -229,7 +224,7 @@ export async function getFriendList(userId: string): Promise<(FrontendUser | und
 export async function areFriends(userId: string, userId2: string): Promise<boolean> {
 	const model: Model<FriendAttributes, any> | null = await Friend.findOne({
 		where: {
-			[Op.or]: [
+			[Op.and]: [
 				{
 					friend1Id: [userId, userId2]
 				},
@@ -245,12 +240,12 @@ export async function areFriends(userId: string, userId2: string): Promise<boole
 export async function friendRequestExisting(id: string, params_id: string): Promise<boolean> {
 	const model: Model<FriendRequestAttributes, any> | null = await FriendRequest.findOne({
 		where: {
-			[Op.or]: [
+			[Op.and]: [
 				{
-					requestedId: [id, params_id]
+					senderId: [id, params_id]
 				},
 				{
-					requestedId: [id, params_id]
+					receiverId: [id, params_id]
 				}
 			]
 		}
@@ -258,38 +253,38 @@ export async function friendRequestExisting(id: string, params_id: string): Prom
 	return Boolean(model);
 }
 
-export async function createFriendRequest(requester: string, requested: string): Promise<void> {
-	if (!(await friendRequestExisting(requester, requested))) {
+export async function createFriendRequest(senderId: string, receiverId: string): Promise<void> {
+	if (!(await friendRequestExisting(senderId, receiverId))) {
 		await FriendRequest.create({
 			id: crypto.randomUUID(),
-			requesterId: requester,
-			requestedId: requested
+			senderId: senderId,
+			receiverId: receiverId
 		});
 	}
 }
 
-export async function getIncomingFriendRequests(requestedId: string): Promise<IncomingFriendRequest[]> {
+export async function getReceivedFriendRequests(receiverId: string): Promise<FriendRequestData[]> {
 	const model: Model<FriendRequestAttributes, any>[] = await FriendRequest.findAll({
 		where: {
-			requestedId: requestedId
+			receiverId: receiverId
 		}
 	});
-	return Promise.all(model.map((value) => convertToIncomingFriendRequest(value.dataValues)));
+	return Promise.all(model.map((value) => convertToFriendRequest(value.dataValues)));
 }
 
-export async function getOutgoingFriendRequests(requesterId: string): Promise<OutgoingFriendRequest[]> {
+export async function getSentFriendRequests(senderId: string): Promise<FriendRequestData[]> {
 	const model: Model<FriendRequestAttributes, any>[] = await FriendRequest.findAll({
 		where: {
-			requesterId: requesterId
+			senderId: senderId
 		}
 	});
-	return Promise.all(model.map((value) => convertToOutgoingFriendRequest(value.dataValues)));
+	return Promise.all(model.map((value) => convertToFriendRequest(value.dataValues)));
 }
 
 export async function removeFriend(id: string, params_id: string): Promise<void> {
 	await Friend.destroy({
 		where: {
-			[Op.or]: [
+			[Op.and]: [
 				{
 					friend1Id: [id, params_id]
 				},
@@ -319,12 +314,12 @@ export async function addFriend(userId: string, userId2: string): Promise<void> 
 async function deleteFriendRequest(id: string, params_id: string): Promise<void> {
 	await FriendRequest.destroy({
 		where: {
-			[Op.or]: [
+			[Op.and]: [
 				{
-					requesterId: [id, params_id]
+					senderId: [id, params_id]
 				},
 				{
-					requestedId: [id, params_id]
+					receiverId: [id, params_id]
 				}
 			]
 		}

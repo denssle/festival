@@ -1,7 +1,8 @@
-<script lang="ts">
+<script lang='ts'>
 	import { error } from '@sveltejs/kit';
 	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
+	import { invalidateAll } from '$app/navigation';
 
 	export let yourFriend = false;
 	export let friendId: string;
@@ -14,6 +15,7 @@
 				} else {
 					openDialog('Fehler bei Anfrage.');
 				}
+				invalidateAll();
 			})
 			.catch((reason) => error(reason));
 	}
@@ -26,6 +28,7 @@
 				} else {
 					openDialog('Fehler bei Anfrage.');
 				}
+				invalidateAll();
 			})
 			.catch((reason) => error(reason));
 	}

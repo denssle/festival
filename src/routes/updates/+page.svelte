@@ -1,18 +1,22 @@
 <script lang='ts'>
 	import type { UpdateTransferData } from '$lib/models/updates/UpdateTransferData';
+	import { invalidateAll } from '$app/navigation';
 
 	export let data: UpdateTransferData;
 
-	function acceptFriendRequest(id: string | undefined) {
-		fetch(`updates/accept-friend`, { method: 'POST', body: id });
+	async function acceptFriendRequest(id: string | undefined) {
+		await fetch(`updates/accept-friend`, { method: 'POST', body: id });
+		invalidateAll();
 	}
 
-	function declineFriendRequest(id: string | undefined) {
-		fetch(`updates/cancel-request`, { method: 'POST', body: id });
+	async function declineFriendRequest(id: string | undefined) {
+		await fetch(`updates/cancel-request`, { method: 'POST', body: id });
+		invalidateAll();
 	}
 
-	function cancelFriendRequest(id: string | undefined) {
-		fetch(`updates/decline-friend`, { method: 'POST', body: id });
+	async function cancelFriendRequest(id: string | undefined) {
+		await fetch(`updates/decline-friend`, { method: 'POST', body: id });
+		invalidateAll();
 	}
 </script>
 
@@ -20,32 +24,32 @@
 	<h2>Updates</h2>
 	<section>
 		<h4>Eingegangene Freundschaftsanfragen</h4>
-		{#each data.incoming as incomingRequest}
+		{#each data.receivedFriendRequests as received}
 			<div class='friend-request'>
-				<a href='/user/{incomingRequest?.requestedBy?.id}'>
-					{incomingRequest?.requestedBy?.nickname}
+				<a href='/user/{received?.sendTo?.id}'>
+					{received?.sendTo?.nickname}
 				</a>
 				<div>
-					<button on:click={() => acceptFriendRequest(incomingRequest?.requestedBy?.id)}> Annehmen</button>
-					<button on:click={() => declineFriendRequest(incomingRequest?.requestedBy?.id)}> Ablehnen</button>
+					<button on:click={() => acceptFriendRequest(received?.sendTo?.id)}> Annehmen</button>
+					<button on:click={() => declineFriendRequest(received?.sendTo?.id)}> Ablehnen</button>
 				</div>
 			</div>
 		{/each}
-		{#if data.incoming.length === 0}
+		{#if data.receivedFriendRequests.length === 0}
 			<p>Keine Anfragen</p>
 		{/if}
 	</section>
 	<section>
 		<h4>Ausstehende Freundschaftsanfragen</h4>
-		{#each data.outgoing as outgoingRequest}
+		{#each data.sentFriendRequests as send}
 			<div class='friend-request'>
-				<a href='/user/{outgoingRequest?.requestedTo?.id}'>
-					{outgoingRequest?.requestedTo?.nickname}
+				<a href='/user/{send?.receivedFrom?.id}'>
+					{send?.receivedFrom?.nickname}
 				</a>
-				<button on:click={() => cancelFriendRequest(outgoingRequest?.requestedTo?.id)}> Zurückziehen</button>
+				<button on:click={() => cancelFriendRequest(send?.receivedFrom?.id)}> Zurückziehen</button>
 			</div>
 		{/each}
-		{#if data.outgoing.length === 0}
+		{#if data.sentFriendRequests.length === 0}
 			<p>Keine Anfragen</p>
 		{/if}
 	</section>

@@ -129,10 +129,10 @@ Friend.belongsTo(User, {
 });
 
 User.hasMany(FriendRequest, {
-	foreignKey: 'requesterId'
+	foreignKey: 'senderId'
 });
 FriendRequest.belongsTo(User, {
-	as: 'requested'
+	as: 'receiver'
 });
 
 export async function startDB(): Promise<void> {

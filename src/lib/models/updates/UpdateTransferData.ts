@@ -1,7 +1,6 @@
-import { OutgoingFriendRequest } from '$lib/models/updates/OutgoingFriendRequest';
-import { IncomingFriendRequest } from '$lib/models/updates/IncomingFriendRequest';
+import { FriendRequestData } from '$lib/models/updates/FriendRequestData';
 
 export interface UpdateTransferData {
-	incoming: IncomingFriendRequest[];
-	outgoing: OutgoingFriendRequest[];
+	receivedFriendRequests: FriendRequestData[];
+	sentFriendRequests: FriendRequestData[];
 }
