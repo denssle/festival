@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang='ts'>
 	import type { JoinEventDialogData } from '$lib/models/dialogData/JoinEventDialogData';
 	import BaseDialog from '$lib/sharedComponents/BaseDialog.svelte';
 
@@ -11,14 +11,14 @@
 	<section>
 		<label>
 			Ich bringe weitere Gäste mit (die hier nicht angemeldet sind):
-			<input bind:value={joinDialogData.numberOfOtherGuests} id="otherGuests" type="number" />
+			<input bind:value={joinDialogData.numberOfOtherGuests} id='otherGuests' type='number' />
 		</label>
 	</section>
 
 	<section>
 		<label>
 			Ich bringe etwas zu essen mit:
-			<input bind:value={joinDialogData.food} id="food" type="text" />
+			<input bind:value={joinDialogData.food} id='food' type='text' />
 		</label>
 
 		{#if joinDialogData.bringYourOwnFood}
@@ -31,7 +31,7 @@
 	<section>
 		<label>
 			Ich bringe etwas zu trinken mit:
-			<input bind:value={joinDialogData.drink} id="drink" type="text" />
+			<input bind:value={joinDialogData.drink} id='drink' type='text' />
 		</label>
 
 		{#if joinDialogData.bringYourOwnBottle}

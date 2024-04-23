@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang='ts'>
 	import type { CancelInvitationDialogData } from '$lib/models/dialogData/CancelInvitationDialogData';
 	import BaseDialog from '$lib/sharedComponents/BaseDialog.svelte';
 
@@ -9,7 +9,7 @@
 	<p>Leider bin ich / sind wir bei dem Event nicht dabei.</p>
 
 	<section>
-		<label for="comment">Kommentar (optional):</label>
-		<input bind:value={cancelInvitationDialogData.comment} id="comment" type="text" />
+		<label for='comment'>Kommentar (optional):</label>
+		<input bind:value={cancelInvitationDialogData.comment} id='comment' type='text' />
 	</section>
 </BaseDialog>

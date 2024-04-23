@@ -13,8 +13,7 @@ function getTestUser(): FrontendUser {
 		lastname: '',
 		email: '',
 		createdAt: new Date(),
-		updatedAt: new Date(),
-		image: ''
+		updatedAt: new Date()
 	};
 }
 

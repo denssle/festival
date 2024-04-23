@@ -6,5 +6,4 @@ export interface BaseUser {
 	email: string;
 	createdAt: Date;
 	updatedAt: Date;
-	image: string;
 }

@@ -3,13 +3,11 @@ import type { BackendUser } from '../models/user/BackendUser';
 import type { FrontendUser } from '../models/user/FrontendUser';
 import type { UserFormData } from '$lib/models/user/UserFormData';
 import type { Cookies } from '@sveltejs/kit';
-import { Friend, FriendRequest, User } from '$lib/db/db';
-import { convertToBackendUser } from '$lib/db/attributes/UserAttributes';
+import { User, UserImage } from '$lib/db/db';
+import { convertToBackendUser, UserAttributes } from '$lib/db/attributes/UserAttributes';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
-import { Model, Op } from 'sequelize';
-import { convertToFriendRequest, FriendRequestAttributes } from '$lib/db/attributes/FriendRequestAttributes';
-import { FriendAttributes } from '$lib/db/attributes/FriendAttributes';
-import { FriendRequestData } from '$lib/models/updates/FriendRequestData';
+import { Model } from 'sequelize';
+import { UserImageAttributes } from '$lib/db/attributes/UserImageAttributes';
 
 async function getByNickname(nickname: string) {
 	return await User.findOne({
@@ -113,8 +111,7 @@ export function parseBackendUserToFrontend(user: BackendUser): FrontendUser {
 		lastname: user.lastname,
 		email: user.email,
 		updatedAt: user.updatedAt,
-		createdAt: user.createdAt,
-		image: user.image
+		createdAt: user.createdAt
 	};
 }
 
@@ -122,7 +119,6 @@ export function parseSessionUserToFrontEnd(user: SessionTokenUser): FrontendUser
 	return {
 		id: user.id,
 		nickname: user.nickname,
-		image: 'not set in token',
 		forename: 'not set in token',
 		lastname: 'not set in token',
 		email: 'not set in token',
@@ -160,7 +156,7 @@ export function createSessionCookie(cookies: Cookies, user: BackendUser | Sessio
 }
 
 export async function updateUser(oldUser: SessionTokenUser, formData: UserFormData): Promise<SessionTokenUser> {
-	const model = await User.findByPk(oldUser.id);
+	const model: Model<UserAttributes, any> | null = await User.findByPk(oldUser.id);
 	if (model) {
 		model.set({
 			email: formData.email,
@@ -175,161 +171,17 @@ export async function updateUser(oldUser: SessionTokenUser, formData: UserFormDa
 }
 
 export async function saveUserImage(userId: string, image: string): Promise<string> {
-	const model = await User.findByPk(userId);
-	if (model) {
-		model.set({
-			image: image
+	await UserImage.findOne({ where: { UserId: userId } })
+		.then(function(model: Model<UserImageAttributes, any> | null) {
+			if (model) {
+				return model.update({ image: Buffer.from(image) });
+			}
+			return UserImage.create({ id: crypto.randomUUID(), UserId: userId, image: Buffer.from(image) });
 		});
-		await model.save();
-	}
 	return image;
 }
 
 export async function getUserImage(userId: string): Promise<string | null> {
-	const model = await User.findByPk(userId);
-	return model ? model.dataValues.image : null;
-}
-
-export async function getFriends(userId: string): Promise<{ id: string; friend1Id: string; friend2Id: string }[]> {
-	const model = await Friend.findAll({
-		where: {
-			[Op.or]: [
-				{
-					friend1Id: userId
-				},
-				{
-					friend2Id: userId
-				}
-			]
-		}
-	});
-	return model.map((value) => value.dataValues);
-}
-
-export async function getFriendList(userId: string): Promise<(FrontendUser | undefined)[]> {
-	const friends: { id: string; friend1Id: string; friend2Id: string }[] = await getFriends(userId);
-	return await Promise.all(
-		friends
-			.map((value) => {
-				if (value.friend1Id === userId) {
-					return loadFrontEndUserById(value.friend2Id);
-				} else {
-					return loadFrontEndUserById(value.friend1Id);
-				}
-			})
-			.filter((value) => Boolean(value))
-	);
-}
-
-export async function areFriends(userId: string, userId2: string): Promise<boolean> {
-	const model: Model<FriendAttributes, any> | null = await Friend.findOne({
-		where: {
-			[Op.and]: [
-				{
-					friend1Id: [userId, userId2]
-				},
-				{
-					friend2Id: [userId, userId2]
-				}
-			]
-		}
-	});
-	return Boolean(model);
-}
-
-export async function friendRequestExisting(id: string, params_id: string): Promise<boolean> {
-	const model: Model<FriendRequestAttributes, any> | null = await FriendRequest.findOne({
-		where: {
-			[Op.and]: [
-				{
-					senderId: [id, params_id]
-				},
-				{
-					receiverId: [id, params_id]
-				}
-			]
-		}
-	});
-	return Boolean(model);
-}
-
-export async function createFriendRequest(senderId: string, receiverId: string): Promise<void> {
-	if (!(await friendRequestExisting(senderId, receiverId))) {
-		await FriendRequest.create({
-			id: crypto.randomUUID(),
-			senderId: senderId,
-			receiverId: receiverId
-		});
-	}
-}
-
-export async function getReceivedFriendRequests(receiverId: string): Promise<FriendRequestData[]> {
-	const model: Model<FriendRequestAttributes, any>[] = await FriendRequest.findAll({
-		where: {
-			receiverId: receiverId
-		}
-	});
-	return Promise.all(model.map((value) => convertToFriendRequest(value.dataValues)));
-}
-
-export async function getSentFriendRequests(senderId: string): Promise<FriendRequestData[]> {
-	const model: Model<FriendRequestAttributes, any>[] = await FriendRequest.findAll({
-		where: {
-			senderId: senderId
-		}
-	});
-	return Promise.all(model.map((value) => convertToFriendRequest(value.dataValues)));
-}
-
-export async function removeFriend(id: string, params_id: string): Promise<void> {
-	await Friend.destroy({
-		where: {
-			[Op.and]: [
-				{
-					friend1Id: [id, params_id]
-				},
-				{
-					friend2Id: [id, params_id]
-				}
-			]
-		}
-	});
-}
-
-export async function acceptFriendRequest(id: string, params_id: string) {
-	if (await friendRequestExisting(id, params_id)) {
-		await deleteFriendRequest(id, params_id);
-		await addFriend(id, params_id);
-	}
-}
-
-export async function addFriend(userId: string, userId2: string): Promise<void> {
-	await Friend.create({
-		id: crypto.randomUUID(),
-		friend1Id: userId,
-		friend2Id: userId2
-	});
-}
-
-async function deleteFriendRequest(id: string, params_id: string): Promise<void> {
-	await FriendRequest.destroy({
-		where: {
-			[Op.and]: [
-				{
-					senderId: [id, params_id]
-				},
-				{
-					receiverId: [id, params_id]
-				}
-			]
-		}
-	});
-}
-
-export async function cancelFriendRequest(id: string, params_id: string) {
-	await deleteFriendRequest(id, params_id);
-}
-
-export async function declineFriendRequest(id: string, params_id: string) {
-	await deleteFriendRequest(id, params_id);
+	const model: Model<UserImageAttributes, any> | null = await UserImage.findOne({ where: { UserId: userId } });
+	return model ? model.dataValues.image.toString() : null;
 }

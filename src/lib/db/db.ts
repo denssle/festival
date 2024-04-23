@@ -6,6 +6,7 @@ import { FestivalEventAttributes } from '$lib/db/attributes/FestivalEventAttribu
 import { FALLBACK_PICTURE } from '$lib/constants';
 import { FriendAttributes } from '$lib/db/attributes/FriendAttributes';
 import { FriendRequestAttributes } from '$lib/db/attributes/FriendRequestAttributes';
+import { UserImageAttributes } from '$lib/db/attributes/UserImageAttributes';
 
 const sequelize: Sequelize = new Sequelize({
 	dialect: 'mariadb',
@@ -26,6 +27,19 @@ export const User: ModelStatic<Model<UserAttributes, any>> = sequelize.define(
 		lastname: { type: DataTypes.STRING },
 		email: { type: DataTypes.STRING },
 		image: { type: DataTypes.STRING(65000), defaultValue: FALLBACK_PICTURE }
+	},
+	{
+		timestamps: true,
+		createdAt: true,
+		updatedAt: true
+	}
+);
+
+export const UserImage: ModelStatic<Model<UserImageAttributes, any>> = sequelize.define(
+	'UserImage',
+	{
+		id: { type: DataTypes.STRING, primaryKey: true, allowNull: false },
+		image: { type: DataTypes.BLOB('long'), allowNull: false }
 	},
 	{
 		timestamps: true,
@@ -114,6 +128,9 @@ export const FriendRequest: ModelStatic<Model<FriendRequestAttributes, any>> = s
 
 FestivalEvent.hasMany(GuestInformation);
 GuestInformation.belongsTo(FestivalEvent);
+
+User.hasMany(UserImage);
+UserImage.belongsTo(User);
 
 User.hasMany(GuestInformation);
 GuestInformation.belongsTo(User);

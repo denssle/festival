@@ -1,6 +1,7 @@
 import { RequestHandler } from '@sveltejs/kit';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
-import { extractUser, removeFriend } from '$lib/services/user-service';
+import { extractUser } from '$lib/services/user-service';
+import { removeFriend } from '$lib/services/friendship-service';
 
 export const POST: RequestHandler = async ({ cookies, params }): Promise<Response> => {
 	const user: SessionTokenUser | null = extractUser(cookies.get('session'));

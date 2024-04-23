@@ -4,9 +4,9 @@ import { getUserImage, saveUserImage } from '$lib/services/user-service';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 
 export const POST: RequestHandler = async ({
-	cookies,
-	request
-}: {
+																						 cookies,
+																						 request
+																					 }: {
 	cookies: Cookies;
 	request: Request;
 }): Promise<Response> => {
@@ -19,7 +19,6 @@ export const POST: RequestHandler = async ({
 			return new Response(null, { status: 200 });
 		}
 	}
-	console.error('img upload failed', request.body);
 	return new Response(null, { status: 500 });
 };
 
