@@ -3,7 +3,6 @@ import { MARIA_DB_PASSWORD, MARIA_DB_USER } from '$env/static/private';
 import { GuestInformationAttributes } from '$lib/db/attributes/GuestInformationAttributes';
 import { UserAttributes } from '$lib/db/attributes/UserAttributes';
 import { FestivalEventAttributes } from '$lib/db/attributes/FestivalEventAttributes';
-import { FALLBACK_PICTURE } from '$lib/constants';
 import { FriendAttributes } from '$lib/db/attributes/FriendAttributes';
 import { FriendRequestAttributes } from '$lib/db/attributes/FriendRequestAttributes';
 import { UserImageAttributes } from '$lib/db/attributes/UserImageAttributes';
@@ -25,8 +24,7 @@ export const User: ModelStatic<Model<UserAttributes, any>> = sequelize.define(
 		nickname: { type: DataTypes.STRING },
 		forename: { type: DataTypes.STRING },
 		lastname: { type: DataTypes.STRING },
-		email: { type: DataTypes.STRING },
-		image: { type: DataTypes.STRING(65000), defaultValue: FALLBACK_PICTURE }
+		email: { type: DataTypes.STRING }
 	},
 	{
 		timestamps: true,

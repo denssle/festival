@@ -134,7 +134,7 @@ export async function readFormDataFrontEndUser(data: Promise<FormData>): Promise
 		nickname: String(values.get('nickname')),
 		forename: String(values.get('forename')),
 		lastname: String(values.get('lastname')),
-		password: String(values.get('password'))
+		password: values.get('password') ? String(values.get('password')) : ''
 	};
 }
 
@@ -162,7 +162,6 @@ export async function updateUser(oldUser: SessionTokenUser, formData: UserFormDa
 			email: formData.email,
 			lastname: formData.lastname,
 			forename: formData.forename,
-			password: formData.password ? saltPassword(formData.password) : oldUser.password
 		});
 		const saved = await model.save();
 		return convertToBackendUser(saved.dataValues);
@@ -170,8 +169,12 @@ export async function updateUser(oldUser: SessionTokenUser, formData: UserFormDa
 	return oldUser;
 }
 
+export async function updatePassword(oldUser: SessionTokenUser, password: string) {
+
+}
+
 export async function saveUserImage(userId: string, image: string): Promise<string> {
-	await UserImage.findOne({ where: { UserId: userId } }).then(function (model: Model<UserImageAttributes, any> | null) {
+	await UserImage.findOne({ where: { UserId: userId } }).then(function(model: Model<UserImageAttributes, any> | null) {
 		if (model) {
 			return model.update({ image: Buffer.from(image) });
 		}

@@ -3,7 +3,6 @@ import { error } from '@sveltejs/kit';
 import type { FrontendUser } from '$lib/models/user/FrontendUser';
 import * as userService from '$lib/services/user-service';
 import {
-	createSessionCookie,
 	extractUser,
 	loadFrontEndUserById,
 	nickNameInvalid,
@@ -17,9 +16,9 @@ import type { UserTransferData } from '$lib/models/user/UserTransferData';
 import { areFriends, getFriendList } from '$lib/services/friendship-service';
 
 export const load: PageServerLoad = async ({
-	cookies,
-	params
-}: {
+																						 cookies,
+																						 params
+																					 }: {
 	cookies: Cookies;
 	params: RouteParams;
 }): Promise<UserTransferData> => {
@@ -51,7 +50,7 @@ export const actions: Actions = {
 					return { success: false, message: 'Nickname invalid!' };
 				}
 			}
-			createSessionCookie(cookies, await userService.updateUser(oldUser, formData));
+			await userService.updateUser(oldUser, formData);
 			return { success: true, message: 'Updated user' };
 		}
 		return { success: false, message: 'Update failed!' };
