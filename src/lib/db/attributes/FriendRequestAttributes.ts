@@ -9,9 +9,7 @@ export type FriendRequestAttributes = {
 	updatedAt: Date;
 };
 
-export async function convertToFriendRequest(
-	attribute: FriendRequestAttributes
-): Promise<FriendRequestData> {
+export async function convertToFriendRequest(attribute: FriendRequestAttributes): Promise<FriendRequestData> {
 	return {
 		id: attribute.id,
 		receivedFrom: await loadFrontEndUserById(attribute.receiverId),

@@ -11,9 +11,9 @@ import type { FestivalTransferData } from '$lib/models/FestivalTransferData';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 
 export const load: PageServerLoad = async ({
-																						 cookies,
-																						 params
-																					 }: {
+	cookies,
+	params
+}: {
 	cookies: Cookies;
 	params: RouteParams;
 }): Promise<FestivalTransferData> => {

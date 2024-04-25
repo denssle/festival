@@ -11,9 +11,9 @@ import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFe
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 
 export const load: PageServerLoad = async ({
-																						 cookies,
-																						 params
-																					 }: {
+	cookies,
+	params
+}: {
 	cookies: Cookies;
 	params: RouteParams;
 }): Promise<FrontendFestivalEvent> => {

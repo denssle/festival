@@ -1,4 +1,4 @@
-<script lang='ts'>
+<script lang="ts">
 	import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 	import { getTotalNumberOfComingGuests } from '$lib/utils/festivalEventUtils';
 
@@ -12,9 +12,9 @@
 		<p>Alle Events:</p>
 		{#each data.festivalEvents as loadedEvent}
 			<article>
-				<a href='/festival/{loadedEvent.id}'>{loadedEvent.name}</a>
+				<a href="/festival/{loadedEvent.id}">{loadedEvent.name}</a>
 				<p>
-					Von <a href='/user/{loadedEvent.createdBy.id}'>{loadedEvent.createdBy.nickname}</a>
+					Von <a href="/user/{loadedEvent.createdBy.id}">{loadedEvent.createdBy.nickname}</a>
 					<span>Bisherige Gäste: {getTotalNumberOfComingGuests(loadedEvent)}</span>
 				</p>
 			</article>

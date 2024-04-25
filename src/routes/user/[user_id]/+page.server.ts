@@ -17,9 +17,9 @@ import type { UserTransferData } from '$lib/models/user/UserTransferData';
 import { areFriends, getFriendList } from '$lib/services/friendship-service';
 
 export const load: PageServerLoad = async ({
-																						 cookies,
-																						 params
-																					 }: {
+	cookies,
+	params
+}: {
 	cookies: Cookies;
 	params: RouteParams;
 }): Promise<UserTransferData> => {

@@ -1,4 +1,4 @@
-<script lang='ts'>
+<script lang="ts">
 	import type { BaseDialogData } from '$lib/models/dialogData/BaseDialogData';
 
 	export let dialogData: BaseDialogData;
@@ -24,7 +24,7 @@
 <dialog bind:this={dialogData.dialog}>
 	<slot />
 
-	<section style='text-align: right;'>
+	<section style="text-align: right;">
 		<button on:click={() => onNo()}>{buttonLabels.no}</button>
 		<button on:click={() => onYes()}>{buttonLabels.yes}</button>
 	</section>

@@ -1,4 +1,4 @@
-<script lang='ts'>
+<script lang="ts">
 	import type { UpdateTransferData } from '$lib/models/updates/UpdateTransferData';
 	import { invalidateAll } from '$app/navigation';
 
@@ -25,8 +25,8 @@
 	<section>
 		<h4>Eingegangene Freundschaftsanfragen</h4>
 		{#each data.receivedFriendRequests as received}
-			<div class='friend-request'>
-				<a href='/user/{received?.sendTo?.id}'>
+			<div class="friend-request">
+				<a href="/user/{received?.sendTo?.id}">
 					{received?.sendTo?.nickname}
 				</a>
 				<div>
@@ -42,8 +42,8 @@
 	<section>
 		<h4>Ausstehende Freundschaftsanfragen</h4>
 		{#each data.sentFriendRequests as send}
-			<div class='friend-request'>
-				<a href='/user/{send?.receivedFrom?.id}'>
+			<div class="friend-request">
+				<a href="/user/{send?.receivedFrom?.id}">
 					{send?.receivedFrom?.nickname}
 				</a>
 				<button on:click={() => cancelFriendRequest(send?.receivedFrom?.id)}> Zurückziehen</button>
@@ -56,9 +56,9 @@
 </article>
 
 <style>
-    .friend-request {
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
-    }
+	.friend-request {
+		width: 100%;
+		display: flex;
+		justify-content: space-between;
+	}
 </style>

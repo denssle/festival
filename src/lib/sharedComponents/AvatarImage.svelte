@@ -1,4 +1,4 @@
-<script lang='ts'>
+<script lang="ts">
 	import { afterUpdate, onMount } from 'svelte';
 	import Spinner from '$lib/sharedComponents/Spinner.svelte';
 	import { FALLBACK_PICTURE } from '$lib/constants';
@@ -53,23 +53,22 @@
 	}
 </script>
 
-<div style='--size:{size+"em"};' on:click={()=> onImageClick()}>
+<div style="--size:{size + 'em'};" on:click={() => onImageClick()}>
 	{#if avatar}
-		<img src={avatar} alt='alt avatar' class='avatar' />
+		<img src={avatar} alt="alt avatar" class="avatar" />
 	{:else}
 		<Spinner />
 	{/if}
 </div>
 
-
 <style>
-    .avatar {
-        vertical-align: middle;
-        object-fit: cover;
-        border-radius: 50%;
-        width: var(--size);
-        height: var(--size);
-        border: solid var(--green);
-        cursor: pointer;
-    }
+	.avatar {
+		vertical-align: middle;
+		object-fit: cover;
+		border-radius: 50%;
+		width: var(--size);
+		height: var(--size);
+		border: solid var(--green);
+		cursor: pointer;
+	}
 </style>

@@ -4,4 +4,4 @@ export type UserImageAttributes = {
 	image: Buffer;
 	createdAt: Date;
 	updatedAt: Date;
-}
+};

@@ -171,13 +171,12 @@ export async function updateUser(oldUser: SessionTokenUser, formData: UserFormDa
 }
 
 export async function saveUserImage(userId: string, image: string): Promise<string> {
-	await UserImage.findOne({ where: { UserId: userId } })
-		.then(function(model: Model<UserImageAttributes, any> | null) {
-			if (model) {
-				return model.update({ image: Buffer.from(image) });
-			}
-			return UserImage.create({ id: crypto.randomUUID(), UserId: userId, image: Buffer.from(image) });
-		});
+	await UserImage.findOne({ where: { UserId: userId } }).then(function (model: Model<UserImageAttributes, any> | null) {
+		if (model) {
+			return model.update({ image: Buffer.from(image) });
+		}
+		return UserImage.create({ id: crypto.randomUUID(), UserId: userId, image: Buffer.from(image) });
+	});
 	return image;
 }
 
