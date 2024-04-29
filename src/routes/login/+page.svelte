@@ -2,6 +2,8 @@
 	import type { LoginRegisterFormData } from '$lib/models/LoginRegisterFormData';
 
 	export let data: LoginRegisterFormData;
+	export let form;
+
 </script>
 
 <article>
@@ -26,6 +28,9 @@
 
 			<p>
 				<button disabled={!data.nickname || !data.password} type="submit"> Los gehts!</button>
+				{#if form?.success === false}
+					<span style="color: var(--error)">{form.message}</span>
+				{/if}
 			</p>
 		</section>
 

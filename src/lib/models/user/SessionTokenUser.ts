@@ -1,6 +1,6 @@
 export interface SessionTokenUser {
 	id: string;
-	password: string;
+	token: string;
 	nickname: string;
 	email: string;
 }
