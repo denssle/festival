@@ -1,4 +1,5 @@
 <script lang="ts">
+	export let form;
 </script>
 
 <article>
@@ -10,6 +11,10 @@
 				<p>
 					<label for="password">Ändere dein Passwort: </label>
 					<input id="password" name="password" placeholder="Passwort" type="password" value={''} />
+
+					{#if form?.message}
+						<span>{form.message}</span>
+					{/if}
 				</p>
 			</details>
 
