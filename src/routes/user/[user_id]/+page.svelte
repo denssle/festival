@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang='ts'>
 	import AvatarImage from '$lib/sharedComponents/AvatarImage.svelte';
 	import AvatarUpload from './AvatarUpload.svelte';
 	import UserDataForm from './UserDataForm.svelte';
@@ -11,11 +11,11 @@
 
 <article>
 	<h2>Benutzer <strong>{data.user.nickname}</strong></h2>
-	<section style="display: flex">
+	<section style='display: flex'>
 		<AvatarImage userId={data.user.id} />
 		<div>
 			{#if data.isOwnProfil}
-				<AvatarUpload isOwnProfil={data.isOwnProfil} />
+				<AvatarUpload isOwnProfil={data.isOwnProfil} userId={data.user.id} />
 			{:else}
 				<FriendButtons friendId={data.user.id} yourFriend={data.yourFriend} />
 			{/if}

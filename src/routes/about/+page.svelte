@@ -8,11 +8,9 @@
 	<h2>Über diese Seite</h2>
 	<section>
 		<p>
-			Diese Seite wurde erstellt mit <a href="https://kit.svelte.dev/">svelte</a>. Das Styling kommt von
-			<a href="https://simplecss.org/">simple css </a>
-			und die Daten werden gespeichert in einer
-			<a href="https://redis.io/">redis</a>
-			Datenbank auf <a href="https://upstash.com/">upstash</a>.
+			Diese Seite wurde erstellt mit <a href="https://kit.svelte.dev/">svelte</a>.
+			Das Styling kommt von <a href="https://simplecss.org/">simple css </a>
+			und die Daten werden gespeichert in einer <a href="https://mariadb.com/">Maria DB</a>.
 		</p>
 	</section>
 	<section>
