@@ -159,7 +159,7 @@ export async function readNickPass(data: Promise<FormData>): Promise<NickPassDat
 
 export async function createSessionCookie(cookies: Cookies, user: BackendUser | SessionTokenUser): Promise<void> {
 	const token: string = crypto.randomUUID();
-	await SessionToken.create({
+	await SessionToken.upsert({
 		UserId: user.id,
 		token: token
 	});

@@ -24,7 +24,7 @@ export const actions: Actions = {
 			} else {
 				const user: BackendUser | null = await register(formData.nickname, formData.password);
 				if (user) {
-					userService.createSessionCookie(cookies, user);
+					await userService.createSessionCookie(cookies, user);
 					redirect(302, '/');
 				} else {
 					return { success: false, message: 'User creation failed' };
