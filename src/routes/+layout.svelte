@@ -60,7 +60,7 @@
 		--preformatted: #444;
 		--marked: #ffdd33;
 		--disabled: #efefef;
-		--error: var(--red)
+		--error: var(--red);
 	}
 
 	:global(button) {

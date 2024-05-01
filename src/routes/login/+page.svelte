@@ -3,7 +3,6 @@
 
 	export let data: LoginRegisterFormData;
 	export let form;
-
 </script>
 
 <article>
@@ -27,7 +26,7 @@
 			</p>
 
 			<p>
-				<button disabled={!data.nickname || !data.password} type="submit"> Los gehts!</button>
+				<button disabled={!data.nickname || !data.password} type="submit">Los gehts!</button>
 				{#if form?.success === false}
 					<span style="color: var(--error)">{form.message}</span>
 				{/if}

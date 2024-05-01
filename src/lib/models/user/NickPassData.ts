@@ -1,4 +1,4 @@
 export interface NickPassData {
-    nickname: string;
-    password: string;
+	nickname: string;
+	password: string;
 }
