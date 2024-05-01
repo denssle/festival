@@ -1,13 +1,54 @@
 <script lang="ts">
-	import type { NicknamePasswordFormData } from '$lib/models/NicknamePasswordFormData';
-	import NicknamePasswordForm from '$lib/sharedComponents/NicknamePasswordForm.svelte';
-	import type { ActionData } from '../../../.svelte-kit/types/src/routes/registration/$types';
+	import type { LoginRegisterFormData } from '$lib/models/LoginRegisterFormData';
 
-	export let data: NicknamePasswordFormData;
-	export let form: ActionData;
-	console.log(form);
+	export let data: LoginRegisterFormData;
+
+	export let form;
 </script>
 
-<NicknamePasswordForm {data} headline={'Registration'}>
-	Bereits ein Konto? <a href="/login">Hier geht es zur Anmeldung.</a>
-</NicknamePasswordForm>
+<article>
+	<h2>Registration</h2>
+
+	<form method="POST">
+		<section>
+			<p>
+				<input bind:value={data.nickname} minlength="3" name="nickname" placeholder="Nickname" required type="text" />
+			</p>
+
+			<p>
+				<input
+					bind:value={data.password}
+					minlength="3"
+					name="password"
+					placeholder="Passwort"
+					required
+					type="password"
+				/>
+
+				<input
+					bind:value={data.password2}
+					minlength="3"
+					name="password2"
+					placeholder="Passwort Wiederholung"
+					required
+					type="password"
+				/>
+			</p>
+
+			<p>
+				<button disabled={data.password !== data.password2 || !data.nickname || !data.password} type="submit">
+					Los gehts!
+				</button>
+				{#if form?.success === false}
+					<span style="color: var(--error)">{form.message}</span>
+				{/if}
+			</p>
+		</section>
+
+		<section>
+			<p>
+				Bereits ein Konto? <a href="/login">Hier geht es zur Anmeldung.</a>
+			</p>
+		</section>
+	</form>
+</article>

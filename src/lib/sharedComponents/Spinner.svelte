@@ -1,4 +1,8 @@
-<div class="loader"></div>
+<script lang="ts">
+	export let size: number = 15;
+</script>
+
+<div class="loader" style="--size:{size};"></div>
 
 <style>
 	.loader {

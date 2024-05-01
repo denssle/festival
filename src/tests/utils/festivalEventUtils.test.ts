@@ -1,9 +1,9 @@
 import { test } from '@jest/globals';
 import { getTotalNumberOfComingGuests } from '../../lib/utils/festivalEventUtils';
 
-import type { FrontendFestivalEvent } from '$lib/models/FrontendFestivalEvent';
-import type { FrontendUser } from '$lib/models/FrontendUser';
-import type { FrontendGuestInformation } from '$lib/models/FrontendGuestInformation';
+import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
+import type { FrontendUser } from '$lib/models/user/FrontendUser';
+import type { FrontendGuestInformation } from '$lib/models/guestInformation/FrontendGuestInformation';
 
 function getTestUser(): FrontendUser {
 	return {
@@ -11,7 +11,9 @@ function getTestUser(): FrontendUser {
 		nickname: '',
 		forename: '',
 		lastname: '',
-		email: ''
+		email: '',
+		createdAt: new Date(),
+		updatedAt: new Date()
 	};
 }
 
@@ -25,7 +27,6 @@ function getTestFestival(): FrontendFestivalEvent {
 		bringYourOwnFood: false,
 		createdBy: getTestUser(),
 		createdAt: null,
-		updatedBy: null,
 		updatedAt: null,
 		startDate: null,
 		frontendGuestInformation: testInfo,
@@ -41,7 +42,6 @@ test('1 visitors', () => {
 	const festival: FrontendFestivalEvent = getTestFestival();
 	festival.frontendGuestInformation = [
 		{
-			userId: '',
 			drink: '',
 			food: '',
 			numberOfOtherGuests: 0,
@@ -57,7 +57,6 @@ test('3 visitors', () => {
 	const festival: FrontendFestivalEvent = getTestFestival();
 	festival.frontendGuestInformation = [
 		{
-			userId: '',
 			drink: '',
 			food: '',
 			numberOfOtherGuests: 2,

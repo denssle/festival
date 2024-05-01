@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import type { CurrentUser } from '$lib/models/CurrentUser';
+	import type { CurrentUser } from '$lib/models/user/CurrentUser';
 
 	async function logout() {
 		await fetch('/logout', {
@@ -20,6 +20,7 @@
 			<a href="/festival/new">Neu</a>
 			<a href="/settings">Einstellungen</a>
 			<a href="/user/{data.currentUser.id}">{data.currentUser.nickname}</a>
+			<a href="/updates">Updates</a>
 			<button on:click|trusted={logout}>Logout</button>
 		{:else}
 			<a href="/login">Anmelden</a>
@@ -59,6 +60,7 @@
 		--preformatted: #444;
 		--marked: #ffdd33;
 		--disabled: #efefef;
+		--error: var(--red);
 	}
 
 	:global(button) {

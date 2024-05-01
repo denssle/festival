@@ -1,29 +1,41 @@
-import type { FrontendFestivalEvent } from '../models/FrontendFestivalEvent';
-import redis from '../redis';
-import type { BackendFestivalEvent } from '../models/BackendFestivalEvent';
-import type { BackendUser } from '../models/BackendUser';
-import type { FrontendUser } from '../models/FrontendUser';
+import type { FrontendFestivalEvent } from '../models/festivalEvent/FrontendFestivalEvent';
+import type { BackendFestivalEvent } from '../models/festivalEvent/BackendFestivalEvent';
+import type { BackendUser } from '../models/user/BackendUser';
+import type { FrontendUser } from '../models/user/FrontendUser';
 import { loadFrontEndUserById } from './user-service';
-import { getUTCNow, convertUTCToLocalDate } from '../utils/dateUtils';
-import type { BackendGuestInformation } from '$lib/models/BackendGuestInformation';
-import type { BaseGuestInformation } from '$lib/models/BaseGuestInformation';
-import type { FrontendGuestInformation } from '$lib/models/FrontendGuestInformation';
+import type { BackendGuestInformation } from '$lib/models/guestInformation/BackendGuestInformation';
+import type { BaseGuestInformation } from '$lib/models/guestInformation/BaseGuestInformation';
+import type { FrontendGuestInformation } from '$lib/models/guestInformation/FrontendGuestInformation';
+import { FestivalEvent, GuestInformation } from '$lib/db/db';
+import {
+	FestivalEventAttributes,
+	mapToBackendFestivalEvent,
+	mapToFrontendFestivalEvent
+} from '$lib/db/attributes/FestivalEventAttributes';
+import { Model } from 'sequelize';
+import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 
 export async function getAllFestivals(): Promise<FrontendFestivalEvent[]> {
-	const keys: string[] = await redis.keys('festival:*');
-	const result: FrontendFestivalEvent[] = [];
-	for (const key of keys) {
-		if (key) {
-			const festivalString: string | null = await redis.get(key);
-			if (festivalString) {
-				const loaded: FrontendFestivalEvent | null = await parseToFrontend(parseStringToFestival(festivalString));
-				if (loaded) {
-					result.push(loaded);
-				}
-			}
-		}
+	const allFestivals = await FestivalEvent.findAll({ include: GuestInformation });
+	return Promise.all(
+		allFestivals.map((value: Model<FestivalEventAttributes, any>) => {
+			return mapToFrontendFestivalEvent(value.dataValues);
+		})
+	);
+}
+
+async function getFestivalModel(id: string) {
+	return await FestivalEvent.findByPk(id, {
+		include: GuestInformation
+	});
+}
+
+async function getFestival(id: string): Promise<BackendFestivalEvent | null> {
+	const mayBeFestival = await getFestivalModel(id);
+	if (mayBeFestival) {
+		return mapToBackendFestivalEvent(mayBeFestival.dataValues);
 	}
-	return result;
+	return null;
 }
 
 export async function getFrontEndFestival(id: string): Promise<FrontendFestivalEvent | null> {
@@ -34,17 +46,8 @@ export async function getFrontEndFestival(id: string): Promise<FrontendFestivalE
 	return null;
 }
 
-async function getFestival(id: string): Promise<BackendFestivalEvent | null> {
-	const mayBeFestival: string | null = await redis.get(`festival:${id}`);
-	if (mayBeFestival) {
-		return parseStringToFestival(mayBeFestival);
-	}
-	console.log("getFestival: no festival found for id", id);
-	return null;
-}
-
-export async function create(
-	user: BackendUser | null,
+export async function createFestival(
+	user: BackendUser | null | SessionTokenUser,
 	name: string,
 	description: string,
 	startDate: number | null,
@@ -53,22 +56,17 @@ export async function create(
 	location: string
 ): Promise<FrontendFestivalEvent | null> {
 	if (user) {
-		const newFestival: BackendFestivalEvent = {
+		const model = await FestivalEvent.create({
 			id: crypto.randomUUID(),
 			name: name,
 			description: description,
-			createdBy: user.id,
-			createdAt: getUTCNow(),
-			updatedBy: null,
-			updatedAt: null,
+			UserId: user.id,
 			startDate: startDate,
-			guestInformation: [],
 			bringYourOwnBottle: bringYourOwnBottle,
 			bringYourOwnFood: bringYourOwnFood,
 			location: location
-		};
-		redis.set(`festival:${newFestival.id}`, parseFestivalToString(newFestival));
-		return await parseToFrontend(newFestival);
+		});
+		return await mapToFrontendFestivalEvent(model.dataValues);
 	} else {
 		console.warn('festival service: create: no user found');
 	}
@@ -76,7 +74,7 @@ export async function create(
 }
 
 export async function updateFestival(
-	user: BackendUser | null,
+	user: BackendUser | null | SessionTokenUser,
 	festivalId: string,
 	name: string,
 	description: string,
@@ -84,114 +82,103 @@ export async function updateFestival(
 	bringYourOwnBottle: boolean,
 	bringYourOwnFood: boolean,
 	location: string
-): Promise<'OK' | undefined> {
-	const festival: BackendFestivalEvent | null = await getFestival(festivalId);
-	if (festival && user) {
-		festival.name = name;
-		festival.description = description;
-		festival.updatedAt = getUTCNow();
-		festival.updatedBy = user.id;
-		festival.startDate = startDate ? startDate : null;
-		festival.bringYourOwnBottle = bringYourOwnBottle;
-		festival.bringYourOwnFood = bringYourOwnFood;
-		festival.location = location;
-		return redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
+): Promise<void> {
+	const festivalModel = await getFestivalModel(festivalId);
+	if (festivalModel && user) {
+		festivalModel.set({
+			name: name,
+			description: description,
+			startDate: startDate ? new Date(startDate) : undefined,
+			bringYourOwnBottle: bringYourOwnBottle,
+			bringYourOwnFood: bringYourOwnFood,
+			location: location
+		});
+		await festivalModel.save();
 	} else {
 		// TODO create new? throw error?
-		console.error('updateFestival failed!', festival);
+		console.error('updateFestival failed!');
 	}
 }
 
-export async function deleteFestival(user: BackendUser | null, festivalId: string): Promise<void> {
+export async function deleteFestival(user: BackendUser | null | SessionTokenUser, festivalId: string): Promise<void> {
 	if (user && festivalId) {
-		const festival: BackendFestivalEvent | null = await getFestival(festivalId);
-		if (festival && festival.createdBy === user.id) {
-			redis.del(`festival:${festivalId}`);
+		const festivalModel = await getFestivalModel(festivalId);
+		if (festivalModel && festivalModel.dataValues.UserId === user.id) {
+			await festivalModel.destroy();
 		} else {
-			console.error('festival missing or not authorized', festival, user.id);
+			console.error('festival missing or not authorized', festivalModel, user.id);
 		}
 	} else {
 		console.error('user or festival id missing', user, festivalId);
 	}
 }
 
+async function getGuestInformationModel(userId: string, festivalId: string) {
+	return await GuestInformation.findOne({
+		where: {
+			festivalEventId: festivalId,
+			UserId: userId
+		}
+	});
+}
+
 export async function joinFestival(
-	user: BackendUser | null,
+	user: BackendUser | null | SessionTokenUser,
 	festivalId: string,
 	eventData: BaseGuestInformation
 ): Promise<void> {
 	if (user && festivalId) {
-		const festival: BackendFestivalEvent | null = await getFestival(festivalId);
-		if (festival) {
-			const find: BackendGuestInformation | undefined = festival.guestInformation.find((value: BackendGuestInformation) => value.userId === user.id);
-			if (find) {
-				find.coming = true;
-				find.comment = eventData.comment;
-
-				find.food = eventData.food;
-				find.drink = eventData.drink;
-				find.numberOfOtherGuests = eventData.numberOfOtherGuests;
-			} else {
-				festival.guestInformation.push({
-					userId: user.id,
-					food: eventData.food,
-					drink: eventData.drink,
-					numberOfOtherGuests: eventData.numberOfOtherGuests,
-					comment: eventData.comment,
-					coming: true
-				});
-			}
-			redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
+		const find = await getGuestInformationModel(user.id, festivalId);
+		if (find) {
+			find.set({
+				coming: true,
+				comment: eventData.comment,
+				food: eventData.food,
+				drink: eventData.drink,
+				numberOfOtherGuests: eventData.numberOfOtherGuests
+			});
+			await find.save();
+		} else {
+			await GuestInformation.create({
+				id: crypto.randomUUID(),
+				UserId: user.id,
+				coming: true,
+				comment: eventData.comment,
+				food: eventData.food,
+				drink: eventData.drink,
+				numberOfOtherGuests: eventData.numberOfOtherGuests,
+				FestivalEventId: festivalId
+			});
 		}
 	} else {
-		console.log("joinFestival: no user and festivalId", user, festivalId);
+		console.log('joinFestival: no user and festivalId', user, festivalId);
 	}
 }
 
-export async function leaveFestival(user: BackendUser | null, festivalId: string, comment: string): Promise<void> {
+export async function leaveFestival(
+	user: BackendUser | null | SessionTokenUser,
+	festivalId: string,
+	comment: string
+): Promise<void> {
 	if (user && festivalId) {
-		const festival: BackendFestivalEvent | null = await getFestival(festivalId);
-		if (festival) {
-			const find: BackendGuestInformation | undefined = festival.guestInformation.find((value: BackendGuestInformation) => value.userId === user.id);
-			if (find) {
-				find.coming = false;
-				find.comment = comment;
-			} else {
-				festival.guestInformation.push({
-					userId: user.id,
-					food: '',
-					drink: '',
-					numberOfOtherGuests: 0,
-					comment: comment,
-					coming: false
-				});
-			}
-			redis.set(`festival:${festivalId}`, parseFestivalToString(festival));
+		const find = await getGuestInformationModel(user.id, festivalId);
+		if (find) {
+			find.set({
+				coming: false,
+				comment: comment
+			});
+			await find.save();
+		} else {
+			await GuestInformation.create({
+				UserId: user.id,
+				coming: false,
+				comment: comment,
+				numberOfOtherGuests: 0
+			});
 		}
 	} else {
-		console.log("leaveFestival: no user and festivalId", user, festivalId);
+		console.log('leaveFestival: no user and festivalId', user, festivalId);
 	}
-}
-export function isVisitorOfFestival(festival: FrontendFestivalEvent, user: BackendUser) {
-	const find: BackendGuestInformation | undefined = festival.frontendGuestInformation.find(
-		(value) => value.userId === user.id
-	);
-	return Boolean(find);
-}
-
-function parseFestivalToString(festival: BackendFestivalEvent): string {
-	return JSON.stringify(festival);
-}
-
-function parseStringToFestival(festival: string): BackendFestivalEvent {
-	const parse: BackendFestivalEvent = JSON.parse(festival);
-	if (!parse.createdAt) {
-		parse.createdAt = getUTCNow();
-	}
-	if (!parse.guestInformation) {
-		parse.guestInformation = [];
-	}
-	return parse;
 }
 
 async function mapGuestInformationToFrontendGuestInformation(
@@ -199,7 +186,7 @@ async function mapGuestInformationToFrontendGuestInformation(
 ): Promise<FrontendGuestInformation[]> {
 	const result: FrontendGuestInformation[] = [];
 	for (const information of guestInformation) {
-		const userById = await loadFrontEndUserById(information.userId);
+		const userById = await loadFrontEndUserById(information.UserId);
 		if (userById) {
 			result.push({ user: userById, ...information });
 		}
@@ -208,18 +195,16 @@ async function mapGuestInformationToFrontendGuestInformation(
 }
 
 async function parseToFrontend(festival: BackendFestivalEvent): Promise<FrontendFestivalEvent | null> {
-	const createdBy: FrontendUser | undefined = await loadFrontEndUserById(festival.createdBy);
+	const createdBy: FrontendUser | undefined = await loadFrontEndUserById(festival.UserId);
 	if (createdBy) {
-		const updatedBy: FrontendUser | undefined = await loadFrontEndUserById(festival.updatedBy);
 		return {
 			id: festival.id,
 			name: festival.name,
 			description: festival.description,
 			createdBy: createdBy,
-			createdAt: convertUTCToLocalDate(festival.createdAt),
-			updatedBy: updatedBy ?? null,
-			updatedAt: convertUTCToLocalDate(festival.updatedAt),
-			startDate: convertUTCToLocalDate(festival.startDate),
+			createdAt: festival.createdAt,
+			updatedAt: festival.updatedAt,
+			startDate: festival.startDate,
 			bringYourOwnFood: festival.bringYourOwnFood,
 			bringYourOwnBottle: festival.bringYourOwnBottle,
 			frontendGuestInformation: await mapGuestInformationToFrontendGuestInformation(festival.guestInformation),

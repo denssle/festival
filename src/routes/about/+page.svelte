@@ -10,13 +10,11 @@
 		<p>
 			Diese Seite wurde erstellt mit <a href="https://kit.svelte.dev/">svelte</a>. Das Styling kommt von
 			<a href="https://simplecss.org/">simple css </a>
-			und die Daten werden gespeichert in einer
-			<a href="https://redis.io/">redis</a>
-			Datenbank auf <a href="https://upstash.com/">upstash</a>.
+			und die Daten werden gespeichert in einer <a href="https://mariadb.com/">Maria DB</a>.
 		</p>
 	</section>
 	<section>
-		<img src={uberspaceBanner} alt="uberspace Banner" class="center" />
+		<img alt="uberspace Banner" class="center" src={uberspaceBanner} />
 		<p style="text-align: center">
 			Die Seite ist gehostet auf <a href="https://uberspace.de/">uberspace</a>.
 		</p>

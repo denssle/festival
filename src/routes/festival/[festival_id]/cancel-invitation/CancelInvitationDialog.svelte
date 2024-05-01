@@ -10,6 +10,6 @@
 
 	<section>
 		<label for="comment">Kommentar (optional):</label>
-		<input type="text" id="comment" bind:value={cancelInvitationDialogData.comment} />
+		<input bind:value={cancelInvitationDialogData.comment} id="comment" type="text" />
 	</section>
 </BaseDialog>

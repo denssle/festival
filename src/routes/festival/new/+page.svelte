@@ -6,13 +6,13 @@
 	<section>
 		<form method="POST">
 			<p>
-				<input name="name" required placeholder="Name der Veranstaltung" />
+				<input name="name" placeholder="Name der Veranstaltung" required />
 				<textarea name="description" placeholder="Kurze Beschreibung" />
 			</p>
 
 			<p>
-				<input name="startDate" type="date" placeholder="date" />
-				<input name="startTime" type="time" placeholder="time" />
+				<input name="startDate" placeholder="date" type="date" />
+				<input name="startTime" placeholder="time" type="time" />
 			</p>
 
 			<p>
@@ -21,11 +21,11 @@
 
 			<p>
 				<label>
-					<input type="checkbox" name="bringYourOwnFood" />
+					<input name="bringYourOwnFood" type="checkbox" />
 					Gäste sollen etwas zu Essen mitbringen.
 				</label>
 				<label>
-					<input type="checkbox" name="bringYourOwnBottle" />
+					<input name="bringYourOwnBottle" type="checkbox" />
 					Gäste sollen etwas zu trinken mitbringen.
 				</label>
 			</p>

@@ -11,14 +11,14 @@
 	<section>
 		<label>
 			Ich bringe weitere Gäste mit (die hier nicht angemeldet sind):
-			<input type="number" id="otherGuests" bind:value={joinDialogData.numberOfOtherGuests} />
+			<input bind:value={joinDialogData.numberOfOtherGuests} id="otherGuests" type="number" />
 		</label>
 	</section>
 
 	<section>
 		<label>
 			Ich bringe etwas zu essen mit:
-			<input type="text" id="food" bind:value={joinDialogData.food} />
+			<input bind:value={joinDialogData.food} id="food" type="text" />
 		</label>
 
 		{#if joinDialogData.bringYourOwnFood}
@@ -31,7 +31,7 @@
 	<section>
 		<label>
 			Ich bringe etwas zu trinken mit:
-			<input type="text" id="drink" bind:value={joinDialogData.drink} />
+			<input bind:value={joinDialogData.drink} id="drink" type="text" />
 		</label>
 
 		{#if joinDialogData.bringYourOwnBottle}

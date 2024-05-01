@@ -5,7 +5,7 @@
 	import JoinEventDialog from './join/JoinEventDialog.svelte';
 	import type { JoinEventDialogData } from '$lib/models/dialogData/JoinEventDialogData';
 	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
-	import type { BaseGuestInformation } from '$lib/models/BaseGuestInformation';
+	import type { BaseGuestInformation } from '$lib/models/guestInformation/BaseGuestInformation';
 	import QuestionDialog from '$lib/sharedComponents/QuestionDialog.svelte';
 	import type { QuestionDialogData } from '$lib/models/dialogData/QuestionDialogData';
 	import type { CancelInvitationDialogData } from '$lib/models/dialogData/CancelInvitationDialogData';
@@ -90,17 +90,19 @@
 			updateButtonLabels();
 		});
 	}
-	let joinFestivalButtonText = 'Anmelden';
+
+	let joinFestivalButtonText = 'Zusagen';
 	let leaveFestivalButtonText = 'Absagen';
 	updateButtonLabels();
+
 	function updateButtonLabels() {
-		joinFestivalButtonText = 'Anmelden';
+		joinFestivalButtonText = 'Zusagen';
 		leaveFestivalButtonText = 'Absagen';
 		if (data.guestInformation) {
 			if (data.guestInformation.coming) {
-				joinFestivalButtonText = 'Anmeldung bearbeiten';
+				joinFestivalButtonText = 'Zusage bearbeiten';
 			} else {
-				leaveFestivalButtonText = 'Absagen bearbeiten';
+				leaveFestivalButtonText = 'Absage bearbeiten';
 			}
 		}
 	}
@@ -156,11 +158,11 @@
 		<p>{data.festival.location}</p>
 
 		<label>
-			<input type="checkbox" bind:checked={data.festival.bringYourOwnFood} name="bringYourOwnFood" disabled />
+			<input bind:checked={data.festival.bringYourOwnFood} disabled name="bringYourOwnFood" type="checkbox" />
 			Gäste sollen etwas zu Essen mitbringen.
 		</label>
 		<label>
-			<input type="checkbox" bind:checked={data.festival.bringYourOwnBottle} name="bringYourOwnBottle" disabled />
+			<input bind:checked={data.festival.bringYourOwnBottle} disabled name="bringYourOwnBottle" type="checkbox" />
 			Gäste sollen etwas zu trinken mitbringen.
 		</label>
 	</section>

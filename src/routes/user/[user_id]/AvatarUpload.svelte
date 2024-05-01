@@ -2,8 +2,10 @@
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
 	import { error } from '@sveltejs/kit';
 	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
+	import { loadUserImage } from '$lib/stores/user-image';
 
 	export let isOwnProfil: boolean;
+	export let userId: string = '';
 	let fileInput: HTMLElement;
 	let files: FileList;
 
@@ -41,6 +43,7 @@
 			.then((value: Response) => {
 				if (value.ok) {
 					openDialog('Bild erfolgreich hochgeladen und gespeichert. ');
+					loadUserImage(userId);
 				} else {
 					openDialog('Bildupload gescheitert. ');
 				}
@@ -64,12 +67,12 @@
 <div>
 	<InfoDialog bind:infoDialogData />
 	<input
-		style="display: none"
-		type="file"
 		accept=".png,.jpg"
 		bind:files
 		bind:this={fileInput}
 		on:change={() => getBase64(files[0])}
+		style="display: none"
+		type="file"
 	/>
-	<button on:click={() => onUpload()}>Upload</button>
+	<button on:click={() => onUpload()}>Bild hochladen</button>
 </div>
