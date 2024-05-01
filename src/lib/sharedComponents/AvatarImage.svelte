@@ -1,4 +1,4 @@
-<script lang='ts'>
+<script lang="ts">
 	import { afterUpdate, onMount } from 'svelte';
 	import Spinner from '$lib/sharedComponents/Spinner.svelte';
 	import { goto } from '$app/navigation';
@@ -9,7 +9,7 @@
 
 	let avatar: string;
 	let prevUserId: string;
-	let unsubscribe: Function | undefined;
+	let unsubscribe: () => void | undefined;
 
 	onMount(() => {
 		prevUserId = userId;
@@ -40,20 +40,20 @@
 
 <div style="--size:{size + 'em'};" on:click={() => onImageClick()}>
 	{#if avatar}
-		<img src={avatar} alt='alt avatar' class='avatar' />
+		<img src={avatar} alt="alt avatar" class="avatar" />
 	{:else}
 		<Spinner />
 	{/if}
 </div>
 
 <style>
-    .avatar {
-        vertical-align: middle;
-        object-fit: cover;
-        border-radius: 50%;
-        width: var(--size);
-        height: var(--size);
-        border: solid var(--green);
-        cursor: pointer;
-    }
+	.avatar {
+		vertical-align: middle;
+		object-fit: cover;
+		border-radius: 50%;
+		width: var(--size);
+		height: var(--size);
+		border: solid var(--green);
+		cursor: pointer;
+	}
 </style>

@@ -3,7 +3,6 @@ import { FALLBACK_PICTURE } from '$lib/constants';
 
 const map: Map<string, Writable<string>> = new Map<string, Writable<string>>();
 
-
 export function getUserImageWritable(userId: string): Writable<string> {
 	if (map.has(userId)) {
 		const newVar: Writable<string> | undefined = map.get(userId);
@@ -42,4 +41,3 @@ export function loadUserImage(userId: string): void {
 			imageWritable.set(FALLBACK_PICTURE);
 		});
 }
-
