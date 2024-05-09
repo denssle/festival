@@ -7,6 +7,7 @@ import { FriendAttributes } from '$lib/db/attributes/FriendAttributes';
 import { FriendRequestAttributes } from '$lib/db/attributes/FriendRequestAttributes';
 import { UserImageAttributes } from '$lib/db/attributes/UserImageAttributes';
 import { SessionTokenAttributes } from '$lib/db/attributes/SessionTokenAttributes';
+import { CommentAttributes } from '$lib/db/attributes/CommentAttributes';
 
 const sequelize: Sequelize = new Sequelize({
 	dialect: 'mariadb',
@@ -137,6 +138,21 @@ export const SessionToken: ModelStatic<Model<SessionTokenAttributes, any>> = seq
 			type: DataTypes.STRING,
 			allowNull: false
 		}
+	},
+	{
+		timestamps: true,
+		createdAt: true,
+		updatedAt: true
+	}
+);
+
+export const Comment: ModelStatic<Model<CommentAttributes, any>> = sequelize.define(
+	'Comment',
+	{
+		id: { type: DataTypes.STRING, primaryKey: true, allowNull: false },
+		writtenBy: { type: DataTypes.STRING, allowNull: false },
+		writtenTo: { type: DataTypes.STRING, allowNull: false },
+		comment: { type: DataTypes.STRING }
 	},
 	{
 		timestamps: true,
