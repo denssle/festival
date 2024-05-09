@@ -22,7 +22,7 @@ export const User: ModelStatic<Model<UserAttributes, any>> = sequelize.define(
 	{
 		id: { type: DataTypes.STRING, primaryKey: true, allowNull: false },
 		password: { type: DataTypes.STRING, allowNull: false },
-		nickname: { type: DataTypes.STRING },
+		nickname: { type: DataTypes.STRING, allowNull: false },
 		forename: { type: DataTypes.STRING },
 		lastname: { type: DataTypes.STRING },
 		email: { type: DataTypes.STRING }
@@ -59,7 +59,9 @@ export const GuestInformation: ModelStatic<Model<GuestInformationAttributes, any
 		drink: { type: DataTypes.STRING },
 		numberOfOtherGuests: { type: DataTypes.INTEGER },
 		coming: { type: DataTypes.BOOLEAN },
-		comment: { type: DataTypes.STRING }
+		comment: { type: DataTypes.STRING },
+		FestivalEventId: { type: DataTypes.STRING, allowNull: false },
+		UserId: { type: DataTypes.STRING, allowNull: false }
 	},
 	{
 		timestamps: true,
@@ -84,7 +86,8 @@ export const FestivalEvent: ModelStatic<Model<FestivalEventAttributes, any>> = s
 		location: { type: DataTypes.STRING },
 		bringYourOwnBottle: { type: DataTypes.BOOLEAN },
 		bringYourOwnFood: { type: DataTypes.BOOLEAN },
-		startDate: { type: DataTypes.DATE }
+		startDate: { type: DataTypes.DATE },
+		UserId: { type: DataTypes.STRING, allowNull: false }
 	},
 	{
 		timestamps: true,
@@ -100,7 +103,15 @@ export const Friend: ModelStatic<Model<FriendAttributes, any>> = sequelize.defin
 			type: DataTypes.STRING,
 			primaryKey: true,
 			allowNull: false
-		}
+		},
+		friend1Id: {
+			type: DataTypes.STRING,
+			allowNull: false
+		},
+		friend2Id: {
+			type: DataTypes.STRING,
+			allowNull: false
+		},
 	},
 	{
 		timestamps: true,
@@ -116,7 +127,15 @@ export const FriendRequest: ModelStatic<Model<FriendRequestAttributes, any>> = s
 			type: DataTypes.STRING,
 			primaryKey: true,
 			allowNull: false
-		}
+		},
+		senderId: {
+			type: DataTypes.STRING,
+			allowNull: false
+		},
+		receiverId: {
+			type: DataTypes.STRING,
+			allowNull: false
+		},
 	},
 	{
 		timestamps: true,

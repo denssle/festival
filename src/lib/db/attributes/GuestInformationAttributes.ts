@@ -4,7 +4,6 @@ import { loadFrontEndUserById } from '$lib/services/user-service';
 
 export type GuestInformationAttributes = {
 	id: string;
-	festivalEventId: string;
 	food: string;
 	drink: string;
 	numberOfOtherGuests: number;
@@ -32,7 +31,7 @@ export async function mapToFrontendGuestInformation(
 export function mapToBackendGuestInformation(dataValues: GuestInformationAttributes): BackendGuestInformation {
 	return {
 		UserId: dataValues.UserId,
-		FestivalEventId: dataValues.festivalEventId,
+		FestivalEventId: dataValues.FestivalEventId,
 		food: dataValues.food,
 		comment: dataValues.comment,
 		drink: dataValues.drink,
