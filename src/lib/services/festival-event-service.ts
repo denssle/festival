@@ -14,6 +14,7 @@ import {
 } from '$lib/db/attributes/FestivalEventAttributes';
 import { Model } from 'sequelize';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
+import { GuestInformationAttributes } from '$lib/db/attributes/GuestInformationAttributes';
 
 export async function getAllFestivals(): Promise<FrontendFestivalEvent[]> {
 	const allFestivals = await FestivalEvent.findAll({ include: GuestInformation });
@@ -116,7 +117,7 @@ export async function deleteFestival(user: BackendUser | null | SessionTokenUser
 async function getGuestInformationModel(userId: string, festivalId: string) {
 	return await GuestInformation.findOne({
 		where: {
-			festivalEventId: festivalId,
+			FestivalEventId: festivalId,
 			UserId: userId
 		}
 	});
@@ -170,11 +171,13 @@ export async function leaveFestival(
 			await find.save();
 		} else {
 			await GuestInformation.create({
+				id: crypto.randomUUID(),
+				FestivalEventId: festivalId,
 				UserId: user.id,
 				coming: false,
 				comment: comment,
 				numberOfOtherGuests: 0
-			});
+			} as GuestInformationAttributes);
 		}
 	} else {
 		console.log('leaveFestival: no user and festivalId', user, festivalId);
