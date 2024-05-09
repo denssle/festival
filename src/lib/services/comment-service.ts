@@ -1,11 +1,5 @@
-export function getComments(writtenTo: string) {
+export function getComments(writtenTo: string) {}
 
-}
+export function saveComment() {}
 
-export function saveComment() {
-
-}
-
-export function deleteComment() {
-
-}
+export function deleteComment() {}

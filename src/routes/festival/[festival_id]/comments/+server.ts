@@ -1,3 +1,3 @@
 export function POST() {
-	console.log("got input");
+	console.log('got input');
 }

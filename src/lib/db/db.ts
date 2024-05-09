@@ -112,7 +112,7 @@ export const Friend: ModelStatic<Model<FriendAttributes, any>> = sequelize.defin
 		friend2Id: {
 			type: DataTypes.STRING,
 			allowNull: false
-		},
+		}
 	},
 	{
 		timestamps: true,
@@ -136,7 +136,7 @@ export const FriendRequest: ModelStatic<Model<FriendRequestAttributes, any>> = s
 		receiverId: {
 			type: DataTypes.STRING,
 			allowNull: false
-		},
+		}
 	},
 	{
 		timestamps: true,

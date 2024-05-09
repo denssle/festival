@@ -1,5 +1,4 @@
-<script lang='ts'>
-
+<script lang="ts">
 	export let festivalId: string = '';
 
 	async function handleSubmit(event: { currentTarget: EventTarget & HTMLFormElement }) {
@@ -23,15 +22,9 @@
 </script>
 
 <form>
-	<label for='comment'>Kommentar: </label>
-	<input
-		type='text'
-		id='comment'
-		name='comment'>
+	<label for="comment">Kommentar: </label>
+	<input type="text" id="comment" name="comment" />
 	<p>
-		<button on:submit|preventDefault={handleSubmit}>
-			Absenden
-		</button>
+		<button on:submit|preventDefault={handleSubmit}> Absenden </button>
 	</p>
 </form>
-
