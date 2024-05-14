@@ -1,7 +1,7 @@
 import { RequestEvent } from '@sveltejs/kit';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import { extractUser } from '$lib/services/user-service';
-import { getComments, saveComment } from '$lib/services/comment-service';
+import { deleteComment, getComments, saveComment } from '$lib/services/comment-service';
 import { FrontendComment } from '$lib/models/FrontendComment';
 
 export async function POST(request: RequestEvent): Promise<Response> {
@@ -24,5 +24,14 @@ export async function GET(request: RequestEvent): Promise<Response> {
 		return new Response(JSON.stringify(comments), { status: 200 });
 	}
 	return new Response(null, { status: 500 });
+}
 
+export async function DELETE(request: RequestEvent): Promise<Response> {
+	const commentId = await request.request.text();
+	const user: SessionTokenUser | null = extractUser(request.cookies.get('session'));
+	if (commentId && user) {
+		await deleteComment(user.id, commentId);
+		return new Response(null, { status: 200 });
+	}
+	return new Response(null, { status: 500 });
 }

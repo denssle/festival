@@ -1,0 +1,1 @@
+export type ChangeResult = 'Success' | 'Not authorized' | 'Data Missing'

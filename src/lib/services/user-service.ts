@@ -205,7 +205,7 @@ export async function updatePassword(oldUser: SessionTokenUser, password: string
 }
 
 export async function saveUserImage(userId: string, image: string): Promise<string> {
-	await UserImage.findOne({ where: { UserId: userId } }).then(function (model: Model<UserImageAttributes, any> | null) {
+	await UserImage.findOne({ where: { UserId: userId } }).then(function(model: Model<UserImageAttributes, any> | null) {
 		if (model) {
 			return model.update({ image: Buffer.from(image) });
 		}
