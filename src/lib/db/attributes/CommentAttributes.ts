@@ -10,13 +10,15 @@ export interface CommentAttributes {
 	updatedAt: Date;
 }
 
-export async function mapToFrontendComment(attribute: CommentAttributes): Promise<FrontendComment> {
+export async function mapToFrontendComment(attribute: CommentAttributes, userID: string): Promise<FrontendComment> {
 	return {
 		id: attribute.id,
 		comment: attribute.comment,
 		createdAt: attribute.createdAt,
 		updatedAt: attribute.updatedAt,
 		writtenTo: attribute.writtenTo,
-		writtenBy: (await loadFrontEndUserById(attribute.writtenBy)) ?? null
-	}
+		writtenBy: (await loadFrontEndUserById(attribute.writtenBy)) ?? null,
+		yourComment: attribute.writtenBy === userID,
+		editMode: false
+	};
 }

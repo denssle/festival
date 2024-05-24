@@ -4,6 +4,7 @@
 	import type { FrontendComment } from '$lib/models/FrontendComment';
 	import type { QuestionDialogData } from '$lib/models/dialogData/QuestionDialogData';
 	import QuestionDialog from '$lib/sharedComponents/QuestionDialog.svelte';
+	import AvatarImage from '$lib/sharedComponents/AvatarImage.svelte';
 
 	export let festivalId: string = '';
 
@@ -34,7 +35,6 @@
 	});
 
 	function deleteComment(commentId: string | undefined) {
-		// TODO Check if own comment. Lol
 		questionDialogData.showDialog = true;
 		if (questionDialogData.dialog) {
 			questionDialogData.dialog.onclose = () => {
@@ -50,10 +50,21 @@
 		}
 	}
 
+	function updateComment(comment: FrontendComment) {
+		if (comment.yourComment) {
+			fetch(festivalId + '/comments', {
+				method: 'PUT',
+				body: JSON.stringify(comment)
+			}).then(() => {
+				loadComments();
+			});
+		}
+	}
+
 	let questionDialogData: QuestionDialogData = {
 		showDialog: false,
 		dialog: undefined,
-		questionText: 'Bist du dir sicher?',
+		questionText: 'Kommentar löschen. Bist du dir sicher?',
 		answerYes: false
 	};
 </script>
@@ -68,9 +79,33 @@
 </form>
 
 {#each comments as comment}
+	{@const notYours = !comment.yourComment}
 	<fieldset>
-		<legend><a href='/user/{comment.writtenBy?.id}'>{comment.writtenBy?.nickname}</a></legend>
-		<p class='notice'>{comment.comment}</p>
-		<button on:click={() => deleteComment(comment.id)}>Löschen</button>
+		<legend>
+			<AvatarImage userId={comment.writtenBy?.id} size={4}></AvatarImage>
+			<a href='/user/{comment.writtenBy?.id}'>{comment.writtenBy?.nickname}</a>
+		</legend>
+		{#if comment.editMode}
+			<textarea bind:value={comment.comment} />
+		{:else }
+			<p class='notice'>{comment.comment}</p>
+		{/if}
+		<button on:click={() => deleteComment(comment.id)} disabled={notYours}>Löschen</button>
+		<button on:click={() => comment.editMode = !comment.editMode} disabled={notYours}>
+			{#if comment.editMode}
+				Abbrechen
+			{:else }
+				Bearbeiten
+			{/if}
+		</button>
+		<button on:click={()=> updateComment(comment)} disabled={notYours || !comment.editMode}>
+			Speichern
+		</button>
 	</fieldset>
 {/each}
+
+<style>
+    legend {
+        display: ruby;
+    }
+</style>

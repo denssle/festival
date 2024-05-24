@@ -12,7 +12,7 @@ export function saveComment(who: string, where: string, comment: string) {
 	});
 }
 
-export async function getComments(writtenTo: string): Promise<FrontendComment[]> {
+export async function getComments(writtenTo: string, userID: string): Promise<FrontendComment[]> {
 	const findAll = await Comment.findAll({
 		where: {
 			writtenTo: writtenTo
@@ -21,7 +21,7 @@ export async function getComments(writtenTo: string): Promise<FrontendComment[]>
 	return Promise.all(findAll
 		.map(value => value.dataValues)
 		.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
-		.map(value => mapToFrontendComment(value))
+		.map(value => mapToFrontendComment(value, userID))
 	);
 }
 

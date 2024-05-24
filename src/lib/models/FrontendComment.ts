@@ -7,4 +7,6 @@ export interface FrontendComment {
 	comment: string;
 	createdAt: Date;
 	updatedAt: Date;
+	yourComment: boolean;
+	editMode: boolean;
 }

@@ -9,11 +9,12 @@ import { extractUser } from '$lib/services/user-service';
 import { getUTCFromString } from '$lib/utils/dateUtils';
 import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
+import { ChangeResult } from '$lib/models/updates/ChangeResult';
 
 export const load: PageServerLoad = async ({
-	cookies,
-	params
-}: {
+																						 cookies,
+																						 params
+																					 }: {
 	cookies: Cookies;
 	params: RouteParams;
 }): Promise<FrontendFestivalEvent> => {
@@ -39,7 +40,7 @@ export const actions: Actions = {
 		const name: FormDataEntryValue | null = values.get('name');
 		const description: FormDataEntryValue | null = values.get('description');
 		if (festivalId && name) {
-			await updateFestival(
+			const result: ChangeResult = await updateFestival(
 				extractUser(cookies.get('session')),
 				festivalId,
 				String(name),
@@ -49,9 +50,10 @@ export const actions: Actions = {
 				Boolean(values.get('bringYourOwnFood')),
 				String(values.get('location'))
 			);
-			redirect(302, '/festival/' + festivalId);
-		} else {
-			return new Response(null, { status: 404 });
+			if (result === 'Success') {
+				redirect(302, '/festival/' + festivalId);
+			}
 		}
+		return new Response(null, { status: 500 });
 	}
 };
