@@ -1,4 +1,4 @@
-export type ChangeResult = 'Success' | 'Not authorized' | 'Data Missing'
+export type ChangeResult = 'Success' | 'Not authorized' | 'Data Missing';
 
 export function getHTTPCodeForChangeResult(result: ChangeResult): 200 | 403 | 422 {
 	switch (result) {

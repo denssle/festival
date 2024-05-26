@@ -1,5 +1,5 @@
 import { Comment } from '$lib/db/db';
-import { CommentAttributes, mapToFrontendComment } from '$lib/db/attributes/CommentAttributes';
+import { CommentAttributes, mapToFrontendComment } from '$lib/db/attributes/comment.attributes';
 import { FrontendComment } from '$lib/models/FrontendComment';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
 
@@ -18,10 +18,11 @@ export async function getComments(writtenTo: string, userID: string): Promise<Fr
 			writtenTo: writtenTo
 		}
 	});
-	return Promise.all(findAll
-		.map(value => value.dataValues)
-		.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
-		.map(value => mapToFrontendComment(value, userID))
+	return Promise.all(
+		findAll
+			.map((value) => value.dataValues)
+			.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+			.map((value) => mapToFrontendComment(value, userID))
 	);
 }
 

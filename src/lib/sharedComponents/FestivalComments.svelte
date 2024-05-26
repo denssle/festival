@@ -1,27 +1,42 @@
 <script lang='ts'>
-
-	import { onMount } from 'svelte';
+	import { afterUpdate, onMount } from 'svelte';
 	import type { FrontendComment } from '$lib/models/FrontendComment';
 	import type { QuestionDialogData } from '$lib/models/dialogData/QuestionDialogData';
 	import QuestionDialog from '$lib/sharedComponents/QuestionDialog.svelte';
 	import AvatarImage from '$lib/sharedComponents/AvatarImage.svelte';
 
-	export let festivalId: string = '';
+	export let whereId: string = '';
 
 	let comments: FrontendComment[] = [];
+	let previousWhereId: string;
+	let inputComment: string;
+
+	onMount(() => {
+		previousWhereId = whereId;
+		loadComments();
+	});
+
+	afterUpdate(() => {
+		if (previousWhereId !== whereId) {
+			previousWhereId = whereId;
+			inputComment = '';
+			loadComments();
+		}
+	});
 
 	function handleSubmit(e: SubmitEvent) {
 		const formData = new FormData(e.target as HTMLFormElement);
-		fetch(festivalId + '/comments', {
+		fetch(whereId + '/comments', {
 			method: 'POST',
 			body: formData
 		}).then(() => {
 			loadComments();
+			inputComment = '';
 		});
 	}
 
 	function loadComments() {
-		fetch(festivalId + '/comments', {
+		fetch(whereId + '/comments', {
 			method: 'GET'
 		}).then((response) => {
 			response.json().then((data: FrontendComment[]) => {
@@ -30,16 +45,12 @@
 		});
 	}
 
-	onMount(() => {
-		loadComments();
-	});
-
 	function deleteComment(commentId: string | undefined) {
 		questionDialogData.showDialog = true;
 		if (questionDialogData.dialog) {
 			questionDialogData.dialog.onclose = () => {
 				if (questionDialogData.answerYes) {
-					fetch(festivalId + '/comments', {
+					fetch(whereId + '/comments', {
 						method: 'DELETE',
 						body: commentId
 					}).then(() => {
@@ -52,7 +63,7 @@
 
 	function updateComment(comment: FrontendComment) {
 		if (comment.yourComment) {
-			fetch(festivalId + '/comments', {
+			fetch(whereId + '/comments', {
 				method: 'PUT',
 				body: JSON.stringify(comment)
 			}).then(() => {
@@ -72,7 +83,7 @@
 <QuestionDialog bind:questionDialogData />
 <form on:submit|preventDefault={handleSubmit}>
 	<label for='comment'>Kommentar: </label>
-	<textarea id='comment' name='comment' />
+	<textarea id='comment' name='comment' bind:value={inputComment} />
 	<p>
 		<button type='submit'>Absenden</button>
 	</p>
@@ -87,20 +98,18 @@
 		</legend>
 		{#if comment.editMode}
 			<textarea bind:value={comment.comment} />
-		{:else }
+		{:else}
 			<p class='notice'>{comment.comment}</p>
 		{/if}
 		<button on:click={() => deleteComment(comment.id)} disabled={notYours}>Löschen</button>
-		<button on:click={() => comment.editMode = !comment.editMode} disabled={notYours}>
+		<button on:click={() => (comment.editMode = !comment.editMode)} disabled={notYours}>
 			{#if comment.editMode}
 				Abbrechen
-			{:else }
+			{:else}
 				Bearbeiten
 			{/if}
 		</button>
-		<button on:click={()=> updateComment(comment)} disabled={notYours || !comment.editMode}>
-			Speichern
-		</button>
+		<button on:click={() => updateComment(comment)} disabled={notYours || !comment.editMode}> Speichern</button>
 	</fieldset>
 {/each}
 

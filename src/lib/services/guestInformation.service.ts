@@ -2,10 +2,10 @@ import type { BackendUser } from '$lib/models/user/BackendUser';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import type { BaseGuestInformation } from '$lib/models/guestInformation/BaseGuestInformation';
 import { GuestInformation } from '$lib/db/db';
-import { GuestInformationAttributes } from '$lib/db/attributes/GuestInformationAttributes';
+import { GuestInformationAttributes } from '$lib/db/attributes/guestInformation.attributes';
 import type { BackendGuestInformation } from '$lib/models/guestInformation/BackendGuestInformation';
 import type { FrontendGuestInformation } from '$lib/models/guestInformation/FrontendGuestInformation';
-import { loadFrontEndUserById } from '$lib/services/user-service';
+import { loadFrontEndUserById } from '$lib/services/user.service';
 
 export async function joinFestival(
 	user: BackendUser | null | SessionTokenUser,

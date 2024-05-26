@@ -1,5 +1,5 @@
 import { RequestEvent } from '@sveltejs/kit';
-import { DELETEComment, GETComments, POSTComment, PUTComment } from '$lib/controller/comment.controller';
+import { POSTComment, GETComments, DELETEComment, PUTComment } from '$lib/controller/comment.controller';
 
 export async function POST(request: RequestEvent): Promise<Response> {
 	return await POSTComment(request);

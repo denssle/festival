@@ -1,5 +1,5 @@
 import { test } from '@jest/globals';
-import { getTotalNumberOfComingGuests } from '../../lib/utils/festivalEventUtils';
+import { getTotalNumberOfComingGuests } from '$lib/utils/festivalEvent.util';
 
 import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 import type { FrontendUser } from '$lib/models/user/FrontendUser';

@@ -1,5 +1,5 @@
 import { FrontendComment } from '$lib/models/FrontendComment';
-import { loadFrontEndUserById } from '$lib/services/user-service';
+import { loadFrontEndUserById } from '$lib/services/user.service';
 
 export interface CommentAttributes {
 	id: string;

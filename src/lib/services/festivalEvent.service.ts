@@ -2,17 +2,17 @@ import type { FrontendFestivalEvent } from '../models/festivalEvent/FrontendFest
 import type { BackendFestivalEvent } from '../models/festivalEvent/BackendFestivalEvent';
 import type { BackendUser } from '../models/user/BackendUser';
 import type { FrontendUser } from '../models/user/FrontendUser';
-import { loadFrontEndUserById } from './user-service';
+import { loadFrontEndUserById } from './user.service';
 import { FestivalEvent, GuestInformation } from '$lib/db/db';
 import {
 	FestivalEventAttributes,
 	mapToBackendFestivalEvent,
 	mapToFrontendFestivalEvent
-} from '$lib/db/attributes/FestivalEventAttributes';
+} from '$lib/db/attributes/festivalEvent.attributes';
 import { Model } from 'sequelize';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
-import { mapGuestInformationToFrontendGuestInformation } from '$lib/services/guest-information-service';
+import { mapGuestInformationToFrontendGuestInformation } from '$lib/services/guestInformation.service';
 
 export async function getAllFestivals(): Promise<FrontendFestivalEvent[]> {
 	const allFestivals = await FestivalEvent.findAll({ include: GuestInformation });
@@ -103,7 +103,10 @@ export async function updateFestival(
 	}
 }
 
-export async function deleteFestival(user: BackendUser | null | SessionTokenUser, festivalId: string): Promise<ChangeResult> {
+export async function deleteFestival(
+	user: BackendUser | null | SessionTokenUser,
+	festivalId: string
+): Promise<ChangeResult> {
 	const festivalModel = await getFestivalModel(festivalId);
 	if (user && festivalModel) {
 		if (festivalModel && isChangeAllowed(user.id, festivalModel.dataValues)) {

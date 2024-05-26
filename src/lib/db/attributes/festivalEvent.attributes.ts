@@ -1,12 +1,12 @@
 import { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
-import { loadFrontEndUserById } from '$lib/services/user-service';
+import { loadFrontEndUserById } from '$lib/services/user.service';
 import { BackendFestivalEvent } from '$lib/models/festivalEvent/BackendFestivalEvent';
 import { Model } from 'sequelize';
 import {
 	GuestInformationAttributes,
 	mapToBackendGuestInformation,
 	mapToFrontendGuestInformation
-} from '$lib/db/attributes/GuestInformationAttributes';
+} from '$lib/db/attributes/guestInformation.attributes';
 
 export type FestivalEventAttributes = {
 	id: string;

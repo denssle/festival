@@ -1,6 +1,6 @@
-import { extractUser } from '$lib/services/user-service';
+import { extractUser } from '$lib/services/user.service';
 import type { RequestHandler } from '@sveltejs/kit';
-import { leaveFestival } from '$lib/services/guest-information-service';
+import { leaveFestival } from '$lib/services/guestInformation.service';
 
 export const POST: RequestHandler = async ({ cookies, params, request }) => {
 	const blob: Blob = await request.blob();

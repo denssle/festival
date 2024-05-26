@@ -1,6 +1,6 @@
 import type { RequestHandler } from './$types';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
-import { extractUser, logout } from '$lib/services/user-service';
+import { extractUser, logout } from '$lib/services/user.service';
 
 /* Logout */
 export const POST: RequestHandler = async ({ cookies, locals }): Promise<Response> => {

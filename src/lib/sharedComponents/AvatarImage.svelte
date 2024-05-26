@@ -2,23 +2,23 @@
 	import { afterUpdate, onMount } from 'svelte';
 	import Spinner from '$lib/sharedComponents/Spinner.svelte';
 	import { goto } from '$app/navigation';
-	import { getUserImageWritable, loadUserImage } from '$lib/stores/user-image';
+	import { getUserImageWritable, loadUserImage } from '$lib/stores/userImage.store';
 
 	export let userId: string = '';
 	export let size: number = 15;
 
 	let avatar: string;
-	let prevUserId: string;
+	let previousUserId: string;
 	let unsubscribe: () => void | undefined;
 
 	onMount(() => {
-		prevUserId = userId;
+		previousUserId = userId;
 		loadAndSubscribe();
 	});
 
 	afterUpdate(() => {
-		if (prevUserId !== userId) {
-			prevUserId = userId;
+		if (previousUserId !== userId) {
+			previousUserId = userId;
 			loadAndSubscribe();
 		}
 	});

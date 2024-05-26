@@ -1,13 +1,13 @@
 import { DataTypes, Model, ModelStatic, Sequelize } from 'sequelize';
 import { MARIA_DB_PASSWORD, MARIA_DB_USER } from '$env/static/private';
-import { GuestInformationAttributes } from '$lib/db/attributes/GuestInformationAttributes';
-import { UserAttributes } from '$lib/db/attributes/UserAttributes';
-import { FestivalEventAttributes } from '$lib/db/attributes/FestivalEventAttributes';
-import { FriendAttributes } from '$lib/db/attributes/FriendAttributes';
-import { FriendRequestAttributes } from '$lib/db/attributes/FriendRequestAttributes';
-import { UserImageAttributes } from '$lib/db/attributes/UserImageAttributes';
-import { SessionTokenAttributes } from '$lib/db/attributes/SessionTokenAttributes';
-import { CommentAttributes } from '$lib/db/attributes/CommentAttributes';
+import { GuestInformationAttributes } from '$lib/db/attributes/guestInformation.attributes';
+import { UserAttributes } from '$lib/db/attributes/user.attributes';
+import { FestivalEventAttributes } from '$lib/db/attributes/festivalEvent.attributes';
+import { FriendAttributes } from '$lib/db/attributes/friend.attributes';
+import { FriendRequestAttributes } from '$lib/db/attributes/friendRequest.attributes';
+import { UserImageAttributes } from '$lib/db/attributes/userImage.attributes';
+import { SessionTokenAttributes } from '$lib/db/attributes/sessionToken.attributes';
+import { CommentAttributes } from '$lib/db/attributes/comment.attributes';
 
 const sequelize: Sequelize = new Sequelize({
 	dialect: 'mariadb',

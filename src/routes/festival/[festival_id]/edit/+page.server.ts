@@ -4,17 +4,17 @@ import type {
 	PageServerLoad,
 	RouteParams
 } from '../../../../../.svelte-kit/types/src/routes/festival/[festival_id]/edit/$types';
-import { getFrontEndFestival, updateFestival } from '$lib/services/festival-event-service';
-import { extractUser } from '$lib/services/user-service';
-import { getUTCFromString } from '$lib/utils/dateUtils';
+import { getFrontEndFestival, updateFestival } from '$lib/services/festivalEvent.service';
+import { extractUser } from '$lib/services/user.service';
+import { getUTCFromString } from '$lib/utils/date.util';
 import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
 
 export const load: PageServerLoad = async ({
-																						 cookies,
-																						 params
-																					 }: {
+	cookies,
+	params
+}: {
 	cookies: Cookies;
 	params: RouteParams;
 }): Promise<FrontendFestivalEvent> => {

@@ -1,5 +1,5 @@
 import { expect, test } from '@jest/globals';
-import { dateToString, getUTCFromString } from '../../lib/utils/dateUtils';
+import { dateToString, getUTCFromString } from '$lib/utils/date.util';
 
 const fiveOfDecember: string = '2023-12-05';
 

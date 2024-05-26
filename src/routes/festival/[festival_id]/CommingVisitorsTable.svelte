@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getTotalNumberOfComingGuests } from '$lib/utils/festivalEventUtils.js';
+	import { getTotalNumberOfComingGuests } from '$lib/utils/festivalEvent.util.js';
 	import type { FestivalTransferData } from '$lib/models/FestivalTransferData';
 
 	export let data: FestivalTransferData;
