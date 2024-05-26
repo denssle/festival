@@ -1,6 +1,6 @@
 import type { Cookies, RequestHandler } from '@sveltejs/kit';
-import * as userService from '$lib/services/user-service';
-import { getUserImage, saveUserImage } from '$lib/services/user-service';
+import * as userService from '$lib/services/user.service';
+import { getUserImage, saveUserImage } from '$lib/services/user.service';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 
 export const POST: RequestHandler = async ({

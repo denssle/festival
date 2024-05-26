@@ -1,8 +1,8 @@
 import type { Actions, Cookies } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from '../../../.svelte-kit/types/src/routes/$types';
-import * as userService from '$lib/services/user-service';
-import { nickNameInvalid, register, validateSessionToken } from '$lib/services/user-service';
+import * as userService from '$lib/services/user.service';
+import { nickNameInvalid, register, validateSessionToken } from '$lib/services/user.service';
 import { StandardResponse } from '$lib/models/StandardResponse';
 import { BackendUser } from '$lib/models/user/BackendUser';
 import { NickPassData } from '$lib/models/user/NickPassData';

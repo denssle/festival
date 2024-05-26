@@ -41,25 +41,29 @@
 <style global>
 	:global(:root) {
 		--red: #d81e30;
+		--light-green: #62bcad;
 		--green: #439e8f;
 		--dark-green: #2c685e;
-		--white: #fdf8e1;
+		--darkest-green: #214f47;
+		--white: #efefef;
 		--orange: #fd904d;
 		--light-orange: #feaf7f;
+		--black: #212121;
+		--dark-gray: #444;
 	}
 
 	:root {
-		--accent: var(--green);
+		--accent: var(--light-green);
 		--accent-bg: var(--dark-green);
-		--bg: #212121;
+		--bg: var(--black);
 		--text: var(--orange);
-		--text-light: var(--light-orange);
+		--text-light: var(--darkest-green);
 		--border: var(--dark-green);
 		--accent-light: var(--red);
 		--code: var(--red);
-		--preformatted: #444;
-		--marked: #ffdd33;
-		--disabled: #efefef;
+		--preformatted: var(--dark-gray);
+		--marked: var(--light-orange);
+		--disabled: var(--white);
 		--error: var(--red);
 	}
 

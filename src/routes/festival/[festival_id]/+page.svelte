@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto, invalidateAll } from '$app/navigation';
-	import { dateToDDMMYYYY, formateDateTime } from '$lib/utils/dateUtils';
+	import { dateToDDMMYYYY, formateDateTime } from '$lib/utils/date.util';
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
 	import JoinEventDialog from './join/JoinEventDialog.svelte';
 	import type { JoinEventDialogData } from '$lib/models/dialogData/JoinEventDialogData';
@@ -13,6 +13,7 @@
 	import ComingVisitorsTable from './CommingVisitorsTable.svelte';
 	import NotComingVisitorsTable from './NotCommingVisitorsTable.svelte';
 	import type { FestivalTransferData } from '$lib/models/FestivalTransferData';
+	import FestivalComments from '$lib/sharedComponents/Comments.svelte';
 
 	export let data: FestivalTransferData;
 
@@ -146,7 +147,7 @@
 
 <article>
 	<section>
-		<h4>{data.festival.name}</h4>
+		<h4><u>{data.festival.name}</u></h4>
 		<sub>Starting: {formateDateTime(data.festival.startDate)}</sub>
 		<sub
 			>Erstellt am {dateToDDMMYYYY(data.festival.createdAt)} von
@@ -178,6 +179,6 @@
 		<button on:click={joinFestival}>{joinFestivalButtonText}</button>
 		<a class="button" href="/">Zurück</a>
 	</section>
-</article>
 
-<style></style>
+	<FestivalComments whereId={data.festival.id} />
+</article>

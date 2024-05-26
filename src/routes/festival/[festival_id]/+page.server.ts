@@ -5,8 +5,8 @@ import type {
 import type { Cookies } from '@sveltejs/kit';
 import { error } from '@sveltejs/kit';
 import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
-import { getFrontEndFestival } from '$lib/services/festival-event-service';
-import { extractUser } from '$lib/services/user-service';
+import { getFrontEndFestival } from '$lib/services/festivalEvent.service';
+import { extractUser } from '$lib/services/user.service';
 import type { FestivalTransferData } from '$lib/models/FestivalTransferData';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 

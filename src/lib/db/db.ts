@@ -1,12 +1,13 @@
 import { DataTypes, Model, ModelStatic, Sequelize } from 'sequelize';
 import { MARIA_DB_PASSWORD, MARIA_DB_USER } from '$env/static/private';
-import { GuestInformationAttributes } from '$lib/db/attributes/GuestInformationAttributes';
-import { UserAttributes } from '$lib/db/attributes/UserAttributes';
-import { FestivalEventAttributes } from '$lib/db/attributes/FestivalEventAttributes';
-import { FriendAttributes } from '$lib/db/attributes/FriendAttributes';
-import { FriendRequestAttributes } from '$lib/db/attributes/FriendRequestAttributes';
-import { UserImageAttributes } from '$lib/db/attributes/UserImageAttributes';
-import { SessionTokenAttributes } from '$lib/db/attributes/SessionTokenAttributes';
+import { GuestInformationAttributes } from '$lib/db/attributes/guestInformation.attributes';
+import { UserAttributes } from '$lib/db/attributes/user.attributes';
+import { FestivalEventAttributes } from '$lib/db/attributes/festivalEvent.attributes';
+import { FriendAttributes } from '$lib/db/attributes/friend.attributes';
+import { FriendRequestAttributes } from '$lib/db/attributes/friendRequest.attributes';
+import { UserImageAttributes } from '$lib/db/attributes/userImage.attributes';
+import { SessionTokenAttributes } from '$lib/db/attributes/sessionToken.attributes';
+import { CommentAttributes } from '$lib/db/attributes/comment.attributes';
 
 const sequelize: Sequelize = new Sequelize({
 	dialect: 'mariadb',
@@ -111,7 +112,7 @@ export const Friend: ModelStatic<Model<FriendAttributes, any>> = sequelize.defin
 		friend2Id: {
 			type: DataTypes.STRING,
 			allowNull: false
-		},
+		}
 	},
 	{
 		timestamps: true,
@@ -135,7 +136,7 @@ export const FriendRequest: ModelStatic<Model<FriendRequestAttributes, any>> = s
 		receiverId: {
 			type: DataTypes.STRING,
 			allowNull: false
-		},
+		}
 	},
 	{
 		timestamps: true,
@@ -156,6 +157,21 @@ export const SessionToken: ModelStatic<Model<SessionTokenAttributes, any>> = seq
 			type: DataTypes.STRING,
 			allowNull: false
 		}
+	},
+	{
+		timestamps: true,
+		createdAt: true,
+		updatedAt: true
+	}
+);
+
+export const Comment: ModelStatic<Model<CommentAttributes, any>> = sequelize.define(
+	'Comment',
+	{
+		id: { type: DataTypes.STRING, primaryKey: true, allowNull: false },
+		writtenBy: { type: DataTypes.STRING, allowNull: false },
+		writtenTo: { type: DataTypes.STRING, allowNull: false },
+		comment: { type: DataTypes.STRING }
 	},
 	{
 		timestamps: true,

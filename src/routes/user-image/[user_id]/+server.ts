@@ -1,5 +1,5 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import { getUserImage } from '$lib/services/user-service';
+import { getUserImage } from '$lib/services/user.service';
 
 // TODO Add Types to the parameters
 export const GET: RequestHandler = async ({ params }): Promise<Response> => {

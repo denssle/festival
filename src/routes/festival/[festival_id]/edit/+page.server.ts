@@ -4,11 +4,12 @@ import type {
 	PageServerLoad,
 	RouteParams
 } from '../../../../../.svelte-kit/types/src/routes/festival/[festival_id]/edit/$types';
-import { getFrontEndFestival, updateFestival } from '$lib/services/festival-event-service';
-import { extractUser } from '$lib/services/user-service';
-import { getUTCFromString } from '$lib/utils/dateUtils';
+import { getFrontEndFestival, updateFestival } from '$lib/services/festivalEvent.service';
+import { extractUser } from '$lib/services/user.service';
+import { getDateFromString } from '$lib/utils/date.util';
 import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
+import { ChangeResult } from '$lib/models/updates/ChangeResult';
 
 export const load: PageServerLoad = async ({
 	cookies,
@@ -39,19 +40,20 @@ export const actions: Actions = {
 		const name: FormDataEntryValue | null = values.get('name');
 		const description: FormDataEntryValue | null = values.get('description');
 		if (festivalId && name) {
-			await updateFestival(
+			const result: ChangeResult = await updateFestival(
 				extractUser(cookies.get('session')),
 				festivalId,
 				String(name),
 				String(description),
-				getUTCFromString(String(values.get('startDate')), String(values.get('startTime'))),
+				getDateFromString(String(values.get('startDate')), String(values.get('startTime'))),
 				Boolean(values.get('bringYourOwnBottle')),
 				Boolean(values.get('bringYourOwnFood')),
 				String(values.get('location'))
 			);
-			redirect(302, '/festival/' + festivalId);
-		} else {
-			return new Response(null, { status: 404 });
+			if (result === 'Success') {
+				redirect(302, '/festival/' + festivalId);
+			}
 		}
+		return new Response(null, { status: 500 });
 	}
 };

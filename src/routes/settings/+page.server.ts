@@ -1,6 +1,6 @@
 import { type Actions } from '@sveltejs/kit';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
-import { extractUser, updatePassword } from '$lib/services/user-service';
+import { extractUser, updatePassword } from '$lib/services/user.service';
 import { StandardResponse } from '$lib/models/StandardResponse';
 
 export const actions: Actions = {

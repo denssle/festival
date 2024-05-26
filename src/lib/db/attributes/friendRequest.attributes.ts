@@ -1,4 +1,4 @@
-import { loadFrontEndUserById } from '$lib/services/user-service';
+import { loadFrontEndUserById } from '$lib/services/user.service';
 import { FriendRequestData } from '$lib/models/updates/FriendRequestData';
 
 export type FriendRequestAttributes = {

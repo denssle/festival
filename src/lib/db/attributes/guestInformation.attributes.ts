@@ -1,6 +1,6 @@
 import { BackendGuestInformation } from '$lib/models/guestInformation/BackendGuestInformation';
 import { FrontendGuestInformation } from '$lib/models/guestInformation/FrontendGuestInformation';
-import { loadFrontEndUserById } from '$lib/services/user-service';
+import { loadFrontEndUserById } from '$lib/services/user.service';
 
 export type GuestInformationAttributes = {
 	id: string;

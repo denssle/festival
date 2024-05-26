@@ -2,7 +2,7 @@
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
 	import { error } from '@sveltejs/kit';
 	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
-	import { loadUserImage } from '$lib/stores/user-image';
+	import { loadUserImage } from '$lib/stores/userImage.store';
 
 	export let isOwnProfil: boolean;
 	export let userId: string = '';

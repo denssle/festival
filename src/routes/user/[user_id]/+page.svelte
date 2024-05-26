@@ -5,6 +5,7 @@
 	import type { UserTransferData } from '$lib/models/user/UserTransferData';
 	import FriendListEntry from './FriendListEntry.svelte';
 	import FriendButtons from './FriendButtons.svelte';
+	import FestivalComments from '$lib/sharedComponents/Comments.svelte';
 
 	export let data: UserTransferData;
 </script>
@@ -47,4 +48,6 @@
 			<p>Das liegt bestimmt nicht an dir...</p>
 		{/if}
 	</section>
+
+	<FestivalComments whereId={data.user.id} />
 </article>

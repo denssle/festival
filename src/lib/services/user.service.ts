@@ -4,12 +4,12 @@ import type { FrontendUser } from '../models/user/FrontendUser';
 import type { UserFormData } from '$lib/models/user/UserFormData';
 import type { Cookies } from '@sveltejs/kit';
 import { SessionToken, User, UserImage } from '$lib/db/db';
-import { convertToBackendUser, UserAttributes } from '$lib/db/attributes/UserAttributes';
+import { convertToBackendUser, UserAttributes } from '$lib/db/attributes/user.attributes';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import { Model } from 'sequelize';
-import { UserImageAttributes } from '$lib/db/attributes/UserImageAttributes';
+import { UserImageAttributes } from '$lib/db/attributes/userImage.attributes';
 import { NickPassData } from '$lib/models/user/NickPassData';
-import { SessionTokenAttributes } from '$lib/db/attributes/SessionTokenAttributes';
+import { SessionTokenAttributes } from '$lib/db/attributes/sessionToken.attributes';
 
 async function getByNickname(nickname: string) {
 	return await User.findOne({

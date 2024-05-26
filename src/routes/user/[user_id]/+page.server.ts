@@ -1,19 +1,19 @@
 import type { Actions, Cookies } from '@sveltejs/kit';
 import { error } from '@sveltejs/kit';
 import type { FrontendUser } from '$lib/models/user/FrontendUser';
-import * as userService from '$lib/services/user-service';
+import * as userService from '$lib/services/user.service';
 import {
 	extractUser,
 	loadFrontEndUserById,
 	nickNameInvalid,
 	readFormDataFrontEndUser
-} from '$lib/services/user-service';
+} from '$lib/services/user.service';
 import type { PageServerLoad, RouteParams } from '../../user/[user_id]/$types';
 import { StandardResponse } from '$lib/models/StandardResponse';
 import type { UserFormData } from '$lib/models/user/UserFormData';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import type { UserTransferData } from '$lib/models/user/UserTransferData';
-import { areFriends, getFriendList } from '$lib/services/friendship-service';
+import { areFriends, getFriendList } from '$lib/services/friendship.service';
 
 export const load: PageServerLoad = async ({
 	cookies,

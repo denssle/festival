@@ -3,25 +3,23 @@
  * @param date yyyy-MM-dd
  * @param time hh:mm
  */
-export function getUTCFromString(date: string, time: string): number | null {
+export function getDateFromString(date: string, time: string): number | null {
 	if (date) {
 		const dates: number[] = date.split('-').map((value) => Number(value));
 		if (time) {
 			const times: number[] = time.split(':').map((value) => Number(value));
 			if (datesValid(dates) && times.at(0)) {
 				return new Date(
-					Date.UTC(
-						getNumber(dates, 0),
-						getNumber(dates, 1) - 1,
-						getNumber(dates, 2),
-						getNumber(times, 0),
-						getNumber(times, 1)
-					)
+					getNumber(dates, 0),
+					getNumber(dates, 1) - 1,
+					getNumber(dates, 2),
+					getNumber(times, 0),
+					getNumber(times, 1)
 				).getTime();
 			}
 		} else {
 			if (datesValid(dates)) {
-				return new Date(Date.UTC(getNumber(dates, 0), getNumber(dates, 1) - 1, getNumber(dates, 2), 12)).getTime();
+				return new Date(getNumber(dates, 0), getNumber(dates, 1) - 1, getNumber(dates, 2), 12).getTime();
 			}
 		}
 	}

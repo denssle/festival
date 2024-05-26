@@ -1,5 +1,5 @@
 import type { Handle } from '@sveltejs/kit';
-import * as userController from '$lib/services/user-service';
+import * as userController from '$lib/services/user.service';
 import { startDB } from '$lib/db/db';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 
