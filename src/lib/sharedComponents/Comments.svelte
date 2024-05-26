@@ -4,6 +4,7 @@
 	import type { QuestionDialogData } from '$lib/models/dialogData/QuestionDialogData';
 	import QuestionDialog from '$lib/sharedComponents/QuestionDialog.svelte';
 	import AvatarImage from '$lib/sharedComponents/AvatarImage.svelte';
+	import CreationChangedDate from '$lib/sharedComponents/CreationChangedDate.svelte';
 
 	export let whereId: string = '';
 
@@ -101,15 +102,18 @@
 		{:else}
 			<p class='notice'>{comment.comment}</p>
 		{/if}
-		<button on:click={() => deleteComment(comment.id)} disabled={notYours}>Löschen</button>
-		<button on:click={() => (comment.editMode = !comment.editMode)} disabled={notYours}>
-			{#if comment.editMode}
-				Abbrechen
-			{:else}
-				Bearbeiten
-			{/if}
-		</button>
-		<button on:click={() => updateComment(comment)} disabled={notYours || !comment.editMode}> Speichern</button>
+		<div>
+			<button on:click={() => deleteComment(comment.id)} disabled={notYours}>Löschen</button>
+			<button on:click={() => (comment.editMode = !comment.editMode)} disabled={notYours}>
+				{#if comment.editMode}
+					Abbrechen
+				{:else}
+					Bearbeiten
+				{/if}
+			</button>
+			<button on:click={() => updateComment(comment)} disabled={notYours || !comment.editMode}> Speichern</button>
+		</div>
+		<CreationChangedDate createdAt={comment.createdAt} updatedAt={comment.updatedAt}/>
 	</fieldset>
 {/each}
 

@@ -13,7 +13,7 @@
 	import ComingVisitorsTable from './CommingVisitorsTable.svelte';
 	import NotComingVisitorsTable from './NotCommingVisitorsTable.svelte';
 	import type { FestivalTransferData } from '$lib/models/FestivalTransferData';
-	import FestivalComments from '$lib/sharedComponents/FestivalComments.svelte';
+	import FestivalComments from '$lib/sharedComponents/Comments.svelte';
 
 	export let data: FestivalTransferData;
 
