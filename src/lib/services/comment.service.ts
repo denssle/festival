@@ -16,12 +16,12 @@ export async function getComments(writtenTo: string, userID: string): Promise<Fr
 	const findAll = await Comment.findAll({
 		where: {
 			writtenTo: writtenTo
-		}
+		},
+		order: [['createdAt', 'DESC']]
 	});
 	return Promise.all(
 		findAll
 			.map((value) => value.dataValues)
-			.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
 			.map((value) => mapToFrontendComment(value, userID))
 	);
 }

@@ -1,6 +1,6 @@
 import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 import { extractUser } from '$lib/services/user.service';
-import { getUTCFromString } from '$lib/utils/date.util';
+import { getDateFromString } from '$lib/utils/date.util';
 import { type Actions, Cookies, redirect } from '@sveltejs/kit';
 import { createFestival } from '$lib/services/festivalEvent.service';
 
@@ -14,7 +14,7 @@ export const actions: Actions = {
 				extractUser(cookies.get('session')),
 				String(name),
 				String(description),
-				getUTCFromString(String(values.get('startDate')), String(values.get('startTime'))),
+				getDateFromString(String(values.get('startDate')), String(values.get('startTime'))),
 				Boolean(values.get('bringYourOwnBottle')),
 				Boolean(values.get('bringYourOwnFood')),
 				String(values.get('location'))

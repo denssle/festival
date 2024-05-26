@@ -147,7 +147,7 @@
 
 <article>
 	<section>
-		<h4>{data.festival.name}</h4>
+		<h4><u>{data.festival.name}</u></h4>
 		<sub>Starting: {formateDateTime(data.festival.startDate)}</sub>
 		<sub
 			>Erstellt am {dateToDDMMYYYY(data.festival.createdAt)} von

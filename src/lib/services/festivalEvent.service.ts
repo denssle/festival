@@ -15,7 +15,7 @@ import { ChangeResult } from '$lib/models/updates/ChangeResult';
 import { mapGuestInformationToFrontendGuestInformation } from '$lib/services/guestInformation.service';
 
 export async function getAllFestivals(): Promise<FrontendFestivalEvent[]> {
-	const allFestivals = await FestivalEvent.findAll({ include: GuestInformation });
+	const allFestivals = await FestivalEvent.findAll({ include: GuestInformation, order: [['startDate', 'DESC']] });
 	return Promise.all(
 		allFestivals.map((value: Model<FestivalEventAttributes, any>) => {
 			return mapToFrontendFestivalEvent(value.dataValues);
