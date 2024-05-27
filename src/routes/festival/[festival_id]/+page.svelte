@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto, invalidateAll } from '$app/navigation';
-	import { dateToDDMMYYYY, formateDateTime } from '$lib/utils/date.util';
+	import { formateDateTime } from '$lib/utils/date.util';
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
 	import JoinEventDialog from './join/JoinEventDialog.svelte';
 	import type { JoinEventDialogData } from '$lib/models/dialogData/JoinEventDialogData';
@@ -148,14 +148,13 @@
 <article>
 	<section>
 		<h4><u>{data.festival.name}</u></h4>
-		<sub>Starting: {formateDateTime(data.festival.startDate)}</sub>
-		<sub
-			>Erstellt am {dateToDDMMYYYY(data.festival.createdAt)} von
-			<a href="/user/{data.festival.createdBy?.id}">{data.festival.createdBy?.nickname}</a>
-		</sub>
+		<p>Organisiert von <a href="/user/{data.festival.createdBy?.id}">{data.festival.createdBy?.nickname}</a></p>
+		<mark>Startdatum: {formateDateTime(data.festival.startDate)}</mark>
 
+		<p><u>Beschreibung:</u></p>
 		<p>{data.festival.description}</p>
 
+		<u>Wo:</u>
 		<p>{data.festival.location}</p>
 
 		<label>

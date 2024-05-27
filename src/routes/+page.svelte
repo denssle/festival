@@ -11,13 +11,17 @@
 	<section>
 		<p>Alle Events:</p>
 		{#each data.festivalEvents as loadedEvent}
-			<article>
-				<a href="/festival/{loadedEvent.id}">{loadedEvent.name}</a>
+			<fieldset>
+				<legend>
+					<a href="/festival/{loadedEvent.id}">{loadedEvent.name}</a>
+					von <a href="/user/{loadedEvent.createdBy?.id}">{loadedEvent.createdBy?.nickname}</a>
+				</legend>
+				<i>Start: {loadedEvent.startDate?.toLocaleString()}</i>
+				<p></p>
 				<p>
-					Von <a href="/user/{loadedEvent.createdBy.id}">{loadedEvent.createdBy.nickname}</a>
 					<span>Bisherige Gäste: {getTotalNumberOfComingGuests(loadedEvent)}</span>
 				</p>
-			</article>
+			</fieldset>
 		{/each}
 	</section>
 </article>

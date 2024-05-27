@@ -1,4 +1,4 @@
-<script lang='ts'>
+<script lang="ts">
 	import { afterUpdate, onMount } from 'svelte';
 	import type { FrontendComment } from '$lib/models/FrontendComment';
 	import type { QuestionDialogData } from '$lib/models/dialogData/QuestionDialogData';
@@ -83,10 +83,10 @@
 
 <QuestionDialog bind:questionDialogData />
 <form on:submit|preventDefault={handleSubmit}>
-	<label for='comment'>Kommentar: </label>
-	<textarea id='comment' name='comment' bind:value={inputComment} />
+	<label for="comment">Kommentar: </label>
+	<textarea id="comment" name="comment" bind:value={inputComment} />
 	<p>
-		<button type='submit'>Absenden</button>
+		<button type="submit">Absenden</button>
 	</p>
 </form>
 
@@ -95,30 +95,32 @@
 	<fieldset>
 		<legend>
 			<AvatarImage userId={comment.writtenBy?.id} size={4}></AvatarImage>
-			<a href='/user/{comment.writtenBy?.id}'>{comment.writtenBy?.nickname}</a>
+			<a href="/user/{comment.writtenBy?.id}">{comment.writtenBy?.nickname}</a>
 		</legend>
 		{#if comment.editMode}
 			<textarea bind:value={comment.comment} />
 		{:else}
-			<p class='notice'>{comment.comment}</p>
+			<p class="notice">{comment.comment}</p>
 		{/if}
-		<div>
-			<button on:click={() => deleteComment(comment.id)} disabled={notYours}>Löschen</button>
-			<button on:click={() => (comment.editMode = !comment.editMode)} disabled={notYours}>
-				{#if comment.editMode}
-					Abbrechen
-				{:else}
-					Bearbeiten
-				{/if}
-			</button>
-			<button on:click={() => updateComment(comment)} disabled={notYours || !comment.editMode}> Speichern</button>
-		</div>
-		<CreationChangedDate createdAt={comment.createdAt} updatedAt={comment.updatedAt}/>
+		{#if comment.yourComment}
+			<div>
+				<button on:click={() => deleteComment(comment.id)} disabled={notYours}>Löschen</button>
+				<button on:click={() => (comment.editMode = !comment.editMode)} disabled={notYours}>
+					{#if comment.editMode}
+						Abbrechen
+					{:else}
+						Bearbeiten
+					{/if}
+				</button>
+				<button on:click={() => updateComment(comment)} disabled={notYours || !comment.editMode}> Speichern</button>
+			</div>
+		{/if}
+		<CreationChangedDate createdAt={comment.createdAt} updatedAt={comment.updatedAt} />
 	</fieldset>
 {/each}
 
 <style>
-    legend {
-        display: ruby;
-    }
+	legend {
+		display: ruby;
+	}
 </style>

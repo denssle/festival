@@ -19,11 +19,7 @@ export async function getComments(writtenTo: string, userID: string): Promise<Fr
 		},
 		order: [['createdAt', 'DESC']]
 	});
-	return Promise.all(
-		findAll
-			.map((value) => value.dataValues)
-			.map((value) => mapToFrontendComment(value, userID))
-	);
+	return Promise.all(findAll.map((value) => value.dataValues).map((value) => mapToFrontendComment(value, userID)));
 }
 
 export async function deleteComment(userId: string, commentId: string): Promise<ChangeResult> {
