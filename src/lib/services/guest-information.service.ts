@@ -2,7 +2,10 @@ import type { BackendUser } from '$lib/models/user/BackendUser';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import type { BaseGuestInformation } from '$lib/models/guestInformation/BaseGuestInformation';
 import { GuestInformation } from '$lib/db/db';
-import { GuestInformationAttributes } from '$lib/db/attributes/guestInformation.attributes';
+import {
+	GuestInformationAttributes,
+	mapToBackendGuestInformation
+} from '$lib/db/attributes/guestInformation.attributes';
 import type { BackendGuestInformation } from '$lib/models/guestInformation/BackendGuestInformation';
 import type { FrontendGuestInformation } from '$lib/models/guestInformation/FrontendGuestInformation';
 import { loadFrontEndUserById } from '$lib/services/user.service';
@@ -75,7 +78,14 @@ export async function mapGuestInformationToFrontendGuestInformation(
 	for (const information of guestInformation) {
 		const userById = await loadFrontEndUserById(information.UserId);
 		if (userById) {
-			result.push({ user: userById, ...information });
+			result.push({
+				user: userById,
+				coming: information.coming,
+				numberOfOtherGuests: information.numberOfOtherGuests,
+				drink: information.drink,
+				comment: information.comment,
+				food: information.food
+			});
 		}
 	}
 	return result;
@@ -88,4 +98,14 @@ async function getGuestInformationModel(userId: string, festivalId: string) {
 			UserId: userId
 		}
 	});
+}
+
+export async function getAllActiveGuestInformation(userId: string): Promise<BackendGuestInformation[]> {
+	const infos = await GuestInformation.findAll({
+		where: {
+			UserId: userId,
+			coming: true
+		}
+	});
+	return infos.map((value) => mapToBackendGuestInformation(value.dataValues));
 }

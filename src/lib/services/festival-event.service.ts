@@ -12,7 +12,12 @@ import {
 import { Model } from 'sequelize';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
-import { mapGuestInformationToFrontendGuestInformation } from '$lib/services/guest-information.service';
+import {
+	getAllActiveGuestInformation,
+	mapGuestInformationToFrontendGuestInformation
+} from '$lib/services/guest-information.service';
+import { BackendGuestInformation } from '$lib/models/guestInformation/BackendGuestInformation';
+import { VisitingFestival } from '$lib/models/user/VisitingFestival';
 
 export async function getAllFestivals(): Promise<FrontendFestivalEvent[]> {
 	const allFestivals = await FestivalEvent.findAll({ include: GuestInformation, order: [['startDate', 'DESC']] });
@@ -146,9 +151,19 @@ function isChangeAllowed(id: string, dataValues: FestivalEventAttributes): boole
 	return id === dataValues.UserId;
 }
 
-function getFestivalYouVisit(userId: string) {
-	FestivalEvent.findAll({
-		include: GuestInformation,
-		where: {}
-	});
+export async function getFestivalYouVisit(userId: string): Promise<VisitingFestival[]> {
+	const activeInfos: BackendGuestInformation[] = await getAllActiveGuestInformation(userId);
+	const loading: Promise<BackendFestivalEvent | null>[] = activeInfos.map((value) =>
+		getFestival(value.FestivalEventId)
+	);
+	const result: VisitingFestival[] = [];
+	for (const fest of await Promise.all(loading)) {
+		if (fest !== null) {
+			result.push({
+				festivalId: fest.id,
+				festivalName: fest.name
+			});
+		}
+	}
+	return result;
 }

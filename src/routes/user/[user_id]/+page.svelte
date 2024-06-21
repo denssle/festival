@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang='ts'>
 	import AvatarImage from '$lib/sharedComponents/AvatarImage.svelte';
 	import AvatarUpload from './AvatarUpload.svelte';
 	import UserDataForm from './UserDataForm.svelte';
@@ -7,13 +7,14 @@
 	import FriendButtons from './FriendButtons.svelte';
 	import FestivalComments from '$lib/sharedComponents/Comments.svelte';
 	import UserDataReadOnly from './UserDataReadOnly.svelte';
+	import VisitingFestivals from './VisitingFestivals.svelte';
 
 	export let data: UserTransferData;
 </script>
 
 <article>
 	<h2>Benutzer <strong>{data.user.nickname}</strong></h2>
-	<section style="display: flex">
+	<section style='display: flex'>
 		<AvatarImage userId={data.user.id} />
 		<div>
 			{#if data.isOwnProfil}
@@ -23,6 +24,7 @@
 			{/if}
 		</div>
 	</section>
+
 	<section>
 		{#if data.isOwnProfil}
 			<UserDataForm data={data.user} />
@@ -30,6 +32,7 @@
 			<UserDataReadOnly user={data.user} />
 		{/if}
 	</section>
+
 	<section>
 		<h4>Freunde:</h4>
 		{#each data.friendList as friend}
@@ -39,6 +42,11 @@
 			<p>Es sieht so aus, als hättest du keine Freunde hier.</p>
 			<p>Das liegt bestimmt nicht an dir...</p>
 		{/if}
+	</section>
+
+	<section>
+		<h4>Festivals: </h4>
+		<VisitingFestivals userId={data.user.id} />
 	</section>
 
 	<FestivalComments whereId={data.user.id} />
