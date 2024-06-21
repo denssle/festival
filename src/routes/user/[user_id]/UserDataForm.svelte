@@ -10,7 +10,7 @@
 		<input id="nickname" name="nickname" placeholder="Nickname" type="text" value={data.nickname} />
 	</p>
 
-	<p>
+	<div>
 		<label for="forename">Dein Vorname: </label>
 		<input
 			autocomplete="given-name"
@@ -30,7 +30,7 @@
 			type="text"
 			value={data.lastname}
 		/>
-	</p>
+	</div>
 
 	<p>
 		<label for="email">Deine Email: </label>
