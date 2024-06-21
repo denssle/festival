@@ -149,7 +149,6 @@ function isChangeAllowed(id: string, dataValues: FestivalEventAttributes): boole
 function getFestivalYouVisit(userId: string) {
 	FestivalEvent.findAll({
 		include: GuestInformation,
-		where: {
-		}
+		where: {}
 	});
 }
