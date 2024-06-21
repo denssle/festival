@@ -1,4 +1,4 @@
-<script lang='ts'>
+<script lang="ts">
 	import type { FrontendUser } from '$lib/models/user/FrontendUser';
 
 	export let user: FrontendUser;
@@ -9,7 +9,7 @@
 		<span>Vorname:</span>
 		<span>{user.forename ?? 'Nicht hinterlegt'}</span>
 
-		<br>
+		<br />
 
 		<span>Nachnamen:</span>
 		<span>{user.lastname ?? 'Nicht hinterlegt'}</span>

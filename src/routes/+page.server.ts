@@ -1,4 +1,4 @@
-import { getAllFestivals } from '$lib/services/festivalEvent.service';
+import { getAllFestivals } from '$lib/services/festival-event.service';
 import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 import type { PageServerLoad } from '../../.svelte-kit/types/src/routes/$types';
 

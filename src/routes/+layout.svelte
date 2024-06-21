@@ -72,7 +72,8 @@
 		-webkit-user-select: none; /*Safari*/
 		-moz-user-select: none; /*Firefox*/
 		caret-color: transparent;
-		min-width: 8vw;
+		padding-left: 1rem;
+		padding-right: 1rem;
 	}
 
 	:global(input::-webkit-outer-spin-button) {

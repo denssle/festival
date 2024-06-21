@@ -2,7 +2,7 @@ import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFe
 import { extractUser } from '$lib/services/user.service';
 import { getDateFromString } from '$lib/utils/date.util';
 import { type Actions, Cookies, redirect } from '@sveltejs/kit';
-import { createFestival } from '$lib/services/festivalEvent.service';
+import { createFestival } from '$lib/services/festival-event.service';
 
 export const actions: Actions = {
 	default: async ({ cookies, request }: { cookies: Cookies; request: Request }): Promise<Response | undefined> => {
