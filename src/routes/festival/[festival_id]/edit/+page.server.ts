@@ -4,7 +4,7 @@ import type {
 	PageServerLoad,
 	RouteParams
 } from '../../../../../.svelte-kit/types/src/routes/festival/[festival_id]/edit/$types';
-import { getFrontEndFestival, updateFestival } from '$lib/services/festivalEvent.service';
+import { getFrontEndFestival, updateFestival } from '$lib/services/festival-event.service';
 import { extractUser } from '$lib/services/user.service';
 import { getDateFromString } from '$lib/utils/date.util';
 import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';

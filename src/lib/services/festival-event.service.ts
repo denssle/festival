@@ -12,7 +12,7 @@ import {
 import { Model } from 'sequelize';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
-import { mapGuestInformationToFrontendGuestInformation } from '$lib/services/guestInformation.service';
+import { mapGuestInformationToFrontendGuestInformation } from '$lib/services/guest-information.service';
 
 export async function getAllFestivals(): Promise<FrontendFestivalEvent[]> {
 	const allFestivals = await FestivalEvent.findAll({ include: GuestInformation, order: [['startDate', 'DESC']] });
@@ -144,4 +144,12 @@ async function parseToFrontend(festival: BackendFestivalEvent): Promise<Frontend
 
 function isChangeAllowed(id: string, dataValues: FestivalEventAttributes): boolean {
 	return id === dataValues.UserId;
+}
+
+function getFestivalYouVisit(userId: string) {
+	FestivalEvent.findAll({
+		include: GuestInformation,
+		where: {
+		}
+	});
 }

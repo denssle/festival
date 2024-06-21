@@ -1,4 +1,4 @@
-import { deleteFestival } from '$lib/services/festivalEvent.service';
+import { deleteFestival } from '$lib/services/festival-event.service';
 import { extractUser } from '$lib/services/user.service';
 import type { RequestHandler } from '@sveltejs/kit';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
