@@ -1,5 +1,4 @@
-<script lang='ts'>
-
+<script lang="ts">
 	import type { VisitingFestival } from '$lib/models/user/VisitingFestival';
 	import { afterUpdate, onMount } from 'svelte';
 
@@ -37,10 +36,9 @@
 
 {#if festivals.length === 0}
 	<p>Zu nichts angemeldet.</p>
-{:else }
-	<p>Angemeldet bei: </p>
+{:else}
+	<p>Angemeldet bei:</p>
 	{#each festivals as fest}
-		<a href={'/festival/'+fest.festivalId}>{fest.festivalName}</a>
+		<a href={'/festival/' + fest.festivalId}>{fest.festivalName}</a>
 	{/each}
 {/if}
-

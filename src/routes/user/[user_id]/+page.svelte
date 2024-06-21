@@ -1,4 +1,4 @@
-<script lang='ts'>
+<script lang="ts">
 	import AvatarImage from '$lib/sharedComponents/AvatarImage.svelte';
 	import AvatarUpload from './AvatarUpload.svelte';
 	import UserDataForm from './UserDataForm.svelte';
@@ -14,7 +14,7 @@
 
 <article>
 	<h2>Benutzer <strong>{data.user.nickname}</strong></h2>
-	<section style='display: flex'>
+	<section style="display: flex">
 		<AvatarImage userId={data.user.id} />
 		<div>
 			{#if data.isOwnProfil}
@@ -45,7 +45,7 @@
 	</section>
 
 	<section>
-		<h4>Festivals: </h4>
+		<h4>Festivals:</h4>
 		<VisitingFestivals userId={data.user.id} />
 	</section>
 
