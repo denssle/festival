@@ -8,6 +8,8 @@ import { FriendRequestAttributes } from '$lib/db/attributes/friendRequest.attrib
 import { UserImageAttributes } from '$lib/db/attributes/userImage.attributes';
 import { SessionTokenAttributes } from '$lib/db/attributes/sessionToken.attributes';
 import { CommentAttributes } from '$lib/db/attributes/comment.attributes';
+import { GroupAttributes } from '$lib/db/attributes/group.attributes';
+import { GroupMemberAttributes } from '$lib/db/attributes/groupMember.attributes';
 
 const sequelize: Sequelize = new Sequelize({
 	dialect: 'mariadb',
@@ -180,6 +182,31 @@ export const Comment: ModelStatic<Model<CommentAttributes, any>> = sequelize.def
 	}
 );
 
+export const Group: ModelStatic<Model<GroupAttributes, any>> = sequelize.define(
+	'Group',
+	{
+		id: { type: DataTypes.STRING, primaryKey: true, allowNull: false },
+		description: { type: DataTypes.STRING }
+	},
+	{
+		timestamps: true,
+		createdAt: true,
+		updatedAt: true
+	}
+);
+
+export const GroupMember: ModelStatic<Model<GroupMemberAttributes, any>> = sequelize.define(
+	'GroupMember',
+	{
+		id: { type: DataTypes.STRING, primaryKey: true, allowNull: false }
+	},
+	{
+		timestamps: true,
+		createdAt: true,
+		updatedAt: true
+	}
+);
+
 FestivalEvent.hasMany(GuestInformation);
 GuestInformation.belongsTo(FestivalEvent);
 
@@ -208,6 +235,14 @@ FriendRequest.belongsTo(User, {
 
 User.hasOne(SessionToken);
 SessionToken.belongsTo(User);
+
+User.hasMany(Group);
+Group.belongsTo(User, {
+	as: 'Creator'
+});
+
+Group.hasMany(GroupMember);
+GroupMember.belongsTo(Group);
 
 export async function startDB(): Promise<void> {
 	await sequelize.sync({ force: false });
