@@ -1,4 +1,4 @@
-<script lang='ts'>
+<script lang="ts">
 	import { afterUpdate, onMount } from 'svelte';
 
 	export let createdAt: Date;

@@ -6,6 +6,7 @@
 	import FriendListEntry from './FriendListEntry.svelte';
 	import FriendButtons from './FriendButtons.svelte';
 	import FestivalComments from '$lib/sharedComponents/Comments.svelte';
+	import UserDataReadOnly from './UserDataReadOnly.svelte';
 
 	export let data: UserTransferData;
 </script>
@@ -26,16 +27,7 @@
 		{#if data.isOwnProfil}
 			<UserDataForm data={data.user} />
 		{:else}
-			<p>
-				<b>Name:</b>
-				{#if data.user.forename}
-					{data.user.forename}
-				{/if}
-
-				{#if data.user.lastname}
-					{data.user.lastname}
-				{/if}
-			</p>
+			<UserDataReadOnly user={data.user} />
 		{/if}
 	</section>
 	<section>

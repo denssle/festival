@@ -22,7 +22,7 @@
 				{#each data.festival.frontendGuestInformation.filter((value) => value.coming) as guest}
 					<tr>
 						<td>
-							<a href="/user/{guest.user.id}">{guest.user.nickname}</a>
+							<a href="/user/{guest.user?.id}">{guest.user?.nickname}</a>
 						</td>
 						<td>
 							{guest.food}
