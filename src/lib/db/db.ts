@@ -21,7 +21,7 @@ const sequelize: Sequelize = new Sequelize({
 });
 
 export const User: ModelStatic<Model<UserAttributes, any>> = sequelize.define(
-	'User',
+	'user',
 	{
 		id: { type: DataTypes.STRING, primaryKey: true, allowNull: false },
 		password: { type: DataTypes.STRING, allowNull: false },
@@ -38,7 +38,7 @@ export const User: ModelStatic<Model<UserAttributes, any>> = sequelize.define(
 );
 
 export const UserImage: ModelStatic<Model<UserImageAttributes, any>> = sequelize.define(
-	'UserImage',
+	'userImage',
 	{
 		id: { type: DataTypes.STRING, primaryKey: true, allowNull: false },
 		image: { type: DataTypes.BLOB('long'), allowNull: false }
@@ -51,7 +51,7 @@ export const UserImage: ModelStatic<Model<UserImageAttributes, any>> = sequelize
 );
 
 export const GuestInformation: ModelStatic<Model<GuestInformationAttributes, any>> = sequelize.define(
-	'GuestInformation',
+	'guestInformation',
 	{
 		id: {
 			type: DataTypes.STRING,
@@ -74,7 +74,7 @@ export const GuestInformation: ModelStatic<Model<GuestInformationAttributes, any
 );
 
 export const FestivalEvent: ModelStatic<Model<FestivalEventAttributes, any>> = sequelize.define(
-	'FestivalEvent',
+	'festivalEvent',
 	{
 		id: {
 			type: DataTypes.STRING,
@@ -100,7 +100,7 @@ export const FestivalEvent: ModelStatic<Model<FestivalEventAttributes, any>> = s
 );
 
 export const Friend: ModelStatic<Model<FriendAttributes, any>> = sequelize.define(
-	'Friend',
+	'friend',
 	{
 		id: {
 			type: DataTypes.STRING,
@@ -124,7 +124,7 @@ export const Friend: ModelStatic<Model<FriendAttributes, any>> = sequelize.defin
 );
 
 export const FriendRequest: ModelStatic<Model<FriendRequestAttributes, any>> = sequelize.define(
-	'FriendRequest',
+	'friendRequest',
 	{
 		id: {
 			type: DataTypes.STRING,
@@ -148,7 +148,7 @@ export const FriendRequest: ModelStatic<Model<FriendRequestAttributes, any>> = s
 );
 
 export const SessionToken: ModelStatic<Model<SessionTokenAttributes, any>> = sequelize.define(
-	'SessionToken',
+	'sessionToken',
 	{
 		UserId: {
 			type: DataTypes.STRING,
@@ -168,7 +168,7 @@ export const SessionToken: ModelStatic<Model<SessionTokenAttributes, any>> = seq
 );
 
 export const Comment: ModelStatic<Model<CommentAttributes, any>> = sequelize.define(
-	'Comment',
+	'comment',
 	{
 		id: { type: DataTypes.STRING, primaryKey: true, allowNull: false },
 		writtenBy: { type: DataTypes.STRING, allowNull: false },
@@ -183,9 +183,10 @@ export const Comment: ModelStatic<Model<CommentAttributes, any>> = sequelize.def
 );
 
 export const Group: ModelStatic<Model<GroupAttributes, any>> = sequelize.define(
-	'Group',
+	'group',
 	{
 		id: { type: DataTypes.STRING, primaryKey: true, allowNull: false },
+		name: { type: DataTypes.STRING, allowNull: false },
 		description: { type: DataTypes.STRING }
 	},
 	{
@@ -196,7 +197,7 @@ export const Group: ModelStatic<Model<GroupAttributes, any>> = sequelize.define(
 );
 
 export const GroupMember: ModelStatic<Model<GroupMemberAttributes, any>> = sequelize.define(
-	'GroupMember',
+	'groupMember',
 	{
 		id: { type: DataTypes.STRING, primaryKey: true, allowNull: false }
 	},
@@ -210,40 +211,50 @@ export const GroupMember: ModelStatic<Model<GroupMemberAttributes, any>> = seque
 FestivalEvent.hasMany(GuestInformation);
 GuestInformation.belongsTo(FestivalEvent);
 
-User.hasMany(UserImage);
+User.hasMany(UserImage, { onDelete: 'CASCADE' });
 UserImage.belongsTo(User);
 
-User.hasMany(GuestInformation);
+User.hasMany(GuestInformation, { onDelete: 'CASCADE' });
 GuestInformation.belongsTo(User);
 
-User.hasMany(FestivalEvent);
+User.hasMany(FestivalEvent, { onDelete: 'CASCADE' });
 FestivalEvent.belongsTo(User);
 
+// Many to many??
 User.hasMany(Friend, {
-	foreignKey: 'friend1Id'
+	foreignKey: 'friend1Id',
+	onDelete: 'CASCADE'
 });
 Friend.belongsTo(User, {
 	as: 'friend2'
 });
 
 User.hasMany(FriendRequest, {
-	foreignKey: 'senderId'
+	foreignKey: 'senderId',
+	onDelete: 'CASCADE'
 });
 FriendRequest.belongsTo(User, {
 	as: 'receiver'
 });
 
-User.hasOne(SessionToken);
+User.hasOne(SessionToken, { onDelete: 'CASCADE' });
 SessionToken.belongsTo(User);
 
-User.hasMany(Group);
-Group.belongsTo(User, {
-	as: 'Creator'
-});
+User.hasMany(Group, { onDelete: 'SET NULL' });
+Group.belongsTo(User);
 
-Group.hasMany(GroupMember);
+Group.hasMany(GroupMember, { onDelete: 'CASCADE' });
 GroupMember.belongsTo(Group);
 
+User.hasMany(GroupMember, { onDelete: 'CASCADE' });
+GroupMember.belongsTo(User);
+
 export async function startDB(): Promise<void> {
-	await sequelize.sync({ force: false });
+	try {
+		await sequelize.authenticate();
+		console.log('Connection has been established successfully.');
+		await sequelize.sync({ force: false, alter: true });
+	} catch (error) {
+		console.error('Unable to connect to the database:', error);
+	}
 }

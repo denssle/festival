@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang='ts'>
 	import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 	import { getTotalNumberOfComingGuests } from '$lib/utils/festivalEvent.util';
 
@@ -7,14 +7,15 @@
 
 <article>
 	<h2>Festivals</h2>
-
+	<p>Willkommen hier. </p>
 	<section>
-		<p>Alle Events:</p>
+		<a class="button" href='/festival/new'>Neues Fest anlegen</a>
+
 		{#each data.festivalEvents as loadedEvent}
 			<fieldset>
 				<legend>
-					<a href="/festival/{loadedEvent.id}">{loadedEvent.name}</a>
-					von <a href="/user/{loadedEvent.createdBy?.id}">{loadedEvent.createdBy?.nickname}</a>
+					<a href='/festival/{loadedEvent.id}'>{loadedEvent.name}</a>
+					von <a href='/user/{loadedEvent.createdBy?.id}'>{loadedEvent.createdBy?.nickname}</a>
 				</legend>
 				<i>Start: {loadedEvent.startDate?.toLocaleString()}</i>
 				<p></p>

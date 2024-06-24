@@ -17,10 +17,10 @@
 	<nav>
 		{#if data?.currentUser?.isAuthenticated}
 			<a href="/">Festivals</a>
-			<a href="/festival/new">Neu</a>
-			<a href="/settings">Einstellungen</a>
+			<a href='/group'>Gruppen</a>
 			<a href="/user/{data.currentUser.id}">{data.currentUser.nickname}</a>
 			<a href="/updates">Updates</a>
+			<a href="/settings">Einstellungen</a>
 			<button on:click|trusted={logout}>Logout</button>
 		{:else}
 			<a href="/login">Anmelden</a>
