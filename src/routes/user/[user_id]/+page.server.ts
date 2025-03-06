@@ -9,7 +9,7 @@ import {
 	readFormDataFrontEndUser
 } from '$lib/services/user.service';
 import type { PageServerLoad, RouteParams } from '../../user/[user_id]/$types';
-import { StandardResponse } from '$lib/models/StandardResponse';
+import { StandardResponse } from '$lib/models/transferData/StandardResponse';
 import type { UserFormData } from '$lib/models/user/UserFormData';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import type { UserTransferData } from '$lib/models/user/UserTransferData';

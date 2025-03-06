@@ -1,6 +1,6 @@
 import { Comment } from '$lib/db/db';
 import { CommentAttributes, mapToFrontendComment } from '$lib/db/attributes/comment.attributes';
-import { FrontendComment } from '$lib/models/FrontendComment';
+import { FrontendComment } from '$lib/models/transferData/FrontendComment';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
 
 export function saveComment(who: string, where: string, comment: string) {

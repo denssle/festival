@@ -220,7 +220,7 @@ GuestInformation.belongsTo(User);
 User.hasMany(FestivalEvent, { onDelete: 'CASCADE' });
 FestivalEvent.belongsTo(User);
 
-// Many to many??
+// TODO Check: Many to many??
 User.hasMany(Friend, {
 	foreignKey: 'friend1Id',
 	onDelete: 'CASCADE'
@@ -237,6 +237,7 @@ FriendRequest.belongsTo(User, {
 	as: 'receiver'
 });
 
+// TODO multiple sessions?
 User.hasOne(SessionToken, { onDelete: 'CASCADE' });
 SessionToken.belongsTo(User);
 

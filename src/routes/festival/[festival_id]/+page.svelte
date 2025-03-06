@@ -12,7 +12,7 @@
 	import CancelInvitationDialog from './cancel-invitation/CancelInvitationDialog.svelte';
 	import ComingVisitorsTable from './CommingVisitorsTable.svelte';
 	import NotComingVisitorsTable from './NotCommingVisitorsTable.svelte';
-	import type { FestivalTransferData } from '$lib/models/FestivalTransferData';
+	import type { FestivalTransferData } from '$lib/models/transferData/FestivalTransferData';
 	import FestivalComments from '$lib/sharedComponents/Comments.svelte';
 
 	export let data: FestivalTransferData;

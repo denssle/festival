@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { LoginRegisterFormData } from '$lib/models/LoginRegisterFormData';
+	import type { LoginRegisterFormData } from '$lib/models/transferData/LoginRegisterFormData';
 
 	export let data: LoginRegisterFormData;
 

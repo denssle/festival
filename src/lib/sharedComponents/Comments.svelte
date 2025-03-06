@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { afterUpdate, onMount } from 'svelte';
-	import type { FrontendComment } from '$lib/models/FrontendComment';
+	import type { FrontendComment } from '$lib/models/transferData/FrontendComment';
 	import type { QuestionDialogData } from '$lib/models/dialogData/QuestionDialogData';
 	import QuestionDialog from '$lib/sharedComponents/QuestionDialog.svelte';
 	import AvatarImage from '$lib/sharedComponents/AvatarImage.svelte';

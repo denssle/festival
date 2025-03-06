@@ -8,7 +8,7 @@ import { convertToBackendUser, UserAttributes } from '$lib/db/attributes/user.at
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import { Model } from 'sequelize';
 import { UserImageAttributes } from '$lib/db/attributes/userImage.attributes';
-import { NickPassData } from '$lib/models/user/NickPassData';
+import { NickPassData } from '$lib/models/transferData/NickPassData';
 import { SessionTokenAttributes } from '$lib/db/attributes/sessionToken.attributes';
 
 async function getByNickname(nickname: string) {

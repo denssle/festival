@@ -1,7 +1,7 @@
 import { type Actions } from '@sveltejs/kit';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import { extractUser, updatePassword } from '$lib/services/user.service';
-import { StandardResponse } from '$lib/models/StandardResponse';
+import { StandardResponse } from '$lib/models/transferData/StandardResponse';
 
 export const actions: Actions = {
 	default: async ({ cookies, request }): Promise<StandardResponse> => {

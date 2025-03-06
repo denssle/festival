@@ -4,8 +4,8 @@ import type { PageServerLoad } from '../../../.svelte-kit/types/src/routes/$type
 import * as userService from '$lib/services/user.service';
 import { login, validateSessionToken } from '$lib/services/user.service';
 import type { BackendUser } from '$lib/models/user/BackendUser';
-import { StandardResponse } from '$lib/models/StandardResponse';
-import { NickPassData } from '$lib/models/user/NickPassData';
+import { StandardResponse } from '$lib/models/transferData/StandardResponse';
+import { NickPassData } from '$lib/models/transferData/NickPassData';
 
 export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): Promise<StandardResponse> => {
 	const valid: boolean = await validateSessionToken(cookies.get('session'));

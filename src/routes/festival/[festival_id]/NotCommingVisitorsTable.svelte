@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getTotalNumberOfNotComingGuests } from '$lib/utils/festivalEvent.util';
-	import type { FestivalTransferData } from '$lib/models/FestivalTransferData';
+	import type { FestivalTransferData } from '$lib/models/transferData/FestivalTransferData';
 
 	export let data: FestivalTransferData;
 </script>

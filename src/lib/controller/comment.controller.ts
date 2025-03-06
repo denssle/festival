@@ -2,7 +2,7 @@ import { RequestEvent } from '@sveltejs/kit';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import { extractUser } from '$lib/services/user.service';
 import { deleteComment, getComments, saveComment, updateComment } from '$lib/services/comment.service';
-import { FrontendComment } from '$lib/models/FrontendComment';
+import { FrontendComment } from '$lib/models/transferData/FrontendComment';
 import { ChangeResult, getHTTPCodeForChangeResult } from '$lib/models/updates/ChangeResult';
 
 function getIdFromPath(request: RequestEvent<Partial<Record<string, string>>, string | null>) {
