@@ -7,7 +7,7 @@
 		<form method="POST">
 			<p>
 				<input name="name" placeholder="Name der Veranstaltung" required />
-				<textarea name="description" placeholder="Kurze Beschreibung" />
+				<textarea name="description" placeholder="Kurze Beschreibung"></textarea>
 			</p>
 
 			<p>
@@ -16,7 +16,7 @@
 			</p>
 
 			<p>
-				<textarea name="location" placeholder="Ort" />
+				<textarea name="location" placeholder="Ort"></textarea>
 			</p>
 
 			<p>

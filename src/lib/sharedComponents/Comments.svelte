@@ -84,7 +84,7 @@
 <QuestionDialog bind:questionDialogData />
 <form on:submit|preventDefault={handleSubmit}>
 	<label for="comment">Kommentar: </label>
-	<textarea id="comment" name="comment" bind:value={inputComment} />
+	<textarea id="comment" name="comment" bind:value={inputComment}></textarea>
 	<p>
 		<button type="submit">Absenden</button>
 	</p>
@@ -98,7 +98,7 @@
 			<a href="/user/{comment.writtenBy?.id}">{comment.writtenBy?.nickname}</a>
 		</legend>
 		{#if comment.editMode}
-			<textarea bind:value={comment.comment} />
+			<textarea bind:value={comment.comment}></textarea>
 		{:else}
 			<p class="notice">{comment.comment}</p>
 		{/if}
