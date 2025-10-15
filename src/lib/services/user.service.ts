@@ -11,7 +11,14 @@ import { UserImageAttributes } from '$lib/db/attributes/userImage.attributes';
 import { NickPassData } from '$lib/models/user/NickPassData';
 import { SessionTokenAttributes } from '$lib/db/attributes/sessionToken.attributes';
 
-async function getByNickname(nickname: string) {
+export async function userExists(extractedUser: SessionTokenUser | null): Promise<boolean> {
+	if (extractedUser) {
+		return (await getByNickname(extractedUser?.nickname)) !== null;
+	}
+	return false;
+}
+
+async function getByNickname(nickname: string): Promise<Model<UserAttributes, any> | null> {
 	return await User.findOne({
 		where: {
 			nickname: nickname
@@ -35,7 +42,7 @@ export function saltPassword(password: string): string {
 	return hashSync(password, genSaltSync(4));
 }
 
-export async function login(nickname: string, password: string): Promise<BackendUser | null> {
+export async function loginWithCredentials(nickname: string, password: string): Promise<BackendUser | null> {
 	const user: BackendUser | null = await loadUserByNickname(nickname);
 	if (user && user.password) {
 		if (compareSync(password, user.password)) {
@@ -45,13 +52,17 @@ export async function login(nickname: string, password: string): Promise<Backend
 	return null;
 }
 
-export async function logout(user: SessionTokenUser): Promise<number> {
-	return SessionToken.destroy({
-		where: {
-			UserId: user.id,
-			token: user.token
-		}
-	});
+export function logout(user: SessionTokenUser | null, cookies: Cookies, locals: App.Locals): void {
+	locals.currentUser = undefined;
+	cookies.delete('session', { path: '/' });
+	if (user) {
+		SessionToken.destroy({
+			where: {
+				UserId: user.id,
+				token: user.token
+			}
+		});
+	}
 }
 
 export async function validateSessionToken(userString: string | undefined): Promise<boolean> {
