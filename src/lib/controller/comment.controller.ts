@@ -5,11 +5,11 @@ import { deleteComment, getComments, saveComment, updateComment } from '$lib/ser
 import { FrontendComment } from '$lib/models/FrontendComment';
 import { ChangeResult, getHTTPCodeForChangeResult } from '$lib/models/updates/ChangeResult';
 
-function getIdFromPath(request: RequestEvent<Partial<Record<string, string>>, string | null>) {
+function getIdFromPath(request: RequestEvent) {
 	return request.params.festival_id?.toString() ?? request.params.user_id?.toString();
 }
 
-export async function POSTComment(request: RequestEvent<Partial<Record<string, string>>, string | null>) {
+export async function POSTComment(request: RequestEvent): Promise<Response> {
 	const data: FormData = await request.request.formData();
 	const comment: string | undefined = data.get('comment')?.toString();
 	const pathId: string | undefined = getIdFromPath(request);
@@ -22,7 +22,7 @@ export async function POSTComment(request: RequestEvent<Partial<Record<string, s
 	return new Response(null, { status: 500 });
 }
 
-export async function GETComments(request: RequestEvent<Partial<Record<string, string>>, string | null>) {
+export async function GETComments(request: RequestEvent): Promise<Response> {
 	const pathId: string | undefined = getIdFromPath(request);
 	const user: SessionTokenUser | null = extractUser(request.cookies.get('session'));
 	if (pathId && user) {
@@ -32,7 +32,7 @@ export async function GETComments(request: RequestEvent<Partial<Record<string, s
 	return new Response(null, { status: 500 });
 }
 
-export async function DELETEComment(request: RequestEvent<Partial<Record<string, string>>, string | null>) {
+export async function DELETEComment(request: RequestEvent): Promise<Response> {
 	const commentId: string = await request.request.text();
 	const user: SessionTokenUser | null = extractUser(request.cookies.get('session'));
 	if (commentId && user) {
@@ -42,7 +42,7 @@ export async function DELETEComment(request: RequestEvent<Partial<Record<string,
 	return new Response(null, { status: 500 });
 }
 
-export async function PUTComment(request: RequestEvent<Partial<Record<string, string>>, string | null>) {
+export async function PUTComment(request: RequestEvent): Promise<Response> {
 	const comment = (await request.request.json()) as FrontendComment;
 	const user: SessionTokenUser | null = extractUser(request.cookies.get('session'));
 	if (comment && user) {
