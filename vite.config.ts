@@ -5,6 +5,6 @@ export default defineConfig({
 	plugins: [sveltekit()],
 	server: {
 		host: '0.0.0.0',
-		allowedHosts: ['enzlor.uber.space']
+		allowedHosts: ['enzlor.uber.space', 'festival.enzlor.uber.space']
 	}
 });
