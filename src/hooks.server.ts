@@ -12,7 +12,7 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 	const extractedUser: SessionTokenUser | null = userService.extractUser(event.cookies.get('session'));
 	const userExistsAndValid: boolean = await userService.userExists(extractedUser);
 	if (extractedUser && userExistsAndValid) {
-		await userService.createSessionCookie(event.cookies, extractedUser);
+		await userService.createSessionCookie(event.cookies, event.locals, extractedUser);
 	} else {
 		userService.logout(extractedUser, event.cookies, event.locals);
 	}

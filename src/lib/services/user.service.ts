@@ -168,7 +168,11 @@ export async function readNickPass(data: Promise<FormData>): Promise<NickPassDat
 	}
 }
 
-export async function createSessionCookie(cookies: Cookies, user: BackendUser | SessionTokenUser): Promise<void> {
+export async function createSessionCookie(
+	cookies: Cookies,
+	locals: App.Locals,
+	user: BackendUser | SessionTokenUser
+): Promise<void> {
 	const token: string = crypto.randomUUID();
 	await SessionToken.upsert({
 		UserId: user.id,
@@ -187,6 +191,12 @@ export async function createSessionCookie(cookies: Cookies, user: BackendUser | 
 			maxAge: 60 * 60 * 24 * 30
 		}
 	);
+	locals.currentUser = {
+		isAuthenticated: true,
+		id: user.id,
+		email: user.email,
+		nickname: user.nickname
+	};
 }
 
 export async function updateUser(oldUser: SessionTokenUser, formData: UserFormData): Promise<boolean> {

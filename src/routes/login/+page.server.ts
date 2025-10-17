@@ -16,12 +16,12 @@ export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): P
 };
 
 export const actions: Actions = {
-	default: async ({ cookies, request }: { cookies: Cookies; request: Request }): Promise<StandardResponse> => {
+	default: async ({ cookies, request, locals }: { cookies: Cookies; request: Request, locals: App.Locals }): Promise<StandardResponse> => {
 		const formData: NickPassData | undefined = await userService.readNickPass(request.formData());
 		if (formData) {
 			const user: BackendUser | null = await loginWithCredentials(formData.nickname, formData.password);
 			if (user) {
-				await userService.createSessionCookie(cookies, user);
+				await userService.createSessionCookie(cookies, locals, user);
 				redirect(302, '/');
 			} else {
 				return { success: false, message: 'Password invalid' };
