@@ -16,7 +16,15 @@ export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): P
 };
 
 export const actions: Actions = {
-	default: async ({ cookies, request, locals }: { cookies: Cookies; request: Request, locals: App.Locals }): Promise<StandardResponse> => {
+	default: async ({
+		cookies,
+		request,
+		locals
+	}: {
+		cookies: Cookies;
+		request: Request;
+		locals: App.Locals;
+	}): Promise<StandardResponse> => {
 		const formData: NickPassData | undefined = await userService.readNickPass(request.formData());
 		if (formData) {
 			const user: BackendUser | null = await loginWithCredentials(formData.nickname, formData.password);
