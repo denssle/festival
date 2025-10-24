@@ -9,7 +9,7 @@ import { sequelize } from '$lib/db/sequelize';
 import { FriendRequest } from '$lib/db/model/friendRequest';
 import { GroupMember } from '$lib/db/model/groupMember';
 
-FestivalEvent.hasMany(GuestInformation);
+FestivalEvent.hasMany(GuestInformation, { onDelete: 'CASCADE' });
 GuestInformation.belongsTo(FestivalEvent);
 
 User.hasOne(UserImage, { onDelete: 'CASCADE' });
