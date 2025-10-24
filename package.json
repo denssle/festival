@@ -15,8 +15,7 @@
 		"npm ci": "npm ci",
 		"npm update": "npm update",
 		"npm audit fix": "npm audit --fix",
-		"start-server": "npm install && vite dev",
-		"svelte-check": "svelte-check"
+		"start-server": "npm install && vite dev --host"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.28.4",
