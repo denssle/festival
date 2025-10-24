@@ -1,7 +1,7 @@
 import { DataTypes, Model, ModelStatic } from 'sequelize';
 import { UserImageAttributes } from '$lib/db/attributes/userImage.attributes';
 
-import { sequelize } from '$lib/db/model/sequelize';
+import { sequelize } from '$lib/db/sequelize';
 
 export const UserImage: ModelStatic<Model<UserImageAttributes, any>> = sequelize.define(
 	'userImage',

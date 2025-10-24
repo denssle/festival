@@ -2,10 +2,10 @@ import { User } from '$lib/db/model/user';
 import { UserImage } from '$lib/db/model/userImage';
 import { GuestInformation } from '$lib/db/model/guestInformation';
 import { Friend } from '$lib/db/model/friend';
-import { SessionToken } from '$lib/db/sessionToken';
+import { SessionToken } from '$lib/db/model/sessionToken';
 import { Group } from '$lib/db/model/group';
 import { FestivalEvent } from '$lib/db/model/festivalEvent';
-import { sequelize } from '$lib/db/model/sequelize';
+import { sequelize } from '$lib/db/sequelize';
 import { FriendRequest } from '$lib/db/model/friendRequest';
 import { GroupMember } from '$lib/db/model/groupMember';
 

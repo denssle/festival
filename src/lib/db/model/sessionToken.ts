@@ -1,7 +1,7 @@
 import { DataTypes, Model, ModelStatic } from 'sequelize';
 import { SessionTokenAttributes } from '$lib/db/attributes/sessionToken.attributes';
 
-import { sequelize } from '$lib/db/model/sequelize';
+import { sequelize } from '$lib/db/sequelize';
 
 export const SessionToken: ModelStatic<Model<SessionTokenAttributes, any>> = sequelize.define(
 	'sessionToken',

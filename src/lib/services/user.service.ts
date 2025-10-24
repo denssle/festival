@@ -11,7 +11,7 @@ import { NickPassData } from '$lib/models/transferData/NickPassData';
 import { SessionTokenAttributes } from '$lib/db/attributes/sessionToken.attributes';
 import { User } from '$lib/db/model/user';
 import { UserImage } from '$lib/db/model/userImage';
-import { SessionToken } from '$lib/db/sessionToken';
+import { SessionToken } from '$lib/db/model/sessionToken';
 
 export async function userExists(extractedUser: SessionTokenUser | null): Promise<boolean> {
 	if (extractedUser) {

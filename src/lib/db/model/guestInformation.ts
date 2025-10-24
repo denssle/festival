@@ -1,7 +1,7 @@
 import { DataTypes, Model, ModelStatic } from 'sequelize';
 import { GuestInformationAttributes } from '$lib/db/attributes/guestInformation.attributes';
 
-import { sequelize } from '$lib/db/model/sequelize';
+import { sequelize } from '$lib/db/sequelize';
 
 export const GuestInformation: ModelStatic<Model<GuestInformationAttributes, any>> = sequelize.define(
 	'guestInformation',

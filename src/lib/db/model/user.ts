@@ -1,7 +1,7 @@
 import { DataTypes, Model, ModelStatic } from 'sequelize';
 import { UserAttributes } from '$lib/db/attributes/user.attributes';
 
-import { sequelize } from '$lib/db/model/sequelize';
+import { sequelize } from '$lib/db/sequelize';
 
 export const User: ModelStatic<Model<UserAttributes, any>> = sequelize.define(
 	'user',

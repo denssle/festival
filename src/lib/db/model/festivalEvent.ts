@@ -1,7 +1,7 @@
 import { DataTypes, Model, ModelStatic } from 'sequelize';
 import { FestivalEventAttributes } from '$lib/db/attributes/festivalEvent.attributes';
 
-import { sequelize } from '$lib/db/model/sequelize';
+import { sequelize } from '$lib/db/sequelize';
 
 export const FestivalEvent: ModelStatic<Model<FestivalEventAttributes, any>> = sequelize.define(
 	'festivalEvent',

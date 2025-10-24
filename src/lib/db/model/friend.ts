@@ -1,7 +1,7 @@
 import { DataTypes, Model, ModelStatic } from 'sequelize';
 import { FriendAttributes } from '$lib/db/attributes/friend.attributes';
 
-import { sequelize } from '$lib/db/model/sequelize';
+import { sequelize } from '$lib/db/sequelize';
 
 export const Friend: ModelStatic<Model<FriendAttributes, any>> = sequelize.define(
 	'friend',
