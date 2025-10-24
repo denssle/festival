@@ -1,4 +1,5 @@
-import { Group, GroupMember } from '$lib/db/db';
+import { Group } from '$lib/db/model/group';
+import { GroupMember } from '$lib/db/model/groupMember';
 
 export function createGroup(userId: string, name: File | string, description: FormDataEntryValue | null) {
 	const groupId = crypto.randomUUID();

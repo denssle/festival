@@ -3,13 +3,15 @@ import type { BackendUser } from '../models/user/BackendUser';
 import type { FrontendUser } from '../models/user/FrontendUser';
 import type { UserFormData } from '$lib/models/user/UserFormData';
 import type { Cookies } from '@sveltejs/kit';
-import { SessionToken, User, UserImage } from '$lib/db/db';
 import { convertToBackendUser, UserAttributes } from '$lib/db/attributes/user.attributes';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import { Model } from 'sequelize';
 import { UserImageAttributes } from '$lib/db/attributes/userImage.attributes';
 import { NickPassData } from '$lib/models/transferData/NickPassData';
 import { SessionTokenAttributes } from '$lib/db/attributes/sessionToken.attributes';
+import { User } from '$lib/db/model/user';
+import { UserImage } from '$lib/db/model/userImage';
+import { SessionToken } from '$lib/db/sessionToken';
 
 export async function userExists(extractedUser: SessionTokenUser | null): Promise<boolean> {
 	if (extractedUser) {

@@ -1,7 +1,6 @@
 import type { BackendUser } from '$lib/models/user/BackendUser';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import type { BaseGuestInformation } from '$lib/models/guestInformation/BaseGuestInformation';
-import { GuestInformation } from '$lib/db/db';
 import {
 	GuestInformationAttributes,
 	mapToBackendGuestInformation
@@ -9,6 +8,7 @@ import {
 import type { BackendGuestInformation } from '$lib/models/guestInformation/BackendGuestInformation';
 import type { FrontendGuestInformation } from '$lib/models/guestInformation/FrontendGuestInformation';
 import { loadFrontEndUserById } from '$lib/services/user.service';
+import { GuestInformation } from '$lib/db/model/guestInformation';
 
 export async function joinFestival(
 	user: BackendUser | null | SessionTokenUser,

@@ -1,10 +1,11 @@
-import { Friend, FriendRequest } from '$lib/db/db';
 import { Model, Op } from 'sequelize';
 import type { FrontendUser } from '$lib/models/user/FrontendUser';
 import { FriendAttributes } from '$lib/db/attributes/friend.attributes';
 import { convertToFriendRequest, FriendRequestAttributes } from '$lib/db/attributes/friendRequest.attributes';
 import { FriendRequestData } from '$lib/models/updates/FriendRequestData';
 import { loadFrontEndUserById } from '$lib/services/user.service';
+import { Friend } from '$lib/db/model/friend';
+import { FriendRequest } from '$lib/db/model/friendRequest';
 
 export async function getFriends(userId: string): Promise<{ id: string; friend1Id: string; friend2Id: string }[]> {
 	const model = await Friend.findAll({

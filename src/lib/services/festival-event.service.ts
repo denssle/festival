@@ -3,7 +3,6 @@ import type { BackendFestivalEvent } from '../models/festivalEvent/BackendFestiv
 import type { BackendUser } from '../models/user/BackendUser';
 import type { FrontendUser } from '../models/user/FrontendUser';
 import { loadFrontEndUserById } from './user.service';
-import { FestivalEvent, GuestInformation } from '$lib/db/db';
 import {
 	FestivalEventAttributes,
 	mapToBackendFestivalEvent,
@@ -18,6 +17,8 @@ import {
 } from '$lib/services/guest-information.service';
 import { BackendGuestInformation } from '$lib/models/guestInformation/BackendGuestInformation';
 import { VisitingFestival } from '$lib/models/user/VisitingFestival';
+import { GuestInformation } from '$lib/db/model/guestInformation';
+import { FestivalEvent } from '$lib/db/model/festivalEvent';
 
 export async function getAllFestivals(): Promise<FrontendFestivalEvent[]> {
 	const allFestivals = await FestivalEvent.findAll({ include: GuestInformation, order: [['startDate', 'DESC']] });
