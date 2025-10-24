@@ -1,12 +1,13 @@
+<script>
+	import adresse from '../../images/adresse.png';
+</script>
+
 <article>
 	<h2>Impressum</h2>
 	<section>
 		<p>Angaben gemäß § 5 TMG</p>
 		<address>
-			Dominik Hellweg<br />
-			Thomas-Mann-Str. 26<br />
-			44141 Dortmund<br />
-			E-Mail: <a href="mailto:fdhellweg@web.de">fdhellweg@web.de</a>
+			<img alt="Impressums Adresse" class="center" src={adresse} />
 		</address>
 	</section>
 
@@ -57,5 +58,5 @@
 		der Seiten behalten sich ausdrücklich rechtliche Schritte im Falle der unverlangten Zusendung von Werbeinformationen,
 		etwa durch Spam-Mails, vor.
 	</section>
-	Website Impressum von<a href="https://www.impressum-generator.de">impressum-generator.de</a>
+	Website Impressum von<a href="https://www.impressum-generator.de">impressum-generator</a>
 </article>
