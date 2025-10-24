@@ -1,5 +1,5 @@
 import { DataTypes, Model, ModelStatic, Sequelize } from 'sequelize';
-import { MARIA_DB_PASSWORD, MARIA_DB_USER } from '$env/static/private';
+import { MARIA_DB_PASSWORD, MARIA_DB_USER, MARIA_DB_NAME } from '$env/static/private';
 import { GuestInformationAttributes } from '$lib/db/attributes/guestInformation.attributes';
 import { UserAttributes } from '$lib/db/attributes/user.attributes';
 import { FestivalEventAttributes } from '$lib/db/attributes/festivalEvent.attributes';
@@ -16,7 +16,7 @@ const sequelize: Sequelize = new Sequelize({
 	host: 'localhost',
 	username: MARIA_DB_USER,
 	password: MARIA_DB_PASSWORD,
-	database: MARIA_DB_USER,
+	database: MARIA_DB_USER + '_' + MARIA_DB_NAME,
 	define: {}
 });
 

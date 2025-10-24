@@ -9,6 +9,7 @@
 ```
 MARIA_DB_USER="***"
 MARIA_DB_PASSWORD="***"
+MARIA_DB_NAME="dev"
 ```
 
 - run `npm install`
