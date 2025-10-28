@@ -20,7 +20,6 @@ export const FestivalEvent: ModelStatic<Model<FestivalEventAttributes, any>> = s
 		bringYourOwnBottle: { type: DataTypes.BOOLEAN },
 		bringYourOwnFood: { type: DataTypes.BOOLEAN },
 		startDate: { type: DataTypes.DATE },
-		UserId: { type: DataTypes.STRING, allowNull: false }
 	},
 	{
 		timestamps: true,

@@ -8,12 +8,10 @@ import { FestivalEvent } from '$lib/db/model/festivalEvent';
 import { sequelize } from '$lib/db/sequelize';
 import { FriendRequest } from '$lib/db/model/friendRequest';
 import { GroupMember } from '$lib/db/model/groupMember';
+import { Friendship } from '$lib/db/model/friendship';
 
 FestivalEvent.hasMany(GuestInformation, { onDelete: 'CASCADE' });
 GuestInformation.belongsTo(FestivalEvent);
-
-User.hasOne(UserImage, { onDelete: 'CASCADE' });
-UserImage.belongsTo(User);
 
 User.hasMany(GuestInformation, { onDelete: 'CASCADE' });
 GuestInformation.belongsTo(User);
@@ -21,14 +19,14 @@ GuestInformation.belongsTo(User);
 User.hasMany(FestivalEvent, { onDelete: 'CASCADE' });
 FestivalEvent.belongsTo(User);
 
+User.hasOne(UserImage, { onDelete: 'CASCADE' });
+UserImage.belongsTo(User);
+
 // TODO Check: Many to many??
 User.hasMany(Friend, {
-	foreignKey: 'friend1Id',
 	onDelete: 'CASCADE'
 });
-Friend.belongsTo(User, {
-	as: 'friend2'
-});
+Friend.belongsToMany(User, { through: Friendship });
 
 User.hasMany(FriendRequest, {
 	foreignKey: 'senderId',

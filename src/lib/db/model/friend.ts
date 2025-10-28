@@ -10,14 +10,6 @@ export const Friend: ModelStatic<Model<FriendAttributes, any>> = sequelize.defin
 			type: DataTypes.STRING,
 			primaryKey: true,
 			allowNull: false
-		},
-		friend1Id: {
-			type: DataTypes.STRING,
-			allowNull: false
-		},
-		friend2Id: {
-			type: DataTypes.STRING,
-			allowNull: false
 		}
 	},
 	{
