@@ -47,5 +47,8 @@ export default defineConfig({
     command: 'npm run start-dev',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
+    env: {
+      PLAYWRIGHT: 'true'
+    }
   },
 });

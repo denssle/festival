@@ -13,20 +13,6 @@ jobs:
     name: Run Playwright Tests
     timeout-minutes: 60
     runs-on: ubuntu-latest
-    services:
-      mariadb:
-        image: mariadb:latest
-        env:
-          MARIA_DB_USER: user
-          MARIA_DB_PASSWORD: password
-          MARIA_DB_NAME: dev
-          MYSQL_ROOT_PASSWORD: root_password
-          MYSQL_USER: user
-          MYSQL_PASSWORD: password
-          MYSQL_DATABASE: user_dev
-        ports:
-          - 3306:3306
-        options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -38,10 +24,6 @@ jobs:
         run: npx playwright install --with-deps
       - name: Run Playwright tests
         run: npx playwright test
-        env:
-          MARIA_DB_USER: user
-          MARIA_DB_PASSWORD: password
-          MARIA_DB_NAME: dev
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:

@@ -17,7 +17,8 @@
 		"npm audit fix": "npm audit --fix",
 		"start-server": "npm install && vite dev --host",
 		"test": "playwright test",
-		"test:ui": "playwright test --ui"
+		"test:ui": "playwright test --ui",
+		"test:install": "npx playwright install --with-deps"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.28.5",
@@ -46,6 +47,7 @@
 		"bcrypt-ts": "^8.0.0",
 		"mariadb": "^3.4.5",
 		"sequelize": "^6.37.7",
-		"sequelize-cli": "^6.6.3"
+		"sequelize-cli": "^6.6.3",
+		"sqlite3": "^6.0.1"
 	}
 }

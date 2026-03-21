@@ -8,6 +8,7 @@ import type { UserFormData } from '$lib/models/user/UserFormData';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import type { UserTransferData } from '$lib/models/user/UserTransferData';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
+import { FriendshipService } from '$lib/services/friendship.service';
 
 export const load: PageServerLoad = async ({
 	cookies,

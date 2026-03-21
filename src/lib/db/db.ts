@@ -8,6 +8,7 @@ import { sequelize } from '$lib/db/sequelize';
 import { FriendRequest } from '$lib/db/model/friendRequest';
 import { GroupMember } from '$lib/db/model/groupMember';
 import { Friendship } from '$lib/db/model/friendship';
+import { hash } from 'bcrypt-ts';
 
 FestivalEvent.hasMany(GuestInformation, { onDelete: 'CASCADE' });
 GuestInformation.belongsTo(FestivalEvent);
@@ -21,7 +22,6 @@ FestivalEvent.belongsTo(User);
 User.hasOne(UserImage, { onDelete: 'CASCADE' });
 UserImage.belongsTo(User);
 
-// TODO Check: Many to many??
 User.belongsToMany(User, {
 	through: Friendship,
 	as: 'friends',
@@ -39,8 +39,8 @@ FriendRequest.belongsTo(User, {
 });
 
 // TODO multiple sessions?
-User.hasOne(SessionToken, { onDelete: 'CASCADE' });
-SessionToken.belongsTo(User);
+User.hasOne(SessionToken, { foreignKey: 'UserId', onDelete: 'CASCADE' });
+SessionToken.belongsTo(User, { foreignKey: 'UserId' });
 
 User.hasMany(Group, { as: 'ownedGroups', foreignKey: 'ownerId', onDelete: 'CASCADE' });
 Group.belongsTo(User, { as: 'owner', foreignKey: 'ownerId' });
@@ -59,6 +59,22 @@ export async function startDB(): Promise<void> {
 		await sequelize.authenticate();
 		console.log('Connection has been established successfully.');
 		await sequelize.sync({ force: false, alter: true });
+
+		// Seed TestUser for Playwright tests if in test mode
+		if (process.env.PLAYWRIGHT === 'true' || process.env.NODE_ENV === 'test') {
+			const testNickname = 'TestUser';
+			const testPassword = 'TestPassword123';
+			const existingUser = await User.findOne({ where: { nickname: testNickname } });
+			if (!existingUser) {
+				const hashedPassword = await hash(testPassword, 10);
+				await User.create({
+					id: crypto.randomUUID(),
+					nickname: testNickname,
+					password: hashedPassword
+				});
+				console.log('TestUser seeded for In-Memory Database.');
+			}
+		}
 	} catch (error) {
 		console.error('Unable to connect to the database:', error);
 	}

@@ -31,8 +31,13 @@ test.describe('Authentifizierung: Registrierung und Anmeldung', () => {
 		await expect(page).not.toHaveURL('/registration');
 		
 		// Optional: Wir könnten prüfen, ob wir zur Profilseite navigieren können
-		// Da wir den Nickname kennen, sollte /user/[nickname] existieren
-		await page.goto(`/user/${testNickname}`);
+		// Da wir nun angemeldet sind, sollte im Header ein Link zum Profil mit der User-ID vorhanden sein
+		const profileLink = page.locator(`header nav a[href^="/user/"]`);
+		await expect(profileLink).toBeVisible();
+		await profileLink.click();
+		
+		// Verifizieren, dass wir auf der Profilseite sind und der Nickname angezeigt wird
+		await expect(page).toHaveURL(/\/user\/.+/);
 		await expect(page.locator('h2')).toContainText(testNickname);
 	});
 
