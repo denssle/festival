@@ -8,8 +8,10 @@
 	export let friendId: string;
 
 	async function addFriend(): Promise<void> {
-		fetch(friendId + `/add-friend`, { method: 'POST' })
+		console.log('addFriend called for', friendId);
+		fetch(`/user/` + friendId + `/add-friend`, { method: 'POST' })
 			.then((value: Response) => {
+				console.log('addFriend response status:', value.status);
 				if (value.ok) {
 					openDialog('Freundschaftsanfrage wurde geschickt.');
 				} else {
@@ -17,11 +19,14 @@
 				}
 				invalidateAll();
 			})
-			.catch((reason) => error(reason));
+			.catch((reason) => {
+				console.error('addFriend fetch error:', reason);
+				error(reason);
+			});
 	}
 
 	function removeFriend(): void {
-		fetch(friendId + `/remove-friend`, { method: 'POST' })
+		fetch(`/user/` + friendId + `/remove-friend`, { method: 'POST' })
 			.then((value: Response) => {
 				if (value.ok) {
 					openDialog('Freundschaft gekündigt.');

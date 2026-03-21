@@ -98,7 +98,7 @@
 			<a href="/user/{comment.writtenBy?.id}">{comment.writtenBy?.nickname}</a>
 		</legend>
 		{#if comment.editMode}
-			<textarea bind:value={comment.comment}></textarea>
+			<textarea name="updateComment" bind:value={comment.comment}></textarea>
 		{:else}
 			<p class="notice">{comment.comment}</p>
 		{/if}
@@ -120,7 +120,7 @@
 {/each}
 
 <style>
-	legend {
-		display: ruby;
-	}
+    legend {
+        display: ruby;
+    }
 </style>

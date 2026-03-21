@@ -12,7 +12,7 @@ export type FriendRequestAttributes = {
 export async function convertToFriendRequest(attribute: FriendRequestAttributes): Promise<FriendRequestData> {
 	return {
 		id: attribute.id,
-		receivedFrom: await UserService.loadFrontEndUserById(attribute.receiverId),
-		sendTo: await UserService.loadFrontEndUserById(attribute.senderId)
+		receivedFrom: await UserService.loadFrontEndUserById(attribute.senderId),
+		sendTo: await UserService.loadFrontEndUserById(attribute.receiverId)
 	};
 }

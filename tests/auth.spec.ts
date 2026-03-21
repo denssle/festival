@@ -1,34 +1,17 @@
 import { test, expect } from '@playwright/test';
+import { register } from './test-utils';
 
 test.describe('Authentifizierung: Registrierung und Anmeldung', () => {
 	// Wir generieren einen zufälligen Nickname, um Kollisionen bei wiederholten Testläufen zu vermeiden
-	const testNickname = `User_${Math.floor(Math.random() * 1000000)}`;
+	const testNickname = `User_${Date.now()}`;
 	const testPassword = 'SafePassword123!';
 
 	test('sollte einen neuen User registrieren und sich danach anmelden können', async ({ page }) => {
 		// 1. SCHRITT: Registrierung
-		await page.goto('/registration');
-		
-		// Prüfen ob wir auf der richtigen Seite sind
-		await expect(page.locator('h2')).toContainText('Registration');
+		await register(page, testNickname, testPassword);
 
-		// Formular ausfüllen
-		await page.fill('input[name="nickname"]', testNickname);
-		await page.fill('input[name="password"]', testPassword);
-		await page.fill('input[name="password2"]', testPassword);
-
-		// Registrierung absenden
-		// Der Button ist nur aktiv, wenn die Passwörter übereinstimmen
-		const submitButton = page.locator('button[type="submit"]');
-		await expect(submitButton).toBeEnabled();
-		await submitButton.click();
-
-		// Nach erfolgreicher Registrierung erfolgt laut +page.server.ts eine automatische Session-Erstellung
-		// und eine Weiterleitung auf die Startseite (/)
+		// Verifikation des Logins: Wir prüfen ob wir auf der Startseite sind
 		await expect(page).toHaveURL('/');
-
-		// Verifikation des Logins: Wir prüfen ob wir auf der Startseite sind und nicht mehr auf /registration
-		await expect(page).not.toHaveURL('/registration');
 		
 		// Optional: Wir könnten prüfen, ob wir zur Profilseite navigieren können
 		// Da wir nun angemeldet sind, sollte im Header ein Link zum Profil mit der User-ID vorhanden sein

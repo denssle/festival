@@ -37,7 +37,7 @@ export async function DELETEComment(request: RequestEvent): Promise<Response> {
 	const user: SessionTokenUser | null = UserService.extractUser(request.cookies.get('session'));
 	if (commentId && user) {
 		const result: ChangeResult = await CommentService.deleteComment(user.id, commentId);
-		return new Response(result, { status: getHTTPCodeForChangeResult(result) });
+		return new Response(JSON.stringify(result), { status: getHTTPCodeForChangeResult(result) });
 	}
 	return new Response(null, { status: 500 });
 }
@@ -47,7 +47,7 @@ export async function PUTComment(request: RequestEvent): Promise<Response> {
 	const user: SessionTokenUser | null = UserService.extractUser(request.cookies.get('session'));
 	if (comment && user) {
 		const result: ChangeResult = await CommentService.updateComment(user.id, comment.id, comment.comment);
-		return new Response(result, { status: getHTTPCodeForChangeResult(result) });
+		return new Response(JSON.stringify(result), { status: getHTTPCodeForChangeResult(result) });
 	}
 	return new Response(null, { status: 500 });
 }
