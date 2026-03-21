@@ -38,7 +38,9 @@
 	<p>Zu nichts angemeldet.</p>
 {:else}
 	<p>Angemeldet bei:</p>
-	{#each festivals as fest}
-		<a href={'/festival/' + fest.festivalId}>{fest.festivalName}</a>
-	{/each}
+	<ul>
+		{#each festivals as fest}
+			<li><a href={'/festival/' + fest.festivalId}>{fest.festivalName}</a></li>
+		{/each}
+	</ul>
 {/if}

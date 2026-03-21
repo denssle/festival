@@ -11,10 +11,10 @@ import { Friendship } from '$lib/db/model/friendship';
 import { Comment } from '$lib/db/model/comment';
 import { hash } from 'bcrypt-ts';
 
-FestivalEvent.hasMany(GuestInformation, { as: 'GuestInformations', onDelete: 'CASCADE' });
-GuestInformation.belongsTo(FestivalEvent);
+FestivalEvent.hasMany(GuestInformation, { as: 'EventGuests', onDelete: 'CASCADE' });
+GuestInformation.belongsTo(FestivalEvent, { foreignKey: 'FestivalEventId' });
 
-User.hasMany(GuestInformation, { foreignKey: 'UserId', onDelete: 'CASCADE' });
+User.hasMany(GuestInformation, { as: 'UserGuestInfos', foreignKey: 'UserId', onDelete: 'CASCADE' });
 GuestInformation.belongsTo(User, { foreignKey: 'UserId' });
 
 User.hasMany(FestivalEvent, { foreignKey: 'UserId', onDelete: 'CASCADE' });
@@ -46,14 +46,14 @@ SessionToken.belongsTo(User, { foreignKey: 'UserId' });
 User.hasMany(Group, { as: 'ownedGroups', foreignKey: 'ownerId', onDelete: 'CASCADE' });
 Group.belongsTo(User, { as: 'owner', foreignKey: 'ownerId' });
 
-Group.belongsToMany(User, { through: GroupMember, as: 'members' });
-User.belongsToMany(Group, { through: GroupMember, as: 'joinedGroups' });
+Group.belongsToMany(User, { through: GroupMember, as: 'members', foreignKey: 'GroupId', otherKey: 'UserId' });
+User.belongsToMany(Group, { through: GroupMember, as: 'joinedGroups', foreignKey: 'UserId', otherKey: 'GroupId' });
 
-Group.hasMany(GroupMember, { onDelete: 'CASCADE' });
-GroupMember.belongsTo(Group);
+Group.hasMany(GroupMember, { foreignKey: 'GroupId', onDelete: 'CASCADE' });
+GroupMember.belongsTo(Group, { foreignKey: 'GroupId' });
 
-User.hasMany(GroupMember, { onDelete: 'CASCADE' });
-GroupMember.belongsTo(User);
+User.hasMany(GroupMember, { foreignKey: 'UserId', onDelete: 'CASCADE' });
+GroupMember.belongsTo(User, { foreignKey: 'UserId' });
 
 User.hasMany(Comment, { foreignKey: 'writtenBy', onDelete: 'CASCADE' });
 Comment.belongsTo(User, { foreignKey: 'writtenBy' });

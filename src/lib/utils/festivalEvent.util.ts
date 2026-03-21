@@ -1,5 +1,5 @@
 import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
-import { FrontendGuestInformation } from '$lib/models/guestInformation/FrontendGuestInformation';
+import type { FrontendGuestInformation } from '$lib/models/guestInformation/FrontendGuestInformation';
 
 export function getTotalNumberOfComingGuests(festival: FrontendFestivalEvent): number {
 	const filtered: FrontendGuestInformation[] = festival.frontendGuestInformation.filter((value) => value.coming);

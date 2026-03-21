@@ -62,8 +62,17 @@
 					fetch('/festival/' + data.festival.id + '/join', {
 						method: 'POST',
 						body: JSON.stringify(eventData)
-					}).then(() => {
-						afterRequest();
+					}).then(async (response) => {
+						if (response.ok) {
+							afterRequest();
+						} else {
+							const errorData = await response.json();
+							console.error('Failed to join festival:', errorData);
+							alert('Fehler beim Zusagen: ' + (errorData.message || 'Unbekannter Fehler'));
+						}
+					}).catch((error) => {
+						console.error('Fetch error joining festival:', error);
+						alert('Netzwerkfehler beim Zusagen.');
 					});
 				}
 			};

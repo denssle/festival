@@ -16,8 +16,8 @@ export class GroupService {
 
 			await GroupMember.create({
 				id: crypto.randomUUID(),
-				userId: userId,
-				groupId: groupId
+				UserId: userId,
+				GroupId: groupId
 			});
 		} catch (error) {
 			console.error('Fehler beim Erstellen der Gruppe:', error);

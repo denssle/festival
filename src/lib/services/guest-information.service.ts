@@ -9,6 +9,7 @@ import type { BackendGuestInformation } from '$lib/models/guestInformation/Backe
 import type { FrontendGuestInformation } from '$lib/models/guestInformation/FrontendGuestInformation';
 import { UserService } from '$lib/services/user.service';
 import { GuestInformation } from '$lib/db/model/guestInformation';
+import { Op } from 'sequelize';
 
 export class GuestInformationService {
 	static async joinFestival(
@@ -19,28 +20,27 @@ export class GuestInformationService {
 		if (user && festivalId) {
 			const find = await this.getGuestInformationModel(user.id, festivalId);
 			if (find) {
-				find.set({
+				await find.update({
 					coming: true,
-					comment: eventData.comment,
-					food: eventData.food,
-					drink: eventData.drink,
-					numberOfOtherGuests: eventData.numberOfOtherGuests
+					comment: eventData.comment ?? '',
+					food: eventData.food ?? '',
+					drink: eventData.drink ?? '',
+					numberOfOtherGuests: eventData.numberOfOtherGuests ?? 0
 				});
-				await find.save();
 			} else {
 				await GuestInformation.create({
 					id: crypto.randomUUID(),
 					UserId: user.id,
+					FestivalEventId: festivalId,
 					coming: true,
-					comment: eventData.comment,
-					food: eventData.food,
-					drink: eventData.drink,
-					numberOfOtherGuests: eventData.numberOfOtherGuests,
-					FestivalEventId: festivalId
+					comment: eventData.comment ?? '',
+					food: eventData.food ?? '',
+					drink: eventData.drink ?? '',
+					numberOfOtherGuests: eventData.numberOfOtherGuests ?? 0
 				});
 			}
 		} else {
-			console.log('joinFestival: no user and festivalId', user, festivalId);
+			throw new Error('User or FestivalId missing for joining');
 		}
 	}
 
@@ -52,23 +52,22 @@ export class GuestInformationService {
 		if (user && festivalId) {
 			const find = await this.getGuestInformationModel(user.id, festivalId);
 			if (find) {
-				find.set({
+				await find.update({
 					coming: false,
-					comment: comment
+					comment: comment ?? ''
 				});
-				await find.save();
 			} else {
 				await GuestInformation.create({
 					id: crypto.randomUUID(),
 					FestivalEventId: festivalId,
 					UserId: user.id,
 					coming: false,
-					comment: comment,
+					comment: comment ?? '',
 					numberOfOtherGuests: 0
-				} as GuestInformationAttributes);
+				});
 			}
 		} else {
-			console.log('leaveFestival: no user and festivalId', user, festivalId);
+			throw new Error('User or FestivalId missing for leaving');
 		}
 	}
 
@@ -77,7 +76,8 @@ export class GuestInformationService {
 	): Promise<FrontendGuestInformation[]> {
 		const result: FrontendGuestInformation[] = [];
 		for (const information of guestInformation) {
-			const userById = await UserService.loadFrontEndUserById(information.UserId);
+			const userId = information.UserId || (information as any).userId;
+			const userById = await UserService.loadFrontEndUserById(userId);
 			if (userById) {
 				result.push({
 					user: userById,

@@ -20,6 +20,7 @@ export type FestivalEventAttributes = {
 	startDate: Date;
 	UserId: string;
 	GuestInformations: Model<GuestInformationAttributes, any>[];
+	EventGuests: Model<GuestInformationAttributes, any>[];
 };
 
 export async function mapToFrontendFestivalEvent(event: FestivalEventAttributes): Promise<FrontendFestivalEvent> {
@@ -35,9 +36,9 @@ export async function mapToFrontendFestivalEvent(event: FestivalEventAttributes)
 		startDate: event.startDate,
 		location: event.location,
 		updatedAt: event.updatedAt,
-		frontendGuestInformation: (event.GuestInformations || (event as any).guestInformations)
+		frontendGuestInformation: (event.EventGuests || event.GuestInformations || (event as any).guestInformations)
 			? await Promise.all(
-					(event.GuestInformations || (event as any).guestInformations).map((value: any) => {
+					(event.EventGuests || event.GuestInformations || (event as any).guestInformations).map((value: any) => {
 						return mapToFrontendGuestInformation(value.dataValues);
 					})
 				)
@@ -58,8 +59,8 @@ export async function mapToBackendFestivalEvent(event: FestivalEventAttributes):
 		startDate: event.startDate,
 		UserId: userId,
 		updatedAt: event.updatedAt,
-		guestInformation: (event.GuestInformations || (event as any).guestInformations)
-			? (event.GuestInformations || (event as any).guestInformations).map((value: any) => {
+		guestInformation: (event.EventGuests || event.GuestInformations || (event as any).guestInformations)
+			? (event.EventGuests || event.GuestInformations || (event as any).guestInformations).map((value: any) => {
 					return mapToBackendGuestInformation(value.dataValues);
 				})
 			: []

@@ -65,6 +65,36 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		await expect(foodCheckbox).not.toBeChecked();
 	});
 
+	test('sollte zu einem Festival zusagen können', async () => {
+		await page.goto(`/festival/${festivalId}`);
+		await expect(page.getByRole('heading', { level: 4, name: updatedFestivalName })).toBeVisible();
+
+		// Zusagen Button klicken
+		await page.click('button:has-text("Zusagen")');
+
+		// Dialog sollte erscheinen
+		const dialog = page.locator('dialog[open]');
+		await expect(dialog).toBeVisible();
+		await expect(dialog).toContainText('Bei dem Event bin ich dabei!');
+
+		// Felder ausfüllen (Verwende IDs statt Name, da in JoinEventDialog.svelte IDs genutzt werden)
+		await page.fill('#food', 'Pizza');
+		await page.fill('#drink', 'Bier');
+		await page.fill('#otherGuests', '2');
+
+		// Bestätigen (Button Label ist "Beitreten" laut JoinEventDialog.svelte)
+		await dialog.locator('button:has-text("Beitreten")').click();
+
+		// Warten bis Dialog schließt
+		await expect(dialog).not.toBeVisible();
+
+		// In der Tabelle "Besucher die kommen" prüfen
+		const comingTable = page.locator('table').first(); // ComingVisitorsTable
+		await expect(comingTable).toContainText(userNickname);
+		await expect(comingTable).toContainText('Pizza');
+		await expect(comingTable).toContainText('Bier');
+	});
+
 	test('sollte das Festival löschen können', async () => {
 		await page.goto(`/festival/${festivalId}`);
 		await page.click('button:has-text("Löschen")');

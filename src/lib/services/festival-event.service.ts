@@ -20,7 +20,7 @@ import { FestivalEvent } from '$lib/db/model/festivalEvent';
 export class FestivalEventService {
 	static async getAllFestivals(): Promise<FrontendFestivalEvent[]> {
 		const allFestivals = await FestivalEvent.findAll({
-			include: { model: GuestInformation, as: 'GuestInformations' },
+			include: { model: GuestInformation, as: 'EventGuests' },
 			order: [['startDate', 'DESC']]
 		});
 		return Promise.all(
@@ -32,7 +32,7 @@ export class FestivalEventService {
 
 	private static async getFestivalModel(id: string) {
 		return await FestivalEvent.findByPk(id, {
-			include: { model: GuestInformation, as: 'GuestInformations' }
+			include: { model: GuestInformation, as: 'EventGuests' }
 		});
 	}
 
@@ -151,8 +151,12 @@ export class FestivalEventService {
 
 	static async getFestivalYouVisit(userId: string): Promise<VisitingFestival[]> {
 		const activeInfos: BackendGuestInformation[] = await GuestInformationService.getAllActiveGuestInformation(userId);
-		const loading: Promise<BackendFestivalEvent | null>[] = activeInfos.map((value) =>
-			this.getFestival(value.FestivalEventId)
+		
+		// IDs sammeln, um Duplikate zu vermeiden
+		const uniqueFestivalIds = [...new Set(activeInfos.map(info => info.FestivalEventId))];
+		
+		const loading: Promise<BackendFestivalEvent | null>[] = uniqueFestivalIds.map((id) =>
+			this.getFestival(id)
 		);
 		const result: VisitingFestival[] = [];
 		for (const fest of await Promise.all(loading)) {
