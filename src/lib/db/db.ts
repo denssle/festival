@@ -8,6 +8,7 @@ import { sequelize } from '$lib/db/sequelize';
 import { FriendRequest } from '$lib/db/model/friendRequest';
 import { GroupMember } from '$lib/db/model/groupMember';
 import { Friendship } from '$lib/db/model/friendship';
+import { Comment } from '$lib/db/model/comment';
 import { hash } from 'bcrypt-ts';
 
 FestivalEvent.hasMany(GuestInformation, { onDelete: 'CASCADE' });
@@ -53,6 +54,9 @@ GroupMember.belongsTo(Group);
 
 User.hasMany(GroupMember, { onDelete: 'CASCADE' });
 GroupMember.belongsTo(User);
+
+User.hasMany(Comment, { foreignKey: 'writtenBy', onDelete: 'CASCADE' });
+Comment.belongsTo(User, { foreignKey: 'writtenBy' });
 
 export async function startDB(): Promise<void> {
 	try {
