@@ -1,14 +1,13 @@
 import type { Actions, Cookies } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from '../../../.svelte-kit/types/src/routes/$types';
-import * as userService from '$lib/services/user.service';
-import { nickNameInvalid, register, validateSessionToken } from '$lib/services/user.service';
+import { UserService } from '$lib/services/user.service';
 import { StandardResponse } from '$lib/models/transferData/StandardResponse';
 import { BackendUser } from '$lib/models/user/BackendUser';
 import { NickPassData } from '$lib/models/transferData/NickPassData';
 
 export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): Promise<StandardResponse> => {
-	const valid: boolean = await validateSessionToken(cookies.get('session'));
+	const valid: boolean = await UserService.validateSessionToken(cookies.get('session'));
 	if (valid) {
 		redirect(303, '/');
 	}
@@ -25,14 +24,14 @@ export const actions: Actions = {
 		request: Request;
 		locals: App.Locals;
 	}): Promise<StandardResponse> => {
-		const formData: NickPassData | undefined = await userService.readNickPass(request.formData());
+		const formData: NickPassData | undefined = await UserService.readNickPass(request.formData());
 		if (formData) {
-			if (await nickNameInvalid(formData.nickname)) {
+			if (await UserService.nickNameInvalid(formData.nickname)) {
 				return { success: false, message: 'Invalid Nickname' };
 			} else {
-				const user: BackendUser | null = await register(formData.nickname, formData.password);
+				const user: BackendUser | null = await UserService.register(formData.nickname, formData.password);
 				if (user) {
-					await userService.createSessionCookie(cookies, locals, user);
+					await UserService.createSessionCookie(cookies, locals, user);
 					redirect(302, '/');
 				} else {
 					return { success: false, message: 'User creation failed' };

@@ -1,7 +1,7 @@
 import { RequestEvent } from '@sveltejs/kit';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
-import { extractUser } from '$lib/services/user.service';
-import { deleteComment, getComments, saveComment, updateComment } from '$lib/services/comment.service';
+import { UserService } from '$lib/services/user.service';
+import { CommentService } from '$lib/services/comment.service';
 import { FrontendComment } from '$lib/models/transferData/FrontendComment';
 import { ChangeResult, getHTTPCodeForChangeResult } from '$lib/models/updates/ChangeResult';
 
@@ -13,10 +13,10 @@ export async function POSTComment(request: RequestEvent): Promise<Response> {
 	const data: FormData = await request.request.formData();
 	const comment: string | undefined = data.get('comment')?.toString();
 	const pathId: string | undefined = getIdFromPath(request);
-	const user: SessionTokenUser | null = extractUser(request.cookies.get('session'));
+	const user: SessionTokenUser | null = UserService.extractUser(request.cookies.get('session'));
 
 	if (comment && pathId && user) {
-		await saveComment(user.id, pathId, comment);
+		await CommentService.saveComment(user.id, pathId, comment);
 		return new Response(null, { status: 200 });
 	}
 	return new Response(null, { status: 500 });
@@ -24,9 +24,9 @@ export async function POSTComment(request: RequestEvent): Promise<Response> {
 
 export async function GETComments(request: RequestEvent): Promise<Response> {
 	const pathId: string | undefined = getIdFromPath(request);
-	const user: SessionTokenUser | null = extractUser(request.cookies.get('session'));
+	const user: SessionTokenUser | null = UserService.extractUser(request.cookies.get('session'));
 	if (pathId && user) {
-		const comments: FrontendComment[] = await getComments(pathId, user.id);
+		const comments: FrontendComment[] = await CommentService.getComments(pathId, user.id);
 		return new Response(JSON.stringify(comments), { status: 200 });
 	}
 	return new Response(null, { status: 500 });
@@ -34,9 +34,9 @@ export async function GETComments(request: RequestEvent): Promise<Response> {
 
 export async function DELETEComment(request: RequestEvent): Promise<Response> {
 	const commentId: string = await request.request.text();
-	const user: SessionTokenUser | null = extractUser(request.cookies.get('session'));
+	const user: SessionTokenUser | null = UserService.extractUser(request.cookies.get('session'));
 	if (commentId && user) {
-		const result: ChangeResult = await deleteComment(user.id, commentId);
+		const result: ChangeResult = await CommentService.deleteComment(user.id, commentId);
 		return new Response(result, { status: getHTTPCodeForChangeResult(result) });
 	}
 	return new Response(null, { status: 500 });
@@ -44,9 +44,9 @@ export async function DELETEComment(request: RequestEvent): Promise<Response> {
 
 export async function PUTComment(request: RequestEvent): Promise<Response> {
 	const comment = (await request.request.json()) as FrontendComment;
-	const user: SessionTokenUser | null = extractUser(request.cookies.get('session'));
+	const user: SessionTokenUser | null = UserService.extractUser(request.cookies.get('session'));
 	if (comment && user) {
-		const result: ChangeResult = await updateComment(user.id, comment.id, comment.comment);
+		const result: ChangeResult = await CommentService.updateComment(user.id, comment.id, comment.comment);
 		return new Response(result, { status: getHTTPCodeForChangeResult(result) });
 	}
 	return new Response(null, { status: 500 });

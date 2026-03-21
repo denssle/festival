@@ -7,105 +7,107 @@ import {
 } from '$lib/db/attributes/guestInformation.attributes';
 import type { BackendGuestInformation } from '$lib/models/guestInformation/BackendGuestInformation';
 import type { FrontendGuestInformation } from '$lib/models/guestInformation/FrontendGuestInformation';
-import { loadFrontEndUserById } from '$lib/services/user.service';
+import { UserService } from '$lib/services/user.service';
 import { GuestInformation } from '$lib/db/model/guestInformation';
 
-export async function joinFestival(
-	user: BackendUser | null | SessionTokenUser,
-	festivalId: string,
-	eventData: BaseGuestInformation
-): Promise<void> {
-	if (user && festivalId) {
-		const find = await getGuestInformationModel(user.id, festivalId);
-		if (find) {
-			find.set({
-				coming: true,
-				comment: eventData.comment,
-				food: eventData.food,
-				drink: eventData.drink,
-				numberOfOtherGuests: eventData.numberOfOtherGuests
-			});
-			await find.save();
+export class GuestInformationService {
+	static async joinFestival(
+		user: BackendUser | null | SessionTokenUser,
+		festivalId: string,
+		eventData: BaseGuestInformation
+	): Promise<void> {
+		if (user && festivalId) {
+			const find = await this.getGuestInformationModel(user.id, festivalId);
+			if (find) {
+				find.set({
+					coming: true,
+					comment: eventData.comment,
+					food: eventData.food,
+					drink: eventData.drink,
+					numberOfOtherGuests: eventData.numberOfOtherGuests
+				});
+				await find.save();
+			} else {
+				await GuestInformation.create({
+					id: crypto.randomUUID(),
+					UserId: user.id,
+					coming: true,
+					comment: eventData.comment,
+					food: eventData.food,
+					drink: eventData.drink,
+					numberOfOtherGuests: eventData.numberOfOtherGuests,
+					FestivalEventId: festivalId
+				});
+			}
 		} else {
-			await GuestInformation.create({
-				id: crypto.randomUUID(),
-				UserId: user.id,
-				coming: true,
-				comment: eventData.comment,
-				food: eventData.food,
-				drink: eventData.drink,
-				numberOfOtherGuests: eventData.numberOfOtherGuests,
-				FestivalEventId: festivalId
-			});
+			console.log('joinFestival: no user and festivalId', user, festivalId);
 		}
-	} else {
-		console.log('joinFestival: no user and festivalId', user, festivalId);
 	}
-}
 
-export async function leaveFestival(
-	user: BackendUser | null | SessionTokenUser,
-	festivalId: string,
-	comment: string
-): Promise<void> {
-	if (user && festivalId) {
-		const find = await getGuestInformationModel(user.id, festivalId);
-		if (find) {
-			find.set({
-				coming: false,
-				comment: comment
-			});
-			await find.save();
+	static async leaveFestival(
+		user: BackendUser | null | SessionTokenUser,
+		festivalId: string,
+		comment: string
+	): Promise<void> {
+		if (user && festivalId) {
+			const find = await this.getGuestInformationModel(user.id, festivalId);
+			if (find) {
+				find.set({
+					coming: false,
+					comment: comment
+				});
+				await find.save();
+			} else {
+				await GuestInformation.create({
+					id: crypto.randomUUID(),
+					FestivalEventId: festivalId,
+					UserId: user.id,
+					coming: false,
+					comment: comment,
+					numberOfOtherGuests: 0
+				} as GuestInformationAttributes);
+			}
 		} else {
-			await GuestInformation.create({
-				id: crypto.randomUUID(),
+			console.log('leaveFestival: no user and festivalId', user, festivalId);
+		}
+	}
+
+	static async mapGuestInformationToFrontendGuestInformation(
+		guestInformation: BackendGuestInformation[]
+	): Promise<FrontendGuestInformation[]> {
+		const result: FrontendGuestInformation[] = [];
+		for (const information of guestInformation) {
+			const userById = await UserService.loadFrontEndUserById(information.UserId);
+			if (userById) {
+				result.push({
+					user: userById,
+					coming: information.coming,
+					numberOfOtherGuests: information.numberOfOtherGuests,
+					drink: information.drink,
+					comment: information.comment,
+					food: information.food
+				});
+			}
+		}
+		return result;
+	}
+
+	private static async getGuestInformationModel(userId: string, festivalId: string) {
+		return await GuestInformation.findOne({
+			where: {
 				FestivalEventId: festivalId,
-				UserId: user.id,
-				coming: false,
-				comment: comment,
-				numberOfOtherGuests: 0
-			} as GuestInformationAttributes);
-		}
-	} else {
-		console.log('leaveFestival: no user and festivalId', user, festivalId);
+				UserId: userId
+			}
+		});
 	}
-}
 
-export async function mapGuestInformationToFrontendGuestInformation(
-	guestInformation: BackendGuestInformation[]
-): Promise<FrontendGuestInformation[]> {
-	const result: FrontendGuestInformation[] = [];
-	for (const information of guestInformation) {
-		const userById = await loadFrontEndUserById(information.UserId);
-		if (userById) {
-			result.push({
-				user: userById,
-				coming: information.coming,
-				numberOfOtherGuests: information.numberOfOtherGuests,
-				drink: information.drink,
-				comment: information.comment,
-				food: information.food
-			});
-		}
+	static async getAllActiveGuestInformation(userId: string): Promise<BackendGuestInformation[]> {
+		const infos = await GuestInformation.findAll({
+			where: {
+				UserId: userId,
+				coming: true
+			}
+		});
+		return infos.map((value) => mapToBackendGuestInformation(value.dataValues));
 	}
-	return result;
-}
-
-async function getGuestInformationModel(userId: string, festivalId: string) {
-	return await GuestInformation.findOne({
-		where: {
-			FestivalEventId: festivalId,
-			UserId: userId
-		}
-	});
-}
-
-export async function getAllActiveGuestInformation(userId: string): Promise<BackendGuestInformation[]> {
-	const infos = await GuestInformation.findAll({
-		where: {
-			UserId: userId,
-			coming: true
-		}
-	});
-	return infos.map((value) => mapToBackendGuestInformation(value.dataValues));
 }

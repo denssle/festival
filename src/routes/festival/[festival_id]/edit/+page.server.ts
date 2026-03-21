@@ -4,8 +4,8 @@ import type {
 	PageServerLoad,
 	RouteParams
 } from '../../../../../.svelte-kit/types/src/routes/festival/[festival_id]/edit/$types';
-import { getFrontEndFestival, updateFestival } from '$lib/services/festival-event.service';
-import { extractUser } from '$lib/services/user.service';
+import { FestivalEventService } from '$lib/services/festival-event.service';
+import { UserService } from '$lib/services/user.service';
 import { getDateFromString } from '$lib/utils/date.util';
 import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
@@ -20,9 +20,9 @@ export const load: PageServerLoad = async ({
 }): Promise<FrontendFestivalEvent> => {
 	const festival_id: string = params.festival_id;
 	if (festival_id) {
-		const festival: FrontendFestivalEvent | null = await getFrontEndFestival(festival_id);
+		const festival: FrontendFestivalEvent | null = await FestivalEventService.getFrontEndFestival(festival_id);
 		if (festival) {
-			const user: SessionTokenUser | null = extractUser(cookies.get('session'));
+			const user: SessionTokenUser | null = UserService.extractUser(cookies.get('session'));
 			if (user && user.id === festival.createdBy?.id) {
 				return festival;
 			} else {
@@ -40,8 +40,8 @@ export const actions: Actions = {
 		const name: FormDataEntryValue | null = values.get('name');
 		const description: FormDataEntryValue | null = values.get('description');
 		if (festivalId && name) {
-			const result: ChangeResult = await updateFestival(
-				extractUser(cookies.get('session')),
+			const result: ChangeResult = await FestivalEventService.updateFestival(
+				UserService.extractUser(cookies.get('session')),
 				festivalId,
 				String(name),
 				String(description),

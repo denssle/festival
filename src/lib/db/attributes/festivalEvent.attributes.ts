@@ -1,5 +1,5 @@
 import { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
-import { loadFrontEndUserById } from '$lib/services/user.service';
+import { UserService } from '$lib/services/user.service';
 import { BackendFestivalEvent } from '$lib/models/festivalEvent/BackendFestivalEvent';
 import { Model } from 'sequelize';
 import {
@@ -29,7 +29,7 @@ export async function mapToFrontendFestivalEvent(event: FestivalEventAttributes)
 		bringYourOwnBottle: event.bringYourOwnBottle,
 		bringYourOwnFood: event.bringYourOwnFood,
 		createdAt: event.createdAt,
-		createdBy: (await loadFrontEndUserById(event.UserId)) ?? null,
+		createdBy: (await UserService.loadFrontEndUserById(event.UserId)) ?? null,
 		description: event.description,
 		startDate: event.startDate,
 		location: event.location,

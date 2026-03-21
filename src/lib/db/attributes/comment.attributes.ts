@@ -1,5 +1,5 @@
 import { FrontendComment } from '$lib/models/transferData/FrontendComment';
-import { loadFrontEndUserById } from '$lib/services/user.service';
+import { UserService } from '$lib/services/user.service';
 
 export interface CommentAttributes {
 	id: string;
@@ -17,7 +17,7 @@ export async function mapToFrontendComment(attribute: CommentAttributes, userID:
 		createdAt: attribute.createdAt,
 		updatedAt: attribute.updatedAt,
 		writtenTo: attribute.writtenTo,
-		writtenBy: (await loadFrontEndUserById(attribute.writtenBy)) ?? null,
+		writtenBy: (await UserService.loadFrontEndUserById(attribute.writtenBy)) ?? null,
 		yourComment: attribute.writtenBy === userID,
 		editMode: false
 	};

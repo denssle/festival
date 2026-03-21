@@ -1,7 +1,6 @@
 import { User } from '$lib/db/model/user';
 import { UserImage } from '$lib/db/model/userImage';
 import { GuestInformation } from '$lib/db/model/guestInformation';
-import { Friend } from '$lib/db/model/friend';
 import { SessionToken } from '$lib/db/model/sessionToken';
 import { Group } from '$lib/db/model/group';
 import { FestivalEvent } from '$lib/db/model/festivalEvent';
@@ -23,10 +22,13 @@ User.hasOne(UserImage, { onDelete: 'CASCADE' });
 UserImage.belongsTo(User);
 
 // TODO Check: Many to many??
-User.hasMany(Friend, {
+User.belongsToMany(User, {
+	through: Friendship,
+	as: 'friends',
+	foreignKey: 'friend1Id',
+	otherKey: 'friend2Id',
 	onDelete: 'CASCADE'
 });
-Friend.belongsToMany(User, { through: Friendship });
 
 User.hasMany(FriendRequest, {
 	foreignKey: 'senderId',
@@ -40,8 +42,11 @@ FriendRequest.belongsTo(User, {
 User.hasOne(SessionToken, { onDelete: 'CASCADE' });
 SessionToken.belongsTo(User);
 
-User.hasMany(Group, { onDelete: 'SET NULL' });
-Group.belongsTo(User);
+User.hasMany(Group, { as: 'ownedGroups', foreignKey: 'ownerId', onDelete: 'CASCADE' });
+Group.belongsTo(User, { as: 'owner', foreignKey: 'ownerId' });
+
+Group.belongsToMany(User, { through: GroupMember, as: 'members' });
+User.belongsToMany(Group, { through: GroupMember, as: 'joinedGroups' });
 
 Group.hasMany(GroupMember, { onDelete: 'CASCADE' });
 GroupMember.belongsTo(Group);

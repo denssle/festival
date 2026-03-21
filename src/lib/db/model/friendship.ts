@@ -1,8 +1,8 @@
 import { DataTypes, Model, ModelStatic } from 'sequelize';
-import { GroupMemberAttributes } from '$lib/db/attributes/groupMember.attributes';
+import { FriendAttributes } from '$lib/db/attributes/friend.attributes';
 import { sequelize } from '$lib/db/sequelize';
 
-export const Friendship: ModelStatic<Model<GroupMemberAttributes, any>> = sequelize.define(
+export const Friendship: ModelStatic<Model<FriendAttributes, any>> = sequelize.define(
 	'friendship',
 	{
 		id: { type: DataTypes.STRING, primaryKey: true, allowNull: false }

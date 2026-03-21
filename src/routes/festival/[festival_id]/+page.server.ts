@@ -5,8 +5,8 @@ import type {
 import type { Cookies } from '@sveltejs/kit';
 import { error } from '@sveltejs/kit';
 import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
-import { getFrontEndFestival } from '$lib/services/festival-event.service';
-import { extractUser } from '$lib/services/user.service';
+import { FestivalEventService } from '$lib/services/festival-event.service';
+import { UserService } from '$lib/services/user.service';
 import type { FestivalTransferData } from '$lib/models/transferData/FestivalTransferData';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 
@@ -19,9 +19,9 @@ export const load: PageServerLoad = async ({
 }): Promise<FestivalTransferData> => {
 	const festival_id: string = params.festival_id;
 	if (festival_id) {
-		const festival: FrontendFestivalEvent | null = await getFrontEndFestival(festival_id);
+		const festival: FrontendFestivalEvent | null = await FestivalEventService.getFrontEndFestival(festival_id);
 		if (festival) {
-			const user: SessionTokenUser | null = extractUser(cookies.get('session'));
+			const user: SessionTokenUser | null = UserService.extractUser(cookies.get('session'));
 			if (user) {
 				return {
 					festival: festival,

@@ -1,8 +1,8 @@
 import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
-import { extractUser } from '$lib/services/user.service';
+import { UserService } from '$lib/services/user.service';
 import { getDateFromString } from '$lib/utils/date.util';
 import { type Actions, Cookies, redirect } from '@sveltejs/kit';
-import { createFestival } from '$lib/services/festival-event.service';
+import { FestivalEventService } from '$lib/services/festival-event.service';
 
 export const actions: Actions = {
 	default: async ({ cookies, request }: { cookies: Cookies; request: Request }): Promise<Response | undefined> => {
@@ -10,8 +10,8 @@ export const actions: Actions = {
 		const name: FormDataEntryValue | null = values.get('name');
 		if (name) {
 			const description: FormDataEntryValue | null = values.get('description');
-			const newFestival: FrontendFestivalEvent | null = await createFestival(
-				extractUser(cookies.get('session')),
+			const newFestival: FrontendFestivalEvent | null = await FestivalEventService.createFestival(
+				UserService.extractUser(cookies.get('session')),
 				String(name),
 				String(description),
 				getDateFromString(String(values.get('startDate')), String(values.get('startTime'))),
