@@ -40,15 +40,22 @@ export const actions: Actions = {
 		const name: FormDataEntryValue | null = values.get('name');
 		const description: FormDataEntryValue | null = values.get('description');
 		if (festivalId && name) {
+			const description = values.get('description')?.toString() ?? '';
+			const location = values.get('location')?.toString() ?? '';
+			const startDate = values.get('startDate')?.toString() ?? '';
+			const startTime = values.get('startTime')?.toString() ?? '';
+			const bringYourOwnBottle = values.get('bringYourOwnBottle') === 'on';
+			const bringYourOwnFood = values.get('bringYourOwnFood') === 'on';
+
 			const result: ChangeResult = await FestivalEventService.updateFestival(
 				UserService.extractUser(cookies.get('session')),
 				festivalId,
 				String(name),
-				String(description),
-				getDateFromString(String(values.get('startDate')), String(values.get('startTime'))),
-				Boolean(values.get('bringYourOwnBottle')),
-				Boolean(values.get('bringYourOwnFood')),
-				String(values.get('location'))
+				description,
+				getDateFromString(startDate, startTime),
+				bringYourOwnBottle,
+				bringYourOwnFood,
+				location
 			);
 			if (result === 'Success') {
 				redirect(302, '/festival/' + festivalId);

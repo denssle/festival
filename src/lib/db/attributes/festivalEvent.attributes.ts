@@ -23,20 +23,21 @@ export type FestivalEventAttributes = {
 };
 
 export async function mapToFrontendFestivalEvent(event: FestivalEventAttributes): Promise<FrontendFestivalEvent> {
+	const userId = event.UserId || (event as any).userId;
 	return {
 		id: event.id,
 		name: event.name,
 		bringYourOwnBottle: event.bringYourOwnBottle,
 		bringYourOwnFood: event.bringYourOwnFood,
 		createdAt: event.createdAt,
-		createdBy: (await UserService.loadFrontEndUserById(event.UserId)) ?? null,
+		createdBy: (await UserService.loadFrontEndUserById(userId)) ?? null,
 		description: event.description,
 		startDate: event.startDate,
 		location: event.location,
 		updatedAt: event.updatedAt,
-		frontendGuestInformation: event.GuestInformations
+		frontendGuestInformation: (event.GuestInformations || (event as any).guestInformations)
 			? await Promise.all(
-					event.GuestInformations.map((value) => {
+					(event.GuestInformations || (event as any).guestInformations).map((value: any) => {
 						return mapToFrontendGuestInformation(value.dataValues);
 					})
 				)
@@ -45,6 +46,7 @@ export async function mapToFrontendFestivalEvent(event: FestivalEventAttributes)
 }
 
 export async function mapToBackendFestivalEvent(event: FestivalEventAttributes): Promise<BackendFestivalEvent> {
+	const userId = event.UserId || (event as any).userId;
 	return {
 		id: event.id,
 		name: event.name,
@@ -54,10 +56,12 @@ export async function mapToBackendFestivalEvent(event: FestivalEventAttributes):
 		location: event.location,
 		description: event.description,
 		startDate: event.startDate,
-		UserId: event.UserId,
+		UserId: userId,
 		updatedAt: event.updatedAt,
-		guestInformation: event.GuestInformations.map((value) => {
-			return mapToBackendGuestInformation(value.dataValues);
-		})
+		guestInformation: (event.GuestInformations || (event as any).guestInformations)
+			? (event.GuestInformations || (event as any).guestInformations).map((value: any) => {
+					return mapToBackendGuestInformation(value.dataValues);
+				})
+			: []
 	};
 }

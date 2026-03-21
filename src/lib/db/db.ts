@@ -11,14 +11,14 @@ import { Friendship } from '$lib/db/model/friendship';
 import { Comment } from '$lib/db/model/comment';
 import { hash } from 'bcrypt-ts';
 
-FestivalEvent.hasMany(GuestInformation, { onDelete: 'CASCADE' });
+FestivalEvent.hasMany(GuestInformation, { as: 'GuestInformations', onDelete: 'CASCADE' });
 GuestInformation.belongsTo(FestivalEvent);
 
-User.hasMany(GuestInformation, { onDelete: 'CASCADE' });
-GuestInformation.belongsTo(User);
+User.hasMany(GuestInformation, { foreignKey: 'UserId', onDelete: 'CASCADE' });
+GuestInformation.belongsTo(User, { foreignKey: 'UserId' });
 
-User.hasMany(FestivalEvent, { onDelete: 'CASCADE' });
-FestivalEvent.belongsTo(User);
+User.hasMany(FestivalEvent, { foreignKey: 'UserId', onDelete: 'CASCADE' });
+FestivalEvent.belongsTo(User, { foreignKey: 'UserId' });
 
 User.hasOne(UserImage, { onDelete: 'CASCADE' });
 UserImage.belongsTo(User);

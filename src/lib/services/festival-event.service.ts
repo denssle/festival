@@ -19,7 +19,10 @@ import { FestivalEvent } from '$lib/db/model/festivalEvent';
 
 export class FestivalEventService {
 	static async getAllFestivals(): Promise<FrontendFestivalEvent[]> {
-		const allFestivals = await FestivalEvent.findAll({ include: GuestInformation, order: [['startDate', 'DESC']] });
+		const allFestivals = await FestivalEvent.findAll({
+			include: { model: GuestInformation, as: 'GuestInformations' },
+			order: [['startDate', 'DESC']]
+		});
 		return Promise.all(
 			allFestivals.map((value: Model<FestivalEventAttributes, any>) => {
 				return mapToFrontendFestivalEvent(value.dataValues);
@@ -29,7 +32,7 @@ export class FestivalEventService {
 
 	private static async getFestivalModel(id: string) {
 		return await FestivalEvent.findByPk(id, {
-			include: GuestInformation
+			include: { model: GuestInformation, as: 'GuestInformations' }
 		});
 	}
 
@@ -125,24 +128,21 @@ export class FestivalEventService {
 
 	private static async parseToFrontend(festival: BackendFestivalEvent): Promise<FrontendFestivalEvent | null> {
 		const createdBy: FrontendUser | undefined = await UserService.loadFrontEndUserById(festival.UserId);
-		if (createdBy) {
-			return {
-				id: festival.id,
-				name: festival.name,
-				description: festival.description,
-				createdBy: createdBy,
-				createdAt: festival.createdAt,
-				updatedAt: festival.updatedAt,
-				startDate: festival.startDate,
-				bringYourOwnFood: festival.bringYourOwnFood,
-				bringYourOwnBottle: festival.bringYourOwnBottle,
-				frontendGuestInformation: await GuestInformationService.mapGuestInformationToFrontendGuestInformation(
-					festival.guestInformation
-				),
-				location: festival.location
-			};
-		}
-		return null;
+		return {
+			id: festival.id,
+			name: festival.name,
+			description: festival.description,
+			createdBy: createdBy ?? null,
+			createdAt: festival.createdAt,
+			updatedAt: festival.updatedAt,
+			startDate: festival.startDate,
+			bringYourOwnFood: festival.bringYourOwnFood,
+			bringYourOwnBottle: festival.bringYourOwnBottle,
+			frontendGuestInformation: await GuestInformationService.mapGuestInformationToFrontendGuestInformation(
+				festival.guestInformation
+			),
+			location: festival.location
+		};
 	}
 
 	private static isChangeAllowed(id: string, dataValues: FestivalEventAttributes): boolean {

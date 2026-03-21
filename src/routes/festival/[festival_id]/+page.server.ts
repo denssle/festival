@@ -20,15 +20,13 @@ export const load: PageServerLoad = async ({
 	const festival_id: string = params.festival_id;
 	if (festival_id) {
 		const festival: FrontendFestivalEvent | null = await FestivalEventService.getFrontEndFestival(festival_id);
-		if (festival) {
-			const user: SessionTokenUser | null = UserService.extractUser(cookies.get('session'));
-			if (user) {
-				return {
-					festival: festival,
-					yourFestival: user.id === festival.createdBy?.id,
-					guestInformation: festival.frontendGuestInformation.find((value) => value.user?.id === user.id)
-				};
-			}
+		const user: SessionTokenUser | null = UserService.extractUser(cookies.get('session'));
+		if (festival && user) {
+			return {
+				festival: festival,
+				yourFestival: user.id === festival.createdBy?.id,
+				guestInformation: festival.frontendGuestInformation.find((value) => value.user?.id === user.id)
+			};
 		}
 	}
 	error(404, 'Not Found');

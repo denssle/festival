@@ -9,15 +9,21 @@ export const actions: Actions = {
 		const values: FormData = await request.formData();
 		const name: FormDataEntryValue | null = values.get('name');
 		if (name) {
-			const description: FormDataEntryValue | null = values.get('description');
+			const description = values.get('description')?.toString() ?? '';
+			const location = values.get('location')?.toString() ?? '';
+			const startDate = values.get('startDate')?.toString() ?? '';
+			const startTime = values.get('startTime')?.toString() ?? '';
+			const bringYourOwnBottle = values.get('bringYourOwnBottle') === 'on';
+			const bringYourOwnFood = values.get('bringYourOwnFood') === 'on';
+
 			const newFestival: FrontendFestivalEvent | null = await FestivalEventService.createFestival(
 				UserService.extractUser(cookies.get('session')),
 				String(name),
-				String(description),
-				getDateFromString(String(values.get('startDate')), String(values.get('startTime'))),
-				Boolean(values.get('bringYourOwnBottle')),
-				Boolean(values.get('bringYourOwnFood')),
-				String(values.get('location'))
+				description,
+				getDateFromString(startDate, startTime),
+				bringYourOwnBottle,
+				bringYourOwnFood,
+				location
 			);
 			if (newFestival && newFestival.id) {
 				redirect(302, '/festival/' + newFestival?.id);
