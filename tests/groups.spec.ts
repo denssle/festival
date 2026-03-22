@@ -59,8 +59,8 @@ test.describe.serial('Gruppen Management', () => {
 		await page.click('button[type="submit"]');
 
 		// Verifizieren, dass die Suchergebnisse angezeigt werden
-		await expect(page.getByText(`Suchergebnisse für "${groupName}"`)).toBeVisible();
-		await expect(page.locator('.search-section').getByText(groupName)).toBeVisible();
+		await expect(page.getByText(`Suchergebnisse für "${groupName}"`, { exact: true })).toBeVisible();
+		await expect(page.locator('.search-section').getByText(groupName, { exact: true })).toBeVisible();
 
 		// Suche nach einem Begriff, der keine Ergebnisse liefert
 		await page.fill('input[name="q"]', 'NichtExistierendeGruppe_XYZ_123');
@@ -182,7 +182,7 @@ test.describe.serial('Gruppen Management', () => {
 		await expect(page.getByRole('heading', { name: updatedName })).toBeVisible();
 		await expect(page.getByText(updatedDesc)).toBeVisible();
 	});
-	
+
 	test('ein Mitglied sollte eine Gruppe verlassen können', async ({ page }) => {
 		// Erst erstellen wir eine Gruppe mit dem ersten Benutzer
 		const creatorNickname = `CreatorLeave_${Date.now()}`;

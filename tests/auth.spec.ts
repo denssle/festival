@@ -24,7 +24,7 @@ test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () =>
 		
 		// Im Header sollten nun wieder "Anmelden" und "Registrieren" Links zu sehen sein
 		await expect(page.getByRole('link', { name: 'Anmelden' })).toBeVisible();
-		await expect(page.getByRole('link', { name: 'Registrieren' })).toBeVisible();
+		await expect(page.getByRole('link', { name: 'Registrieren', exact: true })).toBeVisible();
 
 		// 3. SCHRITT: Login mit dem gerade erstellten User
 		await page.goto('/login');

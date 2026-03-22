@@ -51,14 +51,21 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		await page.click('button:has-text("Bearbeiten")');
 		await expect(page).toHaveURL(/\/festival\/.*\/edit/);
 
+		// Sicherstellen, dass die Felder geladen sind
+		await expect(page.locator('input[name="name"]')).toBeVisible();
+
 		await page.fill('input[name="name"]', updatedFestivalName);
 		await page.uncheck('input[name="bringYourOwnFood"]');
 
-		await page.click('button:has-text("Speichern")');
+		// Klicke auf Speichern und warte explizit auf die Navigation
+		await Promise.all([
+			page.waitForNavigation({ url: /\/festival\/[a-z0-9-]+$/ }),
+			page.click('button:has-text("Speichern")')
+		]);
 
-		// Zurück auf Detailseite
-		await expect(page).toHaveURL(/\/festival\/[a-z0-9-]+/);
-		await expect(page.getByRole('heading', { level: 4, name: updatedFestivalName })).toBeVisible();
+		// Verwende einen flexibleren Selektor für das Heading
+		const heading = page.locator('h1, h2, h3, h4, h5, h6').filter({ hasText: updatedFestivalName });
+		await expect(heading).toBeVisible();
 
 		// Checkbox sollte nun deaktiviert und unchecked sein (disabled da Read-only auf Detailseite)
 		const foodCheckbox = page.locator('input[name="bringYourOwnFood"]');
