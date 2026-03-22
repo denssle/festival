@@ -13,11 +13,11 @@ export async function register(page: Page, nickname: string, password = TEST_PAS
 	await page.fill('input[name="nickname"]', nickname);
 	await page.fill('input[name="password"]', password);
 	await page.fill('input[name="password2"]', password);
-	
+
 	const submitButton = page.locator('button[type="submit"]');
 	await expect(submitButton).toBeEnabled();
 	await submitButton.click();
-	
+
 	await expect(page).toHaveURL('/');
 	// Sicherstellen, dass die Session im Header reflektiert wird (Hydration / Login-Status)
 	await expect(page.locator('header nav a[href^="/user/"]')).toBeVisible({ timeout: 10000 });

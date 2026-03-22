@@ -36,13 +36,14 @@ export async function mapToFrontendFestivalEvent(event: FestivalEventAttributes)
 		startDate: event.startDate,
 		location: event.location,
 		updatedAt: event.updatedAt,
-		frontendGuestInformation: (event.EventGuests || event.GuestInformations || (event as any).guestInformations)
-			? await Promise.all(
-					(event.EventGuests || event.GuestInformations || (event as any).guestInformations).map((value: any) => {
-						return mapToFrontendGuestInformation(value.dataValues);
-					})
-				)
-			: []
+		frontendGuestInformation:
+			event.EventGuests || event.GuestInformations || (event as any).guestInformations
+				? await Promise.all(
+						(event.EventGuests || event.GuestInformations || (event as any).guestInformations).map((value: any) => {
+							return mapToFrontendGuestInformation(value.dataValues);
+						})
+					)
+				: []
 	};
 }
 
@@ -59,10 +60,11 @@ export async function mapToBackendFestivalEvent(event: FestivalEventAttributes):
 		startDate: event.startDate,
 		UserId: userId,
 		updatedAt: event.updatedAt,
-		guestInformation: (event.EventGuests || event.GuestInformations || (event as any).guestInformations)
-			? (event.EventGuests || event.GuestInformations || (event as any).guestInformations).map((value: any) => {
-					return mapToBackendGuestInformation(value.dataValues);
-				})
-			: []
+		guestInformation:
+			event.EventGuests || event.GuestInformations || (event as any).guestInformations
+				? (event.EventGuests || event.GuestInformations || (event as any).guestInformations).map((value: any) => {
+						return mapToBackendGuestInformation(value.dataValues);
+					})
+				: []
 	};
 }

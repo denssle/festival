@@ -12,13 +12,13 @@ test.describe('Authentifizierung: Registrierung und Anmeldung', () => {
 
 		// Verifikation des Logins: Wir prüfen ob wir auf der Startseite sind
 		await expect(page).toHaveURL('/');
-		
+
 		// Optional: Wir könnten prüfen, ob wir zur Profilseite navigieren können
 		// Da wir nun angemeldet sind, sollte im Header ein Link zum Profil mit der User-ID vorhanden sein
 		const profileLink = page.locator(`header nav a[href^="/user/"]`);
 		await expect(profileLink).toBeVisible();
 		await profileLink.click();
-		
+
 		// Verifizieren, dass wir auf der Profilseite sind und der Nickname angezeigt wird
 		await expect(page).toHaveURL(/\/user\/.+/);
 		await expect(page.locator('h2')).toContainText(testNickname);
@@ -44,11 +44,11 @@ test.describe('Authentifizierung: Registrierung und Anmeldung', () => {
 
 	test('Registrierung sollte bei ungleichen Passwörtern deaktiviert sein', async ({ page }) => {
 		await page.goto('/registration');
-		
+
 		await page.fill('input[name="nickname"]', 'InvalidUser');
 		await page.fill('input[name="password"]', 'password123');
 		await page.fill('input[name="password2"]', 'different123');
-		
+
 		const submitButton = page.locator('button[type="submit"]');
 		await expect(submitButton).toBeDisabled();
 	});

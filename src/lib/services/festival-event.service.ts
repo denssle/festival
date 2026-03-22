@@ -151,13 +151,11 @@ export class FestivalEventService {
 
 	static async getFestivalYouVisit(userId: string): Promise<VisitingFestival[]> {
 		const activeInfos: BackendGuestInformation[] = await GuestInformationService.getAllActiveGuestInformation(userId);
-		
+
 		// IDs sammeln, um Duplikate zu vermeiden
-		const uniqueFestivalIds = [...new Set(activeInfos.map(info => info.FestivalEventId))];
-		
-		const loading: Promise<BackendFestivalEvent | null>[] = uniqueFestivalIds.map((id) =>
-			this.getFestival(id)
-		);
+		const uniqueFestivalIds = [...new Set(activeInfos.map((info) => info.FestivalEventId))];
+
+		const loading: Promise<BackendFestivalEvent | null>[] = uniqueFestivalIds.map((id) => this.getFestival(id));
 		const result: VisitingFestival[] = [];
 		for (const fest of await Promise.all(loading)) {
 			if (fest !== null) {

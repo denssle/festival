@@ -4,7 +4,7 @@ import { register, getUserId } from './test-utils';
 test.describe.serial('Profile Festivals Display', () => {
 	const userNickname = `FestivalUser_${Date.now()}`;
 	const festivalName = `Unique Festival ${Date.now()}`;
-	
+
 	let page: any;
 	let context: any;
 	let userId: string;
@@ -13,7 +13,8 @@ test.describe.serial('Profile Festivals Display', () => {
 	test.beforeAll(async ({ browser }) => {
 		context = await browser.newContext();
 		page = await context.newPage();
-		userId = await register(page, userNickname);
+		await register(page, userNickname);
+		userId = await getUserId(page);
 	});
 
 	test.afterAll(async () => {
@@ -43,20 +44,20 @@ test.describe.serial('Profile Festivals Display', () => {
 	});
 
 	test('sollte das Festival nur einmal im Profil anzeigen', async () => {
-		// Simuliere einen zweiten (vielleicht verwaisten oder fehlerhaften) Eintrag in der DB, 
+		// Simuliere einen zweiten (vielleicht verwaisten oder fehlerhaften) Eintrag in der DB,
 		// indem wir einfach nochmal beitreten (falls das UI das zulässt oder wir es provozieren)
 		// Da wir den Service fixen, sollte die UI trotzdem nur einen anzeigen.
-		
+
 		// Zum Profil navigieren
 		await page.goto(`/user/${userId}`);
-		
+
 		// Sektion "Festivals" finden
 		const festivalsSection = page.locator('section:has(h4:text("Festivals:"))');
 		await expect(festivalsSection).toBeVisible();
 
 		// Liste der angemeldeten Festivals prüfen
 		const festivalLinks = festivalsSection.locator('ul li a');
-		
+
 		// Warten bis Daten geladen sind (VisitingFestivals.svelte nutzt fetch)
 		// Wir prüfen hier auf genau 1, auch wenn technisch mehrere GuestInfos existieren könnten
 		await expect(festivalLinks).toHaveCount(1);

@@ -5,7 +5,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 	const userNickname = `FestivalCreator_${Date.now()}`;
 	const festivalName = `Mein Super Festival ${Date.now()}`;
 	const updatedFestivalName = `Bearbeitetes Festival ${Date.now()}`;
-	
+
 	let page: any;
 	let context: any;
 	let festivalId: string;
@@ -27,7 +27,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		await page.fill('input[name="name"]', festivalName);
 		await page.fill('textarea[name="description"]', 'Dies ist eine Test-Beschreibung für unser Festival.');
 		await page.fill('textarea[name="location"]', 'Test-Ort im Grünen');
-		
+
 		// Datum setzen (Format hängt vom Browser ab, aber Playwright's fill für type="date" erwartet YYYY-MM-DD)
 		await page.fill('input[name="startDate"]', '2026-08-15');
 		await page.fill('input[name="startTime"]', '18:00');
@@ -41,7 +41,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		// Verifizieren: Redirect auf /festival/[id]
 		await expect(page).toHaveURL(/\/festival\/[a-z0-9-]+/);
 		await expect(page.getByRole('heading', { level: 4, name: festivalName })).toBeVisible();
-		
+
 		// ID extrahieren für spätere Tests (optional, da wir page.url() nutzen können)
 		festivalId = page.url().split('/').pop() || '';
 	});
@@ -53,13 +53,13 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 
 		await page.fill('input[name="name"]', updatedFestivalName);
 		await page.uncheck('input[name="bringYourOwnFood"]');
-		
+
 		await page.click('button:has-text("Speichern")');
 
 		// Zurück auf Detailseite
 		await expect(page).toHaveURL(/\/festival\/[a-z0-9-]+/);
 		await expect(page.getByRole('heading', { level: 4, name: updatedFestivalName })).toBeVisible();
-		
+
 		// Checkbox sollte nun deaktiviert und unchecked sein (disabled da Read-only auf Detailseite)
 		const foodCheckbox = page.locator('input[name="bringYourOwnFood"]');
 		await expect(foodCheckbox).not.toBeChecked();
@@ -106,7 +106,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 
 		// Verifizieren: Redirect auf Startseite
 		await expect(page).toHaveURL('/');
-		
+
 		// Optional: Prüfen, dass das Festival nicht mehr in der Liste ist (falls es eine Liste gibt)
 		await expect(page.locator('body')).not.toContainText(updatedFestivalName);
 	});

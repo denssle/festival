@@ -2,9 +2,10 @@ import { Group } from '$lib/db/model/group';
 import { GroupMember } from '$lib/db/model/groupMember';
 import { GroupAttributes } from '$lib/db/attributes/group.attributes';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
+import { Op } from 'sequelize';
 
 export class GroupService {
-	static async createGroup(userId: string, name: File | string, description: FormDataEntryValue | null): Promise<void> {
+	static async createGroup(userId: string, name: File | string, description: FormDataEntryValue | null): Promise<string> {
 		const groupId = crypto.randomUUID();
 		try {
 			await Group.create({
@@ -19,6 +20,8 @@ export class GroupService {
 				UserId: userId,
 				GroupId: groupId
 			});
+
+			return groupId;
 		} catch (error) {
 			console.error('Fehler beim Erstellen der Gruppe:', error);
 			throw error;
@@ -38,12 +41,7 @@ export class GroupService {
 		return 'Data Missing';
 	}
 
-	static async updateGroup(
-		userId: string,
-		groupId: string,
-		name: string,
-		description: string
-	): Promise<ChangeResult> {
+	static async updateGroup(userId: string, groupId: string, name: string, description: string): Promise<ChangeResult> {
 		const groupModel = await Group.findByPk(groupId);
 		if (groupModel && userId) {
 			if (this.isChangeAllowed(userId, groupModel.dataValues as GroupAttributes)) {
@@ -57,6 +55,18 @@ export class GroupService {
 			}
 		}
 		return 'Data Missing';
+	}
+
+	static async searchGroups(searchTerm: string): Promise<GroupAttributes[]> {
+		const groups = await Group.findAll({
+			where: {
+				[Op.or]: [
+					{ name: { [Op.like]: `%${searchTerm}%` } },
+					{ description: { [Op.like]: `%${searchTerm}%` } }
+				]
+			}
+		});
+		return groups.map((g) => g.dataValues as GroupAttributes);
 	}
 
 	private static isChangeAllowed(userId: string, dataValues: GroupAttributes): boolean {

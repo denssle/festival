@@ -3,20 +3,32 @@ import { UserService } from '$lib/services/user.service';
 import { Group } from '$lib/db/model/group';
 import { GroupMember } from '$lib/db/model/groupMember';
 import type { GroupAttributes } from '$lib/db/attributes/group.attributes';
+import { GroupService } from '$lib/services/group.service';
 
-export const load: PageServerLoad = async ({ cookies }) => {
+export const load: PageServerLoad = async ({ cookies, url }) => {
 	const user = UserService.extractUser(cookies.get('session'));
-	if (!user) return { groups: [] };
+	const searchTerm = url.searchParams.get('q');
 
-	// Lade Gruppen, in denen der Benutzer Mitglied ist
-	const members = await GroupMember.findAll({
-		where: { UserId: user.id },
-		include: [Group]
-	});
+	let groups: GroupAttributes[] = [];
+	let searchResults: GroupAttributes[] = [];
 
-	const groups = members.map((m: any) => m.Group?.dataValues as GroupAttributes).filter(Boolean);
+	if (user) {
+		// Lade Gruppen, in denen der Benutzer Mitglied ist
+		const members = await GroupMember.findAll({
+			where: { UserId: user.id },
+			include: [Group]
+		});
+
+		groups = members.map((m: any) => m.Group?.dataValues as GroupAttributes).filter(Boolean);
+	}
+
+	if (searchTerm) {
+		searchResults = await GroupService.searchGroups(searchTerm);
+	}
 
 	return {
-		groups
+		groups,
+		searchResults,
+		searchTerm
 	};
 };

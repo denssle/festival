@@ -9,11 +9,7 @@ export const POST: RequestHandler = async ({ cookies, params, request }): Promis
 		parsed.coming = true;
 		const user = UserService.extractUser(cookies.get('session'));
 		if (params.festival_id && parsed && user) {
-			await GuestInformationService.joinFestival(
-				user,
-				params.festival_id,
-				parsed
-			);
+			await GuestInformationService.joinFestival(user, params.festival_id, parsed);
 			return new Response(JSON.stringify({ success: true }), { status: 200 });
 		}
 		console.warn('join festival: missing data', { festival_id: params.festival_id, user: !!user, parsed: !!parsed });

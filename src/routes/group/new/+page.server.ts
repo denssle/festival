@@ -10,8 +10,8 @@ export const actions: Actions = {
 		const user: SessionTokenUser | null = UserService.extractUser(cookies.get('session'));
 		if (user && name) {
 			const description: FormDataEntryValue | null = values.get('description');
-			await GroupService.createGroup(user.id, name, description);
-			redirect(302, '/group');
+			const groupId = await GroupService.createGroup(user.id, name, description);
+			redirect(302, `/group/${groupId}`);
 		} else {
 			return new Response(null, { status: 404 });
 		}
