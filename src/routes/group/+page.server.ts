@@ -16,7 +16,7 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
 		// Lade Gruppen, in denen der Benutzer Mitglied ist
 		const members = await GroupMember.findAll({
 			where: { UserId: user.id },
-			include: [Group]
+			include: [{ model: Group, as: 'Group' }]
 		});
 
 		groups = members.map((m: any) => m.Group?.dataValues as GroupAttributes).filter(Boolean);

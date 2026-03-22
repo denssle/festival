@@ -9,6 +9,7 @@ import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import type { UserTransferData } from '$lib/models/user/UserTransferData';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
 import { FriendshipService } from '$lib/services/friendship.service';
+import { GroupService } from '$lib/services/group.service';
 
 export const load: PageServerLoad = async ({
 	cookies,
@@ -26,7 +27,8 @@ export const load: PageServerLoad = async ({
 				user: loaded,
 				isOwnProfil: user && userId === user.id,
 				yourFriend: await FriendshipService.areFriends(userId, user.id),
-				friendList: await FriendshipService.getFriendList(userId)
+				friendList: await FriendshipService.getFriendList(userId),
+				groupList: await GroupService.getGroupsByUserId(userId)
 			};
 		}
 	}

@@ -7,6 +7,7 @@ export const UserImage: ModelStatic<Model<UserImageAttributes, any>> = sequelize
 	'userImage',
 	{
 		id: { type: DataTypes.STRING, primaryKey: true, allowNull: false },
+		UserId: { type: DataTypes.STRING, allowNull: false },
 		image: { type: DataTypes.BLOB('long'), allowNull: false }
 	},
 	{

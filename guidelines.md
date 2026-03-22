@@ -18,17 +18,18 @@
   1. `src/lib/db/attributes/*.attributes.ts` (Interface)
   2. `src/lib/db/model/*.ts` (Sequelize Model Definition)
   3. `src/lib/db/db.ts` (Assoziationen/Beziehungen)
+- **Explizite Fremdschlüssel:** Um "Duplicate column name"-Fehler bei `sequelize.sync({ alter: true })` zu vermeiden, müssen Fremdschlüssel (z. B. `UserId`, `FestivalEventId`) **sowohl** in der Model-Definition (`src/lib/db/model/*.ts`) **als auch** explizit in der Assoziationsdefinition (`src/lib/db/db.ts`) unter `foreignKey` angegeben werden.
 - **Modelle & Beziehungen:**
   - **User:** Zentrale Entität hat 1:1 zu `UserImage` und `SessionToken`.
-  - **FestivalEvent:** Besitzt von Usern, hat viele `GuestInformation`.
-  - **Gruppen:** `Group` & `GroupMember`.
-  - **Soziales:** `Friend`, `Friendship`, `FriendRequest`.
+  - **FestivalEvent:** Besitzt von Usern (via `UserId`), hat viele `GuestInformation`.
+  - **Gruppen:** `Group` (Besitzer: `ownerId`) & `GroupMember` (Mapping-Tabelle).
+  - **Soziales:** `Friend`, `Friendship`, `FriendRequest` (Sender: `senderId`, Empfänger: `receiverId`).
   - Beziehungen sind in `src/lib/db/db.ts` definiert.
 - **Primärschlüssel:** `DataTypes.STRING` mit `crypto.randomUUID()` für eindeutige IDs verwenden.
 - **Asynchronität:** **IMMER** `async/await` mit `try/catch` in Services nutzen. `.then()` vermeiden.
 - **Kaskadierung:** `onDelete: 'CASCADE'` in `db.ts` sicherstellen.
 - **Initialisierung:** Erfolgt über `startDB()` in `src/lib/db/db.ts` mit `sequelize.sync({ alter: true })`.
-- **Eager Loading (Include):** Falls ein Alias in `db.ts` definiert wurde (z.B. `as: 'EventGuests'`), muss dieser Alias zwingend auch im `include`-Statement im Service verwendet werden, um `SequelizeEagerLoadingError` zu vermeiden. Achten Sie auf eindeutige Aliase bei mehreren Beziehungen zum selben Modell (z.B. `EventGuests` vs. `UserGuestInfos`).
+- **Eager Loading (Include):** Falls ein Alias in `db.ts` definiert wurde (z.B. `as: 'EventGuests'`), muss dieser Alias zwingend auch im `include`-Statement im Service/Server-Loader verwendet werden, um `SequelizeEagerLoadingError` zu vermeiden. Achten Sie auf eindeutige Aliase bei mehreren Beziehungen zum selben Modell (z.B. `EventGuests` vs. `UserGuestInfos`).
 
 ## 3. SvelteKit & UI
 
@@ -59,7 +60,7 @@
   - `MARIA_DB_NAME` (Datenbankname in App ist `USER_NAME + '_' + DB_NAME`).
 - Standard-Port: `5173`.
 
-## 7. Offene Punkte / TODOs
-
-- `Friendship`: Prüfung der Many-to-Many Implementierung (siehe `db.ts`).
+## 7. Offene Punkte / TODOS
 - `SessionToken`: Unterstützung mehrerer Sitzungen pro Benutzer evaluieren.
+- **Datenbank-Konsistenz:** Da `sync({ alter: true })` produktiv Risiken birgt, sollte langfristig auf echte Migrationen umgestellt werden.
+- **Frontend-Validierung:** Ergänzung von clientseitiger Validierung (z.B. Zod) zur Verbesserung der UX.

@@ -11,17 +11,17 @@ import { Friendship } from '$lib/db/model/friendship';
 import { Comment } from '$lib/db/model/comment';
 import { hash } from 'bcrypt-ts';
 
-FestivalEvent.hasMany(GuestInformation, { as: 'EventGuests', onDelete: 'CASCADE' });
-GuestInformation.belongsTo(FestivalEvent, { foreignKey: 'FestivalEventId' });
+FestivalEvent.hasMany(GuestInformation, { as: 'EventGuests', foreignKey: 'FestivalEventId', onDelete: 'CASCADE' });
+GuestInformation.belongsTo(FestivalEvent, { foreignKey: 'FestivalEventId', as: 'FestivalEvent' });
 
 User.hasMany(GuestInformation, { as: 'UserGuestInfos', foreignKey: 'UserId', onDelete: 'CASCADE' });
-GuestInformation.belongsTo(User, { foreignKey: 'UserId' });
+GuestInformation.belongsTo(User, { foreignKey: 'UserId', as: 'User' });
 
-User.hasMany(FestivalEvent, { foreignKey: 'UserId', onDelete: 'CASCADE' });
-FestivalEvent.belongsTo(User, { foreignKey: 'UserId' });
+User.hasMany(FestivalEvent, { foreignKey: 'UserId', onDelete: 'CASCADE', as: 'Events' });
+FestivalEvent.belongsTo(User, { foreignKey: 'UserId', as: 'User' });
 
-User.hasOne(UserImage, { onDelete: 'CASCADE' });
-UserImage.belongsTo(User);
+User.hasOne(UserImage, { foreignKey: 'UserId', onDelete: 'CASCADE', as: 'Image' });
+UserImage.belongsTo(User, { foreignKey: 'UserId', as: 'User' });
 
 User.belongsToMany(User, {
 	through: Friendship,
@@ -33,36 +33,48 @@ User.belongsToMany(User, {
 
 User.hasMany(FriendRequest, {
 	foreignKey: 'senderId',
-	onDelete: 'CASCADE'
+	onDelete: 'CASCADE',
+	as: 'SentFriendRequests'
 });
 FriendRequest.belongsTo(User, {
-	as: 'receiver'
+	as: 'sender',
+	foreignKey: 'senderId'
+});
+
+User.hasMany(FriendRequest, {
+	foreignKey: 'receiverId',
+	onDelete: 'CASCADE',
+	as: 'ReceivedFriendRequests'
+});
+FriendRequest.belongsTo(User, {
+	as: 'receiver',
+	foreignKey: 'receiverId'
 });
 
 // TODO multiple sessions?
-User.hasOne(SessionToken, { foreignKey: 'UserId', onDelete: 'CASCADE' });
-SessionToken.belongsTo(User, { foreignKey: 'UserId' });
+User.hasOne(SessionToken, { foreignKey: 'UserId', onDelete: 'CASCADE', as: 'Session' });
+SessionToken.belongsTo(User, { foreignKey: 'UserId', as: 'User' });
 
 User.hasMany(Group, { as: 'ownedGroups', foreignKey: 'ownerId', onDelete: 'CASCADE' });
 Group.belongsTo(User, { as: 'owner', foreignKey: 'ownerId' });
 
-Group.belongsToMany(User, { through: GroupMember, as: 'members', foreignKey: 'GroupId', otherKey: 'UserId' });
-User.belongsToMany(Group, { through: GroupMember, as: 'joinedGroups', foreignKey: 'UserId', otherKey: 'GroupId' });
+Group.belongsToMany(User, { through: GroupMember, as: 'members', foreignKey: 'GroupId', otherKey: 'UserId', onDelete: 'CASCADE' });
+User.belongsToMany(Group, { through: GroupMember, as: 'joinedGroups', foreignKey: 'UserId', otherKey: 'GroupId', onDelete: 'CASCADE' });
 
-Group.hasMany(GroupMember, { foreignKey: 'GroupId', onDelete: 'CASCADE' });
-GroupMember.belongsTo(Group, { foreignKey: 'GroupId' });
+Group.hasMany(GroupMember, { foreignKey: 'GroupId', onDelete: 'CASCADE', as: 'GroupMembers' });
+GroupMember.belongsTo(Group, { foreignKey: 'GroupId', as: 'Group' });
 
-User.hasMany(GroupMember, { foreignKey: 'UserId', onDelete: 'CASCADE' });
-GroupMember.belongsTo(User, { foreignKey: 'UserId' });
+User.hasMany(GroupMember, { foreignKey: 'UserId', onDelete: 'CASCADE', as: 'GroupMemberships' });
+GroupMember.belongsTo(User, { foreignKey: 'UserId', as: 'User' });
 
-User.hasMany(Comment, { foreignKey: 'writtenBy', onDelete: 'CASCADE' });
-Comment.belongsTo(User, { foreignKey: 'writtenBy' });
+User.hasMany(Comment, { foreignKey: 'writtenBy', onDelete: 'CASCADE', as: 'Comments' });
+Comment.belongsTo(User, { foreignKey: 'writtenBy', as: 'Author' });
 
 export async function startDB(): Promise<void> {
 	try {
 		await sequelize.authenticate();
 		console.log('Connection has been established successfully.');
-		await sequelize.sync({ force: false, alter: true });
+		await sequelize.sync({ force: true, alter: true });
 
 		// Seed TestUser for Playwright tests if in test mode
 		if (process.env.PLAYWRIGHT === 'true' || process.env.NODE_ENV === 'test') {

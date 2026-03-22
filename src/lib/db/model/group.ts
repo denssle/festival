@@ -8,7 +8,8 @@ export const Group: ModelStatic<Model<GroupAttributes, any>> = sequelize.define(
 	{
 		id: { type: DataTypes.STRING, primaryKey: true, allowNull: false },
 		name: { type: DataTypes.STRING, allowNull: false },
-		description: { type: DataTypes.STRING }
+		description: { type: DataTypes.STRING },
+		ownerId: { type: DataTypes.STRING, allowNull: false }
 	},
 	{
 		timestamps: true,

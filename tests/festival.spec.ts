@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { register, getUserId } from './test-utils';
+import { register } from './test-utils';
 
 test.describe.serial('Festival-Management Lifecycle', () => {
 	const userNickname = `FestivalCreator_${Date.now()}`;

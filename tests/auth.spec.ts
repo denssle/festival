@@ -1,45 +1,40 @@
 import { test, expect } from '@playwright/test';
 import { register } from './test-utils';
 
-test.describe('Authentifizierung: Registrierung und Anmeldung', () => {
+test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () => {
 	// Wir generieren einen zufälligen Nickname, um Kollisionen bei wiederholten Testläufen zu vermeiden
 	const testNickname = `User_${Date.now()}`;
 	const testPassword = 'SafePassword123!';
 
-	test('sollte einen neuen User registrieren und sich danach anmelden können', async ({ page }) => {
+	test('sollte einen neuen User registrieren, sich an- und wieder abmelden können', async ({ page }) => {
 		// 1. SCHRITT: Registrierung
 		await register(page, testNickname, testPassword);
 
 		// Verifikation des Logins: Wir prüfen ob wir auf der Startseite sind
 		await expect(page).toHaveURL('/');
 
-		// Optional: Wir könnten prüfen, ob wir zur Profilseite navigieren können
-		// Da wir nun angemeldet sind, sollte im Header ein Link zum Profil mit der User-ID vorhanden sein
-		const profileLink = page.locator(`header nav a[href^="/user/"]`);
-		await expect(profileLink).toBeVisible();
-		await profileLink.click();
+		// 2. SCHRITT: Logout
+		// Der Logout-Button befindet sich im Header
+		const logoutButton = page.getByRole('button', { name: 'Logout' });
+		await expect(logoutButton).toBeVisible();
+		await logoutButton.click();
 
-		// Verifizieren, dass wir auf der Profilseite sind und der Nickname angezeigt wird
-		await expect(page).toHaveURL(/\/user\/.+/);
-		await expect(page.locator('h2')).toContainText(testNickname);
-	});
+		// Nach Logout sollten wir auf der Login-Seite landen (laut +layout.svelte)
+		await expect(page).toHaveURL('/login');
+		
+		// Im Header sollten nun wieder "Anmelden" und "Registrieren" Links zu sehen sein
+		await expect(page.getByRole('link', { name: 'Anmelden' })).toBeVisible();
+		await expect(page.getByRole('link', { name: 'Registrieren' })).toBeVisible();
 
-	test('sollte sich mit einem existierenden User anmelden können', async ({ page }) => {
-		// Wir nutzen einen statischen Test-User für den Login-Check
-		// In einer realen CI/CD Pipeline würde man diesen vorher in die DB inserten
-		const loginUser = 'TestUser';
-		const loginPass = 'TestPassword123';
-
+		// 3. SCHRITT: Login mit dem gerade erstellten User
 		await page.goto('/login');
-		await expect(page.locator('h2')).toContainText('Anmeldung');
-
-		await page.fill('input[name="nickname"]', loginUser);
-		await page.fill('input[name="password"]', loginPass);
+		await page.fill('input[name="nickname"]', testNickname);
+		await page.fill('input[name="password"]', testPassword);
 		await page.click('button[type="submit"]');
 
-		// Nach Login Weiterleitung auf /
+		// Verifizieren, dass wir wieder angemeldet sind
 		await expect(page).toHaveURL('/');
-		await expect(page).not.toHaveURL('/login');
+		await expect(page.getByRole('link', { name: testNickname })).toBeVisible();
 	});
 
 	test('Registrierung sollte bei ungleichen Passwörtern deaktiviert sein', async ({ page }) => {

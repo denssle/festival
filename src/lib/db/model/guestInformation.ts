@@ -15,7 +15,9 @@ export const GuestInformation: ModelStatic<Model<GuestInformationAttributes, any
 		drink: { type: DataTypes.STRING },
 		numberOfOtherGuests: { type: DataTypes.INTEGER },
 		coming: { type: DataTypes.BOOLEAN },
-		comment: { type: DataTypes.STRING }
+		comment: { type: DataTypes.STRING },
+		FestivalEventId: { type: DataTypes.STRING, allowNull: false },
+		UserId: { type: DataTypes.STRING, allowNull: false }
 	},
 	{
 		timestamps: true,

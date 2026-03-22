@@ -49,5 +49,18 @@
 		<VisitingFestivals userId={data.user.id} />
 	</section>
 
+	<section>
+		<h4>Gruppen:</h4>
+		{#if data.groupList && data.groupList.length > 0}
+			<ul>
+				{#each data.groupList as group}
+					<li><a href="/group/{group.id}">{group.name}</a></li>
+				{/each}
+			</ul>
+		{:else}
+			<p>{data.isOwnProfil ? 'Du bist in keiner Gruppe.' : 'Dieser Benutzer ist in keiner Gruppe.'}</p>
+		{/if}
+	</section>
+
 	<FestivalComments whereId={data.user.id} />
 </article>

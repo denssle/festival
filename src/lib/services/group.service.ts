@@ -69,6 +69,71 @@ export class GroupService {
 		return groups.map((g) => g.dataValues as GroupAttributes);
 	}
 
+	static async getGroupsByUserId(userId: string): Promise<GroupAttributes[]> {
+		const members = await GroupMember.findAll({
+			where: { UserId: userId },
+			include: [{ model: Group, as: 'Group' }]
+		});
+
+		return members.map((m: any) => m.Group?.dataValues as GroupAttributes).filter(Boolean);
+	}
+
+	static async joinGroup(userId: string, groupId: string): Promise<ChangeResult> {
+		try {
+			const existingMember = await GroupMember.findOne({
+				where: {
+					UserId: userId,
+					GroupId: groupId
+				}
+			});
+
+			if (existingMember) {
+				return 'Already in Group';
+			}
+
+			await GroupMember.create({
+				id: crypto.randomUUID(),
+				UserId: userId,
+				GroupId: groupId
+			});
+
+			return 'Success';
+		} catch (error) {
+			console.error('Fehler beim Beitreten der Gruppe:', error);
+			return 'Failure';
+		}
+	}
+
+	static async leaveGroup(userId: string, groupId: string): Promise<ChangeResult> {
+		try {
+			const groupModel = await Group.findByPk(groupId);
+			if (!groupModel) {
+				return 'Data Missing';
+			}
+
+			// Der Besitzer darf die Gruppe nicht verlassen (er muss sie löschen)
+			if (groupModel.dataValues.ownerId === userId) {
+				return 'Not authorized';
+			}
+
+			const deletedCount = await GroupMember.destroy({
+				where: {
+					UserId: userId,
+					GroupId: groupId
+				}
+			});
+
+			if (deletedCount > 0) {
+				return 'Success';
+			} else {
+				return 'Failure';
+			}
+		} catch (error) {
+			console.error('Fehler beim Verlassen der Gruppe:', error);
+			return 'Failure';
+		}
+	}
+
 	private static isChangeAllowed(userId: string, dataValues: GroupAttributes): boolean {
 		return dataValues.ownerId === userId;
 	}
