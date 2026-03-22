@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { register, TEST_PASSWORD } from './test-utils';
+import { register, TEST_PASSWORD, login } from './test-utils';
 
 test.describe.serial('Gruppen Management', () => {
 	const timestamp = Date.now();
@@ -15,26 +15,24 @@ test.describe.serial('Gruppen Management', () => {
 
 	test('sollte eine neue Gruppe anlegen können', async ({ page }) => {
 		// Login
-		await page.goto('/login');
-		await page.fill('input[name="nickname"]', userNickname);
-		await page.fill('input[name="password"]', TEST_PASSWORD);
-		await page.click('button[type="submit"]');
-		await expect(page).toHaveURL('/');
+		await login(page, userNickname, TEST_PASSWORD);
 
 		// Zur Gruppenseite navigieren
 		await page.goto('/group');
 		await expect(page.getByText('Deine Gruppen')).toBeVisible();
 
 		// Neue Gruppe anlegen
-		await page.click('a[href="/group/new"]');
-		await expect(page).toHaveURL('/group/new');
+		await Promise.all([
+			page.waitForURL('/group/new'),
+			page.click('a[href="/group/new"]')
+		]);
 
 		await page.fill('input[name="name"]', groupName);
 		await page.fill('textarea[name="description"]', groupDescription);
-		await page.click('button[type="submit"]');
-
-		// Redirect zur Gruppendetailseite (nicht mehr zur Übersicht)
-		await expect(page).toHaveURL(/\/group\/[0-9a-f-]+/);
+		await Promise.all([
+			page.waitForURL(/\/group\/[0-9a-f-]+/),
+			page.click('button[type="submit"]')
+		]);
 
 		// Verifizieren, dass wir auf der richtigen Seite sind (Gruppenname sollte dort stehen)
 		await expect(page.getByRole('heading', { name: groupName })).toBeVisible();
@@ -46,27 +44,30 @@ test.describe.serial('Gruppen Management', () => {
 
 	test('sollte nach Gruppen suchen können', async ({ page }) => {
 		// Login
-		await page.goto('/login');
-		await page.fill('input[name="nickname"]', userNickname);
-		await page.fill('input[name="password"]', TEST_PASSWORD);
-		await page.click('button[type="submit"]');
+		await login(page, userNickname, TEST_PASSWORD);
 
 		// Zur Gruppenseite navigieren
 		await page.goto('/group');
 
 		// Suche nach der zuvor erstellten Gruppe
 		await page.fill('input[name="q"]', groupName);
-		await page.click('button[type="submit"]');
+		await Promise.all([
+			page.waitForURL(new RegExp(`\\?q=${groupName}`)),
+			page.click('button[type="submit"]')
+		]);
 
 		// Verifizieren, dass die Suchergebnisse angezeigt werden
-		await expect(page.getByText(`Suchergebnisse für "${groupName}"`, { exact: true })).toBeVisible();
-		await expect(page.locator('.search-section').getByText(groupName, { exact: true })).toBeVisible();
+		await expect(page.getByText(`Suchergebnisse für "${groupName}"`, { exact: true })).toBeVisible({ timeout: 10000 });
+		await expect(page.locator('.search-section').getByText(groupName, { exact: true })).toBeVisible({ timeout: 10000 });
 
 		// Suche nach einem Begriff, der keine Ergebnisse liefert
 		await page.fill('input[name="q"]', 'NichtExistierendeGruppe_XYZ_123');
-		await page.click('button[type="submit"]');
+		await Promise.all([
+			page.waitForURL(/\?q=NichtExistierendeGruppe_XYZ_123/),
+			page.click('button[type="submit"]')
+		]);
 
-		await expect(page.getByText('Keine Gruppen gefunden.')).toBeVisible();
+		await expect(page.getByText('Keine Gruppen gefunden.')).toBeVisible({ timeout: 10000 });
 	});
 
 	test('sollte anzeigen, dass man in keiner Gruppe ist (bei neuem User)', async ({ page }) => {
@@ -86,10 +87,12 @@ test.describe.serial('Gruppen Management', () => {
 		// Gruppe erstellen
 		await page.goto('/group/new');
 		await page.fill('input[name="name"]', joinableGroupName);
-		await page.click('button[type="submit"]');
+		await Promise.all([
+			page.waitForURL(/\/group\/[0-9a-f-]+/),
+			page.click('button[type="submit"]')
+		]);
 
 		// URL der Gruppe merken
-		await expect(page).toHaveURL(/\/group\/([0-9a-f-]+)/);
 		const groupUrl = page.url();
 
 		// Logout
@@ -110,7 +113,7 @@ test.describe.serial('Gruppen Management', () => {
 		await joinButton.click();
 
 		// Erfolgsmeldung prüfen
-		await expect(page.getByText('Du bist der Gruppe erfolgreich beigetreten!')).toBeVisible();
+		await expect(page.getByText('Du bist der Gruppe erfolgreich beigetreten!')).toBeVisible({ timeout: 10000 });
 
 		// Beitreten Button sollte nun weg sein
 		await expect(joinButton).not.toBeVisible();
@@ -163,19 +166,23 @@ test.describe.serial('Gruppen Management', () => {
 		await expect(editButton).toBeVisible();
 
 		// Bearbeiten klicken
-		await editButton.click();
+		await Promise.all([
+			page.waitForURL(/\/group\/[0-9a-f-]+\/edit/),
+			editButton.click()
+		]);
 
 		// Wir sollten auf der Edit-Seite sein
-		await expect(page).toHaveURL(/\/group\/[0-9a-f-]+\/edit/);
 		await expect(page.getByRole('heading', { name: 'Gruppe bearbeiten' })).toBeVisible();
 
 		// Felder ausfüllen
 		await page.fill('input[name="name"]', updatedName);
 		await page.fill('textarea[name="description"]', updatedDesc);
-		await page.click('button[type="submit"]');
+		await Promise.all([
+			page.waitForURL(/\/group\/[0-9a-f-]+$/),
+			page.click('button[type="submit"]')
+		]);
 
 		// Wir sollten zurück auf der Detailseite sein
-		await expect(page).toHaveURL(/\/group\/[0-9a-f-]+/);
 		await expect(page).not.toHaveURL(/\/edit/);
 
 		// Änderungen verifizieren
@@ -192,10 +199,12 @@ test.describe.serial('Gruppen Management', () => {
 		// Gruppe erstellen
 		await page.goto('/group/new');
 		await page.fill('input[name="name"]', leaveGroupName);
-		await page.click('button[type="submit"]');
+		await Promise.all([
+			page.waitForURL(/\/group\/[0-9a-f-]+/),
+			page.click('button[type="submit"]')
+		]);
 
 		// URL der Gruppe merken
-		await expect(page).toHaveURL(/\/group\/([0-9a-f-]+)/);
 		const groupUrl = page.url();
 
 		// Logout

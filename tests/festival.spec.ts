@@ -28,28 +28,32 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		await page.fill('textarea[name="description"]', 'Dies ist eine Test-Beschreibung für unser Festival.');
 		await page.fill('textarea[name="location"]', 'Test-Ort im Grünen');
 
-		// Datum setzen (Format hängt vom Browser ab, aber Playwright's fill für type="date" erwartet YYYY-MM-DD)
+		// Datum setzen
 		await page.fill('input[name="startDate"]', '2026-08-15');
 		await page.fill('input[name="startTime"]', '18:00');
 
 		await page.check('input[name="bringYourOwnFood"]');
 		await page.check('input[name="bringYourOwnBottle"]');
 
-		// Absenden
-		await page.click('button:has-text("Speichern")');
+		// Absenden und auf Navigation warten
+		await Promise.all([
+			page.waitForURL(/\/festival\/[a-z0-9-]+$/),
+			page.click('button:has-text("Speichern")')
+		]);
 
-		// Verifizieren: Redirect auf /festival/[id]
-		await expect(page).toHaveURL(/\/festival\/[a-z0-9-]+/);
+		// Verifizieren: Heading auf der Detailseite
 		await expect(page.getByRole('heading', { level: 4, name: festivalName })).toBeVisible();
 
-		// ID extrahieren für spätere Tests (optional, da wir page.url() nutzen können)
+		// ID extrahieren
 		festivalId = page.url().split('/').pop() || '';
 	});
 
 	test('sollte das Festival bearbeiten können', async () => {
 		// Wir sind bereits auf der Detailseite, klicken auf Bearbeiten
-		await page.click('button:has-text("Bearbeiten")');
-		await expect(page).toHaveURL(/\/festival\/.*\/edit/);
+		await Promise.all([
+			page.waitForURL(/\/festival\/.*\/edit/),
+			page.click('button:has-text("Bearbeiten")')
+		]);
 
 		// Sicherstellen, dass die Felder geladen sind
 		await expect(page.locator('input[name="name"]')).toBeVisible();
@@ -59,7 +63,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 
 		// Klicke auf Speichern und warte explizit auf die Navigation
 		await Promise.all([
-			page.waitForNavigation({ url: /\/festival\/[a-z0-9-]+$/ }),
+			page.waitForURL(/\/festival\/[a-z0-9-]+$/),
 			page.click('button:has-text("Speichern")')
 		]);
 

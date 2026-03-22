@@ -47,10 +47,13 @@
 
 ## 5. Testing Best Practices (Playwright)
 
+- **Parallelität vs. Datenbank-Zustand:** Da die Tests eine gemeinsame Datenbank nutzen, muss in `playwright.config.ts` die Parallelisierung deaktiviert werden (`fullyParallel: false`, `workers: 1`), um Race Conditions zu vermeiden.
+- **Robustere Navigation:** Verwenden Sie `Promise.all([page.waitForURL(...), page.click(...)])`, um sicherzustellen, dass die Seite vollständig geladen ist, bevor Folgeschritte ausgeführt werden. Einfache Klicks ohne `waitForURL` sind in asynchronen Umgebungen fehleranfällig.
+- **Hilfsfunktionen:** Nutzen Sie zentrale Funktionen in `tests/test-utils.ts` (z.B. `login`, `register`), um redundanten Code zu vermeiden und die Wartbarkeit zu erhöhen.
 - **Test-Stabilität:** Da SvelteKit asynchron hydriert, sollten Tests explizit auf die Sichtbarkeit von Elementen warten (`toBeVisible()`), anstatt nur die URL-Änderung oder das Vorhandensein im DOM zu prüfen.
-- **Serial Execution:** Wenn Tests aufeinander aufbauen (z.B. User-Registrierung -> Festival-Erstellung -> Edit), sollte `test.describe.serial` verwendet werden, um eine deterministische Reihenfolge sicherzustellen.
-- **Setup-Redundanz:** Gemeinsame Hilfsfunktionen wie `register` oder `getUserId` sollten in `tests/test-utils.ts` zentralisiert werden.
-- **Eindeutigkeit:** Test-Daten (Namen, E-Mails) sollten Zeitstempel (`Date.now()`) enthalten, um Kollisionen bei parallelen Testläufen zu vermeiden.
+- **Serial Execution:** Wenn Tests aufeinander aufbauen (z. B. User-Registrierung -> Festival-Erstellung -> Edit), sollte `test.describe.serial` verwendet werden, um eine deterministische Reihenfolge sicherzustellen.
+- **Retries:** In CI-Umgebungen sollten Retries aktiviert sein (`retries: 2`), um temporäre Netzwerk- oder Datenbankverzögerungen abzufangen.
+- **Eindeutigkeit:** Test-Daten (Namen, E-Mails) sollten Zeitstempel (`Date.now()`) enthalten, um Kollisionen bei wiederholten Testläufen zu vermeiden.
 
 ## 6. Setup-Hinweise
 
