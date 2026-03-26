@@ -29,11 +29,8 @@ test.describe.serial('Profile Festivals Display', () => {
 		await page.fill('textarea[name="location"]', 'Test');
 		await page.fill('input[name="startDate"]', '2026-09-15');
 		await page.fill('input[name="startTime"]', '18:00');
-		
-		await Promise.all([
-			page.waitForURL(/\/festival\/[a-z0-9-]+$/),
-			page.click('button:has-text("Speichern")')
-		]);
+
+		await Promise.all([page.waitForURL(/\/festival\/[a-z0-9-]+$/), page.click('button:has-text("Speichern")')]);
 
 		festivalId = page.url().split('/').pop() || '';
 
@@ -44,7 +41,7 @@ test.describe.serial('Profile Festivals Display', () => {
 
 		const dialog = page.locator('dialog[open]');
 		await expect(dialog).toBeVisible({ timeout: 10000 });
-		
+
 		await dialog.locator('#food').fill('Pasta');
 		await dialog.locator('button:has-text("Beitreten")').click();
 		await expect(dialog).not.toBeVisible({ timeout: 10000 });

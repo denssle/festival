@@ -34,7 +34,8 @@
 		display: block;
 		margin-bottom: 0.5rem;
 	}
-	input, textarea {
+	input,
+	textarea {
 		width: 100%;
 		margin-bottom: 1rem;
 	}

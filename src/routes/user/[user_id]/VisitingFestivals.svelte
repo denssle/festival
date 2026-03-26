@@ -1,20 +1,12 @@
 <script lang="ts">
 	import type { VisitingFestival } from '$lib/models/user/VisitingFestival';
-	import { afterUpdate, onMount } from 'svelte';
 
-	export let userId: string = '';
+	let { userId = '' } = $props();
 
-	let festivals: VisitingFestival[] = [];
-	let previousUserId: string;
+	let festivals: VisitingFestival[] = $state([]);
 
-	onMount(() => {
-		previousUserId = userId;
-		loadFestivals();
-	});
-
-	afterUpdate(() => {
-		if (previousUserId !== userId) {
-			previousUserId = userId;
+	$effect(() => {
+		if (userId) {
 			loadFestivals();
 		}
 	});

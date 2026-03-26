@@ -6,6 +6,7 @@ import { User } from '$lib/db/model/user';
 import type { GroupAttributes } from '$lib/db/attributes/group.attributes';
 import { UserService } from '$lib/services/user.service';
 import { GroupService } from '$lib/services/group.service';
+import type { StandardResponse } from '$lib/models/transferData/StandardResponse';
 
 export const load: PageServerLoad = async ({ params, cookies }) => {
 	const { group_id } = params;
@@ -33,28 +34,28 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
 };
 
 export const actions: Actions = {
-	join: async ({ params, cookies }) => {
+	join: async ({ params, cookies }): Promise<StandardResponse | any> => {
 		const { group_id } = params;
 		const user = UserService.extractUser(cookies.get('session'));
 
 		if (!user) {
-			return fail(401, { message: 'Nicht angemeldet' });
+			return fail(401, { success: false, message: 'Nicht angemeldet' });
 		}
 
 		const result = await GroupService.joinGroup(user.id, group_id);
 
 		if (result === 'Success') {
-			return { success: true };
+			return { success: true, message: 'Du bist der Gruppe erfolgreich beigetreten!' };
 		} else {
-			return fail(400, { message: result });
+			return fail(400, { success: false, message: result });
 		}
 	},
-	delete: async ({ params, cookies }) => {
+	delete: async ({ params, cookies }): Promise<StandardResponse | any> => {
 		const { group_id } = params;
 		const user = UserService.extractUser(cookies.get('session'));
 
 		if (!user) {
-			return fail(401, { message: 'Nicht angemeldet' });
+			return fail(401, { success: false, message: 'Nicht angemeldet' });
 		}
 
 		const result = await GroupService.deleteGroup(user.id, group_id);
@@ -62,23 +63,23 @@ export const actions: Actions = {
 		if (result === 'Success') {
 			throw redirect(303, '/group');
 		} else {
-			return fail(400, { message: result });
+			return fail(400, { success: false, message: result });
 		}
 	},
-	leave: async ({ params, cookies }) => {
+	leave: async ({ params, cookies }): Promise<StandardResponse | any> => {
 		const { group_id } = params;
 		const user = UserService.extractUser(cookies.get('session'));
 
 		if (!user) {
-			return fail(401, { message: 'Nicht angemeldet' });
+			return fail(401, { success: false, message: 'Nicht angemeldet' });
 		}
 
 		const result = await GroupService.leaveGroup(user.id, group_id);
 
 		if (result === 'Success') {
-			return { success: true };
+			return { success: true, message: 'Du hast die Gruppe verlassen.' };
 		} else {
-			return fail(400, { message: result });
+			return fail(400, { success: false, message: result });
 		}
 	}
 };

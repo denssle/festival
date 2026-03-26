@@ -1,16 +1,9 @@
 <script lang="ts">
-	import { afterUpdate, onMount } from 'svelte';
+	let { createdAt = $bindable(), updatedAt = $bindable() } = $props();
 
-	export let createdAt: Date;
-	export let updatedAt: Date;
+	let edited: boolean = $state(false);
 
-	let edited: boolean = false;
-
-	onMount(() => {
-		mapToDate();
-	});
-
-	afterUpdate(() => {
+	$effect(() => {
 		mapToDate();
 	});
 

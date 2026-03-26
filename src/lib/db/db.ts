@@ -58,8 +58,20 @@ SessionToken.belongsTo(User, { foreignKey: 'UserId', as: 'User' });
 User.hasMany(Group, { as: 'ownedGroups', foreignKey: 'ownerId', onDelete: 'CASCADE' });
 Group.belongsTo(User, { as: 'owner', foreignKey: 'ownerId' });
 
-Group.belongsToMany(User, { through: GroupMember, as: 'members', foreignKey: 'GroupId', otherKey: 'UserId', onDelete: 'CASCADE' });
-User.belongsToMany(Group, { through: GroupMember, as: 'joinedGroups', foreignKey: 'UserId', otherKey: 'GroupId', onDelete: 'CASCADE' });
+Group.belongsToMany(User, {
+	through: GroupMember,
+	as: 'members',
+	foreignKey: 'GroupId',
+	otherKey: 'UserId',
+	onDelete: 'CASCADE'
+});
+User.belongsToMany(Group, {
+	through: GroupMember,
+	as: 'joinedGroups',
+	foreignKey: 'UserId',
+	otherKey: 'GroupId',
+	onDelete: 'CASCADE'
+});
 
 Group.hasMany(GroupMember, { foreignKey: 'GroupId', onDelete: 'CASCADE', as: 'GroupMembers' });
 GroupMember.belongsTo(Group, { foreignKey: 'GroupId', as: 'Group' });

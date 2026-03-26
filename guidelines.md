@@ -64,6 +64,7 @@
 - Standard-Port: `5173`.
 
 ## 7. Offene Punkte / TODOS
+
 - `SessionToken`: Unterstützung mehrerer Sitzungen pro Benutzer evaluieren.
 - **Datenbank-Konsistenz:** Da `sync({ alter: true })` produktiv Risiken birgt, sollte langfristig auf echte Migrationen umgestellt werden.
 - **Frontend-Validierung:** Ergänzung von clientseitiger Validierung (z.B. Zod) zur Verbesserung der UX.

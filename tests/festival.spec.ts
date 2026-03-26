@@ -36,10 +36,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		await page.check('input[name="bringYourOwnBottle"]');
 
 		// Absenden und auf Navigation warten
-		await Promise.all([
-			page.waitForURL(/\/festival\/[a-z0-9-]+$/),
-			page.click('button:has-text("Speichern")')
-		]);
+		await Promise.all([page.waitForURL(/\/festival\/[a-z0-9-]+$/), page.click('button:has-text("Speichern")')]);
 
 		// Verifizieren: Heading auf der Detailseite
 		await expect(page.getByRole('heading', { level: 4, name: festivalName })).toBeVisible();
@@ -50,10 +47,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 
 	test('sollte das Festival bearbeiten können', async () => {
 		// Wir sind bereits auf der Detailseite, klicken auf Bearbeiten
-		await Promise.all([
-			page.waitForURL(/\/festival\/.*\/edit/),
-			page.click('button:has-text("Bearbeiten")')
-		]);
+		await Promise.all([page.waitForURL(/\/festival\/.*\/edit/), page.click('button:has-text("Bearbeiten")')]);
 
 		// Sicherstellen, dass die Felder geladen sind
 		await expect(page.locator('input[name="name"]')).toBeVisible();
@@ -62,10 +56,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		await page.uncheck('input[name="bringYourOwnFood"]');
 
 		// Klicke auf Speichern und warte explizit auf die Navigation
-		await Promise.all([
-			page.waitForURL(/\/festival\/[a-z0-9-]+$/),
-			page.click('button:has-text("Speichern")')
-		]);
+		await Promise.all([page.waitForURL(/\/festival\/[a-z0-9-]+$/), page.click('button:has-text("Speichern")')]);
 
 		// Verwende einen flexibleren Selektor für das Heading
 		const heading = page.locator('h1, h2, h3, h4, h5, h6').filter({ hasText: updatedFestivalName });

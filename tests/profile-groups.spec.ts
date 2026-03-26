@@ -26,10 +26,10 @@ test.describe.serial('Profil Gruppen Anzeige', () => {
 		// 4. Prüfen, ob die Gruppe in der neuen Sektion angezeigt wird
 		const groupsSection = page.locator('section:has(h4:text("Gruppen:"))');
 		await expect(groupsSection).toBeVisible();
-		
+
 		const groupLink = groupsSection.locator(`a:text("${groupName}")`);
 		await expect(groupLink).toBeVisible();
-		
+
 		// 5. Link prüfen
 		const href = await groupLink.getAttribute('href');
 		expect(href).toMatch(/\/group\/[0-9a-f-]+/);

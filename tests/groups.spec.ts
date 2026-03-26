@@ -22,17 +22,11 @@ test.describe.serial('Gruppen Management', () => {
 		await expect(page.getByText('Deine Gruppen')).toBeVisible();
 
 		// Neue Gruppe anlegen
-		await Promise.all([
-			page.waitForURL('/group/new'),
-			page.click('a[href="/group/new"]')
-		]);
+		await Promise.all([page.waitForURL('/group/new'), page.click('a[href="/group/new"]')]);
 
 		await page.fill('input[name="name"]', groupName);
 		await page.fill('textarea[name="description"]', groupDescription);
-		await Promise.all([
-			page.waitForURL(/\/group\/[0-9a-f-]+/),
-			page.click('button[type="submit"]')
-		]);
+		await Promise.all([page.waitForURL(/\/group\/[0-9a-f-]+/), page.click('button[type="submit"]')]);
 
 		// Verifizieren, dass wir auf der richtigen Seite sind (Gruppenname sollte dort stehen)
 		await expect(page.getByRole('heading', { name: groupName })).toBeVisible();
@@ -51,10 +45,7 @@ test.describe.serial('Gruppen Management', () => {
 
 		// Suche nach der zuvor erstellten Gruppe
 		await page.fill('input[name="q"]', groupName);
-		await Promise.all([
-			page.waitForURL(new RegExp(`\\?q=${groupName}`)),
-			page.click('button[type="submit"]')
-		]);
+		await Promise.all([page.waitForURL(new RegExp(`\\?q=${groupName}`)), page.click('button[type="submit"]')]);
 
 		// Verifizieren, dass die Suchergebnisse angezeigt werden
 		await expect(page.getByText(`Suchergebnisse für "${groupName}"`, { exact: true })).toBeVisible({ timeout: 10000 });
@@ -62,10 +53,7 @@ test.describe.serial('Gruppen Management', () => {
 
 		// Suche nach einem Begriff, der keine Ergebnisse liefert
 		await page.fill('input[name="q"]', 'NichtExistierendeGruppe_XYZ_123');
-		await Promise.all([
-			page.waitForURL(/\?q=NichtExistierendeGruppe_XYZ_123/),
-			page.click('button[type="submit"]')
-		]);
+		await Promise.all([page.waitForURL(/\?q=NichtExistierendeGruppe_XYZ_123/), page.click('button[type="submit"]')]);
 
 		await expect(page.getByText('Keine Gruppen gefunden.')).toBeVisible({ timeout: 10000 });
 	});
@@ -87,16 +75,15 @@ test.describe.serial('Gruppen Management', () => {
 		// Gruppe erstellen
 		await page.goto('/group/new');
 		await page.fill('input[name="name"]', joinableGroupName);
-		await Promise.all([
-			page.waitForURL(/\/group\/[0-9a-f-]+/),
-			page.click('button[type="submit"]')
-		]);
+		await Promise.all([page.waitForURL(/\/group\/[0-9a-f-]+/), page.click('button[type="submit"]')]);
 
 		// URL der Gruppe merken
 		const groupUrl = page.url();
 
 		// Logout
-		await page.goto('/logout');
+		const logoutButton = page.getByRole('button', { name: 'Logout' });
+		await expect(logoutButton).toBeVisible();
+		await logoutButton.click();
 
 		// Neuer Benutzer registrieren
 		const joinerNickname = `Joiner_${Date.now()}`;
@@ -166,10 +153,7 @@ test.describe.serial('Gruppen Management', () => {
 		await expect(editButton).toBeVisible();
 
 		// Bearbeiten klicken
-		await Promise.all([
-			page.waitForURL(/\/group\/[0-9a-f-]+\/edit/),
-			editButton.click()
-		]);
+		await Promise.all([page.waitForURL(/\/group\/[0-9a-f-]+\/edit/), editButton.click()]);
 
 		// Wir sollten auf der Edit-Seite sein
 		await expect(page.getByRole('heading', { name: 'Gruppe bearbeiten' })).toBeVisible();
@@ -177,10 +161,7 @@ test.describe.serial('Gruppen Management', () => {
 		// Felder ausfüllen
 		await page.fill('input[name="name"]', updatedName);
 		await page.fill('textarea[name="description"]', updatedDesc);
-		await Promise.all([
-			page.waitForURL(/\/group\/[0-9a-f-]+$/),
-			page.click('button[type="submit"]')
-		]);
+		await Promise.all([page.waitForURL(/\/group\/[0-9a-f-]+$/), page.click('button[type="submit"]')]);
 
 		// Wir sollten zurück auf der Detailseite sein
 		await expect(page).not.toHaveURL(/\/edit/);
@@ -199,10 +180,7 @@ test.describe.serial('Gruppen Management', () => {
 		// Gruppe erstellen
 		await page.goto('/group/new');
 		await page.fill('input[name="name"]', leaveGroupName);
-		await Promise.all([
-			page.waitForURL(/\/group\/[0-9a-f-]+/),
-			page.click('button[type="submit"]')
-		]);
+		await Promise.all([page.waitForURL(/\/group\/[0-9a-f-]+/), page.click('button[type="submit"]')]);
 
 		// URL der Gruppe merken
 		const groupUrl = page.url();

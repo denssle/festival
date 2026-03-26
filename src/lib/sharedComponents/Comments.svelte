@@ -1,25 +1,17 @@
 <script lang="ts">
-	import { afterUpdate, onMount } from 'svelte';
 	import type { FrontendComment } from '$lib/models/transferData/FrontendComment';
 	import type { QuestionDialogData } from '$lib/models/dialogData/QuestionDialogData';
 	import QuestionDialog from '$lib/sharedComponents/QuestionDialog.svelte';
 	import AvatarImage from '$lib/sharedComponents/AvatarImage.svelte';
 	import CreationChangedDate from '$lib/sharedComponents/CreationChangedDate.svelte';
 
-	export let whereId: string = '';
+	let { whereId = '' } = $props();
 
-	let comments: FrontendComment[] = [];
-	let previousWhereId: string;
-	let inputComment: string;
+	let comments: FrontendComment[] = $state([]);
+	let inputComment: string = $state('');
 
-	onMount(() => {
-		previousWhereId = whereId;
-		loadComments();
-	});
-
-	afterUpdate(() => {
-		if (previousWhereId !== whereId) {
-			previousWhereId = whereId;
+	$effect(() => {
+		if (whereId) {
 			inputComment = '';
 			loadComments();
 		}
@@ -49,16 +41,21 @@
 	function deleteComment(commentId: string | undefined) {
 		questionDialogData.showDialog = true;
 		if (questionDialogData.dialog) {
-			questionDialogData.dialog.onclose = () => {
+			const onclose = () => {
 				if (questionDialogData.answerYes) {
 					fetch(whereId + '/comments', {
 						method: 'DELETE',
+						headers: {
+							'Content-Type': 'text/plain'
+						},
 						body: commentId
 					}).then(() => {
 						loadComments();
 					});
 				}
+				questionDialogData.dialog?.removeEventListener('close', onclose);
 			};
+			questionDialogData.dialog.addEventListener('close', onclose);
 		}
 	}
 
@@ -66,8 +63,18 @@
 		if (comment.yourComment) {
 			fetch(whereId + '/comments', {
 				method: 'PUT',
-				body: JSON.stringify(comment)
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					id: comment.id,
+					comment: comment.comment
+				})
 			}).then(() => {
+				const index = comments.findIndex((c) => c.id === comment.id);
+				if (index !== -1) {
+					comments[index].editMode = false;
+				}
 				loadComments();
 			});
 		}

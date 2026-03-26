@@ -5,7 +5,11 @@ import { ChangeResult } from '$lib/models/updates/ChangeResult';
 import { Op } from 'sequelize';
 
 export class GroupService {
-	static async createGroup(userId: string, name: File | string, description: FormDataEntryValue | null): Promise<string> {
+	static async createGroup(
+		userId: string,
+		name: File | string,
+		description: FormDataEntryValue | null
+	): Promise<string> {
 		const groupId = crypto.randomUUID();
 		try {
 			await Group.create({
@@ -60,10 +64,7 @@ export class GroupService {
 	static async searchGroups(searchTerm: string): Promise<GroupAttributes[]> {
 		const groups = await Group.findAll({
 			where: {
-				[Op.or]: [
-					{ name: { [Op.like]: `%${searchTerm}%` } },
-					{ description: { [Op.like]: `%${searchTerm}%` } }
-				]
+				[Op.or]: [{ name: { [Op.like]: `%${searchTerm}%` } }, { description: { [Op.like]: `%${searchTerm}%` } }]
 			}
 		});
 		return groups.map((g) => g.dataValues as GroupAttributes);

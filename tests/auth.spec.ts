@@ -21,7 +21,7 @@ test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () =>
 
 		// Nach Logout sollten wir auf der Login-Seite landen (laut +layout.svelte)
 		await expect(page).toHaveURL('/login');
-		
+
 		// Im Header sollten nun wieder "Anmelden" und "Registrieren" Links zu sehen sein
 		await expect(page.getByRole('link', { name: 'Anmelden' })).toBeVisible();
 		await expect(page.getByRole('link', { name: 'Registrieren', exact: true })).toBeVisible();

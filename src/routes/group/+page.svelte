@@ -67,7 +67,7 @@
 		gap: 0.5rem;
 		margin-bottom: 1rem;
 	}
-	input[type="text"] {
+	input[type='text'] {
 		flex-grow: 1;
 		padding: 0.5rem;
 	}

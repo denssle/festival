@@ -36,8 +36,14 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 		await expect(pageA.locator('h2')).toContainText(userBNickname);
 
 		// User A schreibt einen Kommentar
-		await pageA.fill('textarea[name="comment"]', commentText);
-		await pageA.click('button:has-text("Absenden")');
+		let textareaElement = pageA.locator('textarea[name="comment"]');
+		await expect(textareaElement).toBeVisible();
+		await textareaElement.fill(commentText);
+		let absendenButtonLocator = pageA.locator('button:has-text("Absenden")');
+		await expect(absendenButtonLocator).toBeVisible();
+		await absendenButtonLocator.click();
+
+		pageA.waitForTimeout(3000);
 
 		// Verifizieren, dass der Kommentar erscheint
 		const commentLocator = pageA.locator('fieldset', { hasText: commentText });
@@ -48,13 +54,23 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 	test('User A sollte den Kommentar bearbeiten können', async () => {
 		await pageA.goto(`/user/${userBId}`);
 		await expect(pageA.locator('h2')).toContainText(userBNickname);
+
 		const commentLocator = pageA.locator('fieldset', { hasText: commentText });
 		await expect(commentLocator).toBeVisible({ timeout: 10000 });
-		await commentLocator.locator('button:has-text("Bearbeiten")').click();
 
-		await pageA.locator('textarea[name="updateComment"]').fill(updatedCommentText);
+		let bearbeitenLocator = commentLocator.locator('button:has-text("Bearbeiten")');
+		await expect(bearbeitenLocator).toBeVisible({ timeout: 10000 });
+		await bearbeitenLocator.click();
+
+		pageA.waitForTimeout(3000);
+
+		let textareaElement = pageA.locator('textarea[name="updateComment"]');
 		let saveButton = pageA.locator('button:has-text("Speichern")');
-		await expect(saveButton).toBeVisible({ timeout: 10000 });
+		await expect(saveButton).toBeVisible();
+		await expect(saveButton).not.toBeDisabled();
+		await expect(textareaElement).toBeVisible();
+
+		await textareaElement.fill(updatedCommentText);
 		await saveButton.click();
 
 		// Verifizieren der Änderung - Wir geben dem Frontend Zeit für den Fetch und Rerender
