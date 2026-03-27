@@ -133,7 +133,7 @@
 {/each}
 
 <style>
-    legend {
-        display: ruby;
-    }
+	legend {
+		display: ruby;
+	}
 </style>
