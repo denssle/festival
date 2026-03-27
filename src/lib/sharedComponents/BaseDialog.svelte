@@ -1,9 +1,21 @@
 <script lang="ts">
 	import type { BaseDialogData } from '$lib/models/dialogData/BaseDialogData';
 
-	export let dialogData: BaseDialogData;
-	export let buttonLabels: { yes: string; no: string } = { yes: 'Ja', no: 'Nope' };
-	$: if (dialogData.dialog && dialogData.showDialog) dialogData.dialog.showModal();
+	let {
+		dialogData = $bindable(),
+		buttonLabels = { yes: 'Ja', no: 'Nope' },
+		children
+	} = $props<{
+		dialogData: BaseDialogData;
+		buttonLabels?: { yes: string; no: string };
+		children?: any;
+	}>();
+
+	$effect(() => {
+		if (dialogData.dialog && dialogData.showDialog) {
+			dialogData.dialog.showModal();
+		}
+	});
 
 	function onYes() {
 		dialogData.answerYes = true;
@@ -23,7 +35,7 @@
 </script>
 
 <dialog bind:this={dialogData.dialog}>
-	<slot />
+	{@render children?.()}
 
 	<section style="text-align: right;">
 		<button on:click={() => onNo()}>{buttonLabels.no}</button>

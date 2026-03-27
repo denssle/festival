@@ -89,7 +89,7 @@ export async function startDB(): Promise<void> {
 		await sequelize.sync({ force: true, alter: true });
 
 		// Seed TestUser for Playwright tests if in test mode
-		if (process.env.PLAYWRIGHT === 'true' || process.env.NODE_ENV === 'test') {
+		if (process.env.PLAYWRIGHT === 'true') {
 			const testNickname = 'TestUser';
 			const testPassword = 'TestPassword123';
 			const existingUser = await User.findOne({ where: { nickname: testNickname } });

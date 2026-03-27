@@ -39,7 +39,9 @@
 	}
 
 	function deleteComment(commentId: string | undefined) {
+		questionDialogData.answerYes = false;
 		questionDialogData.showDialog = true;
+
 		if (questionDialogData.dialog) {
 			const onclose = () => {
 				if (questionDialogData.answerYes) {
@@ -54,8 +56,11 @@
 					});
 				}
 				questionDialogData.dialog?.removeEventListener('close', onclose);
+				questionDialogData.answerYes = false;
 			};
 			questionDialogData.dialog.addEventListener('close', onclose);
+		} else {
+			console.error('no dialog');
 		}
 	}
 
@@ -80,15 +85,16 @@
 		}
 	}
 
-	let questionDialogData: QuestionDialogData = {
+	let questionDialogData: QuestionDialogData = $state({
 		showDialog: false,
 		dialog: undefined,
 		questionText: 'Kommentar löschen. Bist du dir sicher?',
 		answerYes: false
-	};
+	});
 </script>
 
 <QuestionDialog bind:questionDialogData />
+
 <form on:submit|preventDefault={handleSubmit}>
 	<label for="comment">Kommentar: </label>
 	<textarea id="comment" name="comment" bind:value={inputComment}></textarea>
@@ -127,7 +133,7 @@
 {/each}
 
 <style>
-	legend {
-		display: ruby;
-	}
+    legend {
+        display: ruby;
+    }
 </style>
