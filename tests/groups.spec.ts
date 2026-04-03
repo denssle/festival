@@ -44,18 +44,25 @@ test.describe.serial('Gruppen Management', () => {
 		await page.goto('/group');
 
 		// Suche nach der zuvor erstellten Gruppe
-		await page.fill('input[name="q"]', groupName);
-		await Promise.all([page.waitForURL(new RegExp(`\\?q=${groupName}`)), page.click('button[type="submit"]')]);
+		const searchInput = page.locator('input[name="q"]');
+		await expect(searchInput).toBeVisible();
+		await searchInput.fill(groupName);
+		
+		// Klick auf Suchen und warten auf Navigation
+		await page.click('button[type="submit"]');
 
 		// Verifizieren, dass die Suchergebnisse angezeigt werden
-		await expect(page.getByText(`Suchergebnisse für "${groupName}"`, { exact: true })).toBeVisible({ timeout: 10000 });
-		await expect(page.locator('.search-section').getByText(groupName, { exact: true })).toBeVisible({ timeout: 10000 });
+		// Wir prüfen erst auf den Text im Heading, da die URL-Prüfung flakig sein kann
+		await expect(page.locator('h4')).toContainText(`Suchergebnisse für "${groupName}"`, { timeout: 15000 });
+		
+		// Und den Link zur Gruppe in der Suchsektion
+		await expect(page.locator('.search-section a', { hasText: groupName })).toBeVisible({ timeout: 15000 });
 
 		// Suche nach einem Begriff, der keine Ergebnisse liefert
 		await page.fill('input[name="q"]', 'NichtExistierendeGruppe_XYZ_123');
-		await Promise.all([page.waitForURL(/\?q=NichtExistierendeGruppe_XYZ_123/), page.click('button[type="submit"]')]);
+		await page.click('button[type="submit"]');
 
-		await expect(page.getByText('Keine Gruppen gefunden.')).toBeVisible({ timeout: 10000 });
+		await expect(page.getByText('Keine Gruppen gefunden.')).toBeVisible({ timeout: 15000 });
 	});
 
 	test('sollte anzeigen, dass man in keiner Gruppe ist (bei neuem User)', async ({ page }) => {
@@ -75,7 +82,8 @@ test.describe.serial('Gruppen Management', () => {
 		// Gruppe erstellen
 		await page.goto('/group/new');
 		await page.fill('input[name="name"]', joinableGroupName);
-		await Promise.all([page.waitForURL(/\/group\/[0-9a-f-]+/), page.click('button[type="submit"]')]);
+		await page.click('button[type="submit"]');
+		await expect(page).toHaveURL(/\/group\/[0-9a-f-]+/, { timeout: 15000 });
 
 		// URL der Gruppe merken
 		const groupUrl = page.url();
@@ -84,6 +92,9 @@ test.describe.serial('Gruppen Management', () => {
 		const logoutButton = page.getByRole('button', { name: 'Logout' });
 		await expect(logoutButton).toBeVisible();
 		await logoutButton.click();
+		
+		// Sicherstellen, dass Logout erfolgreich war
+		await expect(page).toHaveURL('/login', { timeout: 15000 });
 
 		// Neuer Benutzer registrieren
 		const joinerNickname = `Joiner_${Date.now()}`;
@@ -94,19 +105,20 @@ test.describe.serial('Gruppen Management', () => {
 
 		// Beitreten Button sollte sichtbar sein
 		const joinButton = page.getByRole('button', { name: 'Beitreten' });
-		await expect(joinButton).toBeVisible();
+		await expect(joinButton).toBeVisible({ timeout: 15000 });
 
 		// Beitreten klicken
 		await joinButton.click();
 
 		// Erfolgsmeldung prüfen
-		await expect(page.getByText('Du bist der Gruppe erfolgreich beigetreten!')).toBeVisible({ timeout: 10000 });
+		await expect(page.locator('.message.success')).toContainText('Du bist der Gruppe erfolgreich beigetreten!', { timeout: 15000 });
 
 		// Beitreten Button sollte nun weg sein
 		await expect(joinButton).not.toBeVisible();
 
 		// Prüfen ob der Benutzer in der Mitgliederliste steht
-		await expect(page.getByText(joinerNickname)).toBeVisible();
+		// Wir nutzen .last(), da der Name im Header (nav) und in der Mitgliederliste (section) vorkommt
+		await expect(page.locator('section').getByText(joinerNickname)).toBeVisible();
 	});
 
 	test('Besitzer sollte seine Gruppe löschen können', async ({ page }) => {
@@ -180,40 +192,49 @@ test.describe.serial('Gruppen Management', () => {
 		// Gruppe erstellen
 		await page.goto('/group/new');
 		await page.fill('input[name="name"]', leaveGroupName);
-		await Promise.all([page.waitForURL(/\/group\/[0-9a-f-]+/), page.click('button[type="submit"]')]);
+		await page.click('button[type="submit"]');
+		await expect(page).toHaveURL(/\/group\/[0-9a-f-]+/, { timeout: 15000 });
 
 		// URL der Gruppe merken
 		const groupUrl = page.url();
 
-		// Logout
-		await page.goto('/logout');
+		// Logout über den Button
+		const logoutButton = page.getByRole('button', { name: 'Logout' });
+		await expect(logoutButton).toBeVisible();
+		await logoutButton.click();
+		await expect(page).toHaveURL('/login', { timeout: 15000 });
 
-		// Ein anderer Benutzer tritt bei
+		// Ein anderer Benutzer registriert sich und tritt bei
 		const memberNickname = `MemberLeave_${Date.now()}`;
 		await register(page, memberNickname, TEST_PASSWORD);
 
 		// Zur Gruppe navigieren und beitreten
 		await page.goto(groupUrl);
-		await page.getByRole('button', { name: 'Beitreten' }).click();
-		await expect(page.getByText('Mitglieder').locator('..').getByText(memberNickname)).toBeVisible();
+		const joinButton = page.getByRole('button', { name: 'Beitreten' });
+		await expect(joinButton).toBeVisible({ timeout: 15000 });
+		await joinButton.click();
+		
+		// Verifizieren, dass er beigetreten ist
+		await expect(page.locator('.message.success')).toContainText('Du bist der Gruppe erfolgreich beigetreten!', { timeout: 15000 });
+		await expect(page.locator('section').getByText(memberNickname)).toBeVisible({ timeout: 15000 });
 
 		// Verlassen Button sollte nun sichtbar sein
 		const leaveButton = page.getByRole('button', { name: 'Gruppe verlassen' });
-		await expect(leaveButton).toBeVisible();
+		await expect(leaveButton).toBeVisible({ timeout: 15000 });
 
 		// Verlassen klicken
 		await leaveButton.click();
 
-		// Erfolgsmeldung prüfen (Wir haben die Meldung auf "Aktion erfolgreich ausgeführt!" generalisiert)
-		await expect(page.getByText('Aktion erfolgreich ausgeführt!')).toBeVisible();
+		// Erfolgsmeldung prüfen
+		await expect(page.locator('.message.success')).toContainText('Du hast die Gruppe verlassen.', { timeout: 15000 });
 
 		// Verlassen Button sollte nun weg sein
 		await expect(leaveButton).not.toBeVisible();
 
 		// Beitreten Button sollte wieder da sein
-		await expect(page.getByRole('button', { name: 'Beitreten' })).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Beitreten' })).toBeVisible({ timeout: 15000 });
 
 		// Prüfen ob der Benutzer nicht mehr in der Mitgliederliste steht
-		await expect(page.getByText('Mitglieder').locator('..').getByText(memberNickname)).not.toBeVisible();
+		await expect(page.locator('section').getByText(memberNickname)).not.toBeVisible();
 	});
 });

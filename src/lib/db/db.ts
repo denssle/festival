@@ -86,12 +86,15 @@ export async function startDB(): Promise<void> {
 	try {
 		await sequelize.authenticate();
 		console.log('Connection has been established successfully.');
-		await sequelize.sync({ force: true, alter: true });
+		
+		const isTest = process.env.PLAYWRIGHT === 'true' || process.env.NODE_ENV === 'test';
+		const isDev = isTest || (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV);
+		await sequelize.sync({ force: isDev, alter: true });
 
-		// Seed TestUser for Playwright tests if in test mode
-		if (process.env.PLAYWRIGHT === 'true') {
+		// Seed TestUser for Playwright tests or local development if in test/dev mode
+		if (isDev) {
 			const testNickname = 'TestUser';
-			const testPassword = 'TestPassword123';
+			const testPassword = 'TestPassword123!';
 			const existingUser = await User.findOne({ where: { nickname: testNickname } });
 			if (!existingUser) {
 				const hashedPassword = await hash(testPassword, 10);
@@ -100,7 +103,7 @@ export async function startDB(): Promise<void> {
 					nickname: testNickname,
 					password: hashedPassword
 				});
-				console.log('TestUser seeded for In-Memory Database.');
+				console.log('TestUser seeded for Database.');
 			}
 		}
 	} catch (error) {

@@ -82,4 +82,32 @@ test.describe.serial('Freundschaftsprozess', () => {
 		await pageB.goto(`/user/${userAId}`);
 		await expect(pageB.locator('button:has-text("Anfreunden")')).toBeVisible();
 	});
+
+	test('User A sollte eine Anfrage senden und wieder zurückziehen können', async () => {
+		await pageA.goto(`/user/${userBId}`);
+		await pageA.evaluate((id: string) => {
+			return fetch(`/user/${id}/add-friend`, { method: 'POST' });
+		}, userBId);
+
+		await pageA.goto('/updates');
+		const cancelBtn = pageA.locator(`.friend-request:has-text("${userBNickname}") button:has-text("Zurückziehen")`);
+		await expect(cancelBtn).toBeVisible({ timeout: 10000 });
+		await cancelBtn.click();
+
+		await expect(pageA.locator(`.friend-request:has-text("${userBNickname}")`)).not.toBeVisible();
+	});
+
+	test('User A sollte eine Anfrage senden und User B diese ablehnen können', async () => {
+		await pageA.goto(`/user/${userBId}`);
+		await pageA.evaluate((id: string) => {
+			return fetch(`/user/${id}/add-friend`, { method: 'POST' });
+		}, userBId);
+
+		await pageB.goto('/updates');
+		const declineBtn = pageB.locator(`.friend-request:has-text("${userANickname}") button:has-text("Ablehnen")`);
+		await expect(declineBtn).toBeVisible({ timeout: 10000 });
+		await declineBtn.click();
+
+		await expect(pageB.locator(`.friend-request:has-text("${userANickname}")`)).not.toBeVisible();
+	});
 });

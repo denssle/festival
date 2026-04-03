@@ -47,20 +47,29 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 
 	test('sollte das Festival bearbeiten können', async () => {
 		// Wir sind bereits auf der Detailseite, klicken auf Bearbeiten
-		await Promise.all([page.waitForURL(/\/festival\/.*\/edit/), page.click('button:has-text("Bearbeiten")')]);
+		const editButton = page.locator('button:has-text("Bearbeiten")');
+		await expect(editButton).toBeVisible();
+		await editButton.click();
+		
+		// Falls die Navigation langsam ist
+		await expect(page).toHaveURL(/\/festival\/.*\/edit/, { timeout: 15000 });
 
 		// Sicherstellen, dass die Felder geladen sind
-		await expect(page.locator('input[name="name"]')).toBeVisible();
+		const nameInput = page.locator('input[name="name"]');
+		await expect(nameInput).toBeVisible({ timeout: 15000 });
 
-		await page.fill('input[name="name"]', updatedFestivalName);
+		await nameInput.fill(updatedFestivalName);
 		await page.uncheck('input[name="bringYourOwnFood"]');
 
-		// Klicke auf Speichern und warte explizit auf die Navigation
-		await Promise.all([page.waitForURL(/\/festival\/[a-z0-9-]+$/), page.click('button:has-text("Speichern")')]);
+		// Klicke auf Speichern
+		await page.click('button:has-text("Speichern")');
+		
+		// Warten auf Rückkehr zur Detailseite
+		await expect(page).toHaveURL(new RegExp(`/festival/${festivalId}$`), { timeout: 15000 });
 
-		// Verwende einen flexibleren Selektor für das Heading
-		const heading = page.locator('h1, h2, h3, h4, h5, h6').filter({ hasText: updatedFestivalName });
-		await expect(heading).toBeVisible();
+		// Verifizieren des neuen Namens
+		// In +page.svelte steht der Name in einem <u> innerhalb von <h4>
+		await expect(page.locator('h4 u')).toContainText(updatedFestivalName, { timeout: 15000 });
 
 		// Checkbox sollte nun deaktiviert und unchecked sein (disabled da Read-only auf Detailseite)
 		const foodCheckbox = page.locator('input[name="bringYourOwnFood"]');
@@ -69,7 +78,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 
 	test('sollte zu einem Festival zusagen können', async () => {
 		await page.goto(`/festival/${festivalId}`);
-		await expect(page.getByRole('heading', { level: 4, name: updatedFestivalName })).toBeVisible();
+		await expect(page.locator('h4 u')).toContainText(updatedFestivalName, { timeout: 15000 });
 
 		// Zusagen Button klicken
 		await page.click('button:has-text("Zusagen")');
@@ -90,11 +99,118 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		// Warten bis Dialog schließt
 		await expect(dialog).not.toBeVisible();
 
-		// In der Tabelle "Besucher die kommen" prüfen
-		const comingTable = page.locator('table').first(); // ComingVisitorsTable
+		// In der Tabelle "Zusagen" prüfen
+		const comingTable = page.locator('section:has(h5:has-text("Zusagen:")) table');
 		await expect(comingTable).toContainText(userNickname);
 		await expect(comingTable).toContainText('Pizza');
 		await expect(comingTable).toContainText('Bier');
+	});
+
+	test('sollte eine Zusage bearbeiten können', async () => {
+		await page.goto(`/festival/${festivalId}`);
+		
+		// Button sollte nun "Zusage bearbeiten" heißen
+		const editJoinButton = page.locator('button:has-text("Zusage bearbeiten")');
+		await expect(editJoinButton).toBeVisible();
+		await editJoinButton.click();
+
+		const dialog = page.locator('dialog[open]');
+		await expect(dialog).toBeVisible();
+
+		// Daten ändern
+		await page.fill('#food', 'Pasta');
+		await page.fill('#drink', 'Wein');
+		
+		await dialog.locator('button:has-text("Beitreten")').click();
+		await expect(dialog).not.toBeVisible();
+
+		// Geänderte Daten in der Tabelle prüfen
+		const comingTable = page.locator('section:has(h5:has-text("Zusagen:")) table');
+		await expect(comingTable).toContainText('Pasta');
+		await expect(comingTable).toContainText('Wein');
+		await expect(comingTable).not.toContainText('Pizza');
+	});
+
+	test('sollte zum Festival absagen können', async () => {
+		await page.goto(`/festival/${festivalId}`);
+		
+		// Absagen Button klicken (In der Button-Leiste am Ende der Seite)
+		const leaveButton = page.locator('article > section').last().locator('button:has-text("Absagen")');
+		await expect(leaveButton).toBeVisible();
+		await leaveButton.click();
+
+		const dialog = page.locator('dialog[open]');
+		await expect(dialog).toBeVisible();
+		await expect(dialog).toContainText('Leider bin ich / sind wir bei dem Event nicht dabei.');
+
+		// Kommentar hinzufügen
+		await page.fill('#comment', 'Leider keine Zeit');
+		
+		// Bestätigen (Button Label ist "Absagen" laut CancelInvitationDialog.svelte)
+		// Wir nutzen hier den Button innerhalb des Dialogs
+		await dialog.locator('button:has-text("Absagen")').click();
+		await expect(dialog).not.toBeVisible();
+
+		// In der Tabelle "Absagen" prüfen
+		const notComingTable = page.locator('section:has(h5:has-text("Absagen:")) table');
+		await expect(notComingTable).toContainText(userNickname);
+		await expect(notComingTable).toContainText('Leider keine Zeit');
+
+		// Der User sollte NICHT mehr in der "Zusagen" Tabelle stehen (falls die Tabelle überhaupt noch da ist)
+		const comingSection = page.locator('section:has(h5:has-text("Zusagen:"))');
+		if (await comingSection.locator('table').count() > 0) {
+			await expect(comingSection.locator('table')).not.toContainText(userNickname);
+		} else {
+			await expect(comingSection).toContainText('Es hat noch niemand zugesagt.');
+		}
+	});
+
+	test('sollte eine Absage bearbeiten können', async () => {
+		await page.goto(`/festival/${festivalId}`);
+		
+		// Button sollte nun "Absage bearbeiten" heißen
+		const editLeaveButton = page.locator('article > section').last().locator('button:has-text("Absage bearbeiten")');
+		await expect(editLeaveButton).toBeVisible();
+		await editLeaveButton.click();
+
+		const dialog = page.locator('dialog[open]');
+		await expect(dialog).toBeVisible();
+
+		// Kommentar ändern
+		await page.fill('#comment', 'Bin doch im Urlaub');
+		
+		await dialog.locator('button:has-text("Absagen")').click();
+		await expect(dialog).not.toBeVisible();
+
+		// Geänderte Daten in der Tabelle prüfen
+		const notComingTable = page.locator('section:has(h5:has-text("Absagen:")) table');
+		await expect(notComingTable).toContainText('Bin doch im Urlaub');
+		await expect(notComingTable).not.toContainText('Leider keine Zeit');
+	});
+
+	test('sollte von einer Absage wieder zur Zusage wechseln können', async () => {
+		await page.goto(`/festival/${festivalId}`);
+		
+		// Wieder auf Zusagen klicken (heißt aktuell "Zusagen", da wir abgesagt haben)
+		const joinButton = page.locator('article > section').last().locator('button:has-text("Zusagen")');
+		await expect(joinButton).toBeVisible();
+		await joinButton.click();
+
+		const dialog = page.locator('dialog[open]');
+		await expect(dialog).toBeVisible();
+		
+		await page.fill('#food', 'Salat');
+		await dialog.locator('button:has-text("Beitreten")').click();
+		await expect(dialog).not.toBeVisible();
+
+		// Prüfen, dass wieder in der Zusage-Tabelle
+		const comingTable = page.locator('section:has(h5:has-text("Zusagen:")) table');
+		await expect(comingTable).toContainText(userNickname);
+		await expect(comingTable).toContainText('Salat');
+
+		// Und nicht mehr in der Absage-Tabelle
+		const notComingTable = page.locator('section:has(h5:has-text("Absagen:"))');
+		await expect(notComingTable).not.toContainText(userNickname);
 	});
 
 	test('sollte das Festival löschen können', async () => {

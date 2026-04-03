@@ -13,5 +13,15 @@ MARIA_DB_NAME="dev"
 ```
 
 - run `npm install`
-- run `dev`
+- run `npm run dev`
 - Application starts on http://localhost:5173
+
+## Deployment (Production)
+
+On the production server (e.g. Uberspace), the application should be started with:
+
+```bash
+npm run start-server
+```
+
+This command ensures that dependencies are installed and the server is reachable under the configured host.

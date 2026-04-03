@@ -10,12 +10,12 @@
 	}
 
 	async function declineFriendRequest(id: string | undefined) {
-		await fetch(`/updates/cancel-request`, { method: 'POST', body: id });
+		await fetch(`/updates/decline-friend`, { method: 'POST', body: id });
 		invalidateAll();
 	}
 
 	async function cancelFriendRequest(id: string | undefined) {
-		await fetch(`/updates/decline-friend`, { method: 'POST', body: id });
+		await fetch(`/updates/cancel-request`, { method: 'POST', body: id });
 		invalidateAll();
 	}
 </script>

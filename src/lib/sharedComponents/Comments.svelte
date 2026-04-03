@@ -18,13 +18,14 @@
 	});
 
 	function handleSubmit(e: SubmitEvent) {
-		const formData = new FormData(e.target as HTMLFormElement);
+		const form = e.target as HTMLFormElement;
+		const formData = new FormData(form);
 		fetch(whereId + '/comments', {
 			method: 'POST',
 			body: formData
 		}).then(() => {
-			loadComments();
 			inputComment = '';
+			loadComments();
 		});
 	}
 

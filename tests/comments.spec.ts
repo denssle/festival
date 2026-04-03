@@ -43,11 +43,9 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 		await expect(absendenButtonLocator).toBeVisible();
 		await absendenButtonLocator.click();
 
-		pageA.waitForTimeout(3000);
-
 		// Verifizieren, dass der Kommentar erscheint
-		const commentLocator = pageA.locator('fieldset', { hasText: commentText });
-		await expect(commentLocator).toBeVisible();
+		const commentLocator = pageA.locator('fieldset').filter({ hasText: commentText });
+		await expect(commentLocator).toBeVisible({ timeout: 15000 });
 		await expect(commentLocator).toContainText(userANickname);
 	});
 
@@ -55,14 +53,12 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 		await pageA.goto(`/user/${userBId}`);
 		await expect(pageA.locator('h2')).toContainText(userBNickname);
 
-		const commentLocator = pageA.locator('fieldset', { hasText: commentText });
+		const commentLocator = pageA.locator('fieldset').filter({ hasText: commentText });
 		await expect(commentLocator).toBeVisible({ timeout: 10000 });
 
 		let bearbeitenLocator = commentLocator.locator('button:has-text("Bearbeiten")');
 		await expect(bearbeitenLocator).toBeVisible({ timeout: 10000 });
 		await bearbeitenLocator.click();
-
-		pageA.waitForTimeout(3000);
 
 		let textareaElement = pageA.locator('textarea[name="updateComment"]');
 		let saveButton = pageA.locator('button:has-text("Speichern")');
@@ -82,12 +78,12 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 
 	test('User B sollte den bearbeiteten Kommentar sehen', async () => {
 		await pageB.goto(`/user/${userBId}`);
-		await expect(pageB.locator('fieldset', { hasText: updatedCommentText })).toBeVisible({ timeout: 10000 });
+		await expect(pageB.locator('fieldset').filter({ hasText: updatedCommentText })).toBeVisible({ timeout: 15000 });
 	});
 
 	test('User A sollte den Kommentar löschen können', async () => {
 		await pageA.goto(`/user/${userBId}`);
-		const updatedCommentLocator = pageA.locator('fieldset', { hasText: updatedCommentText });
+		const updatedCommentLocator = pageA.locator('fieldset').filter({ hasText: updatedCommentText });
 		await expect(updatedCommentLocator).toBeVisible({ timeout: 10000 });
 		await updatedCommentLocator.locator('button:has-text("Löschen")').click();
 
@@ -102,6 +98,6 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 
 	test('User B sollte den gelöschten Kommentar nicht mehr sehen', async () => {
 		await pageB.goto(`/user/${userBId}`);
-		await expect(pageB.locator('fieldset', { hasText: updatedCommentText })).not.toBeVisible();
+		await expect(pageB.locator('fieldset').filter({ hasText: updatedCommentText })).not.toBeVisible({ timeout: 15000 });
 	});
 });

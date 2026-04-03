@@ -10,6 +10,7 @@
 - **Testing:** Playwright wird für E2E-Tests verwendet (Happy Path, Authentifizierung). Tests befinden sich im Ordner `tests/`.
 - **CI/CD:** Ein einheitlicher GitHub Action Workflow in `.github/workflows/pipeline.yml` führt Playwright-Tests bei jedem Push auf `main` oder Pull Requests aus.
   - Deployment erfolgt automatisch per `rsync` auf Uberspace nach erfolgreichen Tests auf dem `main` Branch.
+  - **WICHTIG:** Auf dem Produktionsserver (z. B. Uberspace) muss der Service über `npm run start-server` gestartet werden. Dieser Befehl (`npm install && vite dev --host`) stellt sicher, dass alle Abhängigkeiten aktuell sind und der Server unter dem richtigen Host erreichbar ist.
   - Die Pipeline nutzt einen MariaDB Service Container.
 
 ## 2. Datenbank (Sequelize) Best Practices
