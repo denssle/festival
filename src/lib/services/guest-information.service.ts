@@ -1,9 +1,7 @@
 import type { BackendUser } from '$lib/models/user/BackendUser';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import type { BaseGuestInformation } from '$lib/models/guestInformation/BaseGuestInformation';
-import {
-	mapToBackendGuestInformation
-} from '$lib/db/attributes/guestInformation.attributes';
+import { mapToBackendGuestInformation } from '$lib/db/attributes/guestInformation.attributes';
 import type { BackendGuestInformation } from '$lib/models/guestInformation/BackendGuestInformation';
 import type { FrontendGuestInformation } from '$lib/models/guestInformation/FrontendGuestInformation';
 import { UserService } from '$lib/services/user.service';

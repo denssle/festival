@@ -40,16 +40,19 @@ test.describe.serial('Profile Festivals Authorization', () => {
 		await user1Page.fill('textarea[name="location"]', 'Test');
 		await user1Page.fill('input[name="startDate"]', '2026-09-15');
 		await user1Page.fill('input[name="startTime"]', '18:00');
-		await Promise.all([user1Page.waitForURL(/\/festival\/[a-z0-9-]+$/), user1Page.click('button:has-text("Speichern")')]);
+		await Promise.all([
+			user1Page.waitForURL(/\/festival\/[a-z0-9-]+$/),
+			user1Page.click('button:has-text("Speichern")')
+		]);
 
 		const zusagenButton = user1Page.getByRole('button', { name: 'Zusagen' });
 		await expect(zusagenButton).toBeVisible();
-		
+
 		await zusagenButton.click();
 		const beitretenButton = user1Page.getByRole('button', { name: 'Beitreten' });
 		await expect(beitretenButton).toBeVisible({ timeout: 10000 });
 		await Promise.all([
-			user1Page.waitForResponse(resp => resp.url().includes('/join') && resp.status() === 200),
+			user1Page.waitForResponse((resp) => resp.url().includes('/join') && resp.status() === 200),
 			beitretenButton.click()
 		]);
 	});
@@ -65,9 +68,9 @@ test.describe.serial('Profile Festivals Authorization', () => {
 		await user2Page.goto(`/user/${user1Id}`);
 		const addFriendButton = user2Page.getByRole('button', { name: 'Anfreunden' });
 		await expect(addFriendButton).toBeVisible();
-		
+
 		await Promise.all([
-			user2Page.waitForResponse(resp => resp.url().includes('/add-friend') && resp.status() === 200),
+			user2Page.waitForResponse((resp) => resp.url().includes('/add-friend') && resp.status() === 200),
 			addFriendButton.click()
 		]);
 
@@ -76,7 +79,7 @@ test.describe.serial('Profile Festivals Authorization', () => {
 		const acceptButton = user1Page.getByRole('button', { name: 'Annehmen' }).first();
 		await expect(acceptButton).toBeVisible();
 		await Promise.all([
-			user1Page.waitForResponse(resp => resp.url().includes('/accept-friend') && resp.status() === 200),
+			user1Page.waitForResponse((resp) => resp.url().includes('/accept-friend') && resp.status() === 200),
 			acceptButton.click()
 		]);
 		await expect(acceptButton).not.toBeVisible();
