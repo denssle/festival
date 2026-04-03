@@ -6,9 +6,12 @@ import { FriendshipService } from '$lib/services/friendship.service';
 export const POST: RequestHandler = async ({ cookies, params }): Promise<Response> => {
 	const user: SessionTokenUser | null = UserService.extractUser(cookies.get('session'));
 	const params_id: string | undefined = params.user_id;
-	if (user && params_id) {
+	if (!user) {
+		return new Response('Unauthorized', { status: 401 });
+	}
+	if (params_id) {
 		await FriendshipService.removeFriend(user.id, params_id);
 		return new Response(null, { status: 200 });
 	}
-	return new Response(null, { status: 404 });
+	return new Response('Bad Request', { status: 400 });
 };

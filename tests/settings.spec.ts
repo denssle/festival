@@ -16,16 +16,13 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 
 		// Das Passwort-Feld ist in einem <details> verborgen
 		await page.locator('summary', { hasText: 'Passwort' }).click();
-		
+
 		const passwordInput = page.locator('input[name="password"]');
 		await expect(passwordInput).toBeVisible();
 		await passwordInput.fill(newPassword);
-		
+
 		// Klick auf Speichern und warten auf Navigation
-		await Promise.all([
-			page.waitForNavigation({ waitUntil: 'networkidle' }),
-			page.click('button[type="submit"]')
-		]);
+		await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle' }), page.click('button[type="submit"]')]);
 
 		// Das <details> muss eventuell wieder geöffnet werden, falls es nach Reload geschlossen ist
 		const summary = page.locator('summary', { hasText: 'Passwort' });
@@ -55,19 +52,24 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		const userId = await getUserId(page);
 		await page.goto(`/user/${userId}`);
 		await expect(page).toHaveURL(`/user/${userId}`, { timeout: 15000 });
-		
+
 		const fileChooserPromise = page.waitForEvent('filechooser');
 		await page.click('button:has-text("Bild hochladen")');
 		const fileChooser = await fileChooserPromise;
-		
+
 		// Ein minimales valides PNG (1x1 Pixel)
-		const buffer = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
-		
-		await fileChooser.setFiles([{
-			name: 'test.png',
-			mimeType: 'image/png',
-			buffer: buffer
-		}]);
+		const buffer = Buffer.from(
+			'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+			'base64'
+		);
+
+		await fileChooser.setFiles([
+			{
+				name: 'test.png',
+				mimeType: 'image/png',
+				buffer: buffer
+			}
+		]);
 
 		// Dialog-Erfolg abwarten - Präziser Selektor um Strict Mode Violation zu vermeiden
 		const dialog = page.locator('dialog').filter({ hasText: 'Okay' });

@@ -22,6 +22,12 @@ export const GuestInformation: ModelStatic<Model<GuestInformationAttributes, any
 	{
 		timestamps: true,
 		createdAt: true,
-		updatedAt: true
+		updatedAt: true,
+		indexes: [
+			{
+				unique: true,
+				fields: ['FestivalEventId', 'UserId']
+			}
+		]
 	}
 );

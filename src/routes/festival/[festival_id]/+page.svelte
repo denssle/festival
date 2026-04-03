@@ -19,7 +19,7 @@
 
 	async function editFestival(): Promise<void> {
 		if (data.yourFestival) {
-			goto('/festival/' + data.festival.id + '/edit');
+			await goto('/festival/' + data.festival.id + '/edit');
 		} else {
 			infoDialogData.infoDialogText = 'Das ist nicht dein Event. ';
 			infoDialogData.showDialog = true;
@@ -81,7 +81,7 @@
 		}
 	}
 
-	function leaveFestival(): void {
+	function cancelInvitation(): void {
 		cancelInvitationDialogData.showDialog = true;
 		if (cancelInvitationDialogData.dialog) {
 			cancelInvitationDialogData.dialog.onclose = () => {
@@ -110,8 +110,8 @@
 	function updateButtonLabels() {
 		joinFestivalButtonText = 'Zusagen';
 		leaveFestivalButtonText = 'Absagen';
-		if (data.guestInformation) {
-			if (data.guestInformation.coming) {
+		if (data.yourGestInformation) {
+			if (data.yourGestInformation.coming) {
 				joinFestivalButtonText = 'Zusage bearbeiten';
 			} else {
 				leaveFestivalButtonText = 'Absage bearbeiten';
@@ -122,7 +122,7 @@
 	let cancelInvitationDialogData: CancelInvitationDialogData = {
 		showDialog: false,
 		dialog: undefined,
-		comment: data.guestInformation?.comment ?? '',
+		comment: data.yourGestInformation?.comment ?? '',
 		answerYes: false
 	};
 	let infoDialogData: InfoDialogData = {
@@ -135,12 +135,12 @@
 		showDialog: false,
 		bringYourOwnBottle: data.festival.bringYourOwnBottle,
 		bringYourOwnFood: data.festival.bringYourOwnFood,
-		food: data.guestInformation?.food ?? '',
-		drink: data.guestInformation?.drink ?? '',
-		numberOfOtherGuests: data.guestInformation?.numberOfOtherGuests ?? 0,
+		food: data.yourGestInformation?.food ?? '',
+		drink: data.yourGestInformation?.drink ?? '',
+		numberOfOtherGuests: data.yourGestInformation?.numberOfOtherGuests ?? 0,
 		dialog: undefined,
 		coming: true,
-		comment: data.guestInformation?.comment ?? '',
+		comment: data.yourGestInformation?.comment ?? '',
 		answerYes: false
 	};
 	let questionDialogData: QuestionDialogData = {
@@ -185,7 +185,7 @@
 	<section>
 		<button on:click={editFestival}>Bearbeiten</button>
 		<button on:click={deleteFestival}>Löschen</button>
-		<button on:click={leaveFestival}>{leaveFestivalButtonText}</button>
+		<button on:click={cancelInvitation}>{leaveFestivalButtonText}</button>
 		<button on:click={joinFestival}>{joinFestivalButtonText}</button>
 		<a class="button" href="/">Zurück</a>
 	</section>

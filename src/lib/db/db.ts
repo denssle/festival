@@ -86,9 +86,9 @@ export async function startDB(): Promise<void> {
 	try {
 		await sequelize.authenticate();
 		console.log('Connection has been established successfully.');
-		
+
 		const isTest = process.env.PLAYWRIGHT === 'true' || process.env.NODE_ENV === 'test';
-		const isDev = isTest || (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV);
+		const isDev = isTest || process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
 		await sequelize.sync({ force: isDev, alter: true });
 
 		// Seed TestUser for Playwright tests or local development if in test/dev mode

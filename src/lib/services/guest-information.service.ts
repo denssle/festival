@@ -2,14 +2,12 @@ import type { BackendUser } from '$lib/models/user/BackendUser';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import type { BaseGuestInformation } from '$lib/models/guestInformation/BaseGuestInformation';
 import {
-	GuestInformationAttributes,
 	mapToBackendGuestInformation
 } from '$lib/db/attributes/guestInformation.attributes';
 import type { BackendGuestInformation } from '$lib/models/guestInformation/BackendGuestInformation';
 import type { FrontendGuestInformation } from '$lib/models/guestInformation/FrontendGuestInformation';
 import { UserService } from '$lib/services/user.service';
 import { GuestInformation } from '$lib/db/model/guestInformation';
-import { Op } from 'sequelize';
 
 export class GuestInformationService {
 	static async joinFestival(
@@ -44,15 +42,15 @@ export class GuestInformationService {
 		}
 	}
 
-	static async leaveFestival(
+	static async cancelInvitation(
 		user: BackendUser | null | SessionTokenUser,
 		festivalId: string,
 		comment: string
 	): Promise<void> {
 		if (user && festivalId) {
-			const find = await this.getGuestInformationModel(user.id, festivalId);
-			if (find) {
-				await find.update({
+			const guestInfoModel = await this.getGuestInformationModel(user.id, festivalId);
+			if (guestInfoModel) {
+				await guestInfoModel.update({
 					coming: false,
 					comment: comment ?? ''
 				});

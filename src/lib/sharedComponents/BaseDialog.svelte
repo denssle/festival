@@ -30,7 +30,6 @@
 	function closeDialog() {
 		dialogData.dialog?.close();
 		dialogData.showDialog = false;
-		dialogData.dialog?.dispatchEvent(new Event('close'));
 	}
 </script>
 

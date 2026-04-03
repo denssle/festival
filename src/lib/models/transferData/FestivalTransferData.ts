@@ -4,5 +4,5 @@ import { FrontendGuestInformation } from '$lib/models/guestInformation/FrontendG
 export interface FestivalTransferData {
 	festival: FrontendFestivalEvent;
 	yourFestival: boolean;
-	guestInformation: FrontendGuestInformation | undefined;
+	yourGuestInformation: FrontendGuestInformation | undefined;
 }

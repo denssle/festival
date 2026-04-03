@@ -6,6 +6,11 @@ import { FestivalEventService } from '$lib/services/festival-event.service';
 
 export const actions: Actions = {
 	default: async ({ cookies, request }: { cookies: Cookies; request: Request }): Promise<Response | undefined> => {
+		const user = UserService.extractUser(cookies.get('session'));
+		if (!user) {
+			throw redirect(302, '/login');
+		}
+
 		const values: FormData = await request.formData();
 		const name: FormDataEntryValue | null = values.get('name');
 		if (name) {
@@ -17,7 +22,7 @@ export const actions: Actions = {
 			const bringYourOwnFood = values.get('bringYourOwnFood') === 'on';
 
 			const newFestival: FrontendFestivalEvent | null = await FestivalEventService.createFestival(
-				UserService.extractUser(cookies.get('session')),
+				user,
 				String(name),
 				description,
 				getDateFromString(startDate, startTime),

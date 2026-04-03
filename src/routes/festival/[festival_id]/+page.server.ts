@@ -22,10 +22,11 @@ export const load: PageServerLoad = async ({
 		const festival: FrontendFestivalEvent | null = await FestivalEventService.getFrontEndFestival(festival_id);
 		const user: SessionTokenUser | null = UserService.extractUser(cookies.get('session'));
 		if (festival && user) {
+			const guestInformation = festival.frontendGuestInformation.find((value) => value.user?.id === user.id);
 			return {
 				festival: festival,
 				yourFestival: user.id === festival.createdBy?.id,
-				guestInformation: festival.frontendGuestInformation.find((value) => value.user?.id === user.id)
+				yourGuestInformation: guestInformation
 			};
 		}
 	}

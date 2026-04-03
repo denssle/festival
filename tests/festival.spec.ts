@@ -48,21 +48,21 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 	test('sollte das Festival bearbeiten können', async () => {
 		// Wir sind bereits auf der Detailseite
 		await expect(page.locator('h4 u')).toContainText(festivalName, { timeout: 15000 });
-		
+
 		// ID extrahieren (id ist im globalen Scope definiert)
 		const festivalId = page.url().split('/').pop() || '';
 
 		// Wir klicken auf Bearbeiten
 		const editButton = page.locator('button:has-text("Bearbeiten")');
 		await expect(editButton).toBeVisible();
-		
+
 		await editButton.click();
-		
+
 		// Falls der Klick nicht navigiert (SvelteKit Client-Side Routing), erzwingen wir es
 		if (!page.url().endsWith('/edit')) {
 			await page.goto(`/festival/${festivalId}/edit`);
 		}
-		
+
 		// Warten auf Navigation zur Edit-Seite
 		await expect(page).toHaveURL(/\/festival\/.*\/edit/, { timeout: 15000 });
 
@@ -71,7 +71,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		await expect(nameInput).toBeVisible({ timeout: 15000 });
 		await nameInput.clear();
 		await nameInput.fill(updatedFestivalName);
-		
+
 		// Checkboxen
 		const foodCheckbox = page.locator('input[name="bringYourOwnFood"]');
 		await foodCheckbox.uncheck();
@@ -79,10 +79,10 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		// Klicke auf Speichern und warte auf Navigation zurück
 		const saveButton = page.locator('button:has-text("Speichern")');
 		await saveButton.click();
-		
+
 		// Warten auf Navigation zur Detailseite
 		await expect(page).toHaveURL(new RegExp(`/festival/${festivalId}$`), { timeout: 15000 });
-		
+
 		// Verifizieren des neuen Namens
 		await expect(page.locator('h4 u')).toContainText(updatedFestivalName, { timeout: 15000 });
 
@@ -114,7 +114,10 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		await expect(dialog).not.toBeVisible();
 
 		// In der Tabelle "Zusagen" prüfen
-		const comingTable = page.locator('section').filter({ has: page.locator('h5', { hasText: 'Zusagen:' }) }).locator('table');
+		const comingTable = page
+			.locator('section')
+			.filter({ has: page.locator('h5', { hasText: 'Zusagen:' }) })
+			.locator('table');
 		await expect(comingTable).toContainText(userNickname, { timeout: 15000 });
 		await expect(comingTable).toContainText('Pizza');
 		await expect(comingTable).toContainText('Bier');
@@ -122,7 +125,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 
 	test('sollte eine Zusage bearbeiten können', async () => {
 		await page.goto(`/festival/${festivalId}`);
-		
+
 		// Button sollte nun "Zusage bearbeiten" heißen
 		const editJoinButton = page.locator('button:has-text("Zusage bearbeiten")');
 		await expect(editJoinButton).toBeVisible({ timeout: 15000 });
@@ -134,12 +137,15 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		// Daten ändern
 		await dialog.locator('#food').fill('Pasta');
 		await dialog.locator('#drink').fill('Wein');
-		
+
 		await dialog.locator('button:has-text("Beitreten")').click();
 		await expect(dialog).not.toBeVisible({ timeout: 15000 });
 
 		// Geänderte Daten in der Tabelle prüfen
-		const comingTable = page.locator('section').filter({ has: page.locator('h5', { hasText: 'Zusagen:' }) }).locator('table');
+		const comingTable = page
+			.locator('section')
+			.filter({ has: page.locator('h5', { hasText: 'Zusagen:' }) })
+			.locator('table');
 		await expect(comingTable).toContainText('Pasta', { timeout: 15000 });
 		await expect(comingTable).toContainText('Wein', { timeout: 15000 });
 		await expect(comingTable).not.toContainText('Pizza');
@@ -147,7 +153,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 
 	test('sollte zum Festival absagen können', async () => {
 		await page.goto(`/festival/${festivalId}`);
-		
+
 		// Absagen Button klicken (In der Button-Leiste am Ende der Seite)
 		const leaveButton = page.locator('article > section').last().locator('button:has-text("Absagen")');
 		await expect(leaveButton).toBeVisible();
@@ -159,7 +165,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 
 		// Kommentar hinzufügen
 		await page.fill('#comment', 'Leider keine Zeit');
-		
+
 		// Bestätigen (Button Label ist "Absagen" laut CancelInvitationDialog.svelte)
 		// Wir nutzen hier den Button innerhalb des Dialogs
 		await dialog.locator('button:has-text("Absagen")').click();
@@ -172,7 +178,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 
 		// Der User sollte NICHT mehr in der "Zusagen" Tabelle stehen (falls die Tabelle überhaupt noch da ist)
 		const comingSection = page.locator('section:has(h5:has-text("Zusagen:"))');
-		if (await comingSection.locator('table').count() > 0) {
+		if ((await comingSection.locator('table').count()) > 0) {
 			await expect(comingSection.locator('table')).not.toContainText(userNickname);
 		} else {
 			await expect(comingSection).toContainText('Es hat noch niemand zugesagt.');
@@ -181,7 +187,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 
 	test('sollte eine Absage bearbeiten können', async () => {
 		await page.goto(`/festival/${festivalId}`);
-		
+
 		// Button sollte nun "Absage bearbeiten" heißen
 		const editLeaveButton = page.locator('article > section').last().locator('button:has-text("Absage bearbeiten")');
 		await expect(editLeaveButton).toBeVisible();
@@ -192,7 +198,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 
 		// Kommentar ändern
 		await page.fill('#comment', 'Bin doch im Urlaub');
-		
+
 		await dialog.locator('button:has-text("Absagen")').click();
 		await expect(dialog).not.toBeVisible();
 
@@ -204,7 +210,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 
 	test('sollte von einer Absage wieder zur Zusage wechseln können', async () => {
 		await page.goto(`/festival/${festivalId}`);
-		
+
 		// Wieder auf Zusagen klicken (heißt aktuell "Zusagen", da wir abgesagt haben)
 		const joinButton = page.locator('article > section').last().locator('button:has-text("Zusagen")');
 		await expect(joinButton).toBeVisible();
@@ -212,7 +218,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 
 		const dialog = page.locator('dialog[open]');
 		await expect(dialog).toBeVisible();
-		
+
 		await page.fill('#food', 'Salat');
 		await dialog.locator('button:has-text("Beitreten")').click();
 		await expect(dialog).not.toBeVisible();

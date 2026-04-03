@@ -2,7 +2,7 @@ name: Deploy to Uberspace
 
 on:
   workflow_run:
-    workflows: ["Run Playwright Tests"]
+    workflows: ['Run Playwright Tests']
     types:
       - completed
     branches:

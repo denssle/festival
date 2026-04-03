@@ -47,14 +47,14 @@ test.describe.serial('Gruppen Management', () => {
 		const searchInput = page.locator('input[name="q"]');
 		await expect(searchInput).toBeVisible();
 		await searchInput.fill(groupName);
-		
+
 		// Klick auf Suchen und warten auf Navigation
 		await page.click('button[type="submit"]');
 
 		// Verifizieren, dass die Suchergebnisse angezeigt werden
 		// Wir prüfen erst auf den Text im Heading, da die URL-Prüfung flakig sein kann
 		await expect(page.locator('h4')).toContainText(`Suchergebnisse für "${groupName}"`, { timeout: 15000 });
-		
+
 		// Und den Link zur Gruppe in der Suchsektion
 		await expect(page.locator('.search-section ul li a', { hasText: groupName })).toBeVisible({ timeout: 15000 });
 
@@ -92,7 +92,7 @@ test.describe.serial('Gruppen Management', () => {
 		const logoutButton = page.getByRole('button', { name: 'Logout' });
 		await expect(logoutButton).toBeVisible();
 		await logoutButton.click();
-		
+
 		// Sicherstellen, dass Logout erfolgreich war
 		await expect(page).toHaveURL('/login', { timeout: 15000 });
 
@@ -111,7 +111,9 @@ test.describe.serial('Gruppen Management', () => {
 		await page.click('form[action="?/join"] button:has-text("Beitreten")');
 
 		// Erfolgsmeldung prüfen
-		await expect(page.locator('.message.success')).toContainText('Du bist der Gruppe erfolgreich beigetreten!', { timeout: 15000 });
+		await expect(page.locator('.message.success')).toContainText('Du bist der Gruppe erfolgreich beigetreten!', {
+			timeout: 15000
+		});
 
 		// Beitreten Button sollte nun weg sein
 		await expect(joinButton).not.toBeVisible();
@@ -213,9 +215,11 @@ test.describe.serial('Gruppen Management', () => {
 		const joinButton = page.getByRole('button', { name: 'Beitreten' });
 		await expect(joinButton).toBeVisible({ timeout: 15000 });
 		await joinButton.click();
-		
+
 		// Verifizieren, dass er beigetreten ist
-		await expect(page.locator('.message.success')).toContainText('Du bist der Gruppe erfolgreich beigetreten!', { timeout: 15000 });
+		await expect(page.locator('.message.success')).toContainText('Du bist der Gruppe erfolgreich beigetreten!', {
+			timeout: 15000
+		});
 		await expect(page.locator('section').getByText(memberNickname)).toBeVisible({ timeout: 15000 });
 
 		// Verlassen Button sollte nun sichtbar sein

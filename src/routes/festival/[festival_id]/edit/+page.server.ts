@@ -38,7 +38,12 @@ export const actions: Actions = {
 		const festivalId: string | undefined = params.festival_id;
 		const values: FormData = await request.formData();
 		const name: FormDataEntryValue | null = values.get('name');
-		const description: FormDataEntryValue | null = values.get('description');
+		const user = UserService.extractUser(cookies.get('session'));
+
+		if (!user) {
+			throw redirect(302, '/login');
+		}
+
 		if (festivalId && name) {
 			const description = values.get('description')?.toString() ?? '';
 			const location = values.get('location')?.toString() ?? '';
@@ -48,7 +53,7 @@ export const actions: Actions = {
 			const bringYourOwnFood = values.get('bringYourOwnFood') === 'on';
 
 			const result: ChangeResult = await FestivalEventService.updateFestival(
-				UserService.extractUser(cookies.get('session')),
+				user,
 				festivalId,
 				String(name),
 				description,
