@@ -146,8 +146,10 @@ export class FestivalEventService {
 		};
 	}
 
-	private static isChangeAllowed(id: string, dataValues: FestivalEventAttributes): boolean {
-		return id === dataValues.UserId;
+	private static isChangeAllowed(userId: string, dataValues: FestivalEventAttributes): boolean {
+		const ownerId = dataValues.UserId || (dataValues as any).userId || (dataValues as any).UserId;
+		// console.log('isChangeAllowed check:', { userId, ownerId, dataValues });
+		return userId === ownerId;
 	}
 
 	static async getFestivalYouVisit(userId: string): Promise<VisitingFestival[]> {
