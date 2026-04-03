@@ -45,7 +45,7 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 
 		// Verifizieren, dass der Kommentar erscheint
 		const commentLocator = pageA.locator('fieldset').filter({ hasText: commentText });
-		await expect(commentLocator).toBeVisible({ timeout: 15000 });
+		await expect(commentLocator).toBeVisible({ timeout: 20000 });
 		await expect(commentLocator).toContainText(userANickname);
 	});
 

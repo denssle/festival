@@ -8,8 +8,10 @@
 <article>
 	<form method="POST">
 		<p>
-			<input autocomplete="off" name="name" placeholder="Name der Veranstaltung" required value={data?.name ?? ''} />
-			<textarea name="description" placeholder="Kurze Beschreibung" value={data?.description}></textarea>
+			<input name="name" placeholder="Name der Veranstaltung" required value={data?.name ?? ''} />
+		</p>
+		<p>
+			<textarea name="description" placeholder="Kurze Beschreibung">{data?.description ?? ''}</textarea>
 		</p>
 
 		<p>
@@ -18,7 +20,7 @@
 		</p>
 
 		<p>
-			<textarea name="location" placeholder="Ort" value={data.location}></textarea>
+			<textarea name="location" placeholder="Ort">{data.location ?? ''}</textarea>
 		</p>
 
 		<p>

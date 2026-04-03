@@ -16,9 +16,11 @@ export async function register(page: Page, nickname: string, password = TEST_PAS
 
 	const submitButton = page.locator('button[type="submit"]');
 	await expect(submitButton).toBeEnabled();
+	
 	await submitButton.click();
 
-	await expect(page).toHaveURL('/');
+	await expect(page).toHaveURL('/', { timeout: 15000 });
+
 	// Sicherstellen, dass die Session im Header reflektiert wird (Hydration / Login-Status)
 	await expect(page.locator('header nav a[href^="/user/"]')).toBeVisible({ timeout: 10000 });
 	console.log(`Registered user: ${nickname}`);
@@ -49,10 +51,13 @@ export async function login(page: Page, nickname: string, password = TEST_PASSWO
 	await page.goto('/login');
 	await page.fill('input[name="nickname"]', nickname);
 	await page.fill('input[name="password"]', password);
-	await page.click('button[type="submit"]');
+	const submitButton = page.locator('button[type="submit"]');
+	await Promise.all([
+		page.waitForURL('/', { timeout: 15000 }),
+		submitButton.click()
+	]);
 
 	// Sicherstellen, dass der Login erfolgreich war (Redirect zur Home-Seite)
-	await expect(page).toHaveURL('/');
 	await expect(page.locator('header nav a[href^="/user/"]')).toBeVisible({ timeout: 10000 });
 	console.log(`Logged in user: ${nickname}`);
 }

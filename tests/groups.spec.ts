@@ -56,7 +56,7 @@ test.describe.serial('Gruppen Management', () => {
 		await expect(page.locator('h4')).toContainText(`Suchergebnisse für "${groupName}"`, { timeout: 15000 });
 		
 		// Und den Link zur Gruppe in der Suchsektion
-		await expect(page.locator('.search-section a', { hasText: groupName })).toBeVisible({ timeout: 15000 });
+		await expect(page.locator('.search-section ul li a', { hasText: groupName })).toBeVisible({ timeout: 15000 });
 
 		// Suche nach einem Begriff, der keine Ergebnisse liefert
 		await page.fill('input[name="q"]', 'NichtExistierendeGruppe_XYZ_123');
@@ -108,7 +108,7 @@ test.describe.serial('Gruppen Management', () => {
 		await expect(joinButton).toBeVisible({ timeout: 15000 });
 
 		// Beitreten klicken
-		await joinButton.click();
+		await page.click('form[action="?/join"] button:has-text("Beitreten")');
 
 		// Erfolgsmeldung prüfen
 		await expect(page.locator('.message.success')).toContainText('Du bist der Gruppe erfolgreich beigetreten!', { timeout: 15000 });

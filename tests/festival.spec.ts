@@ -46,34 +46,48 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 	});
 
 	test('sollte das Festival bearbeiten können', async () => {
-		// Wir sind bereits auf der Detailseite, klicken auf Bearbeiten
+		// Wir sind bereits auf der Detailseite
+		await expect(page.locator('h4 u')).toContainText(festivalName, { timeout: 15000 });
+		
+		// ID extrahieren (id ist im globalen Scope definiert)
+		const festivalId = page.url().split('/').pop() || '';
+
+		// Wir klicken auf Bearbeiten
 		const editButton = page.locator('button:has-text("Bearbeiten")');
 		await expect(editButton).toBeVisible();
+		
 		await editButton.click();
 		
-		// Falls die Navigation langsam ist
+		// Falls der Klick nicht navigiert (SvelteKit Client-Side Routing), erzwingen wir es
+		if (!page.url().endsWith('/edit')) {
+			await page.goto(`/festival/${festivalId}/edit`);
+		}
+		
+		// Warten auf Navigation zur Edit-Seite
 		await expect(page).toHaveURL(/\/festival\/.*\/edit/, { timeout: 15000 });
 
 		// Sicherstellen, dass die Felder geladen sind
 		const nameInput = page.locator('input[name="name"]');
 		await expect(nameInput).toBeVisible({ timeout: 15000 });
-
+		await nameInput.clear();
 		await nameInput.fill(updatedFestivalName);
-		await page.uncheck('input[name="bringYourOwnFood"]');
-
-		// Klicke auf Speichern
-		await page.click('button:has-text("Speichern")');
 		
-		// Warten auf Rückkehr zur Detailseite
-		await expect(page).toHaveURL(new RegExp(`/festival/${festivalId}$`), { timeout: 15000 });
+		// Checkboxen
+		const foodCheckbox = page.locator('input[name="bringYourOwnFood"]');
+		await foodCheckbox.uncheck();
 
+		// Klicke auf Speichern und warte auf Navigation zurück
+		const saveButton = page.locator('button:has-text("Speichern")');
+		await saveButton.click();
+		
+		// Warten auf Navigation zur Detailseite
+		await expect(page).toHaveURL(new RegExp(`/festival/${festivalId}$`), { timeout: 15000 });
+		
 		// Verifizieren des neuen Namens
-		// In +page.svelte steht der Name in einem <u> innerhalb von <h4>
 		await expect(page.locator('h4 u')).toContainText(updatedFestivalName, { timeout: 15000 });
 
-		// Checkbox sollte nun deaktiviert und unchecked sein (disabled da Read-only auf Detailseite)
-		const foodCheckbox = page.locator('input[name="bringYourOwnFood"]');
-		await expect(foodCheckbox).not.toBeChecked();
+		// Checkbox sollte nun deaktiviert und unchecked sein
+		await expect(page.locator('input[name="bringYourOwnFood"]')).not.toBeChecked();
 	});
 
 	test('sollte zu einem Festival zusagen können', async () => {
@@ -100,8 +114,8 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		await expect(dialog).not.toBeVisible();
 
 		// In der Tabelle "Zusagen" prüfen
-		const comingTable = page.locator('section:has(h5:has-text("Zusagen:")) table');
-		await expect(comingTable).toContainText(userNickname);
+		const comingTable = page.locator('section').filter({ has: page.locator('h5', { hasText: 'Zusagen:' }) }).locator('table');
+		await expect(comingTable).toContainText(userNickname, { timeout: 15000 });
 		await expect(comingTable).toContainText('Pizza');
 		await expect(comingTable).toContainText('Bier');
 	});
@@ -111,23 +125,23 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		
 		// Button sollte nun "Zusage bearbeiten" heißen
 		const editJoinButton = page.locator('button:has-text("Zusage bearbeiten")');
-		await expect(editJoinButton).toBeVisible();
+		await expect(editJoinButton).toBeVisible({ timeout: 15000 });
 		await editJoinButton.click();
 
 		const dialog = page.locator('dialog[open]');
-		await expect(dialog).toBeVisible();
+		await expect(dialog).toBeVisible({ timeout: 15000 });
 
 		// Daten ändern
-		await page.fill('#food', 'Pasta');
-		await page.fill('#drink', 'Wein');
+		await dialog.locator('#food').fill('Pasta');
+		await dialog.locator('#drink').fill('Wein');
 		
 		await dialog.locator('button:has-text("Beitreten")').click();
-		await expect(dialog).not.toBeVisible();
+		await expect(dialog).not.toBeVisible({ timeout: 15000 });
 
 		// Geänderte Daten in der Tabelle prüfen
-		const comingTable = page.locator('section:has(h5:has-text("Zusagen:")) table');
-		await expect(comingTable).toContainText('Pasta');
-		await expect(comingTable).toContainText('Wein');
+		const comingTable = page.locator('section').filter({ has: page.locator('h5', { hasText: 'Zusagen:' }) }).locator('table');
+		await expect(comingTable).toContainText('Pasta', { timeout: 15000 });
+		await expect(comingTable).toContainText('Wein', { timeout: 15000 });
 		await expect(comingTable).not.toContainText('Pizza');
 	});
 

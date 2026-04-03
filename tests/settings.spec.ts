@@ -21,12 +21,23 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		await expect(passwordInput).toBeVisible();
 		await passwordInput.fill(newPassword);
 		
-		await page.click('button[type="submit"]');
+		// Klick auf Speichern und warten auf Navigation
+		await Promise.all([
+			page.waitForNavigation({ waitUntil: 'networkidle' }),
+			page.click('button[type="submit"]')
+		]);
+
+		// Das <details> muss eventuell wieder geöffnet werden, falls es nach Reload geschlossen ist
+		const summary = page.locator('summary', { hasText: 'Passwort' });
+		const details = page.locator('details');
+		const isOpen = await details.evaluate((node) => (node as HTMLDetailsElement).open);
+		if (!isOpen) {
+			await summary.click();
+		}
 
 		// Erfolgsmeldung prüfen - sie ist in einem span innerhalb des p-tags
 		const successMessage = page.locator('span', { hasText: 'Password changed' });
-		// Wir prüfen hier nur auf den Textinhalt, da die Sichtbarkeit (hidden Attribut) problematisch sein könnte
-		await expect(successMessage).toHaveText('Password changed', { timeout: 15000 });
+		await expect(successMessage).toBeVisible({ timeout: 15000 });
 
 		// Logout über den Button im Header
 		await page.click('nav button:has-text("Logout")');
@@ -43,6 +54,7 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 	test('sollte ein Profilbild hochladen können', async ({ page }) => {
 		const userId = await getUserId(page);
 		await page.goto(`/user/${userId}`);
+		await expect(page).toHaveURL(`/user/${userId}`, { timeout: 15000 });
 		
 		const fileChooserPromise = page.waitForEvent('filechooser');
 		await page.click('button:has-text("Bild hochladen")');
@@ -62,6 +74,9 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		await expect(dialog).toBeVisible({ timeout: 15000 });
 		await expect(dialog).toContainText('Bild erfolgreich hochgeladen');
 		await dialog.locator('button:has-text("Okay")').click();
+
+		// Sicherstellen, dass wir noch auf der User-Profilseite sind (und nicht redirected wurden)
+		await expect(page).toHaveURL(`/user/${userId}`, { timeout: 15000 });
 
 		// Prüfen ob das Bild im Avatar geladen wird
 		// Alt-Text in AvatarImage.svelte ist "alt avatar"

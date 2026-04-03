@@ -101,6 +101,7 @@ export class FestivalEventService {
 					location: location
 				});
 				await festivalModel.save();
+				console.log('Festival updated in DB:', festivalModel.dataValues.name);
 				return 'Success';
 			} else {
 				return 'Not authorized';
