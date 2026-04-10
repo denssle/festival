@@ -25,3 +25,10 @@ npm run start-server
 ```
 
 This command ensures that dependencies are installed and the server is reachable under the configured host.
+
+## AI Assistant Configuration
+
+This project uses an AI Assistant (like Junie or JetBrains AI) for development. The rules and guidelines for the AI are stored in:
+
+- `.aiassistant/guidelines.md`: Project-specific architectural and coding standards.
+- `.aiassistant/rules/rules.md`: Active rules for the assistant.

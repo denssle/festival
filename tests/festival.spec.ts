@@ -46,48 +46,42 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 	});
 
 	test('sollte das Festival bearbeiten können', async () => {
-		// Wir sind bereits auf der Detailseite
+		await page.goto(`/festival/${festivalId}`);
 		await expect(page.locator('h4 u')).toContainText(festivalName, { timeout: 15000 });
 
-		// ID extrahieren (id ist im globalen Scope definiert)
-		const festivalId = page.url().split('/').pop() || '';
+		await page.goto(`/festival/${festivalId}/edit`);
+		await expect(page).toHaveURL(`/festival/${festivalId}/edit`, { timeout: 15000 });
 
-		// Wir klicken auf Bearbeiten
-		const editButton = page.locator('button:has-text("Bearbeiten")');
-		await expect(editButton).toBeVisible();
-
-		await editButton.click();
-
-		// Falls der Klick nicht navigiert (SvelteKit Client-Side Routing), erzwingen wir es
-		if (!page.url().endsWith('/edit')) {
-			await page.goto(`/festival/${festivalId}/edit`);
-		}
-
-		// Warten auf Navigation zur Edit-Seite
-		await expect(page).toHaveURL(/\/festival\/.*\/edit/, { timeout: 15000 });
-
-		// Sicherstellen, dass die Felder geladen sind
 		const nameInput = page.locator('input[name="name"]');
 		await expect(nameInput).toBeVisible({ timeout: 15000 });
-		await nameInput.clear();
 		await nameInput.fill(updatedFestivalName);
 
-		// Checkboxen
+		const descriptionInput = page.locator('textarea[name="description"]');
+		await descriptionInput.fill('Aktualisierte Beschreibung für den Test.');
+
+		const locationInput = page.locator('textarea[name="location"]');
+		await locationInput.fill('Neuer Test-Ort');
+
 		const foodCheckbox = page.locator('input[name="bringYourOwnFood"]');
-		await foodCheckbox.uncheck();
+		if (await foodCheckbox.isChecked()) {
+			await foodCheckbox.uncheck();
+		}
 
-		// Klicke auf Speichern und warte auf Navigation zurück
-		const saveButton = page.locator('button:has-text("Speichern")');
-		await saveButton.click();
+		const bottleCheckbox = page.locator('input[name="bringYourOwnBottle"]');
+		if (!(await bottleCheckbox.isChecked())) {
+			await bottleCheckbox.check();
+		}
 
-		// Warten auf Navigation zur Detailseite
-		await expect(page).toHaveURL(new RegExp(`/festival/${festivalId}$`), { timeout: 15000 });
+		const saveButton = page.locator('button[type="submit"]', { hasText: 'Speichern' });
+		await Promise.all([
+			page.waitForURL(new RegExp(`/festival/${festivalId}$`), { timeout: 15000 }),
+			saveButton.click()
+		]);
 
-		// Verifizieren des neuen Namens
 		await expect(page.locator('h4 u')).toContainText(updatedFestivalName, { timeout: 15000 });
-
-		// Checkbox sollte nun deaktiviert und unchecked sein
+		await expect(page.locator('p')).toContainText('Aktualisierte Beschreibung für den Test.');
 		await expect(page.locator('input[name="bringYourOwnFood"]')).not.toBeChecked();
+		await expect(page.locator('input[name="bringYourOwnBottle"]')).toBeChecked();
 	});
 
 	test('sollte zu einem Festival zusagen können', async () => {

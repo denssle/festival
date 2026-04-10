@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { register, getUserId } from './test-utils';
 
 test.describe('Benutzereinstellungen und Profilbild', () => {
-	const testNickname = `SettingsUser_${Date.now()}`;
+	const testNickname = `User_${Date.now()}`;
 	const initialPassword = 'InitialPassword123!';
 	const newPassword = 'NewSecurePassword456!';
 
