@@ -2,15 +2,11 @@ import { test, expect } from '@playwright/test';
 import { register, getUserId } from './test-utils';
 
 test.describe('Benutzereinstellungen und Profilbild', () => {
-	const testNickname = `User_${Date.now()}`;
-	const initialPassword = 'InitialPassword123!';
-	const newPassword = 'NewSecurePassword456!';
-
-	test.beforeEach(async ({ page }) => {
-		await register(page, testNickname, initialPassword);
-	});
-
 	test('sollte das Passwort ändern können', async ({ page }) => {
+		const testNickname = `Password_User_${Date.now()}`;
+		const initialPassword = 'InitialPassword123!';
+		const newPassword = 'NewSecurePassword456!';
+		await register(page, testNickname, initialPassword);
 		await page.goto('/settings');
 		await expect(page.locator('h2')).toContainText('Einstellungen');
 
@@ -49,6 +45,7 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 	});
 
 	test('sollte ein Profilbild hochladen können', async ({ page }) => {
+		await register(page, `Profilbild_User_${Date.now()}`, 'InitialPassword123!');
 		const userId = await getUserId(page);
 		await page.goto(`/user/${userId}`);
 		await expect(page).toHaveURL(`/user/${userId}`, { timeout: 15000 });

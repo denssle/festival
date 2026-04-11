@@ -104,17 +104,17 @@
 	}
 
 	let joinFestivalButtonText = 'Zusagen';
-	let leaveFestivalButtonText = 'Absagen';
+	let cancelFestivalButtonText = 'Absagen';
 	updateButtonLabels();
 
 	function updateButtonLabels() {
 		joinFestivalButtonText = 'Zusagen';
-		leaveFestivalButtonText = 'Absagen';
-		if (data.yourGestInformation) {
-			if (data.yourGestInformation.coming) {
+		cancelFestivalButtonText = 'Absagen';
+		if (data.yourGuestInformation) {
+			if (data.yourGuestInformation.coming) {
 				joinFestivalButtonText = 'Zusage bearbeiten';
 			} else {
-				leaveFestivalButtonText = 'Absage bearbeiten';
+				cancelFestivalButtonText = 'Absage bearbeiten';
 			}
 		}
 	}
@@ -122,7 +122,7 @@
 	let cancelInvitationDialogData: CancelInvitationDialogData = {
 		showDialog: false,
 		dialog: undefined,
-		comment: data.yourGestInformation?.comment ?? '',
+		comment: data.yourGuestInformation?.comment ?? '',
 		answerYes: false
 	};
 	let infoDialogData: InfoDialogData = {
@@ -135,12 +135,12 @@
 		showDialog: false,
 		bringYourOwnBottle: data.festival.bringYourOwnBottle,
 		bringYourOwnFood: data.festival.bringYourOwnFood,
-		food: data.yourGestInformation?.food ?? '',
-		drink: data.yourGestInformation?.drink ?? '',
-		numberOfOtherGuests: data.yourGestInformation?.numberOfOtherGuests ?? 0,
+		food: data.yourGuestInformation?.food ?? '',
+		drink: data.yourGuestInformation?.drink ?? '',
+		numberOfOtherGuests: data.yourGuestInformation?.numberOfOtherGuests ?? 0,
 		dialog: undefined,
 		coming: true,
-		comment: data.yourGestInformation?.comment ?? '',
+		comment: data.yourGuestInformation?.comment ?? '',
 		answerYes: false
 	};
 	let questionDialogData: QuestionDialogData = {
@@ -185,7 +185,7 @@
 	<section>
 		<button on:click={editFestival}>Bearbeiten</button>
 		<button on:click={deleteFestival}>Löschen</button>
-		<button on:click={cancelInvitation}>{leaveFestivalButtonText}</button>
+		<button on:click={cancelInvitation}>{cancelFestivalButtonText}</button>
 		<button on:click={joinFestival}>{joinFestivalButtonText}</button>
 		<a class="button" href="/">Zurück</a>
 	</section>

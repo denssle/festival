@@ -8,7 +8,6 @@ test.describe.serial('Profile Festivals Display', () => {
 	let page: any;
 	let context: any;
 	let userId: string;
-	let festivalId: string;
 
 	test.beforeAll(async ({ browser }) => {
 		context = await browser.newContext();
@@ -31,8 +30,6 @@ test.describe.serial('Profile Festivals Display', () => {
 		await page.fill('input[name="startTime"]', '18:00');
 
 		await Promise.all([page.waitForURL(/\/festival\/[a-z0-9-]+$/), page.click('button:has-text("Speichern")')]);
-
-		festivalId = page.url().split('/').pop() || '';
 
 		// 2. Beitreten (Zusagen)
 		const zusagenButton = page.getByRole('button', { name: 'Zusagen' });
