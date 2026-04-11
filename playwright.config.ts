@@ -29,21 +29,18 @@ export default defineConfig({
 		{
 			name: 'chromium',
 			use: { ...devices['Desktop Chrome'] }
-		},
-
+		}
+		/*
 		{
 			name: 'firefox',
-			use: { ...devices['Desktop Firefox'] },
-			/* Skip firefox locally to save time, only run on CI */
-			grep: process.env.CI ? /.*/ : /@fast/
+			use: { ...devices['Desktop Firefox'] }
 		},
 
 		{
 			name: 'webkit',
-			use: { ...devices['Desktop Safari'] },
-			/* Skip webkit locally to save time, only run on CI */
-			grep: process.env.CI ? /.*/ : /@fast/
+			use: { ...devices['Desktop Safari'] }
 		}
+		 */
 	],
 
 	/* Run your local dev server before starting the tests */

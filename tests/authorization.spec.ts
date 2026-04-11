@@ -49,6 +49,7 @@ test.describe.serial('Profile Festivals Authorization', () => {
 		await expect(zusagenButton).toBeVisible();
 
 		await zusagenButton.click();
+
 		const beitretenButton = user1Page.getByRole('button', { name: 'Beitreten' });
 		await expect(beitretenButton).toBeVisible({ timeout: 10000 });
 		await Promise.all([
