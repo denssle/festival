@@ -1,11 +1,9 @@
-import { Sequelize, type Options } from 'sequelize';
+import { type Options, Sequelize } from 'sequelize';
 import { MARIA_DB_NAME, MARIA_DB_PASSWORD, MARIA_DB_USER } from '$env/static/private';
-import { dev } from '$app/environment';
 
-const isTest = process.env.NODE_ENV === 'test' || process.env.VITEST === 'true' || process.env.PLAYWRIGHT === 'true';
-const useSqlite = isTest || dev;
+const isTestOrLocal = MARIA_DB_NAME == 'dev';
 
-const options: Options = useSqlite
+const options: Options = isTestOrLocal
 	? {
 			dialect: 'sqlite',
 			storage: ':memory:',

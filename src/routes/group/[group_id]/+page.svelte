@@ -113,11 +113,7 @@
 		vertical-align: middle;
 	}
 
-	.actions {
-		margin-top: 2rem;
-	}
-
-	.button.primary {
+  .button.primary {
 		background-color: #007bff;
 		color: white;
 		border: none;
@@ -139,13 +135,5 @@
 	.header-actions {
 		display: flex;
 		align-items: center;
-	}
-
-	.button.secondary {
-		background-color: #6c757d;
-		color: white;
-		text-decoration: none;
-		padding: 0.5rem 1rem;
-		border-radius: 4px;
 	}
 </style>

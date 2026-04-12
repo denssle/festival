@@ -1,7 +1,7 @@
 <script lang="ts">
 	import uberspaceBanner from '../../images/uberspace_badge_dark.png';
 
-	export let data: { version: string };
+	export let data: { version: string, db: string };
 </script>
 
 <article>
@@ -21,13 +21,14 @@
 	</section>
 	<section>
 		<p>Version: {data.version}</p>
+		<p>DB: {data.db}</p>
 	</section>
 </article>
 
 <style>
-	.center {
-		display: block;
-		margin-left: auto;
-		margin-right: auto;
-	}
+    .center {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
 </style>
