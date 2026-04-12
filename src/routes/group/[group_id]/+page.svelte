@@ -113,7 +113,7 @@
 		vertical-align: middle;
 	}
 
-  .button.primary {
+	.button.primary {
 		background-color: #007bff;
 		color: white;
 		border: none;
