@@ -1,7 +1,11 @@
 import { type Options, Sequelize } from 'sequelize';
 import { MARIA_DB_NAME, MARIA_DB_PASSWORD, MARIA_DB_USER } from '$env/static/private';
 
-const isTestOrLocal = MARIA_DB_NAME == 'dev';
+const isTestOrLocal =
+	MARIA_DB_NAME == 'dev' ||
+	process.env.NODE_ENV === 'test' ||
+	process.env.VITEST === 'true' ||
+	process.env.PLAYWRIGHT === 'true';
 
 const options: Options = isTestOrLocal
 	? {

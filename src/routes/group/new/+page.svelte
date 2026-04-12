@@ -4,7 +4,7 @@
 		<form method="POST">
 			<p>
 				<input name="name" placeholder="Name der Gruppe" required />
-				<textarea name="description" placeholder="Kurze Beschreibung" />
+				<textarea name="description" placeholder="Kurze Beschreibung"></textarea>
 			</p>
 
 			<button type="submit">Speichern</button>
