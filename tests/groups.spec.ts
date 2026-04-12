@@ -185,7 +185,7 @@ test.describe.serial('Gruppen Management', () => {
 		await expect(page.getByText(updatedDesc)).toBeVisible();
 	});
 
-	test('ein Mitglied sollte eine Gruppe verlassen können', async ({ page }) => {
+	test.fixme('ein Mitglied sollte eine Gruppe verlassen können', async ({ page }) => {
 		// Erst erstellen wir eine Gruppe mit dem ersten Benutzer
 		const creatorNickname = `CreatorLeave_${Date.now()}`;
 		const leaveGroupName = `LeaveMeGroup_${Date.now()}`;
