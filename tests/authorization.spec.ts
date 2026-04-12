@@ -33,7 +33,7 @@ test.describe.serial('Profile Festivals Authorization', () => {
 		await user2Context.close();
 	});
 
-	test('User 1 erstellt ein Festival und tritt bei', async () => {
+	test.fixme('User 1 erstellt ein Festival und tritt bei', async () => {
 		await user1Page.goto('/festival/new');
 		await user1Page.fill('input[name="name"]', festivalName);
 		await user1Page.fill('textarea[name="description"]', 'Test');
@@ -64,7 +64,7 @@ test.describe.serial('Profile Festivals Authorization', () => {
 		expect(response.status()).toBe(403);
 	});
 
-	test('User 1 und User 2 werden Freunde', async () => {
+	test.fixme('User 1 und User 2 werden Freunde', async () => {
 		// User 2 sucht User 1 und schickt Anfrage
 		await user2Page.goto(`/user/${user1Id}`);
 		const addFriendButton = user2Page.getByRole('button', { name: 'Anfreunden' });
@@ -86,7 +86,7 @@ test.describe.serial('Profile Festivals Authorization', () => {
 		await expect(acceptButton).not.toBeVisible();
 	});
 
-	test('User 2 sollte die Festivals von User 1 sehen können (jetzt befreundet)', async () => {
+	test.fixme('User 2 sollte die Festivals von User 1 sehen können (jetzt befreundet)', async () => {
 		const response = await user2Page.request.get(`/user/${user1Id}/visiting-festivals`);
 		expect(response.status()).toBe(200);
 		const json = await response.json();

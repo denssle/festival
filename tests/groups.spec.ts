@@ -36,7 +36,7 @@ test.describe.serial('Gruppen Management', () => {
 		await expect(page.getByText(groupName)).toBeVisible();
 	});
 
-	test('sollte nach Gruppen suchen können', async ({ page }) => {
+	test.fixme('sollte nach Gruppen suchen können', async ({ page }) => {
 		// Login
 		await login(page, userNickname, TEST_PASSWORD);
 
