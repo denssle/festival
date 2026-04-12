@@ -56,29 +56,29 @@
 </article>
 
 <style>
-    .actions {
-        margin-bottom: 2rem;
-    }
+	.actions {
+		margin-bottom: 2rem;
+	}
 
-    .search-section {
-        margin-bottom: 2rem;
-        padding-bottom: 2rem;
-    }
+	.search-section {
+		margin-bottom: 2rem;
+		padding-bottom: 2rem;
+	}
 
-    .description {
-        font-size: 0.9rem;
-        color: #666;
-        margin: 0;
-    }
+	.description {
+		font-size: 0.9rem;
+		color: #666;
+		margin: 0;
+	}
 
-    form {
-        display: flex;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-    }
+	form {
+		display: flex;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
 
-    input[type='text'] {
-        flex-grow: 1;
-        padding: 0.5rem;
-    }
+	input[type='text'] {
+		flex-grow: 1;
+		padding: 0.5rem;
+	}
 </style>
