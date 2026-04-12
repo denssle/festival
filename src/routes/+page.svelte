@@ -8,6 +8,7 @@
 <article>
 	<h2>Festivals</h2>
 	<p>Willkommen hier.</p>
+
 	<section>
 		<a class="button" href="/festival/new">Neues Fest anlegen</a>
 

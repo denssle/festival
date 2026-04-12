@@ -69,71 +69,64 @@
 </article>
 
 <style>
-	header {
-		margin-bottom: 2rem;
-		padding-bottom: 1rem;
-		border-bottom: 1px solid #ccc;
-	}
+    header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+    }
 
-	.header-content {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
-	.description {
-		font-style: italic;
-		color: #555;
-	}
+    .description {
+        font-style: italic;
+        color: #555;
+    }
 
-	.message {
-		padding: 0.5rem;
-		border-radius: 4px;
-		margin-top: 1rem;
-	}
+    .message {
+        padding: 0.5rem;
+        border-radius: 4px;
+        margin-top: 1rem;
+    }
 
-	.message.success {
-		background-color: #d4edda;
-		color: #155724;
-		border: 1px solid #c3e6cb;
-	}
+    .message.success {
+        background-color: #d4edda;
+        color: var(--dark-green);
+        border: 1px solid var(--darkest-green);
+    }
 
-	.message.error {
-		background-color: #f8d7da;
-		color: #721c24;
-		border: 1px solid #f5c6cb;
-	}
+    .message.error {
+        background-color: #f8d7da;
+        color: var(--red);
+        border: 1px solid #f5c6cb;
+    }
 
-	.badge {
-		background: #eee;
-		padding: 2px 6px;
-		border-radius: 4px;
-		font-size: 0.8rem;
-		margin-left: 0.5rem;
-		vertical-align: middle;
-	}
+    .badge {
+        background: var(--green);
+        color: var(--dark-gray);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        margin-left: 0.5rem;
+        vertical-align: middle;
+    }
 
-	.button.primary {
-		background-color: #007bff;
-		color: white;
-		border: none;
-		padding: 0.5rem 1rem;
-		border-radius: 4px;
-		cursor: pointer;
-	}
+    .button.primary {
+        border: none;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+    }
 
-	.button.danger {
-		background-color: #dc3545;
-		color: white;
-		border: none;
-		padding: 0.5rem 1rem;
-		border-radius: 4px;
-		cursor: pointer;
-		margin-right: 0.5rem;
-	}
+    .button.danger {
+        background-color: var(--red);
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+    }
 
-	.header-actions {
-		display: flex;
-		align-items: center;
-	}
+    .header-actions {
+        display: flex;
+        align-items: center;
+    }
 </style>
