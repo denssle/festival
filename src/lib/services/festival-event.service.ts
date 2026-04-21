@@ -16,6 +16,7 @@ import { BackendGuestInformation } from '$lib/models/guestInformation/BackendGue
 import { VisitingFestival } from '$lib/models/user/VisitingFestival';
 import { GuestInformation } from '$lib/db/model/guestInformation';
 import { FestivalEvent } from '$lib/db/model/festivalEvent';
+import { isChangeAllowed } from './festival-event.logic';
 
 export class FestivalEventService {
 	static async getAllFestivals(): Promise<FrontendFestivalEvent[]> {
@@ -91,7 +92,8 @@ export class FestivalEventService {
 	): Promise<ChangeResult> {
 		const festivalModel = await this.getFestivalModel(festivalId);
 		if (festivalModel && user) {
-			if (this.isChangeAllowed(user.id, festivalModel.dataValues)) {
+			const ownerId = festivalModel.dataValues.UserId || (festivalModel.dataValues as any).userId;
+			if (isChangeAllowed(user.id, ownerId)) {
 				festivalModel.set({
 					name: name,
 					description: description,
@@ -114,7 +116,8 @@ export class FestivalEventService {
 	static async deleteFestival(user: BackendUser | null | SessionTokenUser, festivalId: string): Promise<ChangeResult> {
 		const festivalModel = await this.getFestivalModel(festivalId);
 		if (user && festivalModel) {
-			if (festivalModel && this.isChangeAllowed(user.id, festivalModel.dataValues)) {
+			const ownerId = festivalModel.dataValues.UserId || (festivalModel.dataValues as any).userId;
+			if (festivalModel && isChangeAllowed(user.id, ownerId)) {
 				await festivalModel.destroy();
 				return 'Success';
 			} else {
@@ -144,12 +147,6 @@ export class FestivalEventService {
 			),
 			location: festival.location
 		};
-	}
-
-	private static isChangeAllowed(userId: string, dataValues: FestivalEventAttributes): boolean {
-		const ownerId = dataValues.UserId || (dataValues as any).userId || (dataValues as any).UserId;
-		// console.log('isChangeAllowed check:', { userId, ownerId, dataValues });
-		return userId === ownerId;
 	}
 
 	static async getFestivalYouVisit(userId: string): Promise<VisitingFestival[]> {

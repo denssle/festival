@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto, invalidateAll } from '$app/navigation';
+	import { tick } from 'svelte';
 	import { formateDateTime } from '$lib/utils/date.util';
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
 	import JoinEventDialog from './join/JoinEventDialog.svelte';
@@ -30,8 +31,12 @@
 		if (data.yourFestival) {
 			questionDialogData.questionText = 'Bist du dir sicher?';
 			questionDialogData.showDialog = true;
-			if (questionDialogData.dialog) {
-				questionDialogData.dialog.onclose = () => {
+			await tick();
+
+			const dialog = questionDialogData.dialog;
+			if (dialog) {
+				dialog.showModal();
+				const onclose = () => {
 					if (questionDialogData.answerYes) {
 						fetch('/festival/' + data.festival.id, {
 							method: 'DELETE'
@@ -39,7 +44,10 @@
 							goto('/');
 						});
 					}
+					dialog.removeEventListener('close', onclose);
+					questionDialogData.answerYes = false;
 				};
+				dialog.addEventListener('close', onclose);
 			}
 		} else {
 			infoDialogData.infoDialogText = 'Das ist nicht dein Event. ';
@@ -47,10 +55,13 @@
 		}
 	}
 
-	function joinFestival(): void {
+	async function joinFestival(): Promise<void> {
 		joinDialogData.showDialog = true;
-		if (joinDialogData.dialog) {
-			joinDialogData.dialog.onclose = () => {
+		await tick();
+		const dialog = joinDialogData.dialog;
+		if (dialog) {
+			if (!dialog.open) dialog.showModal();
+			const onclose = () => {
 				if (joinDialogData.answerYes) {
 					const eventData: BaseGuestInformation = {
 						food: joinDialogData.food,
@@ -77,14 +88,20 @@
 							alert('Netzwerkfehler beim Zusagen.');
 						});
 				}
+ 				dialog.removeEventListener('close', onclose);
+				joinDialogData.answerYes = false;
 			};
+			dialog.addEventListener('close', onclose);
 		}
 	}
 
-	function cancelInvitation(): void {
+	async function cancelInvitation(): Promise<void> {
 		cancelInvitationDialogData.showDialog = true;
-		if (cancelInvitationDialogData.dialog) {
-			cancelInvitationDialogData.dialog.onclose = () => {
+		await tick();
+		const dialog = cancelInvitationDialogData.dialog;
+		if (dialog) {
+			dialog.showModal();
+			const onclose = () => {
 				if (cancelInvitationDialogData.answerYes) {
 					fetch('/festival/' + data.festival.id + '/cancel-invitation', {
 						method: 'POST',
@@ -93,7 +110,10 @@
 						afterRequest();
 					});
 				}
+ 				dialog.removeEventListener('close', onclose);
+				cancelInvitationDialogData.answerYes = false;
 			};
+			dialog.addEventListener('close', onclose);
 		}
 	}
 

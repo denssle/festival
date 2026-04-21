@@ -11,7 +11,9 @@ export const DELETE: RequestHandler = async ({ cookies, params }): Promise<Respo
 		);
 		if (result === 'Success') {
 			return new Response(null, { status: 303 });
+		} else if (result === 'Not authorized') {
+			return new Response(null, { status: 403 });
 		}
 	}
-	return new Response(null, { status: 200 });
+	return new Response(null, { status: 400 });
 };

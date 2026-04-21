@@ -30,7 +30,7 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 		await contextB.close();
 	});
 
-	test.fixme('User A sollte einen Kommentar auf dem Profil von User B erstellen', async () => {
+	test('User A sollte einen Kommentar auf dem Profil von User B erstellen', async () => {
 		// User A navigiert zum Profil von User B
 		await pageA.goto(`/user/${userBId}`);
 		await expect(pageA.locator('h2')).toContainText(userBNickname);
@@ -49,7 +49,7 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 		await expect(commentLocator).toContainText(userANickname);
 	});
 
-	test.fixme('User A sollte den Kommentar bearbeiten können', async () => {
+	test('User A sollte den Kommentar bearbeiten können', async () => {
 		await pageA.goto(`/user/${userBId}`);
 		await expect(pageA.locator('h2')).toContainText(userBNickname);
 
@@ -76,12 +76,12 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 		await expect(pageA.locator('button:has-text("Speichern")')).toBeDisabled();
 	});
 
-	test.fixme('User B sollte den bearbeiteten Kommentar sehen', async () => {
+	test('User B sollte den bearbeiteten Kommentar sehen', async () => {
 		await pageB.goto(`/user/${userBId}`);
 		await expect(pageB.locator('fieldset').filter({ hasText: updatedCommentText })).toBeVisible({ timeout: 15000 });
 	});
 
-	test.fixme('User A sollte den Kommentar löschen können', async () => {
+	test('User A sollte den Kommentar löschen können', async () => {
 		await pageA.goto(`/user/${userBId}`);
 		const updatedCommentLocator = pageA.locator('fieldset').filter({ hasText: updatedCommentText });
 		await expect(updatedCommentLocator).toBeVisible({ timeout: 10000 });

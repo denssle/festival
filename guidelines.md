@@ -46,15 +46,34 @@
 - `bcrypt-ts` für alle passwortbezogenen Operationen verwenden.
 - Trennung zwischen `FrontendUser`, `BackendUser` und `CurrentUser` beibehalten.
 
-## 5. Testing Best Practices (Playwright)
+## 5. Testing Strategy
 
-- **Parallelität vs. Datenbank-Zustand:** Da die Tests eine gemeinsame Datenbank nutzen, muss in `playwright.config.ts` die Parallelisierung deaktiviert werden (`fullyParallel: false`, `workers: 1`), um Race Conditions zu vermeiden.
-- **Robustere Navigation:** Verwenden Sie `Promise.all([page.waitForURL(...), page.click(...)])`, um sicherzustellen, dass die Seite vollständig geladen ist, bevor Folgeschritte ausgeführt werden. Einfache Klicks ohne `waitForURL` sind in asynchronen Umgebungen fehleranfällig.
-- **Hilfsfunktionen:** Nutzen Sie zentrale Funktionen in `tests/test-utils.ts` (z.B. `login`, `register`), um redundanten Code zu vermeiden und die Wartbarkeit zu erhöhen.
-- **Test-Stabilität:** Da SvelteKit asynchron hydriert, sollten Tests explizit auf die Sichtbarkeit von Elementen warten (`toBeVisible()`), anstatt nur die URL-Änderung oder das Vorhandensein im DOM zu prüfen.
-- **Serial Execution:** Wenn Tests aufeinander aufbauen (z. B. User-Registrierung -> Festival-Erstellung -> Edit), sollte `test.describe.serial` verwendet werden, um eine deterministische Reihenfolge sicherzustellen.
-- **Retries:** In CI-Umgebungen sollten Retries aktiviert sein (`retries: 2`), um temporäre Netzwerk- oder Datenbankverzögerungen abzufangen.
-- **Eindeutigkeit:** Test-Daten (Namen, E-Mails) sollten Zeitstempel (`Date.now()`) enthalten, um Kollisionen bei wiederholten Testläufen zu vermeiden.
+### Unit Testing (Vitest)
+- **Fokus:** Isolierte Geschäftslogik, Service-Methoden, Validierungsfunktionen (`*.logic.ts`).
+- **Framework:** `vitest`.
+- **Ausführung:** `npm run test:unit`.
+- **Regel:** Komplexe Berechnungen oder Geschäftslogik sollten immer als Unit-Test abgebildet werden, um die Testabdeckung ohne UI-Flakiness zu maximieren.
+
+### E2E Testing (Playwright)
+- **Fokus:** Kritische User Journeys, UI-Interaktionen, Authentifizierung.
+- **Framework:** `playwright`.
+- **Ausführung:** `npm run test` (oder `npm run test:ui`).
+- **Parallelität:** Muss deaktiviert bleiben (`workers: 1`), da die E2E-Tests eine gemeinsame Datenbank teilen.
+- **Stabilität:**
+    - Nutzen Sie `waitForURL` für Navigation.
+    - Verwenden Sie `dialog.waitFor({ state: 'visible' })` statt `expect(dialog).toBeVisible()` für `<dialog>`-Elemente, da letzteres bei noch nicht geöffneten Dialogen zu Timeouts führt.
+    - `waitForResponse` **vor** dem auslösenden Klick registrieren (nicht in `Promise.all`), um Race Conditions zu vermeiden.
+    - Nutzen Sie `waitForLoadState('networkidle')` nach Navigationen, um sicherzustellen, dass die Seite vollständig geladen ist.
+    - Nutzen Sie `test.describe.serial` für Test-Sequenzen, die aufeinander aufbauen.
+    - Eindeutige Testdaten (`Date.now()`) verwenden.
+    - `test.fixme` vermeiden, stattdessen Tests aktiv halten und stabilisieren.
+    - Bei mehreren `<dialog>`-Elementen auf einer Seite präzise Locators verwenden (z.B. `dialog:has-text("Titel")`), um "Strict mode violation" zu vermeiden.
+    - Für API-Requests in Tests (z.B. DELETE), die Session-Cookies benötigen, `page.evaluate(() => fetch(...))` verwenden, damit der Browser seine eigenen Cookies mitsendet.
+
+### Svelte Dialog-Handling
+- **`bind:this` und `showModal()`:** Vor dem Registrieren eines Event-Listeners auf einem Dialog muss sichergestellt sein, dass `bind:this` gesetzt ist. `await tick()` vor `showModal()` einfügen, damit Svelte das DOM aktualisiert hat.
+- **Event-Listener:** `addEventListener('close', handler)` statt der direkten `onclose`-Zuweisung verwenden, um sicherzustellen, dass Handler korrekt registriert und entfernt werden.
+- **Svelte-Version:** Svelte 4 `$:`-Reaktivität verwenden (nicht Svelte 5 Runes-Syntax), konsistent mit der restlichen Codebase.
 
 ## 6. Setup-Hinweise
 

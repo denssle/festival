@@ -12,7 +12,8 @@
 		"format": "prettier --plugin-search-dir . --write .",
 		"test": "playwright test",
 		"test:ui": "playwright test --ui",
-		"test:install": "npx playwright install --with-deps"
+		"test:install": "npx playwright install --with-deps",
+		"test:unit": "vitest"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.28.5",

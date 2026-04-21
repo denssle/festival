@@ -20,7 +20,7 @@ test.describe.serial('Profile Festivals Display', () => {
 		await context.close();
 	});
 
-	test.fixme('sollte ein Festival anlegen und beitreten', async () => {
+	test('sollte ein Festival anlegen und beitreten', async () => {
 		// 1. Festival erstellen
 		await page.goto('/festival/new');
 		await page.fill('input[name="name"]', festivalName);
@@ -30,21 +30,22 @@ test.describe.serial('Profile Festivals Display', () => {
 		await page.fill('input[name="startTime"]', '18:00');
 
 		await Promise.all([page.waitForURL(/\/festival\/[a-z0-9-]+$/), page.click('button:has-text("Speichern")')]);
+		await page.waitForLoadState('networkidle');
 
 		// 2. Beitreten (Zusagen)
 		const zusagenButton = page.getByRole('button', { name: 'Zusagen' });
 		await expect(zusagenButton).toBeVisible({ timeout: 10000 });
 		await zusagenButton.click();
 
-		const dialog = page.locator('dialog[open]');
-		await expect(dialog).toBeVisible({ timeout: 10000 });
+		const dialog = page.locator('dialog:has-text("Bei dem Event bin ich dabei!")');
+		await dialog.waitFor({ state: 'visible', timeout: 10000 });
 
 		await dialog.locator('#food').fill('Pasta');
 		await dialog.locator('button:has-text("Beitreten")').click();
 		await expect(dialog).not.toBeVisible({ timeout: 10000 });
 	});
 
-	test.fixme('sollte das Festival nur einmal im Profil anzeigen', async () => {
+	test('sollte das Festival nur einmal im Profil anzeigen', async () => {
 		// Simuliere einen zweiten (vielleicht verwaisten oder fehlerhaften) Eintrag in der DB,
 		// indem wir einfach nochmal beitreten (falls das UI das zulässt oder wir es provozieren)
 		// Da wir den Service fixen, sollte die UI trotzdem nur einen anzeigen.

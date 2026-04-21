@@ -36,7 +36,7 @@ test.describe.serial('Gruppen Management', () => {
 		await expect(page.getByText(groupName)).toBeVisible();
 	});
 
-	test.fixme('sollte nach Gruppen suchen können', async ({ page }) => {
+	test('sollte nach Gruppen suchen können', async ({ page }) => {
 		// Login
 		await login(page, userNickname, TEST_PASSWORD);
 
@@ -185,7 +185,7 @@ test.describe.serial('Gruppen Management', () => {
 		await expect(page.getByText(updatedDesc)).toBeVisible();
 	});
 
-	test.fixme('ein Mitglied sollte eine Gruppe verlassen können', async ({ page }) => {
+	test('ein Mitglied sollte eine Gruppe verlassen können', async ({ page }) => {
 		// Erst erstellen wir eine Gruppe mit dem ersten Benutzer
 		const creatorNickname = `CreatorLeave_${Date.now()}`;
 		const leaveGroupName = `LeaveMeGroup_${Date.now()}`;

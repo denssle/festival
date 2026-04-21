@@ -70,7 +70,7 @@ test.describe.serial('Freundschaftsprozess', () => {
 		await expect(pageB.locator('button:has-text("Freund entfernen")')).toBeVisible();
 	});
 
-	test.fixme('User A sollte User B als Freund entfernen können', async () => {
+	test('User A sollte User B als Freund entfernen können', async () => {
 		await pageA.goto(`/user/${userBId}`);
 		const removeFriendButton = pageA.locator('button:has-text("Freund entfernen")');
 		await removeFriendButton.click();

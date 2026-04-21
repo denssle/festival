@@ -45,7 +45,17 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		festivalId = page.url().split('/').pop() || '';
 	});
 
-	test.fixme('sollte das Festival bearbeiten können', async () => {
+	test('sollte das Anlegen eines Festivals ohne Name verhindern', async () => {
+		await page.goto('/festival/new');
+		await page.fill('input[name="name"]', '');
+		await page.fill('textarea[name="description"]', 'Kein Name Test');
+		await page.fill('textarea[name="location"]', 'Test-Ort');
+		await page.click('button:has-text("Speichern")');
+		// URL sollte gleich bleiben (keine Navigation)
+		await expect(page).toHaveURL('/festival/new');
+	});
+
+	test('sollte das Festival bearbeiten können', async () => {
 		await page.goto(`/festival/${festivalId}`);
 		await expect(page.locator('h4 u')).toContainText(festivalName, { timeout: 15000 });
 
@@ -86,7 +96,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		// await expect(page.locator('input[name="bringYourOwnBottle"]')).toBeChecked();
 	});
 
-	test.fixme('sollte zu einem Festival zusagen können', async () => {
+	test('sollte zu einem Festival zusagen können', async () => {
 		await page.goto(`/festival/${festivalId}`);
 		await expect(page.locator('h4 u')).toContainText(updatedFestivalName, { timeout: 15000 });
 
@@ -119,7 +129,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		await expect(comingTable).toContainText('Bier');
 	});
 
-	test.fixme('sollte eine Zusage bearbeiten können', async () => {
+	test('sollte eine Zusage bearbeiten können', async () => {
 		await page.goto(`/festival/${festivalId}`);
 
 		// Button sollte nun "Zusage bearbeiten" heißen
