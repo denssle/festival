@@ -40,6 +40,7 @@ Verantwortlichkeiten
     Es sollte ein klar definierter Notfallplan existieren, der beschreibt, wie auf Sicherheitsvorfälle reagiert werden soll.
     Notfallkontaktinformationen sollten an einem sicheren Ort verfügbar sein.
 
+
 ### Zustimmung zu den Richtlinien
 
 Alle Mitwirkenden an diesem Repository sind angehalten, diese Sicherheitsrichtlinien zu lesen, zu verstehen und einzuhalten.

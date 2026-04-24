@@ -9,14 +9,17 @@ const noAuthURLs: string[] = ['/login', '/registration', '/about', '/impressum']
 
 export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 	const pathname: string = event.url.pathname;
-	const extractedUser: SessionTokenUser | null = UserService.extractUser(event.cookies.get('session'));
-	const userExistsAndValid: boolean = await UserService.userExists(extractedUser);
-	if (extractedUser && userExistsAndValid) {
+	const sessionToken: string | undefined = event.cookies.get('session');
+	const isSessionValid: boolean = await UserService.validateSessionToken(sessionToken);
+	const extractedUser: SessionTokenUser | null = UserService.extractUser(sessionToken);
+
+	if (extractedUser && isSessionValid) {
 		await UserService.createSessionCookie(event.cookies, event.locals, extractedUser);
 	} else {
-		UserService.logout(extractedUser, event.cookies, event.locals);
+		await UserService.logout(extractedUser, event.cookies, event.locals);
 	}
-	if (noAuthURLs.includes(pathname) || userExistsAndValid) {
+
+	if (noAuthURLs.includes(pathname) || isSessionValid) {
 		return resolve(event);
 	} else {
 		return new Response('Redirect', { status: 303, headers: { Location: '/login' } });
