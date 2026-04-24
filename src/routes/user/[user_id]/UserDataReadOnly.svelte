@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { FrontendUser } from '$lib/models/user/FrontendUser';
 
-	export let user: FrontendUser;
+	let { user }: { user: FrontendUser } = $props();
 </script>
 
 <div>

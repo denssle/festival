@@ -9,7 +9,7 @@
 	import UserDataReadOnly from './UserDataReadOnly.svelte';
 	import VisitingFestivals from './VisitingFestivals.svelte';
 
-	export let data: UserTransferData;
+	let { data }: { data: UserTransferData } = $props();
 </script>
 
 <article>

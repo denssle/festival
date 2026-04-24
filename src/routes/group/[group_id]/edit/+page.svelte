@@ -2,8 +2,7 @@
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
 
-	export let data: PageData;
-	export let form: ActionData;
+	let { data, form }: { data: PageData; form: ActionData } = $props();
 </script>
 
 <article>
@@ -16,7 +15,7 @@
 			</p>
 			<p>
 				<label for="description">Beschreibung</label>
-				<textarea id="description" name="description" placeholder="Kurze Beschreibung" value={data.group.description} />
+ 			<textarea id="description" name="description" placeholder="Kurze Beschreibung" value={data.group.description}></textarea>
 			</p>
 
 			{#if form?.message}

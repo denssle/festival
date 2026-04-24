@@ -1,16 +1,23 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import type { CurrentUser } from '$lib/models/user/CurrentUser';
+	import type { Snippet } from 'svelte';
+
+	let {
+		data,
+		children
+	}: {
+		data: { currentUser: CurrentUser | undefined };
+		children: Snippet;
+	} = $props();
 
 	async function logout() {
 		await fetch('/logout', {
 			method: 'POST'
 		});
-		data.currentUser = undefined;
+		await invalidateAll();
 		await goto('/login');
 	}
-
-	export let data: { currentUser: CurrentUser | undefined };
 </script>
 
 <header>
@@ -21,7 +28,7 @@
 			<a href="/user/{data.currentUser.id}">{data.currentUser.nickname}</a>
 			<a href="/updates">Updates</a>
 			<a href="/settings">Einstellungen</a>
-			<button on:click|trusted={logout}>Logout</button>
+			<button onclick={logout}>Logout</button>
 		{:else}
 			<a href="/login">Anmelden</a>
 			<a href="/registration">Registrieren</a>
@@ -29,7 +36,7 @@
 	</nav>
 </header>
 
-<slot />
+{@render children()}
 
 <footer>
 	<nav>

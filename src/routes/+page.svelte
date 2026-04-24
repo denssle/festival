@@ -2,7 +2,7 @@
 	import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 	import { getTotalNumberOfComingGuests } from '$lib/utils/festivalEvent.util';
 
-	export let data: { festivalEvents: FrontendFestivalEvent[] };
+	let { data }: { data: { festivalEvents: FrontendFestivalEvent[] } } = $props();
 </script>
 
 <article>

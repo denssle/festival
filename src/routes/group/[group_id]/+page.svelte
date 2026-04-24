@@ -20,7 +20,7 @@
 			<div class="header-actions">
 				{#if currentUser && group.ownerId === currentUser.id}
 					<a href="/group/{group.id}/edit" class="button">Bearbeiten</a>
-					<form method="POST" action="?/delete" use:enhance on:submit={confirmDelete}>
+ 				<form method="POST" action="?/delete" use:enhance onsubmit={confirmDelete}>
 						<button type="submit" class="button danger">Gruppe löschen</button>
 					</form>
 				{/if}

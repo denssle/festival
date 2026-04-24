@@ -18,6 +18,7 @@
 	});
 
 	function handleSubmit(e: SubmitEvent) {
+		e.preventDefault();
 		const form = e.target as HTMLFormElement;
 		const formData = new FormData(form);
 		fetch(whereId + '/comments', {
@@ -96,7 +97,7 @@
 
 <QuestionDialog bind:questionDialogData />
 
-<form on:submit|preventDefault={handleSubmit}>
+<form onsubmit={handleSubmit}>
 	<label for="comment">Kommentar: </label>
 	<textarea id="comment" name="comment" bind:value={inputComment}></textarea>
 	<p>
@@ -118,15 +119,15 @@
 		{/if}
 		{#if comment.yourComment}
 			<div>
-				<button on:click={() => deleteComment(comment.id)} disabled={notYours}>Löschen</button>
-				<button on:click={() => (comment.editMode = !comment.editMode)} disabled={notYours}>
+				<button onclick={() => deleteComment(comment.id)} disabled={notYours}>Löschen</button>
+				<button onclick={() => (comment.editMode = !comment.editMode)} disabled={notYours}>
 					{#if comment.editMode}
 						Abbrechen
 					{:else}
 						Bearbeiten
 					{/if}
 				</button>
-				<button on:click={() => updateComment(comment)} disabled={notYours || !comment.editMode}> Speichern</button>
+				<button onclick={() => updateComment(comment)} disabled={notYours || !comment.editMode}> Speichern</button>
 			</div>
 		{/if}
 		<CreationChangedDate createdAt={comment.createdAt} updatedAt={comment.updatedAt} />

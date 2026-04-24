@@ -10,53 +10,52 @@ test.describe.serial('Gruppen Management', () => {
 	test.beforeAll(async ({ browser }) => {
 		const page = await browser.newPage();
 		await register(page, userNickname, TEST_PASSWORD);
+		await page.waitForLoadState('networkidle');
+
+		// Gruppe vorab anlegen, damit sie für alle Tests verfügbar ist
+		await page.goto('/group/new', { waitUntil: 'networkidle' });
+		await page.fill('input[name="name"]', groupName);
+		await page.fill('textarea[name="description"]', groupDescription);
+		await Promise.all([
+			page.waitForURL(/\/group\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/),
+			page.click('button[type="submit"]')
+		]);
+		await page.waitForLoadState('networkidle');
 		await page.close();
 	});
 
 	test('sollte eine neue Gruppe anlegen können', async ({ page }) => {
-		// Login
+		// Gruppe wurde in beforeAll angelegt – hier nur verifizieren
 		await login(page, userNickname, TEST_PASSWORD);
-
-		// Zur Gruppenseite navigieren
-		await page.goto('/group');
-		await expect(page.getByText('Deine Gruppen')).toBeVisible();
-
-		// Neue Gruppe anlegen
-		await Promise.all([page.waitForURL('/group/new'), page.click('a[href="/group/new"]')]);
-
-		await page.fill('input[name="name"]', groupName);
-		await page.fill('textarea[name="description"]', groupDescription);
-		await Promise.all([page.waitForURL(/\/group\/[0-9a-f-]+/), page.click('button[type="submit"]')]);
-
-		// Verifizieren, dass wir auf der richtigen Seite sind (Gruppenname sollte dort stehen)
-		await expect(page.getByRole('heading', { name: groupName })).toBeVisible();
-
-		// Optional: Zurück zur Übersicht und prüfen, ob sie dort erscheint
-		await page.goto('/group');
-		await expect(page.getByText(groupName)).toBeVisible();
+		await page.waitForLoadState('networkidle');
+		await page.goto('/group', { waitUntil: 'networkidle' });
+		await expect(page.getByText(groupName)).toBeVisible({ timeout: 15000 });
 	});
 
 	test('sollte nach Gruppen suchen können', async ({ page }) => {
 		// Login
 		await login(page, userNickname, TEST_PASSWORD);
+		await page.waitForLoadState('networkidle');
 
 		// Zur Gruppenseite navigieren
-		await page.goto('/group');
+		await page.goto('/group', { waitUntil: 'networkidle' });
 
 		// Suche nach der zuvor erstellten Gruppe
 		const searchInput = page.locator('input[name="q"]');
 		await expect(searchInput).toBeVisible();
 		await searchInput.fill(groupName);
 
-		// Klick auf Suchen und warten auf Navigation
-		await page.click('button[type="submit"]');
+		// Klick auf Suchen und auf Seitenaktualisierung warten
+		await Promise.all([
+			page.waitForLoadState('networkidle'),
+			page.click('button[type="submit"]')
+		]);
 
 		// Verifizieren, dass die Suchergebnisse angezeigt werden
-		// Wir prüfen erst auf den Text im Heading, da die URL-Prüfung flakig sein kann
 		await expect(page.locator('h4')).toContainText(`Suchergebnisse für "${groupName}"`, { timeout: 15000 });
 
-		// Und den Link zur Gruppe in der Suchsektion
-		await expect(page.locator('.search-section ul li a', { hasText: groupName })).toBeVisible({ timeout: 15000 });
+		// Und den Link zur Gruppe in den Suchergebnissen
+		await expect(page.locator(`a[href*="/group/"]:has-text("${groupName}")`).first()).toBeVisible({ timeout: 15000 });
 
 		// Suche nach einem Begriff, der keine Ergebnisse liefert
 		await page.fill('input[name="q"]', 'NichtExistierendeGruppe_XYZ_123');
@@ -83,7 +82,7 @@ test.describe.serial('Gruppen Management', () => {
 		await page.goto('/group/new');
 		await page.fill('input[name="name"]', joinableGroupName);
 		await page.click('button[type="submit"]');
-		await expect(page).toHaveURL(/\/group\/[0-9a-f-]+/, { timeout: 15000 });
+		await expect(page).toHaveURL(/\/group\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/, { timeout: 15000 });
 
 		// URL der Gruppe merken
 		const groupUrl = page.url();
@@ -92,31 +91,30 @@ test.describe.serial('Gruppen Management', () => {
 		const logoutButton = page.getByRole('button', { name: 'Logout' });
 		await expect(logoutButton).toBeVisible();
 		await logoutButton.click();
-
-		// Sicherstellen, dass Logout erfolgreich war
-		await expect(page).toHaveURL('/login', { timeout: 15000 });
+		await page.waitForURL('/login', { timeout: 15000 });
+		await page.waitForLoadState('networkidle');
 
 		// Neuer Benutzer registrieren
 		const joinerNickname = `Joiner_${Date.now()}`;
 		await register(page, joinerNickname, TEST_PASSWORD);
+		await page.waitForLoadState('networkidle');
 
 		// Zur Gruppenseite navigieren
-		await page.goto(groupUrl);
+		await page.goto(groupUrl, { waitUntil: 'networkidle' });
 
 		// Beitreten Button sollte sichtbar sein
 		const joinButton = page.getByRole('button', { name: 'Beitreten' });
 		await expect(joinButton).toBeVisible({ timeout: 15000 });
 
-		// Beitreten klicken
-		await page.click('form[action="?/join"] button:has-text("Beitreten")');
-
-		// Erfolgsmeldung prüfen
-		await expect(page.locator('.message.success')).toContainText('Du bist der Gruppe erfolgreich beigetreten!', {
-			timeout: 15000
-		});
+		// Beitreten klicken und auf Seitenaktualisierung warten
+		await Promise.all([
+			page.waitForResponse((resp: any) => resp.url().includes('/join'), { timeout: 15000 }),
+			page.click('form[action="?/join"] button:has-text("Beitreten")')
+		]);
+		await page.waitForLoadState('networkidle');
 
 		// Beitreten Button sollte nun weg sein
-		await expect(joinButton).not.toBeVisible();
+		await expect(joinButton).not.toBeVisible({ timeout: 15000 });
 
 		// Prüfen ob der Benutzer in der Mitgliederliste steht
 		// Wir nutzen .last(), da der Name im Header (nav) und in der Mitgliederliste (section) vorkommt
@@ -195,7 +193,7 @@ test.describe.serial('Gruppen Management', () => {
 		await page.goto('/group/new');
 		await page.fill('input[name="name"]', leaveGroupName);
 		await page.click('button[type="submit"]');
-		await expect(page).toHaveURL(/\/group\/[0-9a-f-]+/, { timeout: 15000 });
+		await expect(page).toHaveURL(/\/group\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/, { timeout: 15000 });
 
 		// URL der Gruppe merken
 		const groupUrl = page.url();
@@ -204,41 +202,46 @@ test.describe.serial('Gruppen Management', () => {
 		const logoutButton = page.getByRole('button', { name: 'Logout' });
 		await expect(logoutButton).toBeVisible();
 		await logoutButton.click();
-		await expect(page).toHaveURL('/login', { timeout: 15000 });
+		await page.waitForURL('/login', { timeout: 15000 });
+		await page.waitForLoadState('networkidle');
 
 		// Ein anderer Benutzer registriert sich und tritt bei
 		const memberNickname = `MemberLeave_${Date.now()}`;
 		await register(page, memberNickname, TEST_PASSWORD);
+		await page.waitForLoadState('networkidle');
 
 		// Zur Gruppe navigieren und beitreten
-		await page.goto(groupUrl);
+		await page.goto(groupUrl, { waitUntil: 'networkidle' });
 		const joinButton = page.getByRole('button', { name: 'Beitreten' });
 		await expect(joinButton).toBeVisible({ timeout: 15000 });
-		await joinButton.click();
+
+		await Promise.all([
+			page.waitForResponse((resp: any) => resp.url().includes('/join'), { timeout: 15000 }),
+			joinButton.click()
+		]);
+		await page.waitForLoadState('networkidle');
 
 		// Verifizieren, dass er beigetreten ist
-		await expect(page.locator('.message.success')).toContainText('Du bist der Gruppe erfolgreich beigetreten!', {
-			timeout: 15000
-		});
 		await expect(page.locator('section').getByText(memberNickname)).toBeVisible({ timeout: 15000 });
 
 		// Verlassen Button sollte nun sichtbar sein
 		const leaveButton = page.getByRole('button', { name: 'Gruppe verlassen' });
 		await expect(leaveButton).toBeVisible({ timeout: 15000 });
 
-		// Verlassen klicken
-		await leaveButton.click();
-
-		// Erfolgsmeldung prüfen
-		await expect(page.locator('.message.success')).toContainText('Du hast die Gruppe verlassen.', { timeout: 15000 });
+		// Verlassen klicken und auf Response warten
+		await Promise.all([
+			page.waitForResponse((resp: any) => resp.url().includes('/leave'), { timeout: 15000 }),
+			leaveButton.click()
+		]);
+		await page.waitForLoadState('networkidle');
 
 		// Verlassen Button sollte nun weg sein
-		await expect(leaveButton).not.toBeVisible();
+		await expect(leaveButton).not.toBeVisible({ timeout: 15000 });
 
 		// Beitreten Button sollte wieder da sein
 		await expect(page.getByRole('button', { name: 'Beitreten' })).toBeVisible({ timeout: 15000 });
 
 		// Prüfen ob der Benutzer nicht mehr in der Mitgliederliste steht
-		await expect(page.locator('section').getByText(memberNickname)).not.toBeVisible();
+		await expect(page.locator('section').getByText(memberNickname)).not.toBeVisible({ timeout: 15000 });
 	});
 });

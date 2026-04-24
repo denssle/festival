@@ -4,8 +4,7 @@
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
 	import { invalidateAll } from '$app/navigation';
 
-	export let yourFriend = false;
-	export let friendId: string;
+	let { yourFriend = false, friendId }: { yourFriend?: boolean; friendId: string } = $props();
 
 	async function addFriend(): Promise<void> {
 		console.log('addFriend called for', friendId);
@@ -43,19 +42,19 @@
 		infoDialogData.showDialog = true;
 	}
 
-	let infoDialogData: InfoDialogData = {
+	let infoDialogData: InfoDialogData = $state({
 		showDialog: false,
 		infoDialogText: '',
 		dialog: undefined,
 		answerYes: false
-	};
+	});
 </script>
 
 <InfoDialog bind:infoDialogData />
 <div>
 	{#if yourFriend}
-		<button on:click={() => removeFriend()}> Freund entfernen</button>
+		<button onclick={() => removeFriend()}> Freund entfernen</button>
 	{:else}
-		<button on:click={() => addFriend()}> Anfreunden</button>
+		<button onclick={() => addFriend()}> Anfreunden</button>
 	{/if}
 </div>

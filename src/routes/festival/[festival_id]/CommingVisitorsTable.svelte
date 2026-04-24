@@ -2,7 +2,7 @@
 	import { getTotalNumberOfComingGuests } from '$lib/utils/festivalEvent.util.js';
 	import type { FestivalTransferData } from '$lib/models/transferData/FestivalTransferData';
 
-	export let data: FestivalTransferData;
+	let { data }: { data: FestivalTransferData } = $props();
 </script>
 
 <section>

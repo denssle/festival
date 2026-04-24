@@ -2,7 +2,7 @@
 	import type { UpdateTransferData } from '$lib/models/updates/UpdateTransferData';
 	import { invalidateAll } from '$app/navigation';
 
-	export let data: UpdateTransferData;
+	let { data }: { data: UpdateTransferData } = $props();
 
 	async function acceptFriendRequest(id: string | undefined) {
 		await fetch(`/updates/accept-friend`, { method: 'POST', body: id });
@@ -30,8 +30,8 @@
 					{received?.receivedFrom?.nickname}
 				</a>
 				<div>
-					<button on:click={() => acceptFriendRequest(received?.receivedFrom?.id)}> Annehmen</button>
-					<button on:click={() => declineFriendRequest(received?.receivedFrom?.id)}> Ablehnen</button>
+ 				<button onclick={() => acceptFriendRequest(received?.receivedFrom?.id)}> Annehmen</button>
+					<button onclick={() => declineFriendRequest(received?.receivedFrom?.id)}> Ablehnen</button>
 				</div>
 			</div>
 		{/each}
@@ -46,7 +46,7 @@
 				<a href="/user/{send?.sendTo?.id}">
 					{send?.sendTo?.nickname}
 				</a>
-				<button on:click={() => cancelFriendRequest(send?.sendTo?.id)}> Zurückziehen</button>
+ 			<button onclick={() => cancelFriendRequest(send?.sendTo?.id)}> Zurückziehen</button>
 			</div>
 		{/each}
 		{#if data.sentFriendRequests.length === 0}

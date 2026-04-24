@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { FrontendUser } from '$lib/models/user/FrontendUser';
 
-	export let data: FrontendUser;
+	let { data }: { data: FrontendUser } = $props();
 </script>
 
 <form autocomplete="on" method="POST">

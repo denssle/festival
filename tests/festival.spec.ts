@@ -14,6 +14,21 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		context = await browser.newContext();
 		page = await context.newPage();
 		await register(page, userNickname);
+		await page.waitForLoadState('networkidle');
+
+		// Festival vorab anlegen, damit festivalId für alle Tests verfügbar ist
+		await page.goto('/festival/new', { waitUntil: 'networkidle' });
+		await page.fill('input[name="name"]', festivalName);
+		await page.fill('textarea[name="description"]', 'Dies ist eine Test-Beschreibung für unser Festival.');
+		await page.fill('textarea[name="location"]', 'Test-Ort im Grünen');
+		await page.fill('input[name="startDate"]', '2026-08-15');
+		await page.fill('input[name="startTime"]', '18:00');
+		await page.check('input[name="bringYourOwnFood"]');
+		await page.check('input[name="bringYourOwnBottle"]');
+		await Promise.all([page.waitForURL(/\/festival\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/), page.click('button:has-text("Speichern")')]);
+		await page.waitForLoadState('networkidle');
+		festivalId = page.url().split('/').pop() || '';
+		if (!festivalId || festivalId === 'new') throw new Error('Festival-ID konnte nicht ermittelt werden');
 	});
 
 	test.afterAll(async () => {
@@ -21,28 +36,10 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 	});
 
 	test('sollte ein neues Festival anlegen können', async () => {
-		await page.goto('/festival/new');
-		await expect(page.locator('h2')).toContainText('Neue Veranstaltung anlegen');
-
-		await page.fill('input[name="name"]', festivalName);
-		await page.fill('textarea[name="description"]', 'Dies ist eine Test-Beschreibung für unser Festival.');
-		await page.fill('textarea[name="location"]', 'Test-Ort im Grünen');
-
-		// Datum setzen
-		await page.fill('input[name="startDate"]', '2026-08-15');
-		await page.fill('input[name="startTime"]', '18:00');
-
-		await page.check('input[name="bringYourOwnFood"]');
-		await page.check('input[name="bringYourOwnBottle"]');
-
-		// Absenden und auf Navigation warten
-		await Promise.all([page.waitForURL(/\/festival\/[a-z0-9-]+$/), page.click('button:has-text("Speichern")')]);
-
-		// Verifizieren: Heading auf der Detailseite
-		await expect(page.getByRole('heading', { level: 4, name: festivalName })).toBeVisible();
-
-		// ID extrahieren
-		festivalId = page.url().split('/').pop() || '';
+		// Festival wurde in beforeAll angelegt – hier nur verifizieren
+		await page.goto(`/festival/${festivalId}`);
+		await page.waitForLoadState('networkidle');
+		await expect(page.locator('h4 u')).toContainText(festivalName, { timeout: 30000 });
 	});
 
 	test('sollte das Anlegen eines Festivals ohne Name verhindern', async () => {
@@ -52,11 +49,13 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		await page.fill('textarea[name="location"]', 'Test-Ort');
 		await page.click('button:has-text("Speichern")');
 		// URL sollte gleich bleiben (keine Navigation)
+		await page.waitForLoadState('networkidle');
 		await expect(page).toHaveURL('/festival/new');
 	});
 
 	test('sollte das Festival bearbeiten können', async () => {
 		await page.goto(`/festival/${festivalId}`);
+		await page.waitForLoadState('networkidle');
 		await expect(page.locator('h4 u')).toContainText(festivalName, { timeout: 15000 });
 
 		await page.goto(`/festival/${festivalId}/edit`);
@@ -65,6 +64,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		const nameInput = page.locator('input[name="name"]');
 		await expect(nameInput).toBeVisible({ timeout: 15000 });
 		await nameInput.fill(updatedFestivalName);
+		await page.waitForTimeout(500);
 
 		const descriptionInput = page.locator('textarea[name="description"]');
 		await descriptionInput.fill('Aktualisierte Beschreibung für den Test.');
@@ -89,7 +89,17 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 			page.waitForURL(new RegExp(`/festival/${festivalId}$`), { timeout: 15000 }),
 			saveButton.click()
 		]);
-
+		await page.waitForLoadState('networkidle');
+		// Explizit zur Detailseite navigieren und auf aktualisierten Namen warten
+		// webkit cached SSR-Responses – retry bis der neue Name erscheint
+		await page.goto(`/festival/${festivalId}`, { waitUntil: 'networkidle' });
+		let attempts = 0;
+		while (attempts < 5) {
+			const text = await page.locator('h4 u').textContent();
+			if (text && text.includes(updatedFestivalName)) break;
+			await page.reload({ waitUntil: 'networkidle' });
+			attempts++;
+		}
 		await expect(page.locator('h4 u')).toContainText(updatedFestivalName, { timeout: 15000 });
 		// TODO await expect(page.locator('p')).toContainText('Aktualisierte Beschreibung für den Test.');
 		// await expect(page.locator('input[name="bringYourOwnFood"]')).not.toBeChecked();

@@ -16,7 +16,7 @@
 	import type { FestivalTransferData } from '$lib/models/transferData/FestivalTransferData';
 	import FestivalComments from '$lib/sharedComponents/Comments.svelte';
 
-	export let data: FestivalTransferData;
+	let { data }: { data: FestivalTransferData } = $props();
 
 	async function editFestival(): Promise<void> {
 		if (data.yourFestival) {
@@ -88,7 +88,7 @@
 							alert('Netzwerkfehler beim Zusagen.');
 						});
 				}
- 				dialog.removeEventListener('close', onclose);
+				dialog.removeEventListener('close', onclose);
 				joinDialogData.answerYes = false;
 			};
 			dialog.addEventListener('close', onclose);
@@ -110,7 +110,7 @@
 						afterRequest();
 					});
 				}
- 				dialog.removeEventListener('close', onclose);
+				dialog.removeEventListener('close', onclose);
 				cancelInvitationDialogData.answerYes = false;
 			};
 			dialog.addEventListener('close', onclose);
@@ -123,8 +123,8 @@
 		});
 	}
 
-	let joinFestivalButtonText = 'Zusagen';
-	let cancelFestivalButtonText = 'Absagen';
+	let joinFestivalButtonText = $state('Zusagen');
+	let cancelFestivalButtonText = $state('Absagen');
 	updateButtonLabels();
 
 	function updateButtonLabels() {
@@ -139,19 +139,19 @@
 		}
 	}
 
-	let cancelInvitationDialogData: CancelInvitationDialogData = {
+	let cancelInvitationDialogData: CancelInvitationDialogData = $state({
 		showDialog: false,
 		dialog: undefined,
 		comment: data.yourGuestInformation?.comment ?? '',
 		answerYes: false
-	};
-	let infoDialogData: InfoDialogData = {
+	});
+	let infoDialogData: InfoDialogData = $state({
 		showDialog: false,
 		infoDialogText: '',
 		dialog: undefined,
 		answerYes: false
-	};
-	let joinDialogData: JoinEventDialogData = {
+	});
+	let joinDialogData: JoinEventDialogData = $state({
 		showDialog: false,
 		bringYourOwnBottle: data.festival.bringYourOwnBottle,
 		bringYourOwnFood: data.festival.bringYourOwnFood,
@@ -162,13 +162,13 @@
 		coming: true,
 		comment: data.yourGuestInformation?.comment ?? '',
 		answerYes: false
-	};
-	let questionDialogData: QuestionDialogData = {
+	});
+	let questionDialogData: QuestionDialogData = $state({
 		showDialog: false,
 		dialog: undefined,
 		questionText: '',
 		answerYes: false
-	};
+	});
 </script>
 
 <InfoDialog bind:infoDialogData />
@@ -203,10 +203,10 @@
 	<NotComingVisitorsTable {data} />
 
 	<section>
-		<button on:click={editFestival}>Bearbeiten</button>
-		<button on:click={deleteFestival}>Löschen</button>
-		<button on:click={cancelInvitation}>{cancelFestivalButtonText}</button>
-		<button on:click={joinFestival}>{joinFestivalButtonText}</button>
+		<button onclick={editFestival}>Bearbeiten</button>
+		<button onclick={deleteFestival}>Löschen</button>
+		<button onclick={cancelInvitation}>{cancelFestivalButtonText}</button>
+		<button onclick={joinFestival}>{joinFestivalButtonText}</button>
 		<a class="button" href="/">Zurück</a>
 	</section>
 

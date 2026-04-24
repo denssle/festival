@@ -4,10 +4,10 @@
 	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
 	import { loadUserImage } from '$lib/stores/userImage.store';
 
-	export let isOwnProfil: boolean;
-	export let userId: string = '';
+	let { isOwnProfil, userId = '' }: { isOwnProfil: boolean; userId?: string } = $props();
+
 	let fileInput: HTMLElement;
-	let files: FileList;
+	let files: FileList = $state() as FileList;
 
 	function onUpload() {
 		if (isOwnProfil) {
@@ -56,12 +56,12 @@
 		infoDialogData.showDialog = true;
 	}
 
-	let infoDialogData: InfoDialogData = {
+	let infoDialogData: InfoDialogData = $state({
 		showDialog: false,
 		infoDialogText: '',
 		dialog: undefined,
 		answerYes: false
-	};
+	});
 </script>
 
 <div>
@@ -70,9 +70,9 @@
 		accept=".png,.jpg"
 		bind:files
 		bind:this={fileInput}
-		on:change={() => getBase64(files[0])}
+		onchange={() => getBase64(files[0])}
 		style="display: none"
 		type="file"
 	/>
-	<button on:click={() => onUpload()}>Bild hochladen</button>
+	<button onclick={() => onUpload()}>Bild hochladen</button>
 </div>

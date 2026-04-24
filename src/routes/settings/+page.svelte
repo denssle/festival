@@ -1,5 +1,5 @@
 <script lang="ts">
-	export let form;
+	let { form }: { form: any } = $props();
 </script>
 
 <article>

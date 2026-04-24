@@ -2,34 +2,44 @@
 	import { dateToHHMM, dateToString } from '$lib/utils/date.util';
 	import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 
-	export let data: FrontendFestivalEvent;
+	let { data }: { data: FrontendFestivalEvent } = $props();
+	
+	let formData = $state({
+		name: data?.name ?? '',
+		description: data?.description ?? '',
+		startDate: dateToString(data.startDate),
+		startTime: dateToHHMM(data.startDate),
+		location: data.location ?? '',
+		bringYourOwnFood: data.bringYourOwnFood,
+		bringYourOwnBottle: data.bringYourOwnBottle
+	});
 </script>
 
 <article>
 	<form method="POST">
 		<p>
-			<input name="name" placeholder="Name der Veranstaltung" required value={data?.name ?? ''} />
+			<input name="name" placeholder="Name der Veranstaltung" required bind:value={formData.name} />
 		</p>
 		<p>
-			<textarea name="description" placeholder="Kurze Beschreibung">{data?.description ?? ''}</textarea>
-		</p>
-
-		<p>
-			<input name="startDate" placeholder="date" type="date" value={dateToString(data.startDate)} />
-			<input name="startTime" placeholder="time" type="time" value={dateToHHMM(data.startDate)} />
+			<textarea name="description" placeholder="Kurze Beschreibung" bind:value={formData.description}></textarea>
 		</p>
 
 		<p>
-			<textarea name="location" placeholder="Ort">{data.location ?? ''}</textarea>
+			<input name="startDate" placeholder="date" type="date" bind:value={formData.startDate} />
+			<input name="startTime" placeholder="time" type="time" bind:value={formData.startTime} />
+		</p>
+
+		<p>
+			<textarea name="location" placeholder="Ort" bind:value={formData.location}></textarea>
 		</p>
 
 		<p>
 			<label>
-				<input bind:checked={data.bringYourOwnFood} name="bringYourOwnFood" type="checkbox" />
+				<input type="checkbox" name="bringYourOwnFood" bind:checked={formData.bringYourOwnFood} />
 				Gäste sollen etwas zu Essen mitbringen.
 			</label>
 			<label>
-				<input bind:checked={data.bringYourOwnBottle} name="bringYourOwnBottle" type="checkbox" />
+				<input type="checkbox" name="bringYourOwnBottle" bind:checked={formData.bringYourOwnBottle} />
 				Gäste sollen etwas zu trinken mitbringen.
 			</label>
 		</p>

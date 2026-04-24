@@ -1,7 +1,7 @@
 <script lang="ts">
 	import uberspaceBanner from '../../images/uberspace_badge_dark.png';
 
-	export let data: { version: string; db: string };
+	let { data }: { data: { version: string; db: string } } = $props();
 </script>
 
 <article>

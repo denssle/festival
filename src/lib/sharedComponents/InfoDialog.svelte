@@ -1,12 +1,14 @@
 <script lang="ts">
 	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
 
-	export let infoDialogData: InfoDialogData;
+	let { infoDialogData = $bindable() }: { infoDialogData: InfoDialogData } = $props();
 
-	$: if (infoDialogData.dialog && infoDialogData.showDialog) infoDialogData.dialog.showModal();
+	$effect(() => {
+		if (infoDialogData.dialog && infoDialogData.showDialog) infoDialogData.dialog.showModal();
+	});
 </script>
 
-<dialog bind:this={infoDialogData.dialog} on:close={() => (infoDialogData.showDialog = false)}>
+<dialog bind:this={infoDialogData.dialog} onclose={() => (infoDialogData.showDialog = false)}>
 	<p>{infoDialogData.infoDialogText}</p>
-	<button on:click={() => infoDialogData.dialog?.close()} style="float: right">Okay</button>
+	<button onclick={() => infoDialogData.dialog?.close()} style="float: right">Okay</button>
 </dialog>

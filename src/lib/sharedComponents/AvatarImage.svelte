@@ -29,7 +29,7 @@
 	}
 </script>
 
-<div style="--size:{size + 'em'};" on:click={() => onImageClick()}>
+<div style="--size:{size + 'em'};" onclick={() => onImageClick()} role="button" tabindex="0" onkeypress={() => onImageClick()}>
 	{#if avatar}
 		<img src={avatar} alt="alt avatar" class="avatar" />
 	{:else}

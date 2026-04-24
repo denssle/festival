@@ -12,16 +12,18 @@ test.describe.serial('Profil Gruppen Anzeige', () => {
 		const userId = await getUserId(page);
 
 		// 2. Gruppe anlegen
-		await page.goto('/group/new');
+		await page.goto('/group/new', { waitUntil: 'networkidle' });
 		await page.fill('input[name="name"]', groupName);
 		await page.fill('textarea[name="description"]', 'Eine Testgruppe für das Profil.');
+		const responsePromise = page.waitForResponse((r: any) => r.url().includes('/group') && r.status() === 200);
 		await page.click('button[type="submit"]');
+		await responsePromise;
 
 		// Redirect zur Gruppenseite prüfen
-		await expect(page).toHaveURL(/\/group\/[0-9a-f-]+/);
+		await page.waitForURL(/\/group\/[0-9a-f-]+/, { timeout: 15000 });
 
 		// 3. Zum Profil navigieren
-		await page.goto(`/user/${userId}`);
+		await page.goto(`/user/${userId}`, { waitUntil: 'networkidle' });
 
 		// 4. Prüfen, ob die Gruppe in der neuen Sektion angezeigt wird
 		const groupsSection = page.locator('section:has(h4:text("Gruppen:"))');
@@ -40,7 +42,7 @@ test.describe.serial('Profil Gruppen Anzeige', () => {
 		await register(page, newUser);
 		const userId = await getUserId(page);
 
-		await page.goto(`/user/${userId}`);
+		await page.goto(`/user/${userId}`, { waitUntil: 'networkidle' });
 
 		const groupsSection = page.locator('section:has(h4:text("Gruppen:"))');
 		await expect(groupsSection).toBeVisible();

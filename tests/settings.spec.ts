@@ -17,8 +17,11 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		await expect(passwordInput).toBeVisible();
 		await passwordInput.fill(newPassword);
 
-		// Klick auf Speichern und warten auf Navigation
-		await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle' }), page.click('button[type="submit"]')]);
+		// Klick auf Speichern und warten auf Antwort
+		const responsePromise = page.waitForResponse((r: any) => r.url().includes('/settings') && r.status() === 200);
+		await page.click('button[type="submit"]');
+		await responsePromise;
+		await page.waitForLoadState('networkidle');
 
 		// Das <details> muss eventuell wieder geöffnet werden, falls es nach Reload geschlossen ist
 		const summary = page.locator('summary', { hasText: 'Passwort' });
@@ -34,7 +37,7 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 
 		// Logout über den Button im Header
 		await page.click('nav button:has-text("Logout")');
-		await expect(page).toHaveURL('/login', { timeout: 15000 });
+		await page.waitForURL('/login', { timeout: 15000 });
 
 		// Login mit neuem Passwort verifizieren
 		await page.fill('input[name="nickname"]', testNickname);
@@ -70,7 +73,7 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 
 		// Dialog-Erfolg abwarten - Präziser Selektor um Strict Mode Violation zu vermeiden
 		const dialog = page.locator('dialog').filter({ hasText: 'Okay' });
-		await expect(dialog).toBeVisible({ timeout: 15000 });
+		await dialog.waitFor({ state: 'visible', timeout: 15000 });
 		await expect(dialog).toContainText('Bild erfolgreich hochgeladen');
 		await dialog.locator('button:has-text("Okay")').click();
 

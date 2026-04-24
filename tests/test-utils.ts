@@ -13,6 +13,7 @@ export async function register(page: Page, nickname: string, password = TEST_PAS
 	await page.fill('input[name="nickname"]', nickname);
 	await page.fill('input[name="password"]', password);
 	await page.fill('input[name="password2"]', password);
+	await page.waitForTimeout(500);
 
 	const submitButton = page.locator('button[type="submit"]');
 	await expect(submitButton).toBeEnabled();

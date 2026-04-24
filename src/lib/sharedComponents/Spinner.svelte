@@ -1,5 +1,5 @@
 <script lang="ts">
-	export let size: number = 15;
+	let { size = 15 }: { size?: number } = $props();
 </script>
 
 <div class="loader" style="--size:{size};"></div>

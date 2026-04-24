@@ -1,29 +1,14 @@
 <script lang="ts">
-	import { afterUpdate, onMount } from 'svelte';
+	let { createdAt, updatedAt }: { createdAt: Date; updatedAt: Date } = $props();
 
-	export let createdAt: Date;
-	export let updatedAt: Date;
-
-	let edited: boolean = false;
-
-	onMount(() => {
-		mapToDate();
-	});
-
-	afterUpdate(() => {
-		mapToDate();
-	});
-
-	function mapToDate() {
-		createdAt = new Date(createdAt);
-		updatedAt = new Date(updatedAt);
-		edited = createdAt.getTime() !== updatedAt.getTime();
-	}
+	let createdDate = $derived(new Date(createdAt));
+	let updatedDate = $derived(new Date(updatedAt));
+	let edited = $derived(createdDate.getTime() !== updatedDate.getTime());
 </script>
 
 <i>
-	Geschrieben: {createdAt.toLocaleString()}
+	Geschrieben: {createdDate.toLocaleString()}
 	{#if edited}
-		Aktualisiert: {updatedAt.toLocaleString()}
+		Aktualisiert: {updatedDate.toLocaleString()}
 	{/if}
 </i>

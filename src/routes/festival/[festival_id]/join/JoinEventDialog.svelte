@@ -2,7 +2,7 @@
 	import type { JoinEventDialogData } from '$lib/models/dialogData/JoinEventDialogData';
 	import BaseDialog from '$lib/sharedComponents/BaseDialog.svelte';
 
-	export let joinDialogData: JoinEventDialogData;
+	let { joinDialogData = $bindable() }: { joinDialogData: JoinEventDialogData } = $props();
 </script>
 
 <BaseDialog bind:dialogData={joinDialogData} buttonLabels={{ yes: 'Beitreten', no: 'Zurück' }}>

@@ -2,7 +2,7 @@
 	import type { QuestionDialogData } from '$lib/models/dialogData/QuestionDialogData';
 	import BaseDialog from '$lib/sharedComponents/BaseDialog.svelte';
 
-	export let questionDialogData: QuestionDialogData;
+	let { questionDialogData = $bindable() }: { questionDialogData: QuestionDialogData } = $props();
 </script>
 
 <BaseDialog bind:dialogData={questionDialogData}>
