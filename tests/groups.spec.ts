@@ -46,10 +46,7 @@ test.describe.serial('Gruppen Management', () => {
 		await searchInput.fill(groupName);
 
 		// Klick auf Suchen und auf Seitenaktualisierung warten
-		await Promise.all([
-			page.waitForLoadState('networkidle'),
-			page.click('button[type="submit"]')
-		]);
+		await Promise.all([page.waitForLoadState('networkidle'), page.click('button[type="submit"]')]);
 
 		// Verifizieren, dass die Suchergebnisse angezeigt werden
 		await expect(page.locator('h4')).toContainText(`Suchergebnisse für "${groupName}"`, { timeout: 15000 });
@@ -82,7 +79,9 @@ test.describe.serial('Gruppen Management', () => {
 		await page.goto('/group/new');
 		await page.fill('input[name="name"]', joinableGroupName);
 		await page.click('button[type="submit"]');
-		await expect(page).toHaveURL(/\/group\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/, { timeout: 15000 });
+		await expect(page).toHaveURL(/\/group\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/, {
+			timeout: 15000
+		});
 
 		// URL der Gruppe merken
 		const groupUrl = page.url();
@@ -193,7 +192,9 @@ test.describe.serial('Gruppen Management', () => {
 		await page.goto('/group/new');
 		await page.fill('input[name="name"]', leaveGroupName);
 		await page.click('button[type="submit"]');
-		await expect(page).toHaveURL(/\/group\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/, { timeout: 15000 });
+		await expect(page).toHaveURL(/\/group\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/, {
+			timeout: 15000
+		});
 
 		// URL der Gruppe merken
 		const groupUrl = page.url();

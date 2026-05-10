@@ -2,7 +2,8 @@
 	import type { CancelInvitationDialogData } from '$lib/models/dialogData/CancelInvitationDialogData';
 	import BaseDialog from '$lib/sharedComponents/BaseDialog.svelte';
 
-	let { cancelInvitationDialogData = $bindable() }: { cancelInvitationDialogData: CancelInvitationDialogData } = $props();
+	let { cancelInvitationDialogData = $bindable() }: { cancelInvitationDialogData: CancelInvitationDialogData } =
+		$props();
 </script>
 
 <BaseDialog bind:dialogData={cancelInvitationDialogData} buttonLabels={{ yes: 'Absagen', no: 'Zurück' }}>

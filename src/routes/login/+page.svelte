@@ -9,7 +9,14 @@
 	<form method="POST">
 		<section>
 			<p>
-				<input bind:value={formData.nickname} minlength="3" name="nickname" placeholder="Nickname" required type="text" />
+				<input
+					bind:value={formData.nickname}
+					minlength="3"
+					name="nickname"
+					placeholder="Nickname"
+					required
+					type="text"
+				/>
 			</p>
 
 			<p>

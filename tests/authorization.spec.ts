@@ -93,18 +93,22 @@ test.describe.serial('Profile Festivals Authorization', () => {
 		await user1Page.goto('/updates');
 		const acceptButton = user1Page.getByRole('button', { name: 'Annehmen' }).first();
 		await expect(acceptButton).toBeVisible({ timeout: 15000 });
-		
+
 		// Klick und warten auf Response
 		const [response] = await Promise.all([
-			user1Page.waitForResponse((resp: Response) => resp.url().includes('/accept-friend') && resp.status() === 200, { timeout: 15000 }),
+			user1Page.waitForResponse((resp: Response) => resp.url().includes('/accept-friend') && resp.status() === 200, {
+				timeout: 15000
+			}),
 			acceptButton.click()
 		]);
-		
+
 		// Sicherstellen, dass das Element aus dem DOM entfernt wird
 		await expect(acceptButton).not.toBeVisible({ timeout: 15000 });
+		await user2Page.waitForLoadState('networkidle');
 	});
 
 	test('User 2 sollte die Festivals von User 1 sehen können (jetzt befreundet)', async () => {
+		await user2Page.waitForLoadState('networkidle');
 		const response = await user2Page.request.get(`/user/${user1Id}/visiting-festivals`);
 		expect(response.status()).toBe(200);
 		const json = await response.json();

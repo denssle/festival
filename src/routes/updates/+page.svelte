@@ -30,7 +30,7 @@
 					{received?.receivedFrom?.nickname}
 				</a>
 				<div>
- 				<button onclick={() => acceptFriendRequest(received?.receivedFrom?.id)}> Annehmen</button>
+					<button onclick={() => acceptFriendRequest(received?.receivedFrom?.id)}> Annehmen</button>
 					<button onclick={() => declineFriendRequest(received?.receivedFrom?.id)}> Ablehnen</button>
 				</div>
 			</div>
@@ -46,7 +46,7 @@
 				<a href="/user/{send?.sendTo?.id}">
 					{send?.sendTo?.nickname}
 				</a>
- 			<button onclick={() => cancelFriendRequest(send?.sendTo?.id)}> Zurückziehen</button>
+				<button onclick={() => cancelFriendRequest(send?.sendTo?.id)}> Zurückziehen</button>
 			</div>
 		{/each}
 		{#if data.sentFriendRequests.length === 0}

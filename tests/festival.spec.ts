@@ -25,7 +25,10 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		await page.fill('input[name="startTime"]', '18:00');
 		await page.check('input[name="bringYourOwnFood"]');
 		await page.check('input[name="bringYourOwnBottle"]');
-		await Promise.all([page.waitForURL(/\/festival\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/), page.click('button:has-text("Speichern")')]);
+		await Promise.all([
+			page.waitForURL(/\/festival\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/),
+			page.click('button:has-text("Speichern")')
+		]);
 		await page.waitForLoadState('networkidle');
 		festivalId = page.url().split('/').pop() || '';
 		if (!festivalId || festivalId === 'new') throw new Error('Festival-ID konnte nicht ermittelt werden');

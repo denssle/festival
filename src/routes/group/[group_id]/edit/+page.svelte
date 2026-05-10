@@ -15,7 +15,8 @@
 			</p>
 			<p>
 				<label for="description">Beschreibung</label>
- 			<textarea id="description" name="description" placeholder="Kurze Beschreibung" value={data.group.description}></textarea>
+				<textarea id="description" name="description" placeholder="Kurze Beschreibung" value={data.group.description}
+				></textarea>
 			</p>
 
 			{#if form?.message}

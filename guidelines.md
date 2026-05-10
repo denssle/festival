@@ -49,28 +49,31 @@
 ## 5. Testing Strategy
 
 ### Unit Testing (Vitest)
+
 - **Fokus:** Isolierte Geschäftslogik, Service-Methoden, Validierungsfunktionen (`*.logic.ts`).
 - **Framework:** `vitest`.
 - **Ausführung:** `npm run test:unit`.
 - **Regel:** Komplexe Berechnungen oder Geschäftslogik sollten immer als Unit-Test abgebildet werden, um die Testabdeckung ohne UI-Flakiness zu maximieren.
 
 ### E2E Testing (Playwright)
+
 - **Fokus:** Kritische User Journeys, UI-Interaktionen, Authentifizierung.
 - **Framework:** `playwright`.
 - **Ausführung:** `npm run test` (oder `npm run test:ui`).
 - **Parallelität:** Muss deaktiviert bleiben (`workers: 1`), da die E2E-Tests eine gemeinsame Datenbank teilen.
 - **Stabilität:**
-    - Nutzen Sie `waitForURL` für Navigation.
-    - Verwenden Sie `dialog.waitFor({ state: 'visible' })` statt `expect(dialog).toBeVisible()` für `<dialog>`-Elemente, da letzteres bei noch nicht geöffneten Dialogen zu Timeouts führt.
-    - `waitForResponse` **vor** dem auslösenden Klick registrieren (nicht in `Promise.all`), um Race Conditions zu vermeiden.
-    - Nutzen Sie `waitForLoadState('networkidle')` nach Navigationen, um sicherzustellen, dass die Seite vollständig geladen ist.
-    - Nutzen Sie `test.describe.serial` für Test-Sequenzen, die aufeinander aufbauen.
-    - Eindeutige Testdaten (`Date.now()`) verwenden.
-    - `test.fixme` vermeiden, stattdessen Tests aktiv halten und stabilisieren.
-    - Bei mehreren `<dialog>`-Elementen auf einer Seite präzise Locators verwenden (z.B. `dialog:has-text("Titel")`), um "Strict mode violation" zu vermeiden.
-    - Für API-Requests in Tests (z.B. DELETE), die Session-Cookies benötigen, `page.evaluate(() => fetch(...))` verwenden, damit der Browser seine eigenen Cookies mitsendet.
+  - Nutzen Sie `waitForURL` für Navigation.
+  - Verwenden Sie `dialog.waitFor({ state: 'visible' })` statt `expect(dialog).toBeVisible()` für `<dialog>`-Elemente, da letzteres bei noch nicht geöffneten Dialogen zu Timeouts führt.
+  - `waitForResponse` **vor** dem auslösenden Klick registrieren (nicht in `Promise.all`), um Race Conditions zu vermeiden.
+  - Nutzen Sie `waitForLoadState('networkidle')` nach Navigationen, um sicherzustellen, dass die Seite vollständig geladen ist.
+  - Nutzen Sie `test.describe.serial` für Test-Sequenzen, die aufeinander aufbauen.
+  - Eindeutige Testdaten (`Date.now()`) verwenden.
+  - `test.fixme` vermeiden, stattdessen Tests aktiv halten und stabilisieren.
+  - Bei mehreren `<dialog>`-Elementen auf einer Seite präzise Locators verwenden (z.B. `dialog:has-text("Titel")`), um "Strict mode violation" zu vermeiden.
+  - Für API-Requests in Tests (z.B. DELETE), die Session-Cookies benötigen, `page.evaluate(() => fetch(...))` verwenden, damit der Browser seine eigenen Cookies mitsendet.
 
 ### Svelte Dialog-Handling
+
 - **`bind:this` und `showModal()`:** Vor dem Registrieren eines Event-Listeners auf einem Dialog muss sichergestellt sein, dass `bind:this` gesetzt ist. `await tick()` vor `showModal()` einfügen, damit Svelte das DOM aktualisiert hat.
 - **Event-Listener:** `addEventListener('close', handler)` statt der direkten `onclose`-Zuweisung verwenden, um sicherzustellen, dass Handler korrekt registriert und entfernt werden.
 - **Svelte-Version:** Svelte 4 `$:`-Reaktivität verwenden (nicht Svelte 5 Runes-Syntax), konsistent mit der restlichen Codebase.

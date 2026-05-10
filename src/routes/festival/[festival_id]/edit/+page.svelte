@@ -3,7 +3,7 @@
 	import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 
 	let { data }: { data: FrontendFestivalEvent } = $props();
-	
+
 	let formData = $state({
 		name: data?.name ?? '',
 		description: data?.description ?? '',
