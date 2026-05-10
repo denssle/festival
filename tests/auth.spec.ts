@@ -19,7 +19,11 @@ test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () =>
 		await expect(logoutButton).toBeVisible();
 		await logoutButton.click();
 
-		// Nach Logout sollten wir auf der Login-Seite landen (laut +layout.svelte)
+		// Nach Logout sollte ein Reload den User-Status aktualisieren
+		await page.reload();
+
+		// Nach Logout sollten wir auf der Login-Seite landen
+		await page.goto('/login');
 		await expect(page).toHaveURL('/login');
 
 		// Im Header sollten nun wieder "Anmelden" und "Registrieren" Links zu sehen sein

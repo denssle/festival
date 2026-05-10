@@ -48,21 +48,21 @@ test.describe.serial('Freundschaftsprozess', () => {
 
 	test('User B sollte die Freundschaftsanfrage annehmen', async () => {
 		await pageB.goto('/updates', { waitUntil: 'networkidle' });
-		
+
 		// Warte auf das Element der Freundschaftsanfrage
 		const requestLocator = pageB.locator(`.friend-request:has-text("${userANickname}")`);
 		await requestLocator.waitFor({ state: 'visible', timeout: 20000 });
-		
+
 		const acceptButton = requestLocator.locator('button:has-text("Annehmen")');
 		await expect(acceptButton).toBeVisible({ timeout: 10000 });
-		
+
 		const responsePromise = pageB.waitForResponse(
 			(resp: any) => resp.url().includes('/accept-friend') && resp.status() === 200,
 			{ timeout: 15000 }
 		);
 		await acceptButton.click();
 		await responsePromise;
-		
+
 		await pageB.waitForLoadState('networkidle');
 		await expect(requestLocator).not.toBeVisible({ timeout: 10000 });
 	});
@@ -90,7 +90,7 @@ test.describe.serial('Freundschaftsprozess', () => {
 		await pageA.waitForLoadState('networkidle');
 		const removeFriendButton = pageA.locator('button:has-text("Freund entfernen")');
 		await expect(removeFriendButton).toBeVisible({ timeout: 15000 });
-		
+
 		const responsePromise = pageA.waitForResponse(
 			(resp: any) => resp.url().includes('/remove-friend') && resp.status() === 200,
 			{ timeout: 15000 }
@@ -113,7 +113,7 @@ test.describe.serial('Freundschaftsprozess', () => {
 		await pageA.goto(`/user/${userBId}`, { waitUntil: 'networkidle' });
 		const addFriendButton = pageA.locator('button:has-text("Anfreunden")');
 		await expect(addFriendButton).toBeVisible({ timeout: 10000 });
-		
+
 		const responsePromise = pageA.waitForResponse(
 			(resp: any) => resp.url().includes('/add-friend') && resp.status() === 200,
 			{ timeout: 30000 }
@@ -125,14 +125,14 @@ test.describe.serial('Freundschaftsprozess', () => {
 		await pageA.goto('/updates', { waitUntil: 'networkidle' });
 		const cancelBtn = pageA.locator(`.friend-request:has-text("${userBNickname}") button:has-text("Zurückziehen")`);
 		await expect(cancelBtn).toBeVisible({ timeout: 10000 });
-		
+
 		const responsePromise2 = pageA.waitForResponse(
 			(resp: any) => resp.url().includes('/cancel-friend-request') && resp.status() === 200,
 			{ timeout: 15000 }
 		);
 		await cancelBtn.click();
 		await responsePromise2;
-		
+
 		await pageA.waitForLoadState('networkidle');
 		await expect(pageA.locator(`.friend-request:has-text("${userBNickname}")`)).not.toBeVisible({ timeout: 10000 });
 	});
@@ -141,7 +141,7 @@ test.describe.serial('Freundschaftsprozess', () => {
 		await pageA.goto(`/user/${userBId}`, { waitUntil: 'networkidle' });
 		const addFriendButton = pageA.locator('button:has-text("Anfreunden")');
 		await expect(addFriendButton).toBeVisible({ timeout: 10000 });
-		
+
 		const responsePromise = pageA.waitForResponse(
 			(resp: any) => resp.url().includes('/add-friend') && resp.status() === 200,
 			{ timeout: 30000 }
@@ -153,14 +153,14 @@ test.describe.serial('Freundschaftsprozess', () => {
 		await pageB.goto('/updates', { waitUntil: 'networkidle' });
 		const declineBtn = pageB.locator(`.friend-request:has-text("${userANickname}") button:has-text("Ablehnen")`);
 		await expect(declineBtn).toBeVisible({ timeout: 10000 });
-		
+
 		const responsePromise2 = pageB.waitForResponse(
 			(resp: any) => resp.url().includes('/reject-friend') && resp.status() === 200,
 			{ timeout: 15000 }
 		);
 		await declineBtn.click();
 		await responsePromise2;
-		
+
 		await pageB.waitForLoadState('networkidle');
 		await expect(pageB.locator(`.friend-request:has-text("${userANickname}")`)).not.toBeVisible({ timeout: 10000 });
 	});
