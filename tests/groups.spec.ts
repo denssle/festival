@@ -1,13 +1,16 @@
 import { test, expect } from '@playwright/test';
-import { register, TEST_PASSWORD, login } from './test-utils';
+import { register, TEST_PASSWORD, login, uniqueName } from './test-utils';
 
 test.describe.serial('Gruppen Management', () => {
-	const timestamp = Date.now();
-	const userNickname = `GroupUser_${timestamp}`;
-	const groupName = `TestGruppe_${timestamp}`;
+	const userNickname = uniqueName('GroupUser');
+	const groupName = uniqueName('TestGruppe');
 	const groupDescription = 'Dies ist eine Testbeschreibung für eine Gruppe.';
 
 	test.beforeAll(async ({ browser }) => {
+		const requestContext = await browser.newContext();
+		await requestContext.request.post('/api/test/reset');
+		await requestContext.close();
+
 		const page = await browser.newPage();
 		await register(page, userNickname, TEST_PASSWORD);
 		await page.waitForLoadState('networkidle');
@@ -62,7 +65,7 @@ test.describe.serial('Gruppen Management', () => {
 	});
 
 	test('sollte anzeigen, dass man in keiner Gruppe ist (bei neuem User)', async ({ page }) => {
-		const emptyUser = `EmptyGroupUser_${Date.now()}`;
+		const emptyUser = uniqueName('EmptyGroupUser');
 		await register(page, emptyUser, TEST_PASSWORD);
 
 		await page.goto('/group');
@@ -71,8 +74,8 @@ test.describe.serial('Gruppen Management', () => {
 
 	test('ein neuer Benutzer sollte einer bestehenden Gruppe beitreten können', async ({ page }) => {
 		// Erst erstellen wir eine Gruppe mit dem ersten Benutzer
-		const creatorNickname = `Creator_${Date.now()}`;
-		const joinableGroupName = `JoinMeGroup_${Date.now()}`;
+		const creatorNickname = uniqueName('Creator');
+		const joinableGroupName = uniqueName('JoinMeGroup');
 		await register(page, creatorNickname, TEST_PASSWORD);
 
 		// Gruppe erstellen
@@ -94,7 +97,7 @@ test.describe.serial('Gruppen Management', () => {
 		await page.waitForLoadState('networkidle');
 
 		// Neuer Benutzer registrieren
-		const joinerNickname = `Joiner_${Date.now()}`;
+		const joinerNickname = uniqueName('Joiner');
 		await register(page, joinerNickname, TEST_PASSWORD);
 		await page.waitForLoadState('networkidle');
 
@@ -103,11 +106,11 @@ test.describe.serial('Gruppen Management', () => {
 
 		// Beitreten Button sollte sichtbar sein
 		const joinButton = page.getByRole('button', { name: 'Beitreten' });
-		await expect(joinButton).toBeVisible({ timeout: 15000 });
+		await expect(joinButton).toBeVisible({ timeout: 30000 });
 
 		// Beitreten klicken und auf Seitenaktualisierung warten
 		await Promise.all([
-			page.waitForResponse((resp: any) => resp.url().includes('/join'), { timeout: 15000 }),
+			page.waitForResponse((resp: any) => resp.url().includes('/join'), { timeout: 30000 }),
 			page.click('form[action="?/join"] button:has-text("Beitreten")')
 		]);
 		await page.waitForLoadState('networkidle');

@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { register, getUserId } from './test-utils';
+import { register, getUserId, uniqueName } from './test-utils';
 
 test.describe.serial('Kommentar-Lifecycle', () => {
-	const userANickname = `UserA_Comments_${Date.now()}`;
-	const userBNickname = `UserB_Comments_${Date.now()}`;
+	const userANickname = uniqueName('UserA_Comments');
+	const userBNickname = uniqueName('UserB_Comments');
 	let userBId: string;
 	let pageA: any;
 	let pageB: any;
@@ -13,6 +13,10 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 	const updatedCommentText = 'Hallo UserB, dieser Kommentar wurde bearbeitet!';
 
 	test.beforeAll(async ({ browser }) => {
+		const requestContext = await browser.newContext();
+		await requestContext.request.post('/api/test/reset');
+		await requestContext.close();
+
 		contextA = await browser.newContext();
 		contextB = await browser.newContext();
 		pageA = await contextA.newPage();
@@ -68,7 +72,7 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 		await expect(textareaElement).toBeVisible();
 		await textareaElement.fill(updatedCommentText);
 
-		const responsePromise = pageA.waitForResponse((r: any) => r.url().includes('/user/') && r.status() === 200);
+		const responsePromise = pageA.waitForResponse((r: any) => r.url().includes('/comments') && r.request().method() === 'PUT' && r.status() === 200);
 		await saveButton.click();
 		await responsePromise;
 		await pageA.waitForLoadState('networkidle');
@@ -95,7 +99,9 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 		// Dialog bestätigen
 		const dialog = pageA.locator('dialog').filter({ hasText: 'Ja' });
 		await dialog.waitFor({ state: 'visible', timeout: 10000 });
+		const responsePromise = pageA.waitForResponse((r: any) => r.url().includes('/comments') && r.request().method() === 'DELETE' && r.status() === 200);
 		await dialog.locator('button:has-text("Ja")').click();
+		await responsePromise;
 		await pageA.waitForLoadState('networkidle');
 
 		// Verifizieren, dass der Kommentar weg ist

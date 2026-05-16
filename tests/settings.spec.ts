@@ -2,6 +2,12 @@ import { test, expect } from '@playwright/test';
 import { register, getUserId } from './test-utils';
 
 test.describe('Benutzereinstellungen und Profilbild', () => {
+	test.beforeAll(async ({ browser }) => {
+		const requestContext = await browser.newContext();
+		await requestContext.request.post('/api/test/reset');
+		await requestContext.close();
+	});
+
 	test('sollte das Passwort ändern können', async ({ page }) => {
 		const testNickname = `Password_User_${Date.now()}`;
 		const initialPassword = 'InitialPassword123!';

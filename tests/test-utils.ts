@@ -2,6 +2,8 @@ import { expect, type Page } from '@playwright/test';
 
 export const TEST_PASSWORD = 'TestPassword123!';
 
+export const uniqueName = (prefix: string) => `${prefix}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+
 /**
  * Registriert einen neuen Benutzer.
  * @param page Die Playwright-Page.

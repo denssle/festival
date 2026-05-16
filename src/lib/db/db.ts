@@ -9,7 +9,8 @@ import { FriendRequest } from '$lib/db/model/friendRequest';
 import { GroupMember } from '$lib/db/model/groupMember';
 import { Friendship } from '$lib/db/model/friendship';
 import { Comment } from '$lib/db/model/comment';
-import { MARIA_DB_NAME } from '$env/static/private';
+import { env } from '$env/dynamic/private';
+const { MARIA_DB_NAME } = env;
 
 FestivalEvent.hasMany(GuestInformation, { as: 'EventGuests', foreignKey: 'FestivalEventId', onDelete: 'CASCADE' });
 GuestInformation.belongsTo(FestivalEvent, { foreignKey: 'FestivalEventId', as: 'FestivalEvent' });
@@ -82,13 +83,17 @@ GroupMember.belongsTo(User, { foreignKey: 'UserId', as: 'User' });
 User.hasMany(Comment, { foreignKey: 'writtenBy', onDelete: 'CASCADE', as: 'Comments' });
 Comment.belongsTo(User, { foreignKey: 'writtenBy', as: 'Author' });
 
+let dbStarted = false;
+
 export async function startDB(): Promise<void> {
+	if (dbStarted) return;
 	try {
 		await sequelize.authenticate();
 		console.log('Connection has been established successfully.');
 
 		const isSyncForced = process.env.PLAYWRIGHT === 'true' || process.env.NODE_ENV === 'test' || MARIA_DB_NAME == 'dev';
 		await sequelize.sync({ force: isSyncForced, alter: true });
+		dbStarted = true;
 	} catch (error) {
 		console.error('Unable to connect to the database:', error);
 	}

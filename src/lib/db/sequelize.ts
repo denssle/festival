@@ -1,5 +1,6 @@
 import { type Options, Sequelize } from 'sequelize';
-import { MARIA_DB_NAME, MARIA_DB_PASSWORD, MARIA_DB_USER } from '$env/static/private';
+import { env } from '$env/dynamic/private';
+const { MARIA_DB_NAME, MARIA_DB_PASSWORD, MARIA_DB_USER } = env;
 
 const isTestOrLocal =
 	MARIA_DB_NAME == 'dev' ||

@@ -1,10 +1,10 @@
 import { test, expect, type Response } from '@playwright/test';
-import { register, getUserId } from './test-utils';
+import { register, getUserId, uniqueName } from './test-utils';
 
 test.describe.serial('Profile Festivals Authorization', () => {
-	const user1Nickname = `User1_${Date.now()}`;
-	const user2Nickname = `User2_${Date.now()}`;
-	const festivalName = `Friendship Festival ${Date.now()}`;
+	const user1Nickname = uniqueName('User1');
+	const user2Nickname = uniqueName('User2');
+	const festivalName = uniqueName('Festival');
 
 	let user1Context: any;
 	let user1Page: any;
@@ -91,11 +91,12 @@ test.describe.serial('Profile Festivals Authorization', () => {
 
 		// User 1 nimmt an
 		await user1Page.goto('/updates');
+		await user1Page.waitForLoadState('networkidle');
 		const acceptButton = user1Page.getByRole('button', { name: 'Annehmen' }).first();
 		await expect(acceptButton).toBeVisible({ timeout: 15000 });
 
 		// Klick und warten auf Response
-		const [response] = await Promise.all([
+		await Promise.all([
 			user1Page.waitForResponse((resp: Response) => resp.url().includes('/accept-friend') && resp.status() === 200, {
 				timeout: 15000
 			}),
@@ -104,7 +105,10 @@ test.describe.serial('Profile Festivals Authorization', () => {
 
 		// Sicherstellen, dass das Element aus dem DOM entfernt wird
 		await expect(acceptButton).not.toBeVisible({ timeout: 15000 });
-		await user2Page.waitForLoadState('networkidle');
+		await user1Page.waitForLoadState('networkidle');
+		
+		// Warte kurz, um sicherzugehen, dass DB sync fertig ist
+		await user1Page.waitForTimeout(1000); 
 	});
 
 	test('User 2 sollte die Festivals von User 1 sehen können (jetzt befreundet)', async () => {

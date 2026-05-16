@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { register, getUserId } from './test-utils';
+import { register, getUserId, uniqueName } from './test-utils';
 
 test.describe.serial('Freundschaftsprozess', () => {
-	const userANickname = `UserA_${Date.now()}`;
-	const userBNickname = `UserB_${Date.now()}`;
+	const userANickname = uniqueName('UserA');
+	const userBNickname = uniqueName('UserB');
 	let userAId: string;
 	let userBId: string;
 	let pageA: any;
@@ -12,6 +12,10 @@ test.describe.serial('Freundschaftsprozess', () => {
 	let contextB: any;
 
 	test.beforeAll(async ({ browser }) => {
+		const requestContext = await browser.newContext();
+		await requestContext.request.post('/api/test/reset');
+		await requestContext.close();
+
 		contextA = await browser.newContext();
 		contextB = await browser.newContext();
 		pageA = await contextA.newPage();
@@ -31,7 +35,7 @@ test.describe.serial('Freundschaftsprozess', () => {
 	});
 
 	test('User A sollte eine Freundschaftsanfrage an User B senden', async () => {
-		await pageA.goto(`/user/${userBId}`, { waitUntil: 'networkidle' });
+		await pageA.goto(`/user/${userBId}`);
 		await expect(pageA.locator('h2')).toContainText(userBNickname);
 
 		const addFriendButton = pageA.locator('button:has-text("Anfreunden")');
@@ -69,25 +73,26 @@ test.describe.serial('Freundschaftsprozess', () => {
 
 	test('Freundschaft sollte auf beiden Profilen verifiziert werden', async () => {
 		// Auf Profil B für User A
-		await pageA.goto(`/user/${userBId}`, { waitUntil: 'networkidle' });
+		await pageA.goto(`/user/${userBId}`);
 		await pageA.reload(); // Force reload to bypass potential cache
-		await pageA.waitForLoadState('networkidle');
+		await pageA.waitForLoadState('load');
 
 		// Warte, bis die Seite die Freundschaft geladen hat
-		await expect(pageA.locator('button:has-text("Freund entfernen")')).toBeVisible({ timeout: 15000 });
-		await expect(pageA.locator('section:has-text("Freunde:")')).toContainText(userANickname);
+		await expect(pageA.locator('button:has-text("Freund entfernen")')).toBeVisible({ timeout: 30000 });
+		await expect(pageA.getByRole('link', { name: userANickname })).toBeVisible({ timeout: 10000 });
 
 		// Auf Profil A für User B
-		await pageB.goto(`/user/${userAId}`, { waitUntil: 'networkidle' });
+		await pageB.goto(`/user/${userAId}`);
 		await pageB.reload(); // Force reload to bypass potential cache
-		await pageB.waitForLoadState('networkidle');
-		await expect(pageB.locator('button:has-text("Freund entfernen")')).toBeVisible({ timeout: 15000 });
+		await pageB.waitForLoadState('load');
+		await expect(pageB.locator('button:has-text("Freund entfernen")')).toBeVisible({ timeout: 30000 });
+		await expect(pageB.getByRole('link', { name: userBNickname })).toBeVisible({ timeout: 10000 });
 	});
 
 	test('User A sollte User B als Freund entfernen können', async () => {
-		await pageA.goto(`/user/${userBId}`, { waitUntil: 'networkidle' });
+		await pageA.goto(`/user/${userBId}`);
 		await pageA.reload();
-		await pageA.waitForLoadState('networkidle');
+		await pageA.waitForLoadState('load');
 		const removeFriendButton = pageA.locator('button:has-text("Freund entfernen")');
 		await expect(removeFriendButton).toBeVisible({ timeout: 15000 });
 

@@ -3,7 +3,7 @@ import { UserService } from '$lib/services/user.service';
 import { startDB } from '$lib/db/db';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 
-startDB();
+await startDB();
 
 const noAuthURLs: string[] = ['/login', '/registration', '/about', '/impressum'];
 

@@ -2,6 +2,12 @@ import { test, expect } from '@playwright/test';
 import { register } from './test-utils';
 
 test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () => {
+	test.beforeAll(async ({ browser }) => {
+		const requestContext = await browser.newContext();
+		await requestContext.request.post('/api/test/reset');
+		await requestContext.close();
+	});
+
 	// Wir generieren einen zufälligen Nickname, um Kollisionen bei wiederholten Testläufen zu vermeiden
 	const testNickname = `User_${Date.now()}`;
 	const testPassword = 'SafePassword123!';
