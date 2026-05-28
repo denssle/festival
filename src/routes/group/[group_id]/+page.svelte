@@ -53,7 +53,7 @@
 		<h3>Mitglieder</h3>
 		{#if members && members.length > 0}
 			<ul>
-				{#each members as member}
+				{#each members as member (member.id)}
 					<li>
 						<a href="/user/{member.id}">{member.nickname}</a>
 						{#if member.id === group.ownerId}

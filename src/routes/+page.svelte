@@ -12,7 +12,7 @@
 	<section>
 		<a class="button" href="/festival/new">Neues Fest anlegen</a>
 
-		{#each data.festivalEvents as loadedEvent}
+		{#each data.festivalEvents as loadedEvent (loadedEvent.id)}
 			<fieldset>
 				<legend>
 					<a href="/festival/{loadedEvent.id}">{loadedEvent.name}</a>

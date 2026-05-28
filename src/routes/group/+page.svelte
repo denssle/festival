@@ -12,7 +12,7 @@
 		<h3>Deine Gruppen</h3>
 		{#if data.groups && data.groups.length > 0}
 			<ul>
-				{#each data.groups as group}
+				{#each data.groups as group (group.id)}
 					<li><a href="/group/{group.id}">{group.name}</a></li>
 				{/each}
 			</ul>
@@ -32,7 +32,7 @@
 			<h4>Suchergebnisse für "{data.searchTerm}"</h4>
 			{#if data.searchResults && data.searchResults.length > 0}
 				<ul>
-					{#each data.searchResults as group}
+					{#each data.searchResults as group (group.id)}
 						<li>
 							<a href="/group/{group.id}">{group.name}</a>
 							{#if group.description}

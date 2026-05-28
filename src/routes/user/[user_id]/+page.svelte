@@ -35,7 +35,7 @@
 
 	<section>
 		<h4>Freunde:</h4>
-		{#each data.friendList as friend}
+		{#each data.friendList as friend (friend.id)}
 			<FriendListEntry user={friend} />
 		{/each}
 		{#if data.friendList.length === 0}
@@ -53,7 +53,7 @@
 		<h4>Gruppen:</h4>
 		{#if data.groupList && data.groupList.length > 0}
 			<ul>
-				{#each data.groupList as group}
+				{#each data.groupList as group (group.id)}
 					<li><a href="/group/{group.id}">{group.name}</a></li>
 				{/each}
 			</ul>

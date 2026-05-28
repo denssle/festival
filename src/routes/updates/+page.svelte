@@ -24,7 +24,7 @@
 	<h2>Updates</h2>
 	<section>
 		<h4>Eingegangene Freundschaftsanfragen</h4>
-		{#each data.receivedFriendRequests as received}
+		{#each data.receivedFriendRequests as received (received.id)}
 			<div class="friend-request">
 				<a href="/user/{received?.receivedFrom?.id}">
 					{received?.receivedFrom?.nickname}
@@ -41,7 +41,7 @@
 	</section>
 	<section>
 		<h4>Ausstehende Freundschaftsanfragen</h4>
-		{#each data.sentFriendRequests as send}
+		{#each data.sentFriendRequests as send (send.id)}
 			<div class="friend-request">
 				<a href="/user/{send?.sendTo?.id}">
 					{send?.sendTo?.nickname}

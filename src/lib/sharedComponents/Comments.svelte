@@ -17,45 +17,40 @@
 		}
 	});
 
-	function handleSubmit(e: SubmitEvent) {
+	async function handleSubmit(e: SubmitEvent) {
 		e.preventDefault();
 		const form = e.target as HTMLFormElement;
 		const formData = new FormData(form);
-		fetch(whereId + '/comments', {
+		await fetch(whereId + '/comments', {
 			method: 'POST',
 			body: formData
-		}).then(() => {
-			inputComment = '';
-			loadComments();
 		});
+		inputComment = '';
+		loadComments();
 	}
 
-	function loadComments() {
-		fetch(whereId + '/comments', {
+	async function loadComments() {
+		const response = await fetch(whereId + '/comments', {
 			method: 'GET'
-		}).then((response) => {
-			response.json().then((data: FrontendComment[]) => {
-				comments = data;
-			});
 		});
+		comments = await response.json();
 	}
 
-	function deleteComment(commentId: string | undefined) {
+	async function deleteComment(commentId: string | undefined) {
 		questionDialogData.answerYes = false;
 		questionDialogData.showDialog = true;
 
 		if (questionDialogData.dialog) {
-			const onclose = () => {
+			const onclose = async () => {
 				if (questionDialogData.answerYes) {
-					fetch(whereId + '/comments', {
+					await fetch(whereId + '/comments', {
 						method: 'DELETE',
 						headers: {
 							'Content-Type': 'text/plain'
 						},
 						body: commentId
-					}).then(() => {
-						loadComments();
 					});
+					loadComments();
 				}
 				questionDialogData.dialog?.removeEventListener('close', onclose);
 				questionDialogData.answerYes = false;
@@ -66,9 +61,9 @@
 		}
 	}
 
-	function updateComment(comment: FrontendComment) {
+	async function updateComment(comment: FrontendComment) {
 		if (comment.yourComment) {
-			fetch(whereId + '/comments', {
+			await fetch(whereId + '/comments', {
 				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json'
@@ -77,13 +72,12 @@
 					id: comment.id,
 					comment: comment.comment
 				})
-			}).then(() => {
-				const index = comments.findIndex((c) => c.id === comment.id);
-				if (index !== -1) {
-					comments[index].editMode = false;
-				}
-				loadComments();
 			});
+			const index = comments.findIndex((c) => c.id === comment.id);
+			if (index !== -1) {
+				comments[index].editMode = false;
+			}
+			loadComments();
 		}
 	}
 
@@ -105,7 +99,7 @@
 	</p>
 </form>
 
-{#each comments as comment}
+{#each comments as comment (comment.id)}
 	{@const notYours = !comment.yourComment}
 	<fieldset>
 		<legend>

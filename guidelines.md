@@ -76,7 +76,7 @@
 
 - **`bind:this` und `showModal()`:** Vor dem Registrieren eines Event-Listeners auf einem Dialog muss sichergestellt sein, dass `bind:this` gesetzt ist. `await tick()` vor `showModal()` einfügen, damit Svelte das DOM aktualisiert hat.
 - **Event-Listener:** `addEventListener('close', handler)` statt der direkten `onclose`-Zuweisung verwenden, um sicherzustellen, dass Handler korrekt registriert und entfernt werden.
-- **Svelte-Version:** Svelte 4 `$:`-Reaktivität verwenden (nicht Svelte 5 Runes-Syntax), konsistent mit der restlichen Codebase.
+- **Svelte-Version:** Svelte 5 Runes-Syntax (`$state`, `$derived`, `$effect`, etc.) verwenden. Bestehende `$:`-Reaktivität und Svelte 4 Patterns schrittweise migrieren. Snippets statt Slots verwenden.
 
 ## 6. Setup-Hinweise
 

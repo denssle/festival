@@ -11,18 +11,16 @@
 		}
 	});
 
-	function loadFestivals() {
-		fetch(userId + '/visiting-festivals', {
+	async function loadFestivals() {
+		const response = await fetch(userId + '/visiting-festivals', {
 			method: 'GET'
-		}).then((response) => {
-			response.json().then((data: VisitingFestival[]) => {
-				if (data.length > 0) {
-					festivals = data;
-				} else {
-					festivals = [];
-				}
-			});
 		});
+		const data = await response.json();
+		if (data.length > 0) {
+			festivals = data;
+		} else {
+			festivals = [];
+		}
 	}
 </script>
 
@@ -31,7 +29,7 @@
 {:else}
 	<p>Angemeldet bei:</p>
 	<ul>
-		{#each festivals as fest}
+		{#each festivals as fest (fest.festivalId)}
 			<li><a href={'/festival/' + fest.festivalId}>{fest.festivalName}</a></li>
 		{/each}
 	</ul>
