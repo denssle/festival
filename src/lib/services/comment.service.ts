@@ -20,7 +20,7 @@ export class CommentService {
 			},
 			order: [['createdAt', 'DESC']]
 		});
-		return Promise.all(findAll.map((value) => value.dataValues).map((value) => mapToFrontendComment(value, userID)));
+		return Promise.all(findAll.map((value) => value.get({ plain: true })).map((value) => mapToFrontendComment(value, userID)));
 	}
 
 	static async deleteComment(userId: string, commentId: string): Promise<ChangeResult> {
