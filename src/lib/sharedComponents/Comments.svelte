@@ -21,12 +21,23 @@
 		e.preventDefault();
 		const form = e.target as HTMLFormElement;
 		const formData = new FormData(form);
-		await fetch(whereId + '/comments', {
+		const optimisticComment: FrontendComment = {
+			id: crypto.randomUUID(),
+			comment: inputComment,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+			writtenTo: whereId,
+			writtenBy: null,
+			yourComment: true,
+			editMode: false
+		};
+		inputComment = '';
+		comments = [optimisticComment, ...comments];
+		const response = await fetch(whereId + '/comments', {
 			method: 'POST',
 			body: formData
 		});
-		inputComment = '';
-		loadComments();
+		comments = await response.json();
 	}
 
 	async function loadComments() {
@@ -50,7 +61,7 @@
 						},
 						body: commentId
 					});
-					loadComments();
+					await loadComments();
 				}
 				questionDialogData.dialog?.removeEventListener('close', onclose);
 				questionDialogData.answerYes = false;
@@ -63,7 +74,11 @@
 
 	async function updateComment(comment: FrontendComment) {
 		if (comment.yourComment) {
-			await fetch(whereId + '/comments', {
+			const index = comments.findIndex((c) => c.id === comment.id);
+			if (index !== -1) {
+				comments[index].editMode = false;
+			}
+			const response = await fetch(whereId + '/comments', {
 				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json'
@@ -73,11 +88,9 @@
 					comment: comment.comment
 				})
 			});
-			const index = comments.findIndex((c) => c.id === comment.id);
-			if (index !== -1) {
-				comments[index].editMode = false;
+			if (response.ok) {
+				comments = await response.json();
 			}
-			loadComments();
 		}
 	}
 

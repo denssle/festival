@@ -41,16 +41,17 @@ test.describe.serial('Freundschaftsprozess', () => {
 		const addFriendButton = pageA.locator('button:has-text("Anfreunden")');
 		await expect(addFriendButton).toBeVisible({ timeout: 10000 });
 
+		const addFriendResponse = pageA.waitForResponse(
+			(r: any) => r.url().includes('/add-friend') && r.request().method() === 'POST'
+		);
 		await addFriendButton.click();
-		
+		await addFriendResponse;
+
 		// Warte auf das InfoDialog
 		const dialog = pageA.locator('dialog').filter({ hasText: 'Freundschaftsanfrage wurde geschickt.' });
-		await expect(dialog).toBeVisible({ timeout: 15000 });
+		await dialog.waitFor({ state: 'visible', timeout: 15000 });
 		await dialog.locator('button:has-text("Okay")').click();
-		await expect(dialog).not.toBeVisible();
-
-		await pageA.waitForLoadState('networkidle');
-		await pageA.waitForTimeout(1000); // Zusätzliche Pause für Persistenz
+		await dialog.waitFor({ state: 'hidden', timeout: 10000 });
 	});
 
 	test('User B sollte die Freundschaftsanfrage annehmen', async () => {
@@ -63,11 +64,13 @@ test.describe.serial('Freundschaftsprozess', () => {
 		const acceptButton = requestLocator.locator('button:has-text("Annehmen")');
 		await expect(acceptButton).toBeVisible({ timeout: 10000 });
 
+		const acceptResponse = pageB.waitForResponse(
+			(r: any) => r.url().includes('/accept-friend') && r.request().method() === 'POST'
+		);
 		await acceptButton.click();
+		await acceptResponse;
 
-		await pageB.waitForLoadState('networkidle');
 		await expect(requestLocator).not.toBeVisible({ timeout: 15000 });
-		await pageB.waitForTimeout(1000); // Pause für Persistenz
 	});
 
 	test('Freundschaft sollte auf beiden Profilen verifiziert werden', async () => {
@@ -96,21 +99,23 @@ test.describe.serial('Freundschaftsprozess', () => {
 		await expect(removeFriendButton).toBeVisible({ timeout: 15000 });
 
 		const responsePromise = pageA.waitForResponse(
-			(resp: any) => resp.url().includes('/remove-friend') && resp.status() === 200,
-			{ timeout: 15000 }
+			(resp: any) => resp.url().includes('/remove-friend') && resp.status() === 200
 		);
 		await removeFriendButton.click();
 		await responsePromise;
 
-		await pageA.waitForLoadState('networkidle');
-		await pageA.reload();
+		// Dialog schließen, der durch removeFriend() geöffnet wird
+		const removeDialog = pageA.locator('dialog').filter({ hasText: 'Freundschaft gekündigt.' });
+		await removeDialog.waitFor({ state: 'visible', timeout: 10000 });
+		await removeDialog.locator('button:has-text("Okay")').click();
+		await removeDialog.waitFor({ state: 'hidden', timeout: 10000 });
+
 		await pageA.waitForLoadState('networkidle');
 		await expect(pageA.locator('button:has-text("Anfreunden")')).toBeVisible({ timeout: 10000 });
 
 		await pageB.goto(`/user/${userAId}`, { waitUntil: 'networkidle' });
-		await pageB.reload();
-		await pageB.waitForLoadState('networkidle');
-		await expect(pageB.locator('button:has-text("Anfreunden")')).toBeVisible({ timeout: 10000 });
+		await expect(pageB).toHaveURL(`/user/${userAId}`, { timeout: 10000 });
+		await expect(pageB.locator('button:has-text("Anfreunden")')).toBeVisible({ timeout: 15000 });
 	});
 
 	test('User A sollte eine Anfrage senden und wieder zurückziehen können', async () => {
@@ -118,23 +123,33 @@ test.describe.serial('Freundschaftsprozess', () => {
 		const addFriendButton = pageA.locator('button:has-text("Anfreunden")');
 		await expect(addFriendButton).toBeVisible({ timeout: 10000 });
 
+		const addResponse1 = pageA.waitForResponse(
+			(r: any) => r.url().includes('/add-friend') && r.request().method() === 'POST'
+		);
 		await addFriendButton.click();
-		
+		await addResponse1;
+
 		// Dialog schließen
 		const dialog = pageA.locator('dialog').filter({ hasText: 'Freundschaftsanfrage wurde geschickt.' });
-		await expect(dialog).toBeVisible({ timeout: 10000 });
+		await dialog.waitFor({ state: 'visible', timeout: 10000 });
 		await dialog.locator('button:has-text("Okay")').click();
-		
-		await pageA.waitForLoadState('networkidle');
+		await dialog.waitFor({ state: 'hidden', timeout: 10000 });
 
 		await pageA.goto('/updates', { waitUntil: 'networkidle' });
-		const cancelBtn = pageA.locator('.friend-request').filter({ hasText: userBNickname }).locator('button:has-text("Zurückziehen")');
+		const cancelBtn = pageA
+			.locator('.friend-request')
+			.filter({ hasText: userBNickname })
+			.locator('button:has-text("Zurückziehen")');
 		await expect(cancelBtn).toBeVisible({ timeout: 10000 });
 
+		const cancelResponse = pageA.waitForResponse(
+			(r: any) => r.url().includes('/cancel-request') && r.request().method() === 'POST'
+		);
 		await cancelBtn.click();
-
-		await pageA.waitForLoadState('networkidle');
-		await expect(pageA.locator('.friend-request').filter({ hasText: userBNickname })).not.toBeVisible({ timeout: 10000 });
+		await cancelResponse;
+		await expect(pageA.locator('.friend-request').filter({ hasText: userBNickname })).not.toBeVisible({
+			timeout: 10000
+		});
 	});
 
 	test('User A sollte eine Anfrage senden und User B diese ablehnen können', async () => {
@@ -142,22 +157,31 @@ test.describe.serial('Freundschaftsprozess', () => {
 		const addFriendButton = pageA.locator('button:has-text("Anfreunden")');
 		await expect(addFriendButton).toBeVisible({ timeout: 10000 });
 
+		const addResponse2 = pageA.waitForResponse(
+			(r: any) => r.url().includes('/add-friend') && r.request().method() === 'POST'
+		);
 		await addFriendButton.click();
+		await addResponse2;
 
 		// Dialog schließen
 		const dialog = pageA.locator('dialog').filter({ hasText: 'Freundschaftsanfrage wurde geschickt.' });
-		await expect(dialog).toBeVisible({ timeout: 10000 });
+		await dialog.waitFor({ state: 'visible', timeout: 10000 });
 		await dialog.locator('button:has-text("Okay")').click();
 
-		await pageA.waitForLoadState('networkidle');
-
 		await pageB.goto('/updates', { waitUntil: 'networkidle' });
-		const declineBtn = pageB.locator('.friend-request').filter({ hasText: userANickname }).locator('button:has-text("Ablehnen")');
+		const declineBtn = pageB
+			.locator('.friend-request')
+			.filter({ hasText: userANickname })
+			.locator('button:has-text("Ablehnen")');
 		await expect(declineBtn).toBeVisible({ timeout: 10000 });
 
+		const declineResponse = pageB.waitForResponse(
+			(r: any) => r.url().includes('/decline-friend') && r.request().method() === 'POST'
+		);
 		await declineBtn.click();
-
-		await pageB.waitForLoadState('networkidle');
-		await expect(pageB.locator('.friend-request').filter({ hasText: userANickname })).not.toBeVisible({ timeout: 10000 });
+		await declineResponse;
+		await expect(pageB.locator('.friend-request').filter({ hasText: userANickname })).not.toBeVisible({
+			timeout: 10000
+		});
 	});
 });

@@ -13,6 +13,7 @@ import { User } from '$lib/db/model/user';
 import { UserImage } from '$lib/db/model/userImage';
 import { SessionToken } from '$lib/db/model/sessionToken';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
+import { resolveSessionToken } from '$lib/services/user.logic';
 
 export class UserService {
 	static async userExists(extractedUser: SessionTokenUser | null): Promise<boolean> {
@@ -30,12 +31,29 @@ export class UserService {
 		});
 	}
 
-	static async register(nickname: string, password: string): Promise<BackendUser | null> {
+	private static async getByEmail(email: string): Promise<Model<UserAttributes, any> | null> {
+		return await User.findOne({
+			where: {
+				email: email
+			}
+		});
+	}
+
+	static async emailInvalid(email: string): Promise<boolean> {
+		if (!email || email.length === 0) return false; // leere E-Mail ist erlaubt (optional)
+		return Boolean(await this.getByEmail(email));
+	}
+
+	static async register(nickname: string, password: string, email?: string): Promise<BackendUser | null> {
 		if (!(await this.nickNameInvalid(nickname))) {
+			if (email && (await this.emailInvalid(email))) {
+				return null;
+			}
 			const model = await User.create({
 				id: crypto.randomUUID(),
 				nickname: nickname,
-				password: this.saltPassword(password)
+				password: this.saltPassword(password),
+				...(email ? { email } : {})
 			});
 			return convertToBackendUser(model.dataValues);
 		}
@@ -175,13 +193,18 @@ export class UserService {
 	static async createSessionCookie(
 		cookies: Cookies,
 		locals: App.Locals,
-		user: BackendUser | SessionTokenUser
+		user: BackendUser | SessionTokenUser,
+		forceNewToken: boolean = false
 	): Promise<void> {
-		const token: string = crypto.randomUUID();
-		await SessionToken.upsert({
-			UserId: user.id,
-			token: token
-		});
+		const [token, needsDbUpsert] = resolveSessionToken(user, forceNewToken);
+
+		if (needsDbUpsert) {
+			await SessionToken.upsert({
+				UserId: user.id,
+				token: token
+			});
+		}
+
 		cookies.set(
 			'session',
 			JSON.stringify({

@@ -4,6 +4,16 @@ import { UserService } from '$lib/services/user.service';
 import { StandardResponse } from '$lib/models/transferData/StandardResponse';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
 
+/**
+ * actions.default – POST /settings
+ *
+ * Ändert das Passwort des eingeloggten Nutzers.
+ *
+ * Formularfelder: password (string)
+ *
+ * @returns { success: true, message: 'Password changed' } bei Erfolg,
+ *          { success: false, message } bei Fehler oder fehlendem Passwort
+ */
 export const actions: Actions = {
 	default: async ({ cookies, request }): Promise<StandardResponse> => {
 		const user: SessionTokenUser | null = UserService.extractUser(cookies.get('session'));

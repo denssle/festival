@@ -2,6 +2,17 @@ import { UserService } from '$lib/services/user.service';
 import type { RequestHandler } from '@sveltejs/kit';
 import { GuestInformationService } from '$lib/services/guest-information.service';
 
+/**
+ * POST /festival/:festival_id/cancel-invitation
+ *
+ * Storniert die Einladung eines Nutzers zu einem Festival.
+ * Der optionale Kommentar im Request-Body wird als Begründung gespeichert.
+ *
+ * @param cookies - Session-Cookie zur Authentifizierung
+ * @param params.festival_id - ID des Festivals
+ * @param request - Body enthält einen optionalen Kommentar als Plaintext
+ * @returns 200 bei Erfolg, 401 wenn nicht eingeloggt, 400 bei fehlender festival_id
+ */
 export const POST: RequestHandler = async ({ cookies, params, request }) => {
 	const extractUser = UserService.extractUser(cookies.get('session'));
 	if (!extractUser) {

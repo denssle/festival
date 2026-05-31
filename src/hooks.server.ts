@@ -9,6 +9,10 @@ const noAuthURLs: string[] = ['/login', '/registration', '/about', '/impressum']
 
 export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 	const pathname: string = event.url.pathname;
+
+	if (pathname.startsWith('/_app/') || pathname.startsWith('/favicon')) {
+		return resolve(event);
+	}
 	const sessionToken: string | undefined = event.cookies.get('session');
 	const isSessionValid: boolean = await UserService.validateSessionToken(sessionToken);
 	const extractedUser: SessionTokenUser | null = UserService.extractUser(sessionToken);

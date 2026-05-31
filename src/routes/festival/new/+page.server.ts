@@ -4,6 +4,19 @@ import { getDateFromString } from '$lib/utils/date.util';
 import { type Actions, Cookies, redirect } from '@sveltejs/kit';
 import { FestivalEventService } from '$lib/services/festival-event.service';
 
+/**
+ * actions.default – POST /festival/new
+ *
+ * Erstellt ein neues Festival mit den angegebenen Formulardaten.
+ * Leitet nach erfolgreicher Erstellung auf die Festival-Detailseite weiter.
+ * Nicht eingeloggte Nutzer werden zu /login weitergeleitet.
+ *
+ * Formularfelder: name (string), description (string), location (string),
+ *                 startDate (string), startTime (string),
+ *                 bringYourOwnBottle (checkbox), bringYourOwnFood (checkbox)
+ *
+ * @returns Redirect zu /festival/:id bei Erfolg, 404 wenn kein Name angegeben
+ */
 export const actions: Actions = {
 	default: async ({ cookies, request }: { cookies: Cookies; request: Request }): Promise<Response | undefined> => {
 		const user = UserService.extractUser(cookies.get('session'));

@@ -19,7 +19,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each data.festival.frontendGuestInformation.filter((value) => value.coming) as guest (guest.user?.id || guest.id)}
+				{#each data.festival.frontendGuestInformation.filter((value) => value.coming) as guest (guest.user?.id)}
 					<tr>
 						<td>
 							<a href="/user/{guest.user?.id}">{guest.user?.nickname}</a>

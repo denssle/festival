@@ -4,11 +4,13 @@
 	let { infoDialogData = $bindable() }: { infoDialogData: InfoDialogData } = $props();
 
 	$effect(() => {
-		if (infoDialogData.dialog && infoDialogData.showDialog) infoDialogData.dialog.showModal();
+		if (infoDialogData.dialog && infoDialogData.showDialog && !infoDialogData.dialog.open) {
+			infoDialogData.dialog.showModal();
+		}
 	});
 </script>
 
-<dialog bind:this={infoDialogData.dialog} onclose={() => (infoDialogData.showDialog = false)}>
+<dialog bind:this={infoDialogData.dialog} onclose={() => { infoDialogData.showDialog = false; infoDialogData.onClose?.(); }}>
 	<p>{infoDialogData.infoDialogText}</p>
 	<button onclick={() => infoDialogData.dialog?.close()} style="float: right">Okay</button>
 </dialog>

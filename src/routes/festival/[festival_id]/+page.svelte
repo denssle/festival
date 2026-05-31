@@ -139,10 +139,17 @@
 		}
 	}
 
+	let guestFood = $derived(data.yourGuestInformation?.food ?? '');
+	let guestDrink = $derived(data.yourGuestInformation?.drink ?? '');
+	let guestComment = $derived(data.yourGuestInformation?.comment ?? '');
+	let guestNumberOfOtherGuests = $derived(data.yourGuestInformation?.numberOfOtherGuests ?? 0);
+	let festivalBringYourOwnBottle = $derived(data.festival.bringYourOwnBottle);
+	let festivalBringYourOwnFood = $derived(data.festival.bringYourOwnFood);
+
 	let cancelInvitationDialogData: CancelInvitationDialogData = $state({
 		showDialog: false,
 		dialog: undefined,
-		comment: data.yourGuestInformation?.comment ?? '',
+		comment: '',
 		answerYes: false
 	});
 	let infoDialogData: InfoDialogData = $state({
@@ -153,15 +160,25 @@
 	});
 	let joinDialogData: JoinEventDialogData = $state({
 		showDialog: false,
-		bringYourOwnBottle: data.festival.bringYourOwnBottle,
-		bringYourOwnFood: data.festival.bringYourOwnFood,
-		food: data.yourGuestInformation?.food ?? '',
-		drink: data.yourGuestInformation?.drink ?? '',
-		numberOfOtherGuests: data.yourGuestInformation?.numberOfOtherGuests ?? 0,
+		bringYourOwnBottle: false,
+		bringYourOwnFood: false,
+		food: '',
+		drink: '',
+		numberOfOtherGuests: 0,
 		dialog: undefined,
 		coming: true,
-		comment: data.yourGuestInformation?.comment ?? '',
+		comment: '',
 		answerYes: false
+	});
+
+	$effect(() => {
+		cancelInvitationDialogData.comment = guestComment;
+		joinDialogData.food = guestFood;
+		joinDialogData.drink = guestDrink;
+		joinDialogData.comment = guestComment;
+		joinDialogData.numberOfOtherGuests = guestNumberOfOtherGuests;
+		joinDialogData.bringYourOwnBottle = festivalBringYourOwnBottle;
+		joinDialogData.bringYourOwnFood = festivalBringYourOwnFood;
 	});
 	let questionDialogData: QuestionDialogData = $state({
 		showDialog: false,

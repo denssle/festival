@@ -10,6 +10,10 @@ test.describe.serial('Profile Festivals Display', () => {
 	let userId: string;
 
 	test.beforeAll(async ({ browser }) => {
+		const requestContext = await browser.newContext();
+		await requestContext.request.post('/api/test/reset');
+		await requestContext.close();
+
 		context = await browser.newContext();
 		page = await context.newPage();
 		await register(page, userNickname);
@@ -46,15 +50,15 @@ test.describe.serial('Profile Festivals Display', () => {
 	});
 
 	test('sollte das Festival nur einmal im Profil anzeigen', async () => {
-		// Simuliere einen zweiten (vielleicht verwaisten oder fehlerhaften) Eintrag in der DB,
-		// indem wir einfach nochmal beitreten (falls das UI das zulässt oder wir es provozieren)
-		// Da wir den Service fixen, sollte die UI trotzdem nur einen anzeigen.
-
-		// Zum Profil navigieren
+		// Zum Profil navigieren und auf den visiting-festivals fetch warten
+		const festivalsResponse = page.waitForResponse(
+			(r: any) => r.url().includes('/visiting-festivals') && r.request().method() === 'GET'
+		);
 		await page.goto(`/user/${userId}`);
+		await festivalsResponse;
 
 		// Sektion "Festivals" finden
-		const festivalsSection = page.locator('section:has(h4:text("Festivals:"))');
+		const festivalsSection = page.locator('section').filter({ has: page.locator('h4', { hasText: 'Festivals:' }) });
 		await expect(festivalsSection).toBeVisible();
 
 		// Liste der angemeldeten Festivals prüfen
@@ -62,7 +66,7 @@ test.describe.serial('Profile Festivals Display', () => {
 
 		// Warten bis Daten geladen sind (VisitingFestivals.svelte nutzt fetch)
 		// Wir prüfen hier auf genau 1, auch wenn technisch mehrere GuestInfos existieren könnten
-		await expect(festivalLinks).toHaveCount(1);
+		await expect(festivalLinks).toHaveCount(1, { timeout: 10000 });
 		await expect(festivalLinks.first()).toHaveText(festivalName);
 	});
 });

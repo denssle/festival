@@ -43,8 +43,11 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 		await expect(textareaElement).toBeVisible();
 		await textareaElement.fill(commentText);
 
+		const postResponse = pageA.waitForResponse(
+			(r: any) => r.url().includes('/comments') && r.request().method() === 'POST'
+		);
 		await pageA.locator('button:has-text("Absenden")').click();
-		await pageA.waitForLoadState('load');
+		await postResponse;
 
 		// Verifizieren, dass der Kommentar erscheint
 		const commentLocator = pageA.locator('fieldset').filter({ hasText: commentText });
@@ -70,8 +73,11 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 		await expect(textareaElement).toBeVisible();
 		await textareaElement.fill(updatedCommentText);
 
+		const putResponse = pageA.waitForResponse(
+			(r: any) => r.url().includes('/comments') && r.request().method() === 'PUT'
+		);
 		await saveButton.click();
-		await pageA.waitForLoadState('load');
+		await putResponse;
 
 		// Verifizieren der Änderung
 		await expect(pageA.locator('fieldset', { hasText: updatedCommentText })).toBeVisible({ timeout: 10000 });
@@ -90,13 +96,21 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 		await pageA.goto(`/user/${userBId}`);
 		const updatedCommentLocator = pageA.locator('fieldset').filter({ hasText: updatedCommentText });
 		await expect(updatedCommentLocator).toBeVisible({ timeout: 10000 });
+
+		const deleteResponse = pageA.waitForResponse(
+			(r: any) => r.url().includes('/comments') && r.request().method() === 'DELETE'
+		);
 		await updatedCommentLocator.locator('button:has-text("Löschen")').click();
 
 		// Dialog bestätigen
-		const dialog = pageA.locator('dialog').filter({ hasText: 'Ja' });
+		const dialog = pageA.locator('dialog').filter({ hasText: 'Kommentar löschen' });
 		await dialog.waitFor({ state: 'visible', timeout: 10000 });
+		const reloadResponse = pageA.waitForResponse(
+			(r: any) => r.url().includes('/comments') && r.request().method() === 'GET'
+		);
 		await dialog.locator('button:has-text("Ja")').click();
-		await pageA.waitForLoadState('load');
+		await deleteResponse;
+		await reloadResponse;
 
 		// Verifizieren, dass der Kommentar weg ist
 		await expect(pageA.locator('fieldset', { hasText: updatedCommentText })).not.toBeVisible({ timeout: 10000 });

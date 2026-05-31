@@ -11,6 +11,17 @@ import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFe
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
 
+/**
+ * load – GET /festival/:festival_id/edit
+ *
+ * Lädt die Daten des Festivals für das Bearbeitungsformular.
+ * Nur der Ersteller des Festivals darf diese Seite aufrufen.
+ * Andere Nutzer werden zur Startseite weitergeleitet, unbekannte Festivals ergeben 404.
+ *
+ * @param cookies - Session-Cookie zur Authentifizierung
+ * @param params.festival_id - ID des zu bearbeitenden Festivals
+ * @returns FrontendFestivalEvent-Objekt mit allen Festival-Daten
+ */
 export const load: PageServerLoad = async ({
 	cookies,
 	params
@@ -33,6 +44,19 @@ export const load: PageServerLoad = async ({
 	error(404, 'Not Found');
 };
 
+/**
+ * actions.default – POST /festival/:festival_id/edit
+ *
+ * Aktualisiert ein bestehendes Festival mit den übergebenen Formulardaten.
+ * Nur der Ersteller des Festivals darf Änderungen vornehmen.
+ * Nicht eingeloggte Nutzer werden zu /login weitergeleitet.
+ *
+ * Formularfelder: name (string), description (string), location (string),
+ *                 startDate (string), startTime (string),
+ *                 bringYourOwnBottle (checkbox), bringYourOwnFood (checkbox)
+ *
+ * @returns Redirect zu /festival/:id bei Erfolg, 500 bei Fehler
+ */
 export const actions: Actions = {
 	default: async ({ cookies, request, params }): Promise<Response> => {
 		const festivalId: string | undefined = params.festival_id;

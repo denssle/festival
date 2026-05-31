@@ -1,7 +1,12 @@
-import { CommentAttributes, mapToFrontendComment } from '$lib/db/attributes/comment.attributes';
+import { CommentAttributes } from '$lib/db/attributes/comment.attributes';
 import { FrontendComment } from '$lib/models/transferData/FrontendComment';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
 import { Comment } from '$lib/db/model/comment';
+import { User } from '$lib/db/model/user';
+import { Op } from 'sequelize';
+import { FrontendUser } from '$lib/models/user/FrontendUser';
+import { UserService } from '$lib/services/user.service';
+import { UserAttributes } from '$lib/db/attributes/user.attributes';
 
 export class CommentService {
 	static async saveComment(who: string, where: string, comment: string) {
@@ -20,7 +25,28 @@ export class CommentService {
 			},
 			order: [['createdAt', 'DESC']]
 		});
-		return Promise.all(findAll.map((value) => value.get({ plain: true })).map((value) => mapToFrontendComment(value, userID)));
+		const comments = findAll.map((value) => value.get({ plain: true }));
+
+		const userIds = [...new Set(comments.map((c) => c.writtenBy))];
+		const users = await User.findAll({
+			where: { id: { [Op.in]: userIds } }
+		});
+		const userMap = new Map<string, FrontendUser>();
+		for (const u of users) {
+			const attrs = u.get({ plain: true }) as UserAttributes;
+			userMap.set(attrs.id, UserService.parseBackendUserToFrontend(attrs as any));
+		}
+
+		return comments.map((value) => ({
+			id: value.id,
+			comment: value.comment,
+			createdAt: value.createdAt,
+			updatedAt: value.updatedAt,
+			writtenTo: value.writtenTo,
+			writtenBy: userMap.get(value.writtenBy) ?? null,
+			yourComment: value.writtenBy === userID,
+			editMode: false
+		}));
 	}
 
 	static async deleteComment(userId: string, commentId: string): Promise<ChangeResult> {

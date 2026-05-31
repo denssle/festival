@@ -35,7 +35,7 @@
 
 	<section>
 		<h4>Freunde:</h4>
-		{#each data.friendList as friend (friend.id)}
+		{#each data.friendList.filter((f) => f !== undefined) as friend (friend.id)}
 			<FriendListEntry user={friend} />
 		{/each}
 		{#if data.friendList.length === 0}

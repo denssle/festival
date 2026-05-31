@@ -5,13 +5,23 @@
 	let { data }: { data: FrontendFestivalEvent } = $props();
 
 	let formData = $state({
-		name: data?.name ?? '',
-		description: data?.description ?? '',
-		startDate: dateToString(data.startDate),
-		startTime: dateToHHMM(data.startDate),
-		location: data.location ?? '',
-		bringYourOwnFood: data.bringYourOwnFood,
-		bringYourOwnBottle: data.bringYourOwnBottle
+		name: '',
+		description: '',
+		startDate: '',
+		startTime: '',
+		location: '',
+		bringYourOwnFood: false,
+		bringYourOwnBottle: false
+	});
+
+	$effect(() => {
+		formData.name = data?.name ?? '';
+		formData.description = data?.description ?? '';
+		formData.startDate = dateToString(data.startDate);
+		formData.startTime = dateToHHMM(data.startDate);
+		formData.location = data.location ?? '';
+		formData.bringYourOwnFood = data.bringYourOwnFood;
+		formData.bringYourOwnBottle = data.bringYourOwnBottle;
 	});
 </script>
 

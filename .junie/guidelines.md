@@ -1,3 +1,7 @@
+---
+apply: always
+---
+
 # Project Guidelines: Festival Manager (SvelteKit + Sequelize)
 
 ## 1. Architektur Overview
@@ -5,7 +9,7 @@
 - **Framework:** SvelteKit (Backend: Server-Side `+page.server.ts`, `+server.ts`).
 - **Sprache:** TypeScript.
 - **Datenbank:** MariaDB mit Sequelize als ORM. Modelle in `src/lib/db/model/` und Interfaces in `src/lib/db/attributes/`.
-- **Business Logic:** Kapselung in Service-Klassen mit statischen Methoden in `src/lib/services/`.
+- **Business Logic:** Kapselung in Service-Klassen mit statischen Methoden in `src/lib/services/`. Reine Berechnungs-/Validierungslogik wird in separaten `*.logic.ts`-Dateien (z.B. `festival-event.logic.ts`) ausgelagert und dort auch als Unit-Tests (`*.logic.spec.ts`) abgedeckt.
 - **Authentication:** Gesteuert über `src/hooks.server.ts` unter Verwendung von Session-Tokens in Cookies.
 - **Testing:** Playwright wird für E2E-Tests verwendet (Happy Path, Authentifizierung). Tests befinden sich im Ordner `tests/`.
 - **CI/CD:** Ein einheitlicher GitHub Action Workflow in `.github/workflows/pipeline.yml` führt Playwright-Tests bei jedem Push auf `main` oder Pull Requests aus.
@@ -15,7 +19,7 @@
 
 ## 2. Datenbank (Sequelize) Best Practices
 
-- **Triad Rule:** Bei jeder Änderung an Feldern müssen drei Stellen aktualisiert werden:
+- **Triad Rule:** Bei JEDER Änderung an Datenbankfeldern müssen IMMER diese drei Stellen aktualisiert werden:
   1. `src/lib/db/attributes/*.attributes.ts` (Interface)
   2. `src/lib/db/model/*.ts` (Sequelize Model Definition)
   3. `src/lib/db/db.ts` (Assoziationen/Beziehungen)
@@ -23,8 +27,9 @@
 - **Modelle & Beziehungen:**
   - **User:** Zentrale Entität hat 1:1 zu `UserImage` und `SessionToken`.
   - **FestivalEvent:** Besitzt von Usern (via `UserId`), hat viele `GuestInformation`.
-  - **Gruppen:** `Group` (Besitzer: `ownerId`) & `GroupMember` (Mapping-Tabelle).
-  - **Soziales:** `Friend`, `Friendship`, `FriendRequest` (Sender: `senderId`, Empfänger: `receiverId`).
+  - **Comment:** Kommentare zu Festivals oder Nutzerprofilen, eigenes Datenbankmodell in `src/lib/db/model/comment.ts`.
+  - **Gruppen:** `Group` (Besitzer: `ownerId`) & `GroupMember` (Mapping-Tabelle). Gruppenbesitzer können die Gruppe nicht verlassen (nur löschen).
+  - **Soziales:** `Friend` (Felder: `friend1Id`, `friend2Id`), `Friendship`, `FriendRequest` (Sender: `senderId`, Empfänger: `receiverId`).
   - Beziehungen sind in `src/lib/db/db.ts` definiert.
 - **Primärschlüssel:** `DataTypes.STRING` mit `crypto.randomUUID()` für eindeutige IDs verwenden.
 - **Asynchronität:** **IMMER** `async/await` mit `try/catch` in Services nutzen. `.then()` vermeiden.
@@ -38,6 +43,7 @@
 - **Checkbox-Handling:** In Server-Actions müssen Checkboxen gegen den String `'on'` geprüft werden (`formData.get('name') === 'on'`), da sie bei Nicht-Selektion `null` zurückgeben, was bei einer einfachen `Boolean()`-Konvertierung zu Fehlern führen kann.
 - **Access Control:** Immer `locals.currentUser` in `+page.server.ts` oder Actions prüfen. In Services `isChangeAllowed` zur Validierung nutzen.
 - **Service-Rückgaben:** Methoden sollten `StandardResponse` oder `ChangeResult` zurückgeben.
+- **`ChangeResult`-Werte:** `'Success'` | `'Not authorized'` | `'Data Missing'` | `'Already in Group'` | `'Failure'`. Die Hilfsfunktion `getHTTPCodeForChangeResult(result)` in `src/lib/models/updates/ChangeResult.ts` mappt diese auf HTTP-Statuscodes (200, 403, 422, 409, 500) und sollte in `+server.ts`-Handlern verwendet werden.
 - **Daten-Mapping:** Mapping-Funktionen (z.B. in `attributes.ts`) sollten robust gegenüber fehlenden Assoziationen sein (Null-Checks/Optional Chaining verwenden), da Sequelize-Modelle Assoziationen nur laden, wenn sie explizit mit `include` angefordert werden.
 
 ## 4. Coding Style
@@ -45,6 +51,9 @@
 - Bestehende Namenskonventionen einhalten (camelCase für Eigenschaften, PascalCase für Modelle).
 - `bcrypt-ts` für alle passwortbezogenen Operationen verwenden.
 - Trennung zwischen `FrontendUser`, `BackendUser` und `CurrentUser` beibehalten.
+- Transfer-Modelle in `src/lib/models/transferData/` (z.B. `FrontendComment`, `StandardResponse`) für die Kommunikation zwischen Frontend und Backend verwenden.
+- `isChangeAllowed(userId, ownerId)` aus `src/lib/services/festival-event.logic.ts` für Berechtigungsprüfungen in Services nutzen (statt inline-Vergleiche).
+- Kommentare und Bezeichner folgen dem bestehenden Stil (Deutsch/Englisch Mischung basierend auf Kontext, aber konsistent bleiben).
 
 ## 5. Testing Strategy
 
@@ -64,7 +73,8 @@
 - **Stabilität:**
   - Nutzen Sie `waitForURL` für Navigation.
   - Verwenden Sie `dialog.waitFor({ state: 'visible' })` statt `expect(dialog).toBeVisible()` für `<dialog>`-Elemente, da letzteres bei noch nicht geöffneten Dialogen zu Timeouts führt.
-  - `waitForResponse` **vor** dem auslösenden Klick registrieren (nicht in `Promise.all`), um Race Conditions zu vermeiden.
+  - `waitForResponse` **vor** dem auslösenden Klick registrieren (nicht in `Promise.all`), um Race Conditions zu vermeiden. Beispiel: `const res = page.waitForResponse(r => r.url().includes('/comments') && r.request().method() === 'POST'); await button.click(); await res;`
+  - **Kein `waitForLoadState('load')` nach clientseitigen Fetch-Requests (SPA):** In SPA-Komponenten (z.B. `Comments.svelte`) lösen Fetch-Requests keine Seitennavigation aus. `waitForLoadState('load')` wartet auf eine Navigation, die nie kommt, und führt zu Timeouts. Stattdessen immer `waitForResponse` verwenden.
   - Nutzen Sie `waitForLoadState('networkidle')` nach Navigationen, um sicherzustellen, dass die Seite vollständig geladen ist.
   - Nutzen Sie `test.describe.serial` für Test-Sequenzen, die aufeinander aufbauen.
   - Eindeutige Testdaten (`Date.now()`) verwenden.
@@ -86,7 +96,7 @@
   - `MARIA_DB_NAME` (Datenbankname in App ist `USER_NAME + '_' + DB_NAME`).
 - Standard-Port: `5173`.
 
-## 7. Offene Punkte / TODOS
+## 7. Offene Punkte / TODOs
 
 - `SessionToken`: Unterstützung mehrerer Sitzungen pro Benutzer evaluieren.
 - **Datenbank-Konsistenz:** Da `sync({ alter: true })` produktiv Risiken birgt, sollte langfristig auf echte Migrationen umgestellt werden.

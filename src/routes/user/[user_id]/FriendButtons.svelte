@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { error } from '@sveltejs/kit';
 	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
 	import { invalidateAll } from '$app/navigation';
@@ -7,39 +6,42 @@
 	let { yourFriend = false, friendId }: { yourFriend?: boolean; friendId: string } = $props();
 
 	async function addFriend(): Promise<void> {
-		console.log('addFriend called for', friendId);
-		fetch(`/user/` + friendId + `/add-friend`, { method: 'POST' })
-			.then((value: Response) => {
-				console.log('addFriend response status:', value.status);
-				if (value.ok) {
-					openDialog('Freundschaftsanfrage wurde geschickt.');
-				} else {
-					openDialog('Fehler bei Anfrage.');
-				}
-				invalidateAll();
-			})
-			.catch((reason) => {
-				console.error('addFriend fetch error:', reason);
-				error(reason);
-			});
+		try {
+			const value = await fetch(`/user/` + friendId + `/add-friend`, { method: 'POST' });
+			if (value.ok) {
+				openDialog('Freundschaftsanfrage wurde geschickt.', false);
+			} else {
+				openDialog('Fehler bei Anfrage.', false);
+			}
+		} catch (reason) {
+			console.error('addFriend fetch error:', reason);
+		}
 	}
 
-	function removeFriend(): void {
-		fetch(`/user/` + friendId + `/remove-friend`, { method: 'POST' })
-			.then((value: Response) => {
-				if (value.ok) {
-					openDialog('Freundschaft gekündigt.');
-				} else {
-					openDialog('Fehler bei Anfrage.');
-				}
-				invalidateAll();
-			})
-			.catch((reason) => error(reason));
+	async function removeFriend(): Promise<void> {
+		try {
+			const value = await fetch(`/user/` + friendId + `/remove-friend`, { method: 'POST' });
+			if (value.ok) {
+				openDialog('Freundschaft gekündigt.', true);
+			} else {
+				openDialog('Fehler bei Anfrage.', false);
+			}
+		} catch (reason) {
+			console.error('removeFriend fetch error:', reason);
+		}
 	}
 
-	function openDialog(msg: string) {
+	function openDialog(msg: string, reloadOnClose: boolean) {
 		infoDialogData.infoDialogText = msg;
 		infoDialogData.showDialog = true;
+		if (reloadOnClose) {
+			infoDialogData.onClose = () => {
+				invalidateAll();
+				infoDialogData.onClose = undefined;
+			};
+		} else {
+			infoDialogData.onClose = undefined;
+		}
 	}
 
 	let infoDialogData: InfoDialogData = $state({

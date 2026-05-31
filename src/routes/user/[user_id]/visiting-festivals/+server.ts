@@ -4,6 +4,18 @@ import { VisitingFestival } from '$lib/models/user/VisitingFestival';
 import { UserService } from '$lib/services/user.service';
 import { FriendshipService } from '$lib/services/friendship.service';
 
+/**
+ * GET /user/:user_id/visiting-festivals
+ *
+ * Gibt alle Festivals zurück, die der angegebene Nutzer besuchen wird.
+ * Nur der Nutzer selbst oder befreundete Nutzer dürfen diese Liste abrufen.
+ *
+ * @param request - RequestEvent mit user_id in params und session-Cookie
+ * @returns 200 mit JSON-Array von VisitingFestival bei Erfolg,
+ *          401 wenn nicht eingeloggt,
+ *          403 wenn nicht befreundet und nicht der eigene Account,
+ *          500 bei fehlender user_id
+ */
 export async function GET(request: RequestEvent): Promise<Response> {
 	const pathId: string | undefined = request.params.user_id?.toString();
 	const user = UserService.extractUser(request.cookies.get('session'));

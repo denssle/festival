@@ -70,22 +70,24 @@ export class GuestInformationService {
 	static async mapGuestInformationToFrontendGuestInformation(
 		guestInformation: BackendGuestInformation[]
 	): Promise<FrontendGuestInformation[]> {
-		const result: FrontendGuestInformation[] = [];
-		for (const information of guestInformation) {
-			const userId = information.UserId || (information as any).userId;
-			const userById = await UserService.loadFrontEndUserById(userId);
-			if (userById) {
-				result.push({
-					user: userById,
-					coming: information.coming,
-					numberOfOtherGuests: information.numberOfOtherGuests,
-					drink: information.drink,
-					comment: information.comment,
-					food: information.food
-				});
-			}
-		}
-		return result;
+		const mapped = await Promise.all(
+			guestInformation.map(async (information) => {
+				const userId = information.UserId || (information as any).userId;
+				const userById = await UserService.loadFrontEndUserById(userId);
+				if (userById) {
+					return {
+						user: userById,
+						coming: information.coming,
+						numberOfOtherGuests: information.numberOfOtherGuests,
+						drink: information.drink,
+						comment: information.comment,
+						food: information.food
+					} as FrontendGuestInformation;
+				}
+				return null;
+			})
+		);
+		return mapped.filter((item): item is FrontendGuestInformation => item !== null);
 	}
 
 	private static async getGuestInformationModel(userId: string, festivalId: string) {

@@ -106,9 +106,9 @@ test.describe.serial('Profile Festivals Authorization', () => {
 		// Sicherstellen, dass das Element aus dem DOM entfernt wird
 		await expect(acceptButton).not.toBeVisible({ timeout: 15000 });
 		await user1Page.waitForLoadState('networkidle');
-		
+
 		// Warte kurz, um sicherzugehen, dass DB sync fertig ist
-		await user1Page.waitForTimeout(1000); 
+		await user1Page.waitForTimeout(1000);
 	});
 
 	test('User 2 sollte die Festivals von User 1 sehen können (jetzt befreundet)', async () => {
