@@ -6,17 +6,17 @@
 
 	async function acceptFriendRequest(id: string | undefined) {
 		await fetch(`/updates/accept-friend`, { method: 'POST', body: id });
-		invalidateAll();
+		await invalidateAll();
 	}
 
 	async function declineFriendRequest(id: string | undefined) {
 		await fetch(`/updates/decline-friend`, { method: 'POST', body: id });
-		invalidateAll();
+		await invalidateAll();
 	}
 
 	async function cancelFriendRequest(id: string | undefined) {
 		await fetch(`/updates/cancel-request`, { method: 'POST', body: id });
-		invalidateAll();
+		await invalidateAll();
 	}
 </script>
 

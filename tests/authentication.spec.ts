@@ -41,13 +41,20 @@ test.describe('Authentication Security', () => {
 		const nickname = `LogoutUser_${Date.now()}`;
 		await register(page, nickname);
 
-		// Logout ausführen (angenommen es gibt einen Logout-Link/Button oder API call)
-		await page.goto('/logout'); // Falls eine Route existiert
+		// Echten Logout über den Button im Header auslösen (POST /logout)
+		const logoutResponse = page.waitForResponse(
+			(resp) => resp.url().includes('/logout') && resp.request().method() === 'POST'
+		);
+		await page.getByRole('button', { name: 'Logout' }).click();
+		await logoutResponse;
+		await page.waitForURL(/\/login/);
 
-		// Falls keine Route existiert, hier die Logik zum Logout testen
-		// Da wir keine Logout-Route im Code gesehen haben, simulieren wir das Löschen des Cookies
-		await page.context().clearCookies();
+		// Session-Cookie muss vom Server gelöscht worden sein
+		const cookies = await page.context().cookies();
+		const sessionCookie = cookies.find((c) => c.name === 'session');
+		expect(sessionCookie).toBeUndefined();
 
+		// Zugriff auf geschützte Route führt zu Redirect
 		await page.goto('/festival/new');
 		await expect(page).toHaveURL(/\/login/);
 	});

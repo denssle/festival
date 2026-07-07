@@ -2,7 +2,7 @@ import type { Actions, Cookies } from '@sveltejs/kit';
 import { error } from '@sveltejs/kit';
 import type { FrontendUser } from '$lib/models/user/FrontendUser';
 import { UserService } from '$lib/services/user.service';
-import type { PageServerLoad, RouteParams } from '../../user/[user_id]/$types';
+import type { PageServerLoad, RouteParams } from './$types';
 import { StandardResponse } from '$lib/models/transferData/StandardResponse';
 import type { UserFormData } from '$lib/models/user/UserFormData';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
@@ -23,9 +23,14 @@ export const load: PageServerLoad = async ({
 		const user: SessionTokenUser | null = UserService.extractUser(cookies.get('session'));
 		const loaded: FrontendUser | undefined = await UserService.loadFrontEndUserById(userId);
 		if (user && loaded) {
+			const isOwnProfil: boolean = userId === user.id;
+			// E-Mail ist privat und wird nur im eigenen Profil ausgeliefert
+			if (!isOwnProfil) {
+				loaded.email = '';
+			}
 			return {
 				user: loaded,
-				isOwnProfil: user && userId === user.id,
+				isOwnProfil,
 				yourFriend: await FriendshipService.areFriends(userId, user.id),
 				friendList: await FriendshipService.getFriendList(userId),
 				groupList: await GroupService.getGroupsByUserId(userId)
@@ -36,19 +41,23 @@ export const load: PageServerLoad = async ({
 };
 
 export const actions: Actions = {
-	default: async ({ cookies, request }): Promise<StandardResponse> => {
+	default: async ({ cookies, request, locals }): Promise<StandardResponse> => {
 		const oldUser: SessionTokenUser | null = UserService.extractUser(cookies.get('session'));
 		if (oldUser) {
 			const formData: UserFormData = await UserService.readFormDataFrontEndUser(request.formData());
-			if (oldUser.nickname !== formData.nickname) {
+			const nicknameChanged: boolean = oldUser.nickname !== formData.nickname;
+			if (nicknameChanged) {
 				const invalidNickname: boolean = await UserService.nickNameInvalid(formData.nickname);
-				console.log('invalid nick', invalidNickname);
 				if (invalidNickname) {
 					return { success: false, message: 'Nickname invalid!' };
 				}
 			}
 			const result: ChangeResult = await UserService.updateUser(oldUser, formData);
 			if (result === 'Success') {
+				// Der Nickname steckt auch im Session-Cookie/locals – bei Änderung aktualisieren
+				if (nicknameChanged) {
+					await UserService.createSessionCookie(cookies, locals, { ...oldUser, nickname: formData.nickname });
+				}
 				return { success: true, message: 'Updated user' };
 			} else {
 				return { success: false, message: result };

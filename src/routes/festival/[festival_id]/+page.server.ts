@@ -1,7 +1,4 @@
-import type {
-	PageServerLoad,
-	RouteParams
-} from '../../../../.svelte-kit/types/src/routes/festival/[festival_id]/$types';
+import type { PageServerLoad, RouteParams } from './$types';
 import type { Cookies } from '@sveltejs/kit';
 import { error } from '@sveltejs/kit';
 import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';

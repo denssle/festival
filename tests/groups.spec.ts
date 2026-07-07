@@ -145,8 +145,8 @@ test.describe.serial('Gruppen Management', () => {
 		// Nach dem Löschen sollten wir auf der Gruppenseite sein
 		await expect(page).toHaveURL('/group');
 
-		// Die Gruppe sollte nicht mehr unter "Deine Gruppen" erscheinen
-		await expect(page.locator('.my-groups').getByText(groupToDel)).not.toBeVisible();
+		// Die Gruppe sollte nicht mehr als Link auf der Gruppenseite erscheinen
+		await expect(page.getByRole('link', { name: groupToDel })).toHaveCount(0);
 	});
 
 	test('Besitzer sollte seine Gruppe bearbeiten können', async ({ page }) => {

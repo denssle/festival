@@ -12,7 +12,7 @@
 	});
 
 	async function loadFestivals() {
-		const response = await fetch(userId + '/visiting-festivals', {
+		const response = await fetch('/user/' + userId + '/visiting-festivals', {
 			method: 'GET'
 		});
 		const data = await response.json();

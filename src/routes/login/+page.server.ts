@@ -1,6 +1,6 @@
 import type { Actions, Cookies } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
-import type { PageServerLoad } from '../../../.svelte-kit/types/src/routes/$types';
+import type { PageServerLoad } from './$types';
 import { UserService } from '$lib/services/user.service';
 import type { BackendUser } from '$lib/models/user/BackendUser';
 import { StandardResponse } from '$lib/models/transferData/StandardResponse';

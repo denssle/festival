@@ -8,8 +8,8 @@ const mockBackendUser: BackendUser = {
 	nickname: 'testuser',
 	password: 'hashed',
 	email: 'test@example.com',
-	forename: null,
-	lastname: null,
+	forename: '',
+	lastname: '',
 	createdAt: new Date(),
 	updatedAt: new Date()
 };
@@ -17,7 +17,8 @@ const mockBackendUser: BackendUser = {
 const mockSessionTokenUser: SessionTokenUser = {
 	id: 'user-1',
 	nickname: 'testuser',
-	token: 'existing-token-abc'
+	token: 'existing-token-abc',
+	email: 'test@example.com'
 };
 
 describe('resolveSessionToken', () => {

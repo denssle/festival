@@ -11,7 +11,7 @@ import { ChangeResult } from '$lib/models/updates/ChangeResult';
  *
  * @param cookies - Session-Cookie zur Authentifizierung
  * @param params.festival_id - ID des zu löschenden Festivals
- * @returns 303 bei Erfolg, 403 bei fehlender Berechtigung, 400 bei ungültiger Anfrage
+ * @returns 200 bei Erfolg, 403 bei fehlender Berechtigung, 400 bei ungültiger Anfrage
  */
 export const DELETE: RequestHandler = async ({ cookies, params }): Promise<Response> => {
 	if (params && params.festival_id) {
@@ -20,7 +20,7 @@ export const DELETE: RequestHandler = async ({ cookies, params }): Promise<Respo
 			params.festival_id
 		);
 		if (result === 'Success') {
-			return new Response(null, { status: 303 });
+			return new Response(null, { status: 200 });
 		} else if (result === 'Not authorized') {
 			return new Response(null, { status: 403 });
 		}

@@ -1,4 +1,4 @@
-import { RequestHandler } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import { UserService } from '$lib/services/user.service';
 import { FriendshipService } from '$lib/services/friendship.service';

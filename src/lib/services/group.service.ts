@@ -3,26 +3,32 @@ import { GroupMember } from '$lib/db/model/groupMember';
 import { GroupAttributes } from '$lib/db/attributes/group.attributes';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
 import { Op } from 'sequelize';
+import { sequelize } from '$lib/db/sequelize';
 
 export class GroupService {
-	static async createGroup(
-		userId: string,
-		name: File | string,
-		description: FormDataEntryValue | null
-	): Promise<string> {
+	static async createGroup(userId: string, name: string, description: string): Promise<string> {
 		const groupId = crypto.randomUUID();
 		try {
-			await Group.create({
-				id: groupId,
-				name: name,
-				description: description,
-				ownerId: userId
-			});
+			// Gruppe und Besitzer-Mitgliedschaft atomar anlegen, damit keine besitzerlose Gruppe entstehen kann
+			await sequelize.transaction(async (t) => {
+				await Group.create(
+					{
+						id: groupId,
+						name: name,
+						description: description,
+						ownerId: userId
+					},
+					{ transaction: t }
+				);
 
-			await GroupMember.create({
-				id: crypto.randomUUID(),
-				UserId: userId,
-				GroupId: groupId
+				await GroupMember.create(
+					{
+						id: crypto.randomUUID(),
+						UserId: userId,
+						GroupId: groupId
+					},
+					{ transaction: t }
+				);
 			});
 
 			return groupId;

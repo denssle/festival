@@ -3,6 +3,7 @@ import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import { UserService } from '$lib/services/user.service';
 import { StandardResponse } from '$lib/models/transferData/StandardResponse';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
+import { MIN_PASSWORD_LENGTH } from '$lib/constants';
 
 /**
  * actions.default – POST /settings
@@ -20,6 +21,9 @@ export const actions: Actions = {
 		const data: FormData = await request.formData();
 		const password: string | undefined = data.get('password')?.toString();
 		if (user && password) {
+			if (password.length < MIN_PASSWORD_LENGTH) {
+				return { success: false, message: `Password must be at least ${MIN_PASSWORD_LENGTH} characters long` };
+			}
 			const result: ChangeResult = await UserService.updatePassword(user, password);
 			if (result === 'Success') {
 				return { success: true, message: 'Password changed' };

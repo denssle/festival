@@ -1,7 +1,5 @@
-import { PageServerLoad } from '../../../.svelte-kit/types/src/routes/$types';
-import { env } from '$env/dynamic/private';
-const { MARIA_DB_NAME } = env;
+import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async (): Promise<{ version: string | undefined; db: string | undefined }> => {
-	return { version: process.env.npm_package_version, db: MARIA_DB_NAME };
+export const load: PageServerLoad = async (): Promise<{ version: string | undefined }> => {
+	return { version: process.env.npm_package_version };
 };

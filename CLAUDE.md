@@ -1,7 +1,3 @@
----
-apply: always
----
-
 # Project Guidelines: Festival Manager (SvelteKit + Sequelize)
 
 ## 1. Architektur Overview
@@ -34,7 +30,7 @@ apply: always
 - **Primärschlüssel:** `DataTypes.STRING` mit `crypto.randomUUID()` für eindeutige IDs verwenden.
 - **Asynchronität:** **IMMER** `async/await` mit `try/catch` in Services nutzen. `.then()` vermeiden.
 - **Kaskadierung:** `onDelete: 'CASCADE'` in `db.ts` sicherstellen.
-- **Initialisierung:** Erfolgt über `startDB()` in `src/lib/db/db.ts` mit `sequelize.sync({ alter: true })`.
+- **Initialisierung:** Erfolgt über `startDB()` in `src/lib/db/db.ts`. `force` und `alter` schließen sich gegenseitig aus und dürfen NICHT gemeinsam übergeben werden: In Test-/Dev-Umgebungen (`PLAYWRIGHT`, `NODE_ENV=test`, `MARIA_DB_NAME=dev`) wird `sync({ force: true })` genutzt (Tabellen werden neu erstellt), sonst produktiv `sync({ alter: true })`.
 - **Eager Loading (Include):** Falls ein Alias in `db.ts` definiert wurde (z.B. `as: 'EventGuests'`), muss dieser Alias zwingend auch im `include`-Statement im Service/Server-Loader verwendet werden, um `SequelizeEagerLoadingError` zu vermeiden. Achten Sie auf eindeutige Aliase bei mehreren Beziehungen zum selben Modell (z.B. `EventGuests` vs. `UserGuestInfos`).
 
 ## 3. SvelteKit & UI

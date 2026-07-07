@@ -1,4 +1,5 @@
-import { error, RequestEvent } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
 import { FestivalEventService } from '$lib/services/festival-event.service';
 import { VisitingFestival } from '$lib/models/user/VisitingFestival';
 import { UserService } from '$lib/services/user.service';
@@ -14,11 +15,11 @@ import { FriendshipService } from '$lib/services/friendship.service';
  * @returns 200 mit JSON-Array von VisitingFestival bei Erfolg,
  *          401 wenn nicht eingeloggt,
  *          403 wenn nicht befreundet und nicht der eigene Account,
- *          500 bei fehlender user_id
+ *          400 bei fehlender user_id
  */
-export async function GET(request: RequestEvent): Promise<Response> {
-	const pathId: string | undefined = request.params.user_id?.toString();
-	const user = UserService.extractUser(request.cookies.get('session'));
+export const GET: RequestHandler = async ({ params, cookies }): Promise<Response> => {
+	const pathId: string | undefined = params.user_id;
+	const user = UserService.extractUser(cookies.get('session'));
 
 	if (!user) {
 		throw error(401, 'Unauthorized');
@@ -36,5 +37,5 @@ export async function GET(request: RequestEvent): Promise<Response> {
 			throw error(403, 'Forbidden');
 		}
 	}
-	return new Response(null, { status: 500 });
-}
+	return new Response(null, { status: 400 });
+};

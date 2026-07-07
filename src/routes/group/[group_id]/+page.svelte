@@ -1,7 +1,8 @@
 <script lang="ts">
+	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
 
-	let { data, form } = $props();
+	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	let { group, members, currentUser } = $derived(data);
 	let isMember = $derived(data.isMember);

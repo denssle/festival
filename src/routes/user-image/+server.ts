@@ -1,4 +1,5 @@
-import type { Cookies, RequestHandler } from '@sveltejs/kit';
+import type { Cookies } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import { UserService } from '$lib/services/user.service';
 

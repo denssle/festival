@@ -37,14 +37,21 @@
 			method: 'POST',
 			body: formData
 		});
-		comments = await response.json();
+		if (response.ok) {
+			comments = await response.json();
+		} else {
+			// Optimistisch eingefügten Kommentar wieder verwerfen
+			await loadComments();
+		}
 	}
 
 	async function loadComments() {
 		const response = await fetch(whereId + '/comments', {
 			method: 'GET'
 		});
-		comments = await response.json();
+		if (response.ok) {
+			comments = await response.json();
+		}
 	}
 
 	async function deleteComment(commentId: string | undefined) {

@@ -26,8 +26,7 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
 	}
 
 	return {
-		group,
-		currentUser: user
+		group
 	};
 };
 

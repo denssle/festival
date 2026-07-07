@@ -61,7 +61,7 @@ export class UserService {
 	}
 
 	static saltPassword(password: string): string {
-		return hashSync(password, genSaltSync(4));
+		return hashSync(password, genSaltSync(10));
 	}
 
 	static async loginWithCredentials(nickname: string, password: string): Promise<BackendUser | null> {
@@ -180,9 +180,9 @@ export class UserService {
 
 	static async readNickPass(data: Promise<FormData>): Promise<NickPassData | undefined> {
 		const values: FormData = await data;
-		const nickname = String(values.get('nickname'));
-		const password = String(values.get('password'));
-		if (nickname && password) {
+		const nickname = values.get('nickname');
+		const password = values.get('password');
+		if (typeof nickname === 'string' && nickname.length > 0 && typeof password === 'string' && password.length > 0) {
 			return {
 				nickname: nickname,
 				password: password
@@ -233,7 +233,8 @@ export class UserService {
 				model.set({
 					email: formData.email,
 					lastname: formData.lastname,
-					forename: formData.forename
+					forename: formData.forename,
+					nickname: formData.nickname
 				});
 				await model.save();
 				return 'Success';

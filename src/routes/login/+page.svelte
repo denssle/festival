@@ -1,5 +1,7 @@
 <script lang="ts">
-	let { form }: { form: any } = $props();
+	import type { ActionData } from './$types';
+
+	let { form }: { form: ActionData } = $props();
 	let formData = $state({ nickname: '', password: '' });
 </script>
 

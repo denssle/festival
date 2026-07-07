@@ -15,29 +15,18 @@ export function getUserImageWritable(userId: string): Writable<string> {
 	return stringWritable;
 }
 
-export function loadUserImage(userId: string): void {
+export async function loadUserImage(userId: string): Promise<void> {
 	const imageWritable: Writable<string> = getUserImageWritable(userId);
-	fetch('/user-image/' + userId, {
-		method: 'GET'
-	})
-		.then((response) => {
-			if (response.ok) {
-				response
-					.blob()
-					.then((data) => {
-						data.text().then((text: string) => {
-							imageWritable.set(text);
-						});
-					})
-					.catch((reason) => {
-						console.log('read blob failed', reason);
-					});
-			} else {
-				imageWritable.set(FALLBACK_PICTURE);
-			}
-		})
-		.catch((reason) => {
-			console.error('loading picture error', reason);
+	try {
+		const response = await fetch('/user-image/' + userId, { method: 'GET' });
+		if (response.ok) {
+			const text: string = await (await response.blob()).text();
+			imageWritable.set(text);
+		} else {
 			imageWritable.set(FALLBACK_PICTURE);
-		});
+		}
+	} catch (reason) {
+		console.error('loading picture error', reason);
+		imageWritable.set(FALLBACK_PICTURE);
+	}
 }

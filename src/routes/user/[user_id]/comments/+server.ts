@@ -1,4 +1,4 @@
-import { RequestEvent } from '@sveltejs/kit';
+import type { RequestEvent } from '@sveltejs/kit';
 import { POSTComment, GETComments, DELETEComment, PUTComment } from '$lib/controller/comment.controller';
 
 /**

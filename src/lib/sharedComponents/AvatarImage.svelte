@@ -12,6 +12,11 @@
 		if (userId) {
 			loadAndSubscribe();
 		}
+		return () => {
+			if (unsubscribe) {
+				unsubscribe();
+			}
+		};
 	});
 
 	function loadAndSubscribe(): void {

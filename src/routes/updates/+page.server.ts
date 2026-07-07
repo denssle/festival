@@ -1,5 +1,5 @@
 import type { Cookies } from '@sveltejs/kit';
-import { PageServerLoad } from '../$types';
+import type { PageServerLoad } from './$types';
 import { UserService } from '$lib/services/user.service';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import { UpdateTransferData } from '$lib/models/updates/UpdateTransferData';

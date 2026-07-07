@@ -68,7 +68,9 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		// Das <input type="file"> ist per display:none versteckt und wird per JS .click() ausgelöst.
 		// Playwright's filechooser-Event funktioniert nicht bei programmatischem .click().
 		// Stattdessen direkt setInputFiles() auf dem versteckten Input verwenden.
-		const uploadResponse = page.waitForResponse((r: any) => r.url().includes('/user-image') && r.request().method() === 'POST');
+		const uploadResponse = page.waitForResponse(
+			(r: any) => r.url().includes('/user-image') && r.request().method() === 'POST'
+		);
 		const fileInput = page.locator('input[type="file"]');
 		await fileInput.setInputFiles([
 			{

@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { LoginRegisterFormData } from '$lib/models/transferData/LoginRegisterFormData';
+	import type { ActionData } from './$types';
 
-	let { form }: { form: any } = $props();
+	let { form }: { form: ActionData } = $props();
 	let formData: LoginRegisterFormData = $state({ nickname: '', password: '', password2: '' });
 </script>
 

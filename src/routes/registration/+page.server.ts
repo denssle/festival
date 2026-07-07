@@ -1,10 +1,11 @@
 import type { Actions, Cookies } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
-import type { PageServerLoad } from '../../../.svelte-kit/types/src/routes/$types';
+import type { PageServerLoad } from './$types';
 import { UserService } from '$lib/services/user.service';
 import { StandardResponse } from '$lib/models/transferData/StandardResponse';
 import { BackendUser } from '$lib/models/user/BackendUser';
 import { NickPassData } from '$lib/models/transferData/NickPassData';
+import { MIN_PASSWORD_LENGTH } from '$lib/constants';
 
 /**
  * load – GET /registration
@@ -46,6 +47,9 @@ export const actions: Actions = {
 	}): Promise<StandardResponse> => {
 		const formData: NickPassData | undefined = await UserService.readNickPass(request.formData());
 		if (formData) {
+			if (formData.password.length < MIN_PASSWORD_LENGTH) {
+				return { success: false, message: `Password must be at least ${MIN_PASSWORD_LENGTH} characters long` };
+			}
 			if (await UserService.nickNameInvalid(formData.nickname)) {
 				return { success: false, message: 'Invalid Nickname' };
 			} else {

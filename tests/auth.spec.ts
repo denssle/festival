@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { register } from './test-utils';
+import { register, TEST_PASSWORD } from './test-utils';
 
 test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () => {
 	test.beforeAll(async ({ browser }) => {
@@ -56,5 +56,51 @@ test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () =>
 
 		const submitButton = page.locator('button[type="submit"]');
 		await expect(submitButton).toBeDisabled();
+	});
+
+	test('Login mit falschem Passwort zeigt eine Fehlermeldung', async ({ page }) => {
+		const nickname = `WrongPassUser_${Date.now()}`;
+		await register(page, nickname, 'CorrectPassword123!');
+
+		// Abmelden, um den Login-Flow sauber zu testen
+		const logoutResponse = page.waitForResponse(
+			(resp) => resp.url().includes('/logout') && resp.request().method() === 'POST'
+		);
+		await page.getByRole('button', { name: 'Logout' }).click();
+		await logoutResponse;
+		await page.waitForURL(/\/login/);
+
+		// Login mit falschem Passwort
+		await page.goto('/login');
+		await page.fill('input[name="nickname"]', nickname);
+		await page.fill('input[name="password"]', 'WrongPassword999!');
+		await page.click('button[type="submit"]');
+
+		// Wir bleiben auf /login und sehen die Fehlermeldung
+		await expect(page).toHaveURL(/\/login/);
+		await expect(page.getByText('Password invalid')).toBeVisible();
+	});
+
+	test('Registrierung mit bereits vergebenem Nickname zeigt eine Fehlermeldung', async ({ page, browser }) => {
+		const nickname = `DupUser_${Date.now()}`;
+
+		// Ersten User in eigenem Kontext anlegen
+		const firstContext = await browser.newContext();
+		const firstPage = await firstContext.newPage();
+		await register(firstPage, nickname);
+		await firstContext.close();
+
+		// Zweite Registrierung mit demselben Nickname
+		await page.goto('/registration');
+		await page.fill('input[name="nickname"]', nickname);
+		await page.fill('input[name="password"]', TEST_PASSWORD);
+		await page.fill('input[name="password2"]', TEST_PASSWORD);
+		const submitButton = page.locator('button[type="submit"]');
+		await expect(submitButton).toBeEnabled();
+		await submitButton.click();
+
+		// Wir bleiben auf /registration und sehen die Fehlermeldung
+		await expect(page).toHaveURL(/\/registration/);
+		await expect(page.getByText('Invalid Nickname')).toBeVisible();
 	});
 });

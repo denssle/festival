@@ -1,6 +1,7 @@
 import { UserService } from '$lib/services/user.service';
 import type { RequestHandler } from '@sveltejs/kit';
 import { GuestInformationService } from '$lib/services/guest-information.service';
+import { FestivalEventService } from '$lib/services/festival-event.service';
 
 /**
  * POST /festival/:festival_id/cancel-invitation
@@ -23,6 +24,10 @@ export const POST: RequestHandler = async ({ cookies, params, request }) => {
 	const comment: string = await blob.text();
 
 	if (params.festival_id) {
+		const festival = await FestivalEventService.getFrontEndFestival(params.festival_id);
+		if (!festival) {
+			return new Response('Festival not found', { status: 404 });
+		}
 		await GuestInformationService.cancelInvitation(extractUser, params.festival_id, comment);
 		return new Response(null, { status: 200 });
 	}

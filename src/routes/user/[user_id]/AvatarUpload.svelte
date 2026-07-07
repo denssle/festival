@@ -1,6 +1,5 @@
 <script lang="ts">
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
-	import { error } from '@sveltejs/kit';
 	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
 	import { loadUserImage } from '$lib/stores/userImage.store';
 
@@ -32,23 +31,25 @@
 	}
 
 	async function uploadFunction(imgBase64: string): Promise<void> {
-		await fetch(`/user-image`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				Accept: 'application/json'
-			},
-			body: imgBase64
-		})
-			.then((value: Response) => {
-				if (value.ok) {
-					openDialog('Bild erfolgreich hochgeladen und gespeichert. ');
-					loadUserImage(userId);
-				} else {
-					openDialog('Bildupload gescheitert. ');
-				}
-			})
-			.catch((reason) => error(reason));
+		try {
+			const value: Response = await fetch(`/user-image`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Accept: 'application/json'
+				},
+				body: imgBase64
+			});
+			if (value.ok) {
+				openDialog('Bild erfolgreich hochgeladen und gespeichert. ');
+				loadUserImage(userId);
+			} else {
+				openDialog('Bildupload gescheitert. ');
+			}
+		} catch (reason) {
+			console.error('Bildupload-Fehler:', reason);
+			openDialog('Bildupload gescheitert. ');
+		}
 	}
 
 	function openDialog(msg: string) {

@@ -6,7 +6,6 @@ import { User } from '$lib/db/model/user';
 import type { GroupAttributes } from '$lib/db/attributes/group.attributes';
 import { UserService } from '$lib/services/user.service';
 import { GroupService } from '$lib/services/group.service';
-import type { StandardResponse } from '$lib/models/transferData/StandardResponse';
 
 export const load: PageServerLoad = async ({ params, cookies }) => {
 	const { group_id } = params;
@@ -27,14 +26,15 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
 
 	return {
 		group: groupModel.dataValues as GroupAttributes,
-		members: members.map((m: any) => m.User?.dataValues),
-		currentUser: user,
+		members: members.map((m: any) => m.User?.dataValues).filter(Boolean),
+		// Nur die für die UI nötigen Felder ausliefern – niemals das Session-Token an den Client geben
+		currentUser: user ? { id: user.id, nickname: user.nickname } : null,
 		isMember
 	};
 };
 
 export const actions: Actions = {
-	join: async ({ params, cookies }): Promise<StandardResponse | any> => {
+	join: async ({ params, cookies }) => {
 		const { group_id } = params;
 		const user = UserService.extractUser(cookies.get('session'));
 
@@ -50,7 +50,7 @@ export const actions: Actions = {
 			return fail(400, { success: false, message: result });
 		}
 	},
-	delete: async ({ params, cookies }): Promise<StandardResponse | any> => {
+	delete: async ({ params, cookies }) => {
 		const { group_id } = params;
 		const user = UserService.extractUser(cookies.get('session'));
 
@@ -66,7 +66,7 @@ export const actions: Actions = {
 			return fail(400, { success: false, message: result });
 		}
 	},
-	leave: async ({ params, cookies }): Promise<StandardResponse | any> => {
+	leave: async ({ params, cookies }) => {
 		const { group_id } = params;
 		const user = UserService.extractUser(cookies.get('session'));
 

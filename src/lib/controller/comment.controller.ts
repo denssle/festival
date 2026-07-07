@@ -1,4 +1,4 @@
-import { RequestEvent } from '@sveltejs/kit';
+import type { RequestEvent } from '@sveltejs/kit';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import { UserService } from '$lib/services/user.service';
 import { CommentService } from '$lib/services/comment.service';

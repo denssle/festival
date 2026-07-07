@@ -92,7 +92,9 @@ export async function startDB(): Promise<void> {
 		console.log('Connection has been established successfully.');
 
 		const isSyncForced = process.env.PLAYWRIGHT === 'true' || process.env.NODE_ENV === 'test' || MARIA_DB_NAME == 'dev';
-		await sequelize.sync({ force: isSyncForced, alter: true });
+		// force und alter schließen sich gegenseitig aus: bei force wird die Tabelle ohnehin neu erstellt,
+		// alter greift nur beim nicht-forcierten Sync (Produktion).
+		await sequelize.sync(isSyncForced ? { force: true } : { alter: true });
 		dbStarted = true;
 	} catch (error) {
 		console.error('Unable to connect to the database:', error);

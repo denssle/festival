@@ -56,7 +56,24 @@ export class FriendshipService {
 		return Boolean(model);
 	}
 
+	/**
+	 * Prüft gerichtet, ob eine offene Anfrage existiert, bei der `receiverId` der Empfänger
+	 * und `senderId` der Absender ist. Nötig, damit nur der Empfänger annehmen kann.
+	 */
+	static async receivedFriendRequestExists(receiverId: string, senderId: string): Promise<boolean> {
+		const model: Model<FriendRequestAttributes, any> | null = await FriendRequest.findOne({
+			where: { senderId: senderId, receiverId: receiverId }
+		});
+		return Boolean(model);
+	}
+
 	static async createFriendRequest(senderId: string, receiverId: string): Promise<void> {
+		if (senderId === receiverId) {
+			return;
+		}
+		if (await this.areFriends(senderId, receiverId)) {
+			return;
+		}
 		if (!(await this.friendRequestExisting(senderId, receiverId))) {
 			await FriendRequest.create({
 				id: crypto.randomUUID(),
@@ -96,7 +113,8 @@ export class FriendshipService {
 	}
 
 	static async acceptFriendRequest(id: string, params_id: string) {
-		if (await this.friendRequestExisting(id, params_id)) {
+		// Nur der Empfänger einer offenen Anfrage darf sie annehmen – nicht der Absender selbst
+		if (await this.receivedFriendRequestExists(id, params_id)) {
 			await this.deleteFriendRequest(id, params_id);
 			await this.addFriend(id, params_id);
 		}

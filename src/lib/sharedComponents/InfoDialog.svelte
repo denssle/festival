@@ -10,7 +10,13 @@
 	});
 </script>
 
-<dialog bind:this={infoDialogData.dialog} onclose={() => { infoDialogData.showDialog = false; infoDialogData.onClose?.(); }}>
+<dialog
+	bind:this={infoDialogData.dialog}
+	onclose={() => {
+		infoDialogData.showDialog = false;
+		infoDialogData.onClose?.();
+	}}
+>
 	<p>{infoDialogData.infoDialogText}</p>
 	<button onclick={() => infoDialogData.dialog?.close()} style="float: right">Okay</button>
 </dialog>

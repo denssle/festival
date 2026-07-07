@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
+	import type { PageData } from './$types';
 	import { getTotalNumberOfComingGuests } from '$lib/utils/festivalEvent.util';
 
-	let { data }: { data: { festivalEvents: FrontendFestivalEvent[] } } = $props();
+	let { data }: { data: PageData } = $props();
 </script>
 
 <article>
@@ -16,10 +16,11 @@
 			<fieldset>
 				<legend>
 					<a href="/festival/{loadedEvent.id}">{loadedEvent.name}</a>
-					von <a href="/user/{loadedEvent.createdBy?.id}">{loadedEvent.createdBy?.nickname}</a>
+					{#if loadedEvent.createdBy}
+						von <a href="/user/{loadedEvent.createdBy.id}">{loadedEvent.createdBy.nickname}</a>
+					{/if}
 				</legend>
 				<i>Start: {loadedEvent.startDate?.toLocaleString()}</i>
-				<p></p>
 				<p>
 					<span>Bisherige Gäste: {getTotalNumberOfComingGuests(loadedEvent)}</span>
 				</p>
@@ -27,5 +28,3 @@
 		{/each}
 	</section>
 </article>
-
-<style></style>
