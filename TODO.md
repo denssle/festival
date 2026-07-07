@@ -50,6 +50,7 @@ Sortiert nach **Aufwand** (S → M → L), innerhalb jeder Stufe nach **Priorit�
 - [ ] 🟢 **SessionToken:** Unterstützung mehrerer Sitzungen pro Benutzer auf DB-Ebene evaluieren. _(Datenbank)_
 - [ ] 🟢 **Edge Cases:** Behandlung von leeren Zuständen. _(UX)_
 - [ ] 🟢 **Monitoring:** Logging und Fehlertracking einrichten. _(Deployment)_
+- [ ] 🟢 **`overrides` für `cookie`/`uuid` auflösen:** In `package.json` erzwingen zwei `overrides` gepatchte Transitiv-Versionen (`cookie → ^0.7.0` via `@sveltejs/kit`, `uuid → ^11.1.1` via `sequelize@6`), da es upstream keinen nicht-breaking Fix gibt. Sobald ein `@sveltejs/kit` mit `cookie ≥ 0.7` bzw. `sequelize 7` (nutzt `uuid` nativ, kein `^8` mehr) verfügbar ist, die zugehörigen Kernpakete anheben und die Overrides wieder entfernen. Danach `npm audit` + Build/Tests gegenprüfen. _(Datenbank)_
 
 ## [L] Groß (> 4h)
 
