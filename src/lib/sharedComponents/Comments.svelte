@@ -10,9 +10,20 @@
 	let comments: FrontendComment[] = $state([]);
 	let inputComment: string = $state('');
 
+	// Nicht-reaktives Tracking des zuletzt geladenen Ziels. Bewusst kein $state,
+	// damit das Schreiben den Effect nicht erneut auslöst.
+	let loadedId: string | undefined;
+
 	$effect(() => {
-		if (whereId) {
-			inputComment = '';
+		if (whereId && whereId !== loadedId) {
+			// Nur bei einem echten Wechsel des Ziels (z. B. anderes Profil/Festival) das
+			// Eingabefeld leeren. Beim ersten Lauf NICHT leeren: Der Effect läuft erst nach
+			// der Hydration und würde sonst eine bereits getätigte Eingabe (Race mit dem
+			// SSR-gerenderten Textarea) wieder überschreiben.
+			if (loadedId !== undefined) {
+				inputComment = '';
+			}
+			loadedId = whereId;
 			loadComments();
 		}
 	});
