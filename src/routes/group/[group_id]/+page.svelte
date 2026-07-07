@@ -1,18 +1,44 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
+	import { tick } from 'svelte';
+	import QuestionDialog from '$lib/sharedComponents/QuestionDialog.svelte';
+	import type { QuestionDialogData } from '$lib/models/dialogData/QuestionDialogData';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	let { group, members, currentUser } = $derived(data);
 	let isMember = $derived(data.isMember);
 
-	function confirmDelete(event: Event) {
-		if (!confirm('Bist du sicher, dass du diese Gruppe löschen möchtest? Dies kann nicht rückgängig gemacht werden.')) {
-			event.preventDefault();
+	let deleteForm: HTMLFormElement | undefined = $state();
+
+	let deleteDialogData: QuestionDialogData = $state({
+		showDialog: false,
+		dialog: undefined,
+		questionText: 'Bist du sicher, dass du diese Gruppe löschen möchtest? Dies kann nicht rückgängig gemacht werden.',
+		answerYes: false
+	});
+
+	async function askDeleteGroup() {
+		deleteDialogData.answerYes = false;
+		deleteDialogData.showDialog = true;
+		await tick();
+		const dialog = deleteDialogData.dialog;
+		if (!dialog) {
+			console.error('no dialog');
+			return;
 		}
+		const onClose = () => {
+			dialog.removeEventListener('close', onClose);
+			if (deleteDialogData.answerYes) {
+				deleteForm?.requestSubmit();
+			}
+		};
+		dialog.addEventListener('close', onClose);
 	}
 </script>
+
+<QuestionDialog bind:questionDialogData={deleteDialogData} />
 
 <article>
 	<header>
@@ -21,8 +47,8 @@
 			<div class="header-actions">
 				{#if currentUser && group.ownerId === currentUser.id}
 					<a href="/group/{group.id}/edit" class="button">Bearbeiten</a>
-					<form method="POST" action="?/delete" use:enhance onsubmit={confirmDelete}>
-						<button type="submit" class="button danger">Gruppe löschen</button>
+					<form method="POST" action="?/delete" use:enhance bind:this={deleteForm}>
+						<button type="button" class="button danger" onclick={askDeleteGroup}>Gruppe löschen</button>
 					</form>
 				{/if}
 				{#if currentUser && !isMember}

@@ -138,9 +138,11 @@ test.describe.serial('Gruppen Management', () => {
 		const deleteButton = page.getByRole('button', { name: 'Gruppe löschen' });
 		await expect(deleteButton).toBeVisible();
 
-		// Löschen klicken (Confirm Dialog wird automatisch von Playwright mit OK beantwortet, wenn nicht anders konfiguriert)
-		page.on('dialog', (dialog) => dialog.accept());
+		// Löschen klicken -> Bestätigungsdialog (QuestionDialog) mit "Ja" bestätigen
 		await deleteButton.click();
+		const confirmDialog = page.locator('dialog', { hasText: 'löschen möchtest' });
+		await confirmDialog.waitFor({ state: 'visible' });
+		await confirmDialog.getByRole('button', { name: 'Ja' }).click();
 
 		// Nach dem Löschen sollten wir auf der Gruppenseite sein
 		await expect(page).toHaveURL('/group');

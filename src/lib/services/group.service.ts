@@ -68,12 +68,20 @@ export class GroupService {
 	}
 
 	static async searchGroups(searchTerm: string): Promise<GroupAttributes[]> {
+		// LIKE-Wildcards (%, _) sowie das Escape-Zeichen (\) aus der Eingabe maskieren,
+		// damit z. B. '%' nicht alle Gruppen matcht (Sequelize parametrisiert nur gegen
+		// SQL-Injection, nicht gegen LIKE-Pattern-Missbrauch).
+		const pattern = `%${this.escapeLikePattern(searchTerm)}%`;
 		const groups = await Group.findAll({
 			where: {
-				[Op.or]: [{ name: { [Op.like]: `%${searchTerm}%` } }, { description: { [Op.like]: `%${searchTerm}%` } }]
+				[Op.or]: [{ name: { [Op.like]: pattern } }, { description: { [Op.like]: pattern } }]
 			}
 		});
 		return groups.map((g) => g.dataValues as GroupAttributes);
+	}
+
+	private static escapeLikePattern(input: string): string {
+		return input.replace(/[\\%_]/g, (char) => `\\${char}`);
 	}
 
 	static async getGroupsByUserId(userId: string): Promise<GroupAttributes[]> {
