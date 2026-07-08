@@ -105,4 +105,23 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		// In AvatarImage wird das Bild als Base64 geladen oder via API
 		expect(src).toBeTruthy();
 	});
+
+	test('sollte einen serverseitig ungültigen Upload ablehnen', async ({ page }) => {
+		await register(page, `BadUpload_User_${Date.now()}`, 'InitialPassword123!');
+
+		// Direkt gegen den Endpoint (umgeht die clientseitige Prüfung in AvatarUpload.svelte).
+		// page.evaluate -> Browser sendet seine Session-Cookies mit.
+		const results = await page.evaluate(async () => {
+			const post = (body: string) => fetch('/user-image', { method: 'POST', body }).then((r) => r.status);
+			return {
+				wrongType: await post('data:image/gif;base64,R0lGODlhAQABAAAAACw='),
+				tooBig: await post('data:image/png;base64,' + 'A'.repeat(1_500_000)),
+				malformed: await post('kein-data-uri')
+			};
+		});
+
+		expect(results.wrongType).toBe(415);
+		expect(results.tooBig).toBe(413);
+		expect(results.malformed).toBe(400);
+	});
 });

@@ -21,7 +21,6 @@ Sortiert nach **Aufwand** (S → M → L), innerhalb jeder Stufe nach **Priorit�
 
 ## [S] Klein (< 1h)
 
-- [ ] 🟡 **Bild-Upload serverseitig validieren:** Der `POST /user-image`-Endpoint speichert den Base64-Body ungeprüft. Die 1-MB-Grenze und der Typ (`.png/.jpg`) werden nur clientseitig in `AvatarUpload.svelte` geprüft. Größe und MIME-Typ serverseitig validieren. _(Sicherheit)_
 - [ ] 🟡 **Dokumentation:** Produktions-Umgebung (env) sauber dokumentieren. _(Deployment)_
 - [ ] 🟢 **E-Mail-Eindeutigkeit beim Update:** Die Profil-Update-Action (`user/[user_id]/+page.server.ts`) prüft die Eindeutigkeit des Nicknames, aber nicht der E-Mail (`UserService.emailInvalid` existiert, wird bei Registrierung genutzt). Beim Ändern der E-Mail ebenfalls prüfen. _(Datenschutz)_
 - [ ] 🟢 **Fremdschlüssel-Casing:** Der Workaround `event.UserId || (event as any).userId` (in `src/lib/db/attributes/festivalEvent.attributes.ts:26,49` und `src/lib/services/festival-event.service.ts:95,119`) deutet auf uneinheitliches FK-Casing hin. FK-Namen laut Triad-Regel eindeutig auf `UserId` festlegen und die `as any`-Krücke entfernen. _(Datenbank)_
