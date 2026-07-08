@@ -1,28 +1,26 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { dateToHHMM, dateToString } from '$lib/utils/date.util';
 	import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 
 	let { data }: { data: FrontendFestivalEvent } = $props();
 
-	let formData = $state({
-		name: '',
-		description: '',
-		startDate: '',
-		startTime: '',
-		location: '',
-		bringYourOwnFood: false,
-		bringYourOwnBottle: false
-	});
-
-	$effect(() => {
-		formData.name = data?.name ?? '';
-		formData.description = data?.description ?? '';
-		formData.startDate = dateToString(data.startDate);
-		formData.startTime = dateToHHMM(data.startDate);
-		formData.location = data.location ?? '';
-		formData.bringYourOwnFood = data.bringYourOwnFood;
-		formData.bringYourOwnBottle = data.bringYourOwnBottle;
-	});
+	// Formular einmalig aus data vorbefüllen (gilt für SSR und Client). Bewusst KEIN $effect,
+	// der formData nachträglich aus data setzt: Der Effect liefe erst nach der Hydration und
+	// würde eine bereits getätigte Eingabe (bind:value) wieder mit den Altwerten überschreiben
+	// – ein Race, der zum Speichern der alten Werte führt. untrack signalisiert Svelte, dass
+	// der einmalige Snapshot von data hier gewollt ist (kein reaktives Nachziehen).
+	let formData = $state(
+		untrack(() => ({
+			name: data?.name ?? '',
+			description: data?.description ?? '',
+			startDate: dateToString(data.startDate),
+			startTime: dateToHHMM(data.startDate),
+			location: data.location ?? '',
+			bringYourOwnFood: data.bringYourOwnFood,
+			bringYourOwnBottle: data.bringYourOwnBottle
+		}))
+	);
 </script>
 
 <article>

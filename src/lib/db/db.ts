@@ -9,8 +9,6 @@ import { FriendRequest } from '$lib/db/model/friendRequest';
 import { GroupMember } from '$lib/db/model/groupMember';
 import { Friendship } from '$lib/db/model/friendship';
 import { Comment } from '$lib/db/model/comment';
-import { env } from '$env/dynamic/private';
-const { MARIA_DB_NAME } = env;
 
 FestivalEvent.hasMany(GuestInformation, { as: 'EventGuests', foreignKey: 'FestivalEventId', onDelete: 'CASCADE' });
 GuestInformation.belongsTo(FestivalEvent, { foreignKey: 'FestivalEventId', as: 'FestivalEvent' });
@@ -91,10 +89,12 @@ export async function startDB(): Promise<void> {
 		await sequelize.authenticate();
 		console.log('Connection has been established successfully.');
 
-		const isSyncForced = process.env.PLAYWRIGHT === 'true' || process.env.NODE_ENV === 'test' || MARIA_DB_NAME == 'dev';
-		// force und alter schließen sich gegenseitig aus: bei force wird die Tabelle ohnehin neu erstellt,
-		// alter greift nur beim nicht-forcierten Sync (Produktion).
-		await sequelize.sync(isSyncForced ? { force: true } : { alter: true });
+		// Immer alter: In den Test-/Dev-Umgebungen läuft die DB als frisches In-Memory-SQLite
+		// (siehe sequelize.ts) – dort erzeugt alter die Tabellen ohnehin von Grund auf. In
+		// Produktion (echte MariaDB) erhält alter vorhandene Daten. Ein force (kompletter
+		// Wipe) wird also nirgends benötigt. Sauberkeit zwischen E2E-Tests macht der
+		// /api/test/reset-Endpoint, nicht der Sync-Modus.
+		await sequelize.sync({ alter: true });
 		dbStarted = true;
 	} catch (error) {
 		console.error('Unable to connect to the database:', error);

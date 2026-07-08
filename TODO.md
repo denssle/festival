@@ -28,6 +28,7 @@ Sortiert nach **Aufwand** (S → M → L), innerhalb jeder Stufe nach **Priorit�
 - [ ] 🟢 **API-Body vereinheitlichen:** Der `join`-Endpoint liest `request.json()`, `cancel-invitation` dagegen `request.blob()` → `.text()` (Kommentar als Roh-Textbody). Auf ein einheitliches JSON-Format für beide Endpoints (inkl. Client in `festival/[festival_id]/+page.svelte`) umstellen. _(Datenbank)_
 - [ ] 🟢 **`alert()` ersetzen:** In `src/routes/festival/[festival_id]/+page.svelte` (Join-Fehlerpfad) wird noch natives `alert()` genutzt. Durch den vorhandenen `InfoDialog` ersetzen, konsistent zum Rest der App. _(UX)_
 - [ ] 🟢 **Bild-Store-Cache:** `src/lib/stores/userImage.store.ts` hält eine modulweite `Map<string, Writable>`, die auf dem Client nie geleert wird (wächst mit jedem betrachteten Profil). Cache-Größe begrenzen oder Einträge bei Bedarf invalidieren. _(Performance)_
+- [ ] 🟢 **Dialog-Vorbefüllung entkoppeln:** In `festival/[festival_id]/+page.svelte` synchronisiert ein `$effect` laufend die Zu-/Absage-Dialogfelder (`bind:value`) aus abgeleiteten Gastdaten. Latent dieselbe Hydration-/Überschreib-Race wie in der Edit-Seite (nur unkritischer, da der Dialog erst auf Klick öffnet). Sauberer: die Felder **beim Öffnen** des Dialogs einmalig setzen statt via Dauer-Effect. _(UX)_
 
 ## [M] Mittel (1–4h)
 

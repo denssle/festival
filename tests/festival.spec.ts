@@ -67,7 +67,6 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		const nameInput = page.locator('input[name="name"]');
 		await expect(nameInput).toBeVisible({ timeout: 15000 });
 		await nameInput.fill(updatedFestivalName);
-		await page.waitForTimeout(500);
 
 		const descriptionInput = page.locator('textarea[name="description"]');
 		await descriptionInput.fill('Aktualisierte Beschreibung für den Test.');
@@ -92,17 +91,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 			page.waitForURL(new RegExp(`/festival/${festivalId}$`), { timeout: 15000 }),
 			saveButton.click()
 		]);
-		await page.waitForLoadState('networkidle');
-		// Explizit zur Detailseite navigieren und auf aktualisierten Namen warten
-		// webkit cached SSR-Responses – retry bis der neue Name erscheint
-		await page.goto(`/festival/${festivalId}`, { waitUntil: 'networkidle' });
-		let attempts = 0;
-		while (attempts < 5) {
-			const text = await page.locator('h4 u').textContent();
-			if (text && text.includes(updatedFestivalName)) break;
-			await page.reload({ waitUntil: 'networkidle' });
-			attempts++;
-		}
+		// Nach dem Redirect muss der aktualisierte Name auf der Detailseite stehen.
 		await expect(page.locator('h4 u')).toContainText(updatedFestivalName, { timeout: 15000 });
 		// TODO await expect(page.locator('p')).toContainText('Aktualisierte Beschreibung für den Test.');
 		// await expect(page.locator('input[name="bringYourOwnFood"]')).not.toBeChecked();
