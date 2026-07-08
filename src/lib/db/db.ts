@@ -89,13 +89,12 @@ export async function startDB(): Promise<void> {
 		await sequelize.authenticate();
 		console.log('Connection has been established successfully.');
 
-		// force (löscht und erstellt alle Tabellen neu) NUR für die automatisierten Test-Runner,
-		// die pro Lauf frische Tabellen brauchen. Alle anderen Umgebungen – inkl. dev und
-		// Produktion – nutzen alter, damit vorhandene Daten erhalten bleiben und NICHT
-		// überschrieben werden. force und alter schließen sich gegenseitig aus.
-		const isTestRunner =
-			process.env.PLAYWRIGHT === 'true' || process.env.NODE_ENV === 'test' || process.env.VITEST === 'true';
-		await sequelize.sync(isTestRunner ? { force: true } : { alter: true });
+		// Immer alter: In den Test-/Dev-Umgebungen läuft die DB als frisches In-Memory-SQLite
+		// (siehe sequelize.ts) – dort erzeugt alter die Tabellen ohnehin von Grund auf. In
+		// Produktion (echte MariaDB) erhält alter vorhandene Daten. Ein force (kompletter
+		// Wipe) wird also nirgends benötigt. Sauberkeit zwischen E2E-Tests macht der
+		// /api/test/reset-Endpoint, nicht der Sync-Modus.
+		await sequelize.sync({ alter: true });
 		dbStarted = true;
 	} catch (error) {
 		console.error('Unable to connect to the database:', error);
