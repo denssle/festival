@@ -9,8 +9,6 @@ import { FriendRequest } from '$lib/db/model/friendRequest';
 import { GroupMember } from '$lib/db/model/groupMember';
 import { Friendship } from '$lib/db/model/friendship';
 import { Comment } from '$lib/db/model/comment';
-import { env } from '$env/dynamic/private';
-const { MARIA_DB_NAME } = env;
 
 FestivalEvent.hasMany(GuestInformation, { as: 'EventGuests', foreignKey: 'FestivalEventId', onDelete: 'CASCADE' });
 GuestInformation.belongsTo(FestivalEvent, { foreignKey: 'FestivalEventId', as: 'FestivalEvent' });
@@ -91,10 +89,13 @@ export async function startDB(): Promise<void> {
 		await sequelize.authenticate();
 		console.log('Connection has been established successfully.');
 
-		const isSyncForced = process.env.PLAYWRIGHT === 'true' || process.env.NODE_ENV === 'test' || MARIA_DB_NAME == 'dev';
-		// force und alter schließen sich gegenseitig aus: bei force wird die Tabelle ohnehin neu erstellt,
-		// alter greift nur beim nicht-forcierten Sync (Produktion).
-		await sequelize.sync(isSyncForced ? { force: true } : { alter: true });
+		// force (löscht und erstellt alle Tabellen neu) NUR für die automatisierten Test-Runner,
+		// die pro Lauf frische Tabellen brauchen. Alle anderen Umgebungen – inkl. dev und
+		// Produktion – nutzen alter, damit vorhandene Daten erhalten bleiben und NICHT
+		// überschrieben werden. force und alter schließen sich gegenseitig aus.
+		const isTestRunner =
+			process.env.PLAYWRIGHT === 'true' || process.env.NODE_ENV === 'test' || process.env.VITEST === 'true';
+		await sequelize.sync(isTestRunner ? { force: true } : { alter: true });
 		dbStarted = true;
 	} catch (error) {
 		console.error('Unable to connect to the database:', error);
