@@ -1,56 +1,62 @@
 <script lang="ts">
-	import { error } from '@sveltejs/kit';
 	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
 	import { invalidateAll } from '$app/navigation';
 
-	export let yourFriend = false;
-	export let friendId: string;
+	let { yourFriend = false, friendId }: { yourFriend?: boolean; friendId: string } = $props();
 
 	async function addFriend(): Promise<void> {
-		fetch(friendId + `/add-friend`, { method: 'POST' })
-			.then((value: Response) => {
-				if (value.ok) {
-					openDialog('Freundschaftsanfrage wurde geschickt.');
-				} else {
-					openDialog('Fehler bei Anfrage.');
-				}
-				invalidateAll();
-			})
-			.catch((reason) => error(reason));
+		try {
+			const value = await fetch(`/user/` + friendId + `/add-friend`, { method: 'POST' });
+			if (value.ok) {
+				openDialog('Freundschaftsanfrage wurde geschickt.', false);
+			} else {
+				openDialog('Fehler bei Anfrage.', false);
+			}
+		} catch (reason) {
+			console.error('addFriend fetch error:', reason);
+		}
 	}
 
-	function removeFriend(): void {
-		fetch(friendId + `/remove-friend`, { method: 'POST' })
-			.then((value: Response) => {
-				if (value.ok) {
-					openDialog('Freundschaft gekündigt.');
-				} else {
-					openDialog('Fehler bei Anfrage.');
-				}
-				invalidateAll();
-			})
-			.catch((reason) => error(reason));
+	async function removeFriend(): Promise<void> {
+		try {
+			const value = await fetch(`/user/` + friendId + `/remove-friend`, { method: 'POST' });
+			if (value.ok) {
+				openDialog('Freundschaft gekündigt.', true);
+			} else {
+				openDialog('Fehler bei Anfrage.', false);
+			}
+		} catch (reason) {
+			console.error('removeFriend fetch error:', reason);
+		}
 	}
 
-	function openDialog(msg: string) {
+	function openDialog(msg: string, reloadOnClose: boolean) {
 		infoDialogData.infoDialogText = msg;
 		infoDialogData.showDialog = true;
+		if (reloadOnClose) {
+			infoDialogData.onClose = () => {
+				invalidateAll();
+				infoDialogData.onClose = undefined;
+			};
+		} else {
+			infoDialogData.onClose = undefined;
+		}
 	}
 
-	let infoDialogData: InfoDialogData = {
+	let infoDialogData: InfoDialogData = $state({
 		showDialog: false,
 		infoDialogText: '',
 		dialog: undefined,
 		answerYes: false
-	};
+	});
 </script>
 
 <InfoDialog bind:infoDialogData />
 <div>
 	{#if yourFriend}
-		<button on:click={() => removeFriend()}> Freund entfernen</button>
+		<button onclick={() => removeFriend()}> Freund entfernen</button>
 	{:else}
-		<button on:click={() => addFriend()}> Anfreunden</button>
+		<button onclick={() => addFriend()}> Anfreunden</button>
 	{/if}
 </div>

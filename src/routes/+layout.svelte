@@ -1,27 +1,34 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import type { CurrentUser } from '$lib/models/user/CurrentUser';
+	import type { Snippet } from 'svelte';
+
+	let {
+		data,
+		children
+	}: {
+		data: { currentUser: CurrentUser | undefined };
+		children: Snippet;
+	} = $props();
 
 	async function logout() {
 		await fetch('/logout', {
 			method: 'POST'
 		});
-		data.currentUser = undefined;
+		await invalidateAll();
 		await goto('/login');
 	}
-
-	export let data: { currentUser: CurrentUser | undefined };
 </script>
 
 <header>
 	<nav>
 		{#if data?.currentUser?.isAuthenticated}
 			<a href="/">Festivals</a>
-			<a href="/festival/new">Neu</a>
-			<a href="/settings">Einstellungen</a>
+			<a href="/group">Gruppen</a>
 			<a href="/user/{data.currentUser.id}">{data.currentUser.nickname}</a>
 			<a href="/updates">Updates</a>
-			<button on:click|trusted={logout}>Logout</button>
+			<a href="/settings">Einstellungen</a>
+			<button onclick={logout}>Logout</button>
 		{:else}
 			<a href="/login">Anmelden</a>
 			<a href="/registration">Registrieren</a>
@@ -29,7 +36,7 @@
 	</nav>
 </header>
 
-<slot />
+{@render children()}
 
 <footer>
 	<nav>
@@ -88,5 +95,6 @@
 
 	:global(input[type='number']) {
 		-moz-appearance: textfield;
+		appearance: textfield;
 	}
 </style>

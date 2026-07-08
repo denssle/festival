@@ -1,7 +1,8 @@
 <script lang="ts">
+	import type { PageData } from './$types';
 	import uberspaceBanner from '../../images/uberspace_badge_dark.png';
 
-	export let data: { version: string };
+	let { data }: { data: PageData } = $props();
 </script>
 
 <article>
@@ -15,7 +16,7 @@
 	</section>
 	<section>
 		<img alt="uberspace Banner" class="center" src={uberspaceBanner} />
-		<p style="text-align: center">
+		<p class="center-text">
 			Die Seite ist gehostet auf <a href="https://uberspace.de/">uberspace</a>.
 		</p>
 	</section>
@@ -29,5 +30,9 @@
 		display: block;
 		margin-left: auto;
 		margin-right: auto;
+	}
+
+	.center-text {
+		text-align: center;
 	}
 </style>

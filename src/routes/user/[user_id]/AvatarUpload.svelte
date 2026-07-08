@@ -1,13 +1,12 @@
 <script lang="ts">
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
-	import { error } from '@sveltejs/kit';
 	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
 	import { loadUserImage } from '$lib/stores/userImage.store';
 
-	export let isOwnProfil: boolean;
-	export let userId: string = '';
+	let { isOwnProfil, userId = '' }: { isOwnProfil: boolean; userId?: string } = $props();
+
 	let fileInput: HTMLElement;
-	let files: FileList;
+	let files: FileList = $state() as FileList;
 
 	function onUpload() {
 		if (isOwnProfil) {
@@ -32,23 +31,25 @@
 	}
 
 	async function uploadFunction(imgBase64: string): Promise<void> {
-		await fetch(`/user-image`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				Accept: 'application/json'
-			},
-			body: imgBase64
-		})
-			.then((value: Response) => {
-				if (value.ok) {
-					openDialog('Bild erfolgreich hochgeladen und gespeichert. ');
-					loadUserImage(userId);
-				} else {
-					openDialog('Bildupload gescheitert. ');
-				}
-			})
-			.catch((reason) => error(reason));
+		try {
+			const value: Response = await fetch(`/user-image`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Accept: 'application/json'
+				},
+				body: imgBase64
+			});
+			if (value.ok) {
+				openDialog('Bild erfolgreich hochgeladen und gespeichert. ');
+				loadUserImage(userId);
+			} else {
+				openDialog('Bildupload gescheitert. ');
+			}
+		} catch (reason) {
+			console.error('Bildupload-Fehler:', reason);
+			openDialog('Bildupload gescheitert. ');
+		}
 	}
 
 	function openDialog(msg: string) {
@@ -56,12 +57,12 @@
 		infoDialogData.showDialog = true;
 	}
 
-	let infoDialogData: InfoDialogData = {
+	let infoDialogData: InfoDialogData = $state({
 		showDialog: false,
 		infoDialogText: '',
 		dialog: undefined,
 		answerYes: false
-	};
+	});
 </script>
 
 <div>
@@ -70,9 +71,9 @@
 		accept=".png,.jpg"
 		bind:files
 		bind:this={fileInput}
-		on:change={() => getBase64(files[0])}
+		onchange={() => getBase64(files[0])}
 		style="display: none"
 		type="file"
 	/>
-	<button on:click={() => onUpload()}>Bild hochladen</button>
+	<button onclick={() => onUpload()}>Bild hochladen</button>
 </div>

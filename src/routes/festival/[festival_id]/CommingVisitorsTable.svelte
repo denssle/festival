@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { getTotalNumberOfComingGuests } from '$lib/utils/festivalEvent.util.js';
-	import type { FestivalTransferData } from '$lib/models/FestivalTransferData';
+	import type { FestivalTransferData } from '$lib/models/transferData/FestivalTransferData';
 
-	export let data: FestivalTransferData;
+	let { data }: { data: FestivalTransferData } = $props();
 </script>
 
 <section>
@@ -19,7 +19,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each data.festival.frontendGuestInformation.filter((value) => value.coming) as guest}
+				{#each data.festival.frontendGuestInformation.filter((value) => value.coming) as guest (guest.user?.id)}
 					<tr>
 						<td>
 							<a href="/user/{guest.user?.id}">{guest.user?.nickname}</a>

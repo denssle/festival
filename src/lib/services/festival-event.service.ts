@@ -2,8 +2,7 @@ import type { FrontendFestivalEvent } from '../models/festivalEvent/FrontendFest
 import type { BackendFestivalEvent } from '../models/festivalEvent/BackendFestivalEvent';
 import type { BackendUser } from '../models/user/BackendUser';
 import type { FrontendUser } from '../models/user/FrontendUser';
-import { loadFrontEndUserById } from './user.service';
-import { FestivalEvent, GuestInformation } from '$lib/db/db';
+import { UserService } from './user.service';
 import {
 	FestivalEventAttributes,
 	mapToBackendFestivalEvent,
@@ -12,158 +11,160 @@ import {
 import { Model } from 'sequelize';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
-import {
-	getAllActiveGuestInformation,
-	mapGuestInformationToFrontendGuestInformation
-} from '$lib/services/guest-information.service';
+import { GuestInformationService } from '$lib/services/guest-information.service';
 import { BackendGuestInformation } from '$lib/models/guestInformation/BackendGuestInformation';
 import { VisitingFestival } from '$lib/models/user/VisitingFestival';
+import { GuestInformation } from '$lib/db/model/guestInformation';
+import { FestivalEvent } from '$lib/db/model/festivalEvent';
+import { isChangeAllowed } from './festival-event.logic';
 
-export async function getAllFestivals(): Promise<FrontendFestivalEvent[]> {
-	const allFestivals = await FestivalEvent.findAll({ include: GuestInformation, order: [['startDate', 'DESC']] });
-	return Promise.all(
-		allFestivals.map((value: Model<FestivalEventAttributes, any>) => {
-			return mapToFrontendFestivalEvent(value.dataValues);
-		})
-	);
-}
-
-async function getFestivalModel(id: string) {
-	return await FestivalEvent.findByPk(id, {
-		include: GuestInformation
-	});
-}
-
-async function getFestival(id: string): Promise<BackendFestivalEvent | null> {
-	const mayBeFestival = await getFestivalModel(id);
-	if (mayBeFestival) {
-		return mapToBackendFestivalEvent(mayBeFestival.dataValues);
-	}
-	return null;
-}
-
-export async function getFrontEndFestival(id: string): Promise<FrontendFestivalEvent | null> {
-	const mayBeFestival: BackendFestivalEvent | null = await getFestival(id);
-	if (mayBeFestival) {
-		return await parseToFrontend(mayBeFestival);
-	}
-	return null;
-}
-
-export async function createFestival(
-	user: BackendUser | null | SessionTokenUser,
-	name: string,
-	description: string,
-	startDate: number | null,
-	bringYourOwnBottle: boolean,
-	bringYourOwnFood: boolean,
-	location: string
-): Promise<FrontendFestivalEvent | null> {
-	if (user) {
-		const model = await FestivalEvent.create({
-			id: crypto.randomUUID(),
-			name: name,
-			description: description,
-			UserId: user.id,
-			startDate: startDate,
-			bringYourOwnBottle: bringYourOwnBottle,
-			bringYourOwnFood: bringYourOwnFood,
-			location: location
+export class FestivalEventService {
+	static async getAllFestivals(): Promise<FrontendFestivalEvent[]> {
+		const allFestivals = await FestivalEvent.findAll({
+			include: { model: GuestInformation, as: 'EventGuests' },
+			order: [['startDate', 'DESC']]
 		});
-		return await mapToFrontendFestivalEvent(model.dataValues);
-	} else {
-		console.warn('festival service: create: no user found');
+		return Promise.all(
+			allFestivals.map((value: Model<FestivalEventAttributes, any>) => {
+				return mapToFrontendFestivalEvent(value.dataValues);
+			})
+		);
 	}
-	return null;
-}
 
-export async function updateFestival(
-	user: BackendUser | null | SessionTokenUser,
-	festivalId: string,
-	name: string,
-	description: string,
-	startDate: number | null,
-	bringYourOwnBottle: boolean,
-	bringYourOwnFood: boolean,
-	location: string
-): Promise<ChangeResult> {
-	const festivalModel = await getFestivalModel(festivalId);
-	if (festivalModel && user) {
-		if (isChangeAllowed(user.id, festivalModel.dataValues)) {
-			festivalModel.set({
+	private static async getFestivalModel(id: string) {
+		return await FestivalEvent.findByPk(id, {
+			include: { model: GuestInformation, as: 'EventGuests' }
+		});
+	}
+
+	private static async getFestival(id: string): Promise<BackendFestivalEvent | null> {
+		const mayBeFestival = await this.getFestivalModel(id);
+		if (mayBeFestival) {
+			return mapToBackendFestivalEvent(mayBeFestival.dataValues);
+		}
+		return null;
+	}
+
+	static async getFrontEndFestival(id: string): Promise<FrontendFestivalEvent | null> {
+		const mayBeFestival: BackendFestivalEvent | null = await this.getFestival(id);
+		if (mayBeFestival) {
+			return await this.parseToFrontend(mayBeFestival);
+		}
+		return null;
+	}
+
+	static async createFestival(
+		user: BackendUser | null | SessionTokenUser,
+		name: string,
+		description: string,
+		startDate: number | null,
+		bringYourOwnBottle: boolean,
+		bringYourOwnFood: boolean,
+		location: string
+	): Promise<FrontendFestivalEvent | null> {
+		if (user) {
+			const model = await FestivalEvent.create({
+				id: crypto.randomUUID(),
 				name: name,
 				description: description,
-				startDate: startDate ? new Date(startDate) : undefined,
+				UserId: user.id,
+				startDate: startDate,
 				bringYourOwnBottle: bringYourOwnBottle,
 				bringYourOwnFood: bringYourOwnFood,
 				location: location
 			});
-			await festivalModel.save();
-			return 'Success';
+			return await mapToFrontendFestivalEvent(model.dataValues);
 		} else {
-			return 'Not authorized';
+			console.warn('festival service: create: no user found');
 		}
-	} else {
-		return 'Data Missing';
+		return null;
 	}
-}
 
-export async function deleteFestival(
-	user: BackendUser | null | SessionTokenUser,
-	festivalId: string
-): Promise<ChangeResult> {
-	const festivalModel = await getFestivalModel(festivalId);
-	if (user && festivalModel) {
-		if (festivalModel && isChangeAllowed(user.id, festivalModel.dataValues)) {
-			await festivalModel.destroy();
-			return 'Success';
+	static async updateFestival(
+		user: BackendUser | null | SessionTokenUser,
+		festivalId: string,
+		name: string,
+		description: string,
+		startDate: number | null,
+		bringYourOwnBottle: boolean,
+		bringYourOwnFood: boolean,
+		location: string
+	): Promise<ChangeResult> {
+		const festivalModel = await this.getFestivalModel(festivalId);
+		if (festivalModel && user) {
+			const ownerId = festivalModel.dataValues.UserId || (festivalModel.dataValues as any).userId;
+			if (isChangeAllowed(user.id, ownerId)) {
+				festivalModel.set({
+					name: name,
+					description: description,
+					startDate: startDate ? new Date(startDate) : undefined,
+					bringYourOwnBottle: bringYourOwnBottle,
+					bringYourOwnFood: bringYourOwnFood,
+					location: location
+				});
+				await festivalModel.save();
+				console.log('Festival updated in DB:', festivalModel.dataValues.name);
+				return 'Success';
+			} else {
+				return 'Not authorized';
+			}
 		} else {
-			console.error('festival missing or not authorized', festivalModel, user.id);
-			return 'Not authorized';
+			return 'Data Missing';
 		}
-	} else {
-		console.error('user or festival id missing', user, festivalId);
-		return 'Data Missing';
 	}
-}
 
-async function parseToFrontend(festival: BackendFestivalEvent): Promise<FrontendFestivalEvent | null> {
-	const createdBy: FrontendUser | undefined = await loadFrontEndUserById(festival.UserId);
-	if (createdBy) {
+	static async deleteFestival(user: BackendUser | null | SessionTokenUser, festivalId: string): Promise<ChangeResult> {
+		const festivalModel = await this.getFestivalModel(festivalId);
+		if (user && festivalModel) {
+			const ownerId = festivalModel.dataValues.UserId || (festivalModel.dataValues as any).userId;
+			if (festivalModel && isChangeAllowed(user.id, ownerId)) {
+				await festivalModel.destroy();
+				return 'Success';
+			} else {
+				console.error('festival missing or not authorized', festivalModel, user.id);
+				return 'Not authorized';
+			}
+		} else {
+			console.error('user or festival id missing', user, festivalId);
+			return 'Data Missing';
+		}
+	}
+
+	private static async parseToFrontend(festival: BackendFestivalEvent): Promise<FrontendFestivalEvent | null> {
+		const createdBy: FrontendUser | undefined = await UserService.loadFrontEndUserById(festival.UserId);
 		return {
 			id: festival.id,
 			name: festival.name,
 			description: festival.description,
-			createdBy: createdBy,
+			createdBy: createdBy ?? null,
 			createdAt: festival.createdAt,
 			updatedAt: festival.updatedAt,
 			startDate: festival.startDate,
 			bringYourOwnFood: festival.bringYourOwnFood,
 			bringYourOwnBottle: festival.bringYourOwnBottle,
-			frontendGuestInformation: await mapGuestInformationToFrontendGuestInformation(festival.guestInformation),
+			frontendGuestInformation: await GuestInformationService.mapGuestInformationToFrontendGuestInformation(
+				festival.guestInformation
+			),
 			location: festival.location
 		};
 	}
-	return null;
-}
 
-function isChangeAllowed(id: string, dataValues: FestivalEventAttributes): boolean {
-	return id === dataValues.UserId;
-}
+	static async getFestivalYouVisit(userId: string): Promise<VisitingFestival[]> {
+		const activeInfos: BackendGuestInformation[] = await GuestInformationService.getAllActiveGuestInformation(userId);
 
-export async function getFestivalYouVisit(userId: string): Promise<VisitingFestival[]> {
-	const activeInfos: BackendGuestInformation[] = await getAllActiveGuestInformation(userId);
-	const loading: Promise<BackendFestivalEvent | null>[] = activeInfos.map((value) =>
-		getFestival(value.FestivalEventId)
-	);
-	const result: VisitingFestival[] = [];
-	for (const fest of await Promise.all(loading)) {
-		if (fest !== null) {
-			result.push({
-				festivalId: fest.id,
-				festivalName: fest.name
-			});
+		// IDs sammeln, um Duplikate zu vermeiden
+		const uniqueFestivalIds = [...new Set(activeInfos.map((info) => info.FestivalEventId))];
+
+		const loading: Promise<BackendFestivalEvent | null>[] = uniqueFestivalIds.map((id) => this.getFestival(id));
+		const result: VisitingFestival[] = [];
+		for (const fest of await Promise.all(loading)) {
+			if (fest !== null) {
+				result.push({
+					festivalId: fest.id,
+					festivalName: fest.name
+				});
+			}
 		}
+		return result;
 	}
-	return result;
 }

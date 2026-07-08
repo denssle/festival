@@ -1,151 +1,149 @@
-import { Friend, FriendRequest } from '$lib/db/db';
 import { Model, Op } from 'sequelize';
 import type { FrontendUser } from '$lib/models/user/FrontendUser';
 import { FriendAttributes } from '$lib/db/attributes/friend.attributes';
 import { convertToFriendRequest, FriendRequestAttributes } from '$lib/db/attributes/friendRequest.attributes';
 import { FriendRequestData } from '$lib/models/updates/FriendRequestData';
-import { loadFrontEndUserById } from '$lib/services/user.service';
+import { UserService } from '$lib/services/user.service';
+import { FriendRequest } from '$lib/db/model/friendRequest';
+import { Friendship } from '$lib/db/model/friendship';
 
-export async function getFriends(userId: string): Promise<{ id: string; friend1Id: string; friend2Id: string }[]> {
-	const model = await Friend.findAll({
-		where: {
-			[Op.or]: [
-				{
-					friend1Id: userId
-				},
-				{
-					friend2Id: userId
-				}
-			]
+export class FriendshipService {
+	static async getFriends(userId: string): Promise<FriendAttributes[]> {
+		const model = await Friendship.findAll({
+			where: {
+				[Op.or]: [{ friend1Id: userId }, { friend2Id: userId }]
+			}
+		});
+		return model.map((value) => value.dataValues);
+	}
+
+	static async getFriendList(userId: string): Promise<(FrontendUser | undefined)[]> {
+		const friends = await this.getFriends(userId);
+		return await Promise.all(
+			friends
+				.map((value) => {
+					if (value.friend1Id === userId) {
+						return UserService.loadFrontEndUserById(value.friend2Id);
+					} else {
+						return UserService.loadFrontEndUserById(value.friend1Id);
+					}
+				})
+				.filter((value) => Boolean(value))
+		);
+	}
+
+	static async areFriends(userId: string, userId2: string): Promise<boolean> {
+		const model = await Friendship.findOne({
+			where: {
+				[Op.or]: [
+					{ [Op.and]: [{ friend1Id: userId }, { friend2Id: userId2 }] },
+					{ [Op.and]: [{ friend1Id: userId2 }, { friend2Id: userId }] }
+				]
+			}
+		});
+		return Boolean(model);
+	}
+
+	static async friendRequestExisting(id: string, params_id: string): Promise<boolean> {
+		const model: Model<FriendRequestAttributes, any> | null = await FriendRequest.findOne({
+			where: {
+				[Op.or]: [
+					{ [Op.and]: [{ senderId: id }, { receiverId: params_id }] },
+					{ [Op.and]: [{ senderId: params_id }, { receiverId: id }] }
+				]
+			}
+		});
+		return Boolean(model);
+	}
+
+	/**
+	 * Prüft gerichtet, ob eine offene Anfrage existiert, bei der `receiverId` der Empfänger
+	 * und `senderId` der Absender ist. Nötig, damit nur der Empfänger annehmen kann.
+	 */
+	static async receivedFriendRequestExists(receiverId: string, senderId: string): Promise<boolean> {
+		const model: Model<FriendRequestAttributes, any> | null = await FriendRequest.findOne({
+			where: { senderId: senderId, receiverId: receiverId }
+		});
+		return Boolean(model);
+	}
+
+	static async createFriendRequest(senderId: string, receiverId: string): Promise<void> {
+		if (senderId === receiverId) {
+			return;
 		}
-	});
-	return model.map((value) => value.dataValues);
-}
-
-export async function getFriendList(userId: string): Promise<(FrontendUser | undefined)[]> {
-	const friends: { id: string; friend1Id: string; friend2Id: string }[] = await getFriends(userId);
-	return await Promise.all(
-		friends
-			.map((value) => {
-				if (value.friend1Id === userId) {
-					return loadFrontEndUserById(value.friend2Id);
-				} else {
-					return loadFrontEndUserById(value.friend1Id);
-				}
-			})
-			.filter((value) => Boolean(value))
-	);
-}
-
-export async function areFriends(userId: string, userId2: string): Promise<boolean> {
-	const model: Model<FriendAttributes, any> | null = await Friend.findOne({
-		where: {
-			[Op.and]: [
-				{
-					friend1Id: [userId, userId2]
-				},
-				{
-					friend2Id: [userId, userId2]
-				}
-			]
+		if (await this.areFriends(senderId, receiverId)) {
+			return;
 		}
-	});
-	return Boolean(model);
-}
-
-export async function friendRequestExisting(id: string, params_id: string): Promise<boolean> {
-	const model: Model<FriendRequestAttributes, any> | null = await FriendRequest.findOne({
-		where: {
-			[Op.and]: [
-				{
-					senderId: [id, params_id]
-				},
-				{
-					receiverId: [id, params_id]
-				}
-			]
+		if (!(await this.friendRequestExisting(senderId, receiverId))) {
+			await FriendRequest.create({
+				id: crypto.randomUUID(),
+				senderId: senderId,
+				receiverId: receiverId
+			});
 		}
-	});
-	return Boolean(model);
-}
+	}
 
-export async function createFriendRequest(senderId: string, receiverId: string): Promise<void> {
-	if (!(await friendRequestExisting(senderId, receiverId))) {
-		await FriendRequest.create({
-			id: crypto.randomUUID(),
-			senderId: senderId,
-			receiverId: receiverId
+	static async getReceivedFriendRequests(receiverId: string): Promise<FriendRequestData[]> {
+		const model: Model<FriendRequestAttributes, any>[] = await FriendRequest.findAll({
+			where: {
+				receiverId: receiverId
+			}
+		});
+		return Promise.all(model.map((value) => convertToFriendRequest(value.dataValues)));
+	}
+
+	static async getSentFriendRequests(senderId: string): Promise<FriendRequestData[]> {
+		const model: Model<FriendRequestAttributes, any>[] = await FriendRequest.findAll({
+			where: {
+				senderId: senderId
+			}
+		});
+		return Promise.all(model.map((value) => convertToFriendRequest(value.dataValues)));
+	}
+
+	static async removeFriend(id: string, params_id: string): Promise<void> {
+		await Friendship.destroy({
+			where: {
+				[Op.or]: [
+					{ [Op.and]: [{ friend1Id: id }, { friend2Id: params_id }] },
+					{ [Op.and]: [{ friend1Id: params_id }, { friend2Id: id }] }
+				]
+			}
 		});
 	}
-}
 
-export async function getReceivedFriendRequests(receiverId: string): Promise<FriendRequestData[]> {
-	const model: Model<FriendRequestAttributes, any>[] = await FriendRequest.findAll({
-		where: {
-			receiverId: receiverId
+	static async acceptFriendRequest(id: string, params_id: string) {
+		// Nur der Empfänger einer offenen Anfrage darf sie annehmen – nicht der Absender selbst
+		if (await this.receivedFriendRequestExists(id, params_id)) {
+			await this.deleteFriendRequest(id, params_id);
+			await this.addFriend(id, params_id);
 		}
-	});
-	return Promise.all(model.map((value) => convertToFriendRequest(value.dataValues)));
-}
-
-export async function getSentFriendRequests(senderId: string): Promise<FriendRequestData[]> {
-	const model: Model<FriendRequestAttributes, any>[] = await FriendRequest.findAll({
-		where: {
-			senderId: senderId
-		}
-	});
-	return Promise.all(model.map((value) => convertToFriendRequest(value.dataValues)));
-}
-
-export async function removeFriend(id: string, params_id: string): Promise<void> {
-	await Friend.destroy({
-		where: {
-			[Op.and]: [
-				{
-					friend1Id: [id, params_id]
-				},
-				{
-					friend2Id: [id, params_id]
-				}
-			]
-		}
-	});
-}
-
-export async function acceptFriendRequest(id: string, params_id: string) {
-	if (await friendRequestExisting(id, params_id)) {
-		await deleteFriendRequest(id, params_id);
-		await addFriend(id, params_id);
 	}
-}
 
-export async function addFriend(userId: string, userId2: string): Promise<void> {
-	await Friend.create({
-		id: crypto.randomUUID(),
-		friend1Id: userId,
-		friend2Id: userId2
-	});
-}
+	static async addFriend(userId: string, userId2: string): Promise<void> {
+		await Friendship.create({
+			id: crypto.randomUUID(),
+			friend1Id: userId,
+			friend2Id: userId2
+		});
+	}
 
-async function deleteFriendRequest(id: string, params_id: string): Promise<void> {
-	await FriendRequest.destroy({
-		where: {
-			[Op.and]: [
-				{
-					senderId: [id, params_id]
-				},
-				{
-					receiverId: [id, params_id]
-				}
-			]
-		}
-	});
-}
+	private static async deleteFriendRequest(id: string, params_id: string): Promise<void> {
+		await FriendRequest.destroy({
+			where: {
+				[Op.or]: [
+					{ [Op.and]: [{ senderId: id }, { receiverId: params_id }] },
+					{ [Op.and]: [{ senderId: params_id }, { receiverId: id }] }
+				]
+			}
+		});
+	}
 
-export async function cancelFriendRequest(id: string, params_id: string) {
-	await deleteFriendRequest(id, params_id);
-}
+	static async cancelFriendRequest(id: string, params_id: string) {
+		await this.deleteFriendRequest(id, params_id);
+	}
 
-export async function declineFriendRequest(id: string, params_id: string) {
-	await deleteFriendRequest(id, params_id);
+	static async declineFriendRequest(id: string, params_id: string) {
+		await this.deleteFriendRequest(id, params_id);
+	}
 }

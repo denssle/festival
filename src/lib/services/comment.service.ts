@@ -1,59 +1,87 @@
-import { Comment } from '$lib/db/db';
-import { CommentAttributes, mapToFrontendComment } from '$lib/db/attributes/comment.attributes';
-import { FrontendComment } from '$lib/models/FrontendComment';
+import { CommentAttributes } from '$lib/db/attributes/comment.attributes';
+import { FrontendComment } from '$lib/models/transferData/FrontendComment';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
+import { Comment } from '$lib/db/model/comment';
+import { User } from '$lib/db/model/user';
+import { Op } from 'sequelize';
+import { FrontendUser } from '$lib/models/user/FrontendUser';
+import { UserService } from '$lib/services/user.service';
+import { UserAttributes } from '$lib/db/attributes/user.attributes';
 
-export function saveComment(who: string, where: string, comment: string) {
-	return Comment.create({
-		id: crypto.randomUUID(),
-		writtenBy: who,
-		writtenTo: where,
-		comment: comment
-	});
-}
+export class CommentService {
+	static async saveComment(who: string, where: string, comment: string) {
+		return await Comment.create({
+			id: crypto.randomUUID(),
+			writtenBy: who,
+			writtenTo: where,
+			comment: comment
+		});
+	}
 
-export async function getComments(writtenTo: string, userID: string): Promise<FrontendComment[]> {
-	const findAll = await Comment.findAll({
-		where: {
-			writtenTo: writtenTo
-		},
-		order: [['createdAt', 'DESC']]
-	});
-	return Promise.all(findAll.map((value) => value.dataValues).map((value) => mapToFrontendComment(value, userID)));
-}
+	static async getComments(writtenTo: string, userID: string): Promise<FrontendComment[]> {
+		const findAll = await Comment.findAll({
+			where: {
+				writtenTo: writtenTo
+			},
+			order: [['createdAt', 'DESC']]
+		});
+		const comments = findAll.map((value) => value.get({ plain: true }));
 
-export async function deleteComment(userId: string, commentId: string): Promise<ChangeResult> {
-	if (commentId && userId) {
-		const model = await Comment.findByPk(commentId);
-		if (model) {
-			if (isChangeAllowed(userId, model.dataValues)) {
-				await model.destroy();
-				return 'Success';
-			} else {
-				return 'Not authorized';
+		const userIds = [...new Set(comments.map((c) => c.writtenBy))];
+		const users = await User.findAll({
+			where: { id: { [Op.in]: userIds } }
+		});
+		const userMap = new Map<string, FrontendUser>();
+		for (const u of users) {
+			const attrs = u.get({ plain: true }) as UserAttributes;
+			userMap.set(attrs.id, UserService.parseBackendUserToFrontend(attrs as any));
+		}
+
+		return comments.map((value) => ({
+			id: value.id,
+			comment: value.comment,
+			createdAt: value.createdAt,
+			updatedAt: value.updatedAt,
+			writtenTo: value.writtenTo,
+			writtenBy: userMap.get(value.writtenBy) ?? null,
+			yourComment: value.writtenBy === userID,
+			editMode: false
+		}));
+	}
+
+	static async deleteComment(userId: string, commentId: string): Promise<ChangeResult> {
+		if (commentId && userId) {
+			const model = await Comment.findByPk(commentId);
+			if (model) {
+				if (this.isChangeAllowed(userId, model.dataValues)) {
+					await model.destroy();
+					return 'Success';
+				} else {
+					return 'Not authorized';
+				}
 			}
 		}
+		return 'Data Missing';
 	}
-	return 'Data Missing';
-}
 
-export async function updateComment(userId: string, commentId: string, comment: string): Promise<ChangeResult> {
-	if (commentId && userId) {
-		const model = await Comment.findByPk(commentId);
-		if (model) {
-			if (isChangeAllowed(userId, model.dataValues)) {
-				await model.update({
-					comment: comment
-				});
-				return 'Success';
-			} else {
-				return 'Not authorized';
+	static async updateComment(userId: string, commentId: string, comment: string): Promise<ChangeResult> {
+		if (commentId && userId) {
+			const model = await Comment.findByPk(commentId);
+			if (model) {
+				if (this.isChangeAllowed(userId, model.dataValues)) {
+					await model.update({
+						comment: comment
+					});
+					return 'Success';
+				} else {
+					return 'Not authorized';
+				}
 			}
 		}
+		return 'Data Missing';
 	}
-	return 'Data Missing';
-}
 
-function isChangeAllowed(userId: string, dataValues: CommentAttributes): boolean {
-	return dataValues.writtenBy === userId;
+	private static isChangeAllowed(userId: string, dataValues: CommentAttributes): boolean {
+		return dataValues.writtenBy === userId;
+	}
 }

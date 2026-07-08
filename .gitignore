@@ -128,3 +128,5 @@ dist
 .idea
 .svelte-kit
 *.mjs
+/test-results/
+/playwright-report/

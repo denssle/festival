@@ -2,7 +2,7 @@
 	import type { FrontendUser } from '$lib/models/user/FrontendUser';
 	import AvatarImage from '$lib/sharedComponents/AvatarImage.svelte';
 
-	export let user: FrontendUser | undefined;
+	let { user }: { user: FrontendUser | undefined } = $props();
 </script>
 
 {#if user}

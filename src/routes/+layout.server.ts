@@ -1,5 +1,5 @@
-import type { PageServerLoad } from '../../.svelte-kit/types/src/routes/$types';
+import type { LayoutServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ locals }: { locals: App.Locals }): Promise<App.Locals> => {
+export const load: LayoutServerLoad = async ({ locals }: { locals: App.Locals }): Promise<App.Locals> => {
 	return locals;
 };

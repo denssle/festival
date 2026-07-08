@@ -9,7 +9,7 @@
 	import UserDataReadOnly from './UserDataReadOnly.svelte';
 	import VisitingFestivals from './VisitingFestivals.svelte';
 
-	export let data: UserTransferData;
+	let { data }: { data: UserTransferData } = $props();
 </script>
 
 <article>
@@ -35,7 +35,7 @@
 
 	<section>
 		<h4>Freunde:</h4>
-		{#each data.friendList as friend}
+		{#each data.friendList.filter((f) => f !== undefined) as friend (friend.id)}
 			<FriendListEntry user={friend} />
 		{/each}
 		{#if data.friendList.length === 0}
@@ -47,6 +47,19 @@
 	<section>
 		<h4>Festivals:</h4>
 		<VisitingFestivals userId={data.user.id} />
+	</section>
+
+	<section>
+		<h4>Gruppen:</h4>
+		{#if data.groupList && data.groupList.length > 0}
+			<ul>
+				{#each data.groupList as group (group.id)}
+					<li><a href="/group/{group.id}">{group.name}</a></li>
+				{/each}
+			</ul>
+		{:else}
+			<p>{data.isOwnProfil ? 'Du bist in keiner Gruppe.' : 'Dieser Benutzer ist in keiner Gruppe.'}</p>
+		{/if}
 	</section>
 
 	<FestivalComments whereId={data.user.id} />

@@ -1,88 +1,128 @@
 <script lang="ts">
-	import { afterUpdate, onMount } from 'svelte';
-	import type { FrontendComment } from '$lib/models/FrontendComment';
+	import type { FrontendComment } from '$lib/models/transferData/FrontendComment';
 	import type { QuestionDialogData } from '$lib/models/dialogData/QuestionDialogData';
 	import QuestionDialog from '$lib/sharedComponents/QuestionDialog.svelte';
 	import AvatarImage from '$lib/sharedComponents/AvatarImage.svelte';
 	import CreationChangedDate from '$lib/sharedComponents/CreationChangedDate.svelte';
 
-	export let whereId: string = '';
+	let { whereId = '' } = $props();
 
-	let comments: FrontendComment[] = [];
-	let previousWhereId: string;
-	let inputComment: string;
+	let comments: FrontendComment[] = $state([]);
+	let inputComment: string = $state('');
 
-	onMount(() => {
-		previousWhereId = whereId;
-		loadComments();
-	});
+	// Nicht-reaktives Tracking des zuletzt geladenen Ziels. Bewusst kein $state,
+	// damit das Schreiben den Effect nicht erneut auslöst.
+	let loadedId: string | undefined;
 
-	afterUpdate(() => {
-		if (previousWhereId !== whereId) {
-			previousWhereId = whereId;
-			inputComment = '';
+	$effect(() => {
+		if (whereId && whereId !== loadedId) {
+			// Nur bei einem echten Wechsel des Ziels (z. B. anderes Profil/Festival) das
+			// Eingabefeld leeren. Beim ersten Lauf NICHT leeren: Der Effect läuft erst nach
+			// der Hydration und würde sonst eine bereits getätigte Eingabe (Race mit dem
+			// SSR-gerenderten Textarea) wieder überschreiben.
+			if (loadedId !== undefined) {
+				inputComment = '';
+			}
+			loadedId = whereId;
 			loadComments();
 		}
 	});
 
-	function handleSubmit(e: SubmitEvent) {
-		const formData = new FormData(e.target as HTMLFormElement);
-		fetch(whereId + '/comments', {
+	async function handleSubmit(e: SubmitEvent) {
+		e.preventDefault();
+		const form = e.target as HTMLFormElement;
+		const formData = new FormData(form);
+		const optimisticComment: FrontendComment = {
+			id: crypto.randomUUID(),
+			comment: inputComment,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+			writtenTo: whereId,
+			writtenBy: null,
+			yourComment: true,
+			editMode: false
+		};
+		inputComment = '';
+		comments = [optimisticComment, ...comments];
+		const response = await fetch(whereId + '/comments', {
 			method: 'POST',
 			body: formData
-		}).then(() => {
-			loadComments();
-			inputComment = '';
 		});
+		if (response.ok) {
+			comments = await response.json();
+		} else {
+			// Optimistisch eingefügten Kommentar wieder verwerfen
+			await loadComments();
+		}
 	}
 
-	function loadComments() {
-		fetch(whereId + '/comments', {
+	async function loadComments() {
+		const response = await fetch(whereId + '/comments', {
 			method: 'GET'
-		}).then((response) => {
-			response.json().then((data: FrontendComment[]) => {
-				comments = data;
-			});
 		});
+		if (response.ok) {
+			comments = await response.json();
+		}
 	}
 
-	function deleteComment(commentId: string | undefined) {
+	async function deleteComment(commentId: string | undefined) {
+		questionDialogData.answerYes = false;
 		questionDialogData.showDialog = true;
+
 		if (questionDialogData.dialog) {
-			questionDialogData.dialog.onclose = () => {
+			const onclose = async () => {
 				if (questionDialogData.answerYes) {
-					fetch(whereId + '/comments', {
+					await fetch(whereId + '/comments', {
 						method: 'DELETE',
+						headers: {
+							'Content-Type': 'text/plain'
+						},
 						body: commentId
-					}).then(() => {
-						loadComments();
 					});
+					await loadComments();
 				}
+				questionDialogData.dialog?.removeEventListener('close', onclose);
+				questionDialogData.answerYes = false;
 			};
+			questionDialogData.dialog.addEventListener('close', onclose);
+		} else {
+			console.error('no dialog');
 		}
 	}
 
-	function updateComment(comment: FrontendComment) {
+	async function updateComment(comment: FrontendComment) {
 		if (comment.yourComment) {
-			fetch(whereId + '/comments', {
+			const index = comments.findIndex((c) => c.id === comment.id);
+			if (index !== -1) {
+				comments[index].editMode = false;
+			}
+			const response = await fetch(whereId + '/comments', {
 				method: 'PUT',
-				body: JSON.stringify(comment)
-			}).then(() => {
-				loadComments();
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					id: comment.id,
+					comment: comment.comment
+				})
 			});
+			if (response.ok) {
+				comments = await response.json();
+			}
 		}
 	}
 
-	let questionDialogData: QuestionDialogData = {
+	let questionDialogData: QuestionDialogData = $state({
 		showDialog: false,
 		dialog: undefined,
 		questionText: 'Kommentar löschen. Bist du dir sicher?',
 		answerYes: false
-	};
+	});
 </script>
 
 <QuestionDialog bind:questionDialogData />
-<form on:submit|preventDefault={handleSubmit}>
+
+<form onsubmit={handleSubmit}>
 	<label for="comment">Kommentar: </label>
 	<textarea id="comment" name="comment" bind:value={inputComment}></textarea>
 	<p>
@@ -90,7 +130,7 @@
 	</p>
 </form>
 
-{#each comments as comment}
+{#each comments as comment (comment.id)}
 	{@const notYours = !comment.yourComment}
 	<fieldset>
 		<legend>
@@ -98,21 +138,21 @@
 			<a href="/user/{comment.writtenBy?.id}">{comment.writtenBy?.nickname}</a>
 		</legend>
 		{#if comment.editMode}
-			<textarea bind:value={comment.comment}></textarea>
+			<textarea name="updateComment" bind:value={comment.comment}></textarea>
 		{:else}
 			<p class="notice">{comment.comment}</p>
 		{/if}
 		{#if comment.yourComment}
 			<div>
-				<button on:click={() => deleteComment(comment.id)} disabled={notYours}>Löschen</button>
-				<button on:click={() => (comment.editMode = !comment.editMode)} disabled={notYours}>
+				<button onclick={() => deleteComment(comment.id)} disabled={notYours}>Löschen</button>
+				<button onclick={() => (comment.editMode = !comment.editMode)} disabled={notYours}>
 					{#if comment.editMode}
 						Abbrechen
 					{:else}
 						Bearbeiten
 					{/if}
 				</button>
-				<button on:click={() => updateComment(comment)} disabled={notYours || !comment.editMode}> Speichern</button>
+				<button onclick={() => updateComment(comment)} disabled={notYours || !comment.editMode}> Speichern</button>
 			</div>
 		{/if}
 		<CreationChangedDate createdAt={comment.createdAt} updatedAt={comment.updatedAt} />

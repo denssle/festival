@@ -1,26 +1,22 @@
 <script lang="ts">
-	import { afterUpdate, onMount } from 'svelte';
 	import Spinner from '$lib/sharedComponents/Spinner.svelte';
 	import { goto } from '$app/navigation';
 	import { getUserImageWritable, loadUserImage } from '$lib/stores/userImage.store';
 
-	export let userId: string = '';
-	export let size: number = 15;
+	let { userId = '', size = 15 } = $props();
 
-	let avatar: string;
-	let previousUserId: string;
+	let avatar: string = $state('');
 	let unsubscribe: () => void | undefined;
 
-	onMount(() => {
-		previousUserId = userId;
-		loadAndSubscribe();
-	});
-
-	afterUpdate(() => {
-		if (previousUserId !== userId) {
-			previousUserId = userId;
+	$effect(() => {
+		if (userId) {
 			loadAndSubscribe();
 		}
+		return () => {
+			if (unsubscribe) {
+				unsubscribe();
+			}
+		};
 	});
 
 	function loadAndSubscribe(): void {
@@ -38,7 +34,13 @@
 	}
 </script>
 
-<div style="--size:{size + 'em'};" on:click={() => onImageClick()}>
+<div
+	style="--size:{size + 'em'};"
+	onclick={() => onImageClick()}
+	role="button"
+	tabindex="0"
+	onkeypress={() => onImageClick()}
+>
 	{#if avatar}
 		<img src={avatar} alt="alt avatar" class="avatar" />
 	{:else}

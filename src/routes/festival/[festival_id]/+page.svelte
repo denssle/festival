@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto, invalidateAll } from '$app/navigation';
+	import { tick } from 'svelte';
 	import { formateDateTime } from '$lib/utils/date.util';
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
 	import JoinEventDialog from './join/JoinEventDialog.svelte';
@@ -12,14 +13,14 @@
 	import CancelInvitationDialog from './cancel-invitation/CancelInvitationDialog.svelte';
 	import ComingVisitorsTable from './CommingVisitorsTable.svelte';
 	import NotComingVisitorsTable from './NotCommingVisitorsTable.svelte';
-	import type { FestivalTransferData } from '$lib/models/FestivalTransferData';
+	import type { FestivalTransferData } from '$lib/models/transferData/FestivalTransferData';
 	import FestivalComments from '$lib/sharedComponents/Comments.svelte';
 
-	export let data: FestivalTransferData;
+	let { data }: { data: FestivalTransferData } = $props();
 
 	async function editFestival(): Promise<void> {
 		if (data.yourFestival) {
-			goto('/festival/' + data.festival.id + '/edit');
+			await goto('/festival/' + data.festival.id + '/edit');
 		} else {
 			infoDialogData.infoDialogText = 'Das ist nicht dein Event. ';
 			infoDialogData.showDialog = true;
@@ -30,16 +31,27 @@
 		if (data.yourFestival) {
 			questionDialogData.questionText = 'Bist du dir sicher?';
 			questionDialogData.showDialog = true;
-			if (questionDialogData.dialog) {
-				questionDialogData.dialog.onclose = () => {
+			await tick();
+
+			const dialog = questionDialogData.dialog;
+			if (dialog) {
+				dialog.showModal();
+				const onclose = async () => {
 					if (questionDialogData.answerYes) {
-						fetch('/festival/' + data.festival.id, {
+						const response = await fetch('/festival/' + data.festival.id, {
 							method: 'DELETE'
-						}).then(() => {
-							goto('/');
 						});
+						if (response.ok) {
+							await goto('/');
+						} else {
+							infoDialogData.infoDialogText = 'Löschen fehlgeschlagen.';
+							infoDialogData.showDialog = true;
+						}
 					}
+					dialog.removeEventListener('close', onclose);
+					questionDialogData.answerYes = false;
 				};
+				dialog.addEventListener('close', onclose);
 			}
 		} else {
 			infoDialogData.infoDialogText = 'Das ist nicht dein Event. ';
@@ -47,10 +59,13 @@
 		}
 	}
 
-	function joinFestival(): void {
+	async function joinFestival(): Promise<void> {
 		joinDialogData.showDialog = true;
-		if (joinDialogData.dialog) {
-			joinDialogData.dialog.onclose = () => {
+		await tick();
+		const dialog = joinDialogData.dialog;
+		if (dialog) {
+			if (!dialog.open) dialog.showModal();
+			const onclose = async () => {
 				if (joinDialogData.answerYes) {
 					const eventData: BaseGuestInformation = {
 						food: joinDialogData.food,
@@ -59,85 +74,112 @@
 						coming: true,
 						comment: ''
 					};
-					fetch('/festival/' + data.festival.id + '/join', {
-						method: 'POST',
-						body: JSON.stringify(eventData)
-					}).then(() => {
-						afterRequest();
-					});
+					try {
+						const response = await fetch('/festival/' + data.festival.id + '/join', {
+							method: 'POST',
+							body: JSON.stringify(eventData)
+						});
+						if (response.ok) {
+							await afterRequest();
+						} else {
+							const errorData = await response.json();
+							console.error('Failed to join festival:', errorData);
+							alert('Fehler beim Zusagen: ' + (errorData.message || 'Unbekannter Fehler'));
+						}
+					} catch (error) {
+						console.error('Fetch error joining festival:', error);
+						alert('Netzwerkfehler beim Zusagen.');
+					}
 				}
+				dialog.removeEventListener('close', onclose);
+				joinDialogData.answerYes = false;
 			};
+			dialog.addEventListener('close', onclose);
 		}
 	}
 
-	function leaveFestival(): void {
+	async function cancelInvitation(): Promise<void> {
 		cancelInvitationDialogData.showDialog = true;
-		if (cancelInvitationDialogData.dialog) {
-			cancelInvitationDialogData.dialog.onclose = () => {
+		await tick();
+		const dialog = cancelInvitationDialogData.dialog;
+		if (dialog) {
+			dialog.showModal();
+			const onclose = async () => {
 				if (cancelInvitationDialogData.answerYes) {
-					fetch('/festival/' + data.festival.id + '/cancel-invitation', {
+					const response = await fetch('/festival/' + data.festival.id + '/cancel-invitation', {
 						method: 'POST',
 						body: cancelInvitationDialogData.comment
-					}).then(() => {
-						afterRequest();
 					});
+					if (response.ok) {
+						await afterRequest();
+					} else {
+						infoDialogData.infoDialogText = 'Absagen fehlgeschlagen.';
+						infoDialogData.showDialog = true;
+					}
 				}
+				dialog.removeEventListener('close', onclose);
+				cancelInvitationDialogData.answerYes = false;
 			};
+			dialog.addEventListener('close', onclose);
 		}
 	}
 
-	function afterRequest(): void {
-		invalidateAll().then(() => {
-			updateButtonLabels();
-		});
+	async function afterRequest(): Promise<void> {
+		await invalidateAll();
 	}
 
-	let joinFestivalButtonText = 'Zusagen';
-	let leaveFestivalButtonText = 'Absagen';
-	updateButtonLabels();
+	let joinFestivalButtonText = $derived(data.yourGuestInformation?.coming ? 'Zusage bearbeiten' : 'Zusagen');
+	let cancelFestivalButtonText = $derived(
+		data.yourGuestInformation && !data.yourGuestInformation.coming ? 'Absage bearbeiten' : 'Absagen'
+	);
 
-	function updateButtonLabels() {
-		joinFestivalButtonText = 'Zusagen';
-		leaveFestivalButtonText = 'Absagen';
-		if (data.guestInformation) {
-			if (data.guestInformation.coming) {
-				joinFestivalButtonText = 'Zusage bearbeiten';
-			} else {
-				leaveFestivalButtonText = 'Absage bearbeiten';
-			}
-		}
-	}
+	let guestFood = $derived(data.yourGuestInformation?.food ?? '');
+	let guestDrink = $derived(data.yourGuestInformation?.drink ?? '');
+	let guestComment = $derived(data.yourGuestInformation?.comment ?? '');
+	let guestNumberOfOtherGuests = $derived(data.yourGuestInformation?.numberOfOtherGuests ?? 0);
+	let festivalBringYourOwnBottle = $derived(data.festival.bringYourOwnBottle);
+	let festivalBringYourOwnFood = $derived(data.festival.bringYourOwnFood);
 
-	let cancelInvitationDialogData: CancelInvitationDialogData = {
+	let cancelInvitationDialogData: CancelInvitationDialogData = $state({
 		showDialog: false,
 		dialog: undefined,
-		comment: data.guestInformation?.comment ?? '',
+		comment: '',
 		answerYes: false
-	};
-	let infoDialogData: InfoDialogData = {
+	});
+	let infoDialogData: InfoDialogData = $state({
 		showDialog: false,
 		infoDialogText: '',
 		dialog: undefined,
 		answerYes: false
-	};
-	let joinDialogData: JoinEventDialogData = {
+	});
+	let joinDialogData: JoinEventDialogData = $state({
 		showDialog: false,
-		bringYourOwnBottle: data.festival.bringYourOwnBottle,
-		bringYourOwnFood: data.festival.bringYourOwnFood,
-		food: data.guestInformation?.food ?? '',
-		drink: data.guestInformation?.drink ?? '',
-		numberOfOtherGuests: data.guestInformation?.numberOfOtherGuests ?? 0,
+		bringYourOwnBottle: false,
+		bringYourOwnFood: false,
+		food: '',
+		drink: '',
+		numberOfOtherGuests: 0,
 		dialog: undefined,
 		coming: true,
-		comment: data.guestInformation?.comment ?? '',
+		comment: '',
 		answerYes: false
-	};
-	let questionDialogData: QuestionDialogData = {
+	});
+
+	$effect(() => {
+		cancelInvitationDialogData.comment = guestComment;
+		joinDialogData.food = guestFood;
+		joinDialogData.drink = guestDrink;
+		joinDialogData.comment = guestComment;
+		joinDialogData.numberOfOtherGuests = guestNumberOfOtherGuests;
+		joinDialogData.bringYourOwnBottle = festivalBringYourOwnBottle;
+		joinDialogData.bringYourOwnFood = festivalBringYourOwnFood;
+	});
+	let questionDialogData: QuestionDialogData = $state({
 		showDialog: false,
 		dialog: undefined,
 		questionText: '',
 		answerYes: false
-	};
+	});
 </script>
 
 <InfoDialog bind:infoDialogData />
@@ -148,7 +190,9 @@
 <article>
 	<section>
 		<h4><u>{data.festival.name}</u></h4>
-		<p>Organisiert von <a href="/user/{data.festival.createdBy?.id}">{data.festival.createdBy?.nickname}</a></p>
+		{#if data.festival.createdBy}
+			<p>Organisiert von <a href="/user/{data.festival.createdBy.id}">{data.festival.createdBy.nickname}</a></p>
+		{/if}
 		<mark>Startdatum: {formateDateTime(data.festival.startDate)}</mark>
 
 		<p><u>Beschreibung:</u></p>
@@ -158,11 +202,11 @@
 		<p>{data.festival.location}</p>
 
 		<label>
-			<input bind:checked={data.festival.bringYourOwnFood} disabled name="bringYourOwnFood" type="checkbox" />
+			<input checked={data.festival.bringYourOwnFood} disabled name="bringYourOwnFood" type="checkbox" />
 			Gäste sollen etwas zu Essen mitbringen.
 		</label>
 		<label>
-			<input bind:checked={data.festival.bringYourOwnBottle} disabled name="bringYourOwnBottle" type="checkbox" />
+			<input checked={data.festival.bringYourOwnBottle} disabled name="bringYourOwnBottle" type="checkbox" />
 			Gäste sollen etwas zu trinken mitbringen.
 		</label>
 	</section>
@@ -172,10 +216,10 @@
 	<NotComingVisitorsTable {data} />
 
 	<section>
-		<button on:click={editFestival}>Bearbeiten</button>
-		<button on:click={deleteFestival}>Löschen</button>
-		<button on:click={leaveFestival}>{leaveFestivalButtonText}</button>
-		<button on:click={joinFestival}>{joinFestivalButtonText}</button>
+		<button onclick={editFestival}>Bearbeiten</button>
+		<button onclick={deleteFestival}>Löschen</button>
+		<button onclick={cancelInvitation}>{cancelFestivalButtonText}</button>
+		<button onclick={joinFestival}>{joinFestivalButtonText}</button>
 		<a class="button" href="/">Zurück</a>
 	</section>
 

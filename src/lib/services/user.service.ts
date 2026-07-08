@@ -3,239 +3,280 @@ import type { BackendUser } from '../models/user/BackendUser';
 import type { FrontendUser } from '../models/user/FrontendUser';
 import type { UserFormData } from '$lib/models/user/UserFormData';
 import type { Cookies } from '@sveltejs/kit';
-import { SessionToken, User, UserImage } from '$lib/db/db';
 import { convertToBackendUser, UserAttributes } from '$lib/db/attributes/user.attributes';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import { Model } from 'sequelize';
 import { UserImageAttributes } from '$lib/db/attributes/userImage.attributes';
-import { NickPassData } from '$lib/models/user/NickPassData';
+import { NickPassData } from '$lib/models/transferData/NickPassData';
 import { SessionTokenAttributes } from '$lib/db/attributes/sessionToken.attributes';
+import { User } from '$lib/db/model/user';
+import { UserImage } from '$lib/db/model/userImage';
+import { SessionToken } from '$lib/db/model/sessionToken';
+import { ChangeResult } from '$lib/models/updates/ChangeResult';
+import { resolveSessionToken } from '$lib/services/user.logic';
 
-export async function userExists(extractedUser: SessionTokenUser | null): Promise<boolean> {
-	if (extractedUser) {
-		return (await getByNickname(extractedUser?.nickname)) !== null;
-	}
-	return false;
-}
-
-async function getByNickname(nickname: string): Promise<Model<UserAttributes, any> | null> {
-	return await User.findOne({
-		where: {
-			nickname: nickname
+export class UserService {
+	static async userExists(extractedUser: SessionTokenUser | null): Promise<boolean> {
+		if (extractedUser) {
+			return (await this.getByNickname(extractedUser?.nickname)) !== null;
 		}
-	});
-}
-
-export async function register(nickname: string, password: string): Promise<BackendUser | null> {
-	if (!(await nickNameInvalid(nickname))) {
-		const model = await User.create({
-			id: crypto.randomUUID(),
-			nickname: nickname,
-			password: saltPassword(password)
-		});
-		return convertToBackendUser(model.dataValues);
+		return false;
 	}
-	return null;
-}
 
-export function saltPassword(password: string): string {
-	return hashSync(password, genSaltSync(4));
-}
-
-export async function loginWithCredentials(nickname: string, password: string): Promise<BackendUser | null> {
-	const user: BackendUser | null = await loadUserByNickname(nickname);
-	if (user && user.password) {
-		if (compareSync(password, user.password)) {
-			return user;
-		}
-	}
-	return null;
-}
-
-export function logout(user: SessionTokenUser | null, cookies: Cookies, locals: App.Locals): void {
-	locals.currentUser = undefined;
-	cookies.delete('session', { path: '/' });
-	if (user) {
-		SessionToken.destroy({
+	private static async getByNickname(nickname: string): Promise<Model<UserAttributes, any> | null> {
+		return await User.findOne({
 			where: {
-				UserId: user.id,
-				token: user.token
+				nickname: nickname
 			}
 		});
 	}
-}
 
-export async function validateSessionToken(userString: string | undefined): Promise<boolean> {
-	const user: SessionTokenUser | null = extractUser(userString);
-	if (user) {
-		const found: SessionTokenAttributes | undefined = await loadToken(user.id);
-		if (found && found.token) {
-			// TODO Check token age
-			return found.token === user.token;
-		} else {
-			console.error('session validation: no user in db found', user);
-		}
-	}
-	return false;
-}
-
-async function loadToken(userId: string): Promise<SessionTokenAttributes | undefined> {
-	const model = await SessionToken.findOne({
-		where: {
-			UserId: userId
-		}
-	});
-	return model?.dataValues;
-}
-
-export function extractUser(sessionToken: string | undefined): SessionTokenUser | null {
-	if (sessionToken) {
-		try {
-			const maybeUser: SessionTokenUser = JSON.parse(sessionToken);
-			if (maybeUser) {
-				return maybeUser;
-			} else {
-				console.error('User parsing failed!');
+	private static async getByEmail(email: string): Promise<Model<UserAttributes, any> | null> {
+		return await User.findOne({
+			where: {
+				email: email
 			}
-		} catch (e) {
-			console.error('error parsing user', e);
+		});
+	}
+
+	static async emailInvalid(email: string): Promise<boolean> {
+		if (!email || email.length === 0) return false; // leere E-Mail ist erlaubt (optional)
+		return Boolean(await this.getByEmail(email));
+	}
+
+	static async register(nickname: string, password: string, email?: string): Promise<BackendUser | null> {
+		if (!(await this.nickNameInvalid(nickname))) {
+			if (email && (await this.emailInvalid(email))) {
+				return null;
+			}
+			const model = await User.create({
+				id: crypto.randomUUID(),
+				nickname: nickname,
+				password: this.saltPassword(password),
+				...(email ? { email } : {})
+			});
+			return convertToBackendUser(model.dataValues);
 		}
 		return null;
 	}
-	return null;
-}
 
-export async function nickNameInvalid(nickname: string): Promise<boolean> {
-	return !nickname || nickname.length === 0 || Boolean(await getByNickname(nickname));
-}
-
-async function loadUserByNickname(nickname: string): Promise<BackendUser | null> {
-	const model = await getByNickname(nickname);
-	if (model) {
-		return convertToBackendUser(model.dataValues);
+	static saltPassword(password: string): string {
+		return hashSync(password, genSaltSync(10));
 	}
-	return null;
-}
 
-async function loadUserById(userId: string): Promise<BackendUser | null> {
-	const value = await User.findByPk(userId);
-	if (value) {
-		return convertToBackendUser(value.dataValues);
+	static async loginWithCredentials(nickname: string, password: string): Promise<BackendUser | null> {
+		const user: BackendUser | null = await this.loadUserByNickname(nickname);
+		if (user && user.password) {
+			if (compareSync(password, user.password)) {
+				return user;
+			}
+		}
+		return null;
 	}
-	return null;
-}
 
-export async function loadFrontEndUserById(id: string | null): Promise<FrontendUser | undefined> {
-	if (id) {
-		const byId: BackendUser | null = await loadUserById(id);
-		if (byId) {
-			return parseBackendUserToFrontend(byId);
+	static async logout(user: SessionTokenUser | null, cookies: Cookies, locals: App.Locals): Promise<void> {
+		locals.currentUser = undefined;
+		cookies.delete('session', { path: '/' });
+		if (user) {
+			await SessionToken.destroy({
+				where: {
+					UserId: user.id,
+					token: user.token
+				}
+			});
 		}
 	}
-}
 
-export function parseBackendUserToFrontend(user: BackendUser): FrontendUser {
-	return {
-		id: user.id,
-		nickname: user.nickname,
-		forename: user.forename,
-		lastname: user.lastname,
-		email: user.email,
-		updatedAt: user.updatedAt,
-		createdAt: user.createdAt
-	};
-}
+	static async validateSessionToken(userString: string | undefined): Promise<boolean> {
+		const user: SessionTokenUser | null = this.extractUser(userString);
+		if (user) {
+			const found: SessionTokenAttributes | undefined = await this.loadToken(user.id);
+			if (found && found.token) {
+				// TODO Check token age
+				return found.token === user.token;
+			} else {
+				console.error('session validation: no user in db found', user);
+			}
+		}
+		return false;
+	}
 
-export async function readFormDataFrontEndUser(data: Promise<FormData>): Promise<UserFormData> {
-	const values: FormData = await data;
-	return {
-		email: String(values.get('email')),
-		nickname: String(values.get('nickname')),
-		forename: String(values.get('forename')),
-		lastname: String(values.get('lastname'))
-	};
-}
+	private static async loadToken(userId: string): Promise<SessionTokenAttributes | undefined> {
+		const model = await SessionToken.findOne({
+			where: {
+				UserId: userId
+			}
+		});
+		return model?.dataValues;
+	}
 
-export async function readNickPass(data: Promise<FormData>): Promise<NickPassData | undefined> {
-	const values: FormData = await data;
-	const nickname = String(values.get('nickname'));
-	const password = String(values.get('password'));
-	if (nickname && password) {
+	static extractUser(sessionToken: string | undefined): SessionTokenUser | null {
+		if (sessionToken) {
+			try {
+				const maybeUser: SessionTokenUser = JSON.parse(sessionToken);
+				if (maybeUser) {
+					return maybeUser;
+				} else {
+					console.error('User parsing failed!');
+				}
+			} catch (e) {
+				console.error('error parsing user', e);
+			}
+			return null;
+		}
+		return null;
+	}
+
+	static async nickNameInvalid(nickname: string): Promise<boolean> {
+		return !nickname || nickname.length === 0 || Boolean(await this.getByNickname(nickname));
+	}
+
+	private static async loadUserByNickname(nickname: string): Promise<BackendUser | null> {
+		const model = await this.getByNickname(nickname);
+		if (model) {
+			return convertToBackendUser(model.dataValues);
+		}
+		return null;
+	}
+
+	private static async loadUserById(userId: string): Promise<BackendUser | null> {
+		const value = await User.findByPk(userId);
+		if (value) {
+			return convertToBackendUser(value.dataValues);
+		}
+		return null;
+	}
+
+	static async loadFrontEndUserById(id: string | null): Promise<FrontendUser | undefined> {
+		if (id) {
+			const byId: BackendUser | null = await this.loadUserById(id);
+			if (byId) {
+				return this.parseBackendUserToFrontend(byId);
+			}
+		}
+	}
+
+	static parseBackendUserToFrontend(user: BackendUser): FrontendUser {
 		return {
-			nickname: nickname,
-			password: password
+			id: user.id,
+			nickname: user.nickname,
+			forename: user.forename,
+			lastname: user.lastname,
+			email: user.email,
+			updatedAt: user.updatedAt,
+			createdAt: user.createdAt
 		};
 	}
-}
 
-export async function createSessionCookie(
-	cookies: Cookies,
-	locals: App.Locals,
-	user: BackendUser | SessionTokenUser
-): Promise<void> {
-	const token: string = crypto.randomUUID();
-	await SessionToken.upsert({
-		UserId: user.id,
-		token: token
-	});
-	cookies.set(
-		'session',
-		JSON.stringify({
+	static async readFormDataFrontEndUser(data: Promise<FormData>): Promise<UserFormData> {
+		const values: FormData = await data;
+		return {
+			email: String(values.get('email')),
+			nickname: String(values.get('nickname')),
+			forename: String(values.get('forename')),
+			lastname: String(values.get('lastname'))
+		};
+	}
+
+	static async readNickPass(data: Promise<FormData>): Promise<NickPassData | undefined> {
+		const values: FormData = await data;
+		const nickname = values.get('nickname');
+		const password = values.get('password');
+		if (typeof nickname === 'string' && nickname.length > 0 && typeof password === 'string' && password.length > 0) {
+			return {
+				nickname: nickname,
+				password: password
+			};
+		}
+	}
+
+	static async createSessionCookie(
+		cookies: Cookies,
+		locals: App.Locals,
+		user: BackendUser | SessionTokenUser,
+		forceNewToken: boolean = false
+	): Promise<void> {
+		const [token, needsDbUpsert] = resolveSessionToken(user, forceNewToken);
+
+		if (needsDbUpsert) {
+			await SessionToken.upsert({
+				UserId: user.id,
+				token: token
+			});
+		}
+
+		cookies.set(
+			'session',
+			JSON.stringify({
+				id: user.id,
+				token: token,
+				nickname: user.nickname
+			} as SessionTokenUser),
+			{
+				path: '/',
+				sameSite: 'strict',
+				maxAge: 60 * 60 * 24 * 30
+			}
+		);
+		locals.currentUser = {
+			isAuthenticated: true,
 			id: user.id,
-			token: token,
+			email: user.email,
 			nickname: user.nickname
-		} as SessionTokenUser),
-		{
-			path: '/',
-			sameSite: 'strict',
-			maxAge: 60 * 60 * 24 * 30
-		}
-	);
-	locals.currentUser = {
-		isAuthenticated: true,
-		id: user.id,
-		email: user.email,
-		nickname: user.nickname
-	};
-}
-
-export async function updateUser(oldUser: SessionTokenUser, formData: UserFormData): Promise<boolean> {
-	const model: Model<UserAttributes, any> | null = await User.findByPk(oldUser.id);
-	if (model) {
-		model.set({
-			email: formData.email,
-			lastname: formData.lastname,
-			forename: formData.forename
-		});
-		await model.save();
-		return true;
+		};
 	}
-	return false;
-}
 
-export async function updatePassword(oldUser: SessionTokenUser, password: string): Promise<boolean> {
-	const model: Model<UserAttributes, any> | null = await User.findByPk(oldUser.id);
-	if (model) {
-		model.set({
-			password: saltPassword(password)
-		});
-		await model.save();
-		return true;
-	}
-	return false;
-}
-
-export async function saveUserImage(userId: string, image: string): Promise<string> {
-	await UserImage.findOne({ where: { UserId: userId } }).then(function (model: Model<UserImageAttributes, any> | null) {
+	static async updateUser(oldUser: SessionTokenUser, formData: UserFormData): Promise<ChangeResult> {
+		const model: Model<UserAttributes, any> | null = await User.findByPk(oldUser.id);
 		if (model) {
-			return model.update({ image: Buffer.from(image) });
+			if (this.isChangeAllowed(oldUser.id, model.dataValues)) {
+				model.set({
+					email: formData.email,
+					lastname: formData.lastname,
+					forename: formData.forename,
+					nickname: formData.nickname
+				});
+				await model.save();
+				return 'Success';
+			} else {
+				return 'Not authorized';
+			}
 		}
-		return UserImage.create({ id: crypto.randomUUID(), UserId: userId, image: Buffer.from(image) });
-	});
-	return image;
-}
+		return 'Data Missing';
+	}
 
-export async function getUserImage(userId: string): Promise<string | null> {
-	const model: Model<UserImageAttributes, any> | null = await UserImage.findOne({ where: { UserId: userId } });
-	return model ? model.dataValues.image.toString() : null;
+	private static isChangeAllowed(userId: string, dataValues: UserAttributes): boolean {
+		return dataValues.id === userId;
+	}
+
+	static async updatePassword(oldUser: SessionTokenUser, password: string): Promise<ChangeResult> {
+		const model: Model<UserAttributes, any> | null = await User.findByPk(oldUser.id);
+		if (model) {
+			if (this.isChangeAllowed(oldUser.id, model.dataValues)) {
+				model.set({
+					password: this.saltPassword(password)
+				});
+				await model.save();
+				return 'Success';
+			} else {
+				return 'Not authorized';
+			}
+		}
+		return 'Data Missing';
+	}
+
+	static async saveUserImage(userId: string, image: string): Promise<string> {
+		const model: Model<UserImageAttributes, any> | null = await UserImage.findOne({ where: { UserId: userId } });
+		if (model) {
+			await model.update({ image: Buffer.from(image) });
+		} else {
+			await UserImage.create({ id: crypto.randomUUID(), UserId: userId, image: Buffer.from(image) });
+		}
+		return image;
+	}
+
+	static async getUserImage(userId: string): Promise<string | null> {
+		const model: Model<UserImageAttributes, any> | null = await UserImage.findOne({ where: { UserId: userId } });
+		return model ? model.dataValues.image.toString() : null;
+	}
 }

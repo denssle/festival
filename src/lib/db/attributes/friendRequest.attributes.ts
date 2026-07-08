@@ -1,5 +1,5 @@
-import { loadFrontEndUserById } from '$lib/services/user.service';
 import { FriendRequestData } from '$lib/models/updates/FriendRequestData';
+import { UserService } from '$lib/services/user.service';
 
 export type FriendRequestAttributes = {
 	id: string;
@@ -12,7 +12,7 @@ export type FriendRequestAttributes = {
 export async function convertToFriendRequest(attribute: FriendRequestAttributes): Promise<FriendRequestData> {
 	return {
 		id: attribute.id,
-		receivedFrom: await loadFrontEndUserById(attribute.receiverId),
-		sendTo: await loadFrontEndUserById(attribute.senderId)
+		receivedFrom: await UserService.loadFrontEndUserById(attribute.senderId),
+		sendTo: await UserService.loadFrontEndUserById(attribute.receiverId)
 	};
 }

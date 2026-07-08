@@ -2,21 +2,21 @@
 	import type { UpdateTransferData } from '$lib/models/updates/UpdateTransferData';
 	import { invalidateAll } from '$app/navigation';
 
-	export let data: UpdateTransferData;
+	let { data }: { data: UpdateTransferData } = $props();
 
 	async function acceptFriendRequest(id: string | undefined) {
-		await fetch(`updates/accept-friend`, { method: 'POST', body: id });
-		invalidateAll();
+		await fetch(`/updates/accept-friend`, { method: 'POST', body: id });
+		await invalidateAll();
 	}
 
 	async function declineFriendRequest(id: string | undefined) {
-		await fetch(`updates/cancel-request`, { method: 'POST', body: id });
-		invalidateAll();
+		await fetch(`/updates/decline-friend`, { method: 'POST', body: id });
+		await invalidateAll();
 	}
 
 	async function cancelFriendRequest(id: string | undefined) {
-		await fetch(`updates/decline-friend`, { method: 'POST', body: id });
-		invalidateAll();
+		await fetch(`/updates/cancel-request`, { method: 'POST', body: id });
+		await invalidateAll();
 	}
 </script>
 
@@ -24,14 +24,14 @@
 	<h2>Updates</h2>
 	<section>
 		<h4>Eingegangene Freundschaftsanfragen</h4>
-		{#each data.receivedFriendRequests as received}
+		{#each data.receivedFriendRequests as received (received.id)}
 			<div class="friend-request">
-				<a href="/user/{received?.sendTo?.id}">
-					{received?.sendTo?.nickname}
+				<a href="/user/{received?.receivedFrom?.id}">
+					{received?.receivedFrom?.nickname}
 				</a>
 				<div>
-					<button on:click={() => acceptFriendRequest(received?.sendTo?.id)}> Annehmen</button>
-					<button on:click={() => declineFriendRequest(received?.sendTo?.id)}> Ablehnen</button>
+					<button onclick={() => acceptFriendRequest(received?.receivedFrom?.id)}> Annehmen</button>
+					<button onclick={() => declineFriendRequest(received?.receivedFrom?.id)}> Ablehnen</button>
 				</div>
 			</div>
 		{/each}
@@ -41,12 +41,12 @@
 	</section>
 	<section>
 		<h4>Ausstehende Freundschaftsanfragen</h4>
-		{#each data.sentFriendRequests as send}
+		{#each data.sentFriendRequests as send (send.id)}
 			<div class="friend-request">
-				<a href="/user/{send?.receivedFrom?.id}">
-					{send?.receivedFrom?.nickname}
+				<a href="/user/{send?.sendTo?.id}">
+					{send?.sendTo?.nickname}
 				</a>
-				<button on:click={() => cancelFriendRequest(send?.receivedFrom?.id)}> Zurückziehen</button>
+				<button onclick={() => cancelFriendRequest(send?.sendTo?.id)}> Zurückziehen</button>
 			</div>
 		{/each}
 		{#if data.sentFriendRequests.length === 0}

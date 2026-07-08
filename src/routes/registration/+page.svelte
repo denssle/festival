@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { LoginRegisterFormData } from '$lib/models/LoginRegisterFormData';
+	import type { LoginRegisterFormData } from '$lib/models/transferData/LoginRegisterFormData';
+	import type { ActionData } from './$types';
 
-	export let data: LoginRegisterFormData;
-
-	export let form;
+	let { form }: { form: ActionData } = $props();
+	let formData: LoginRegisterFormData = $state({ nickname: '', password: '', password2: '' });
 </script>
 
 <article>
@@ -12,12 +12,19 @@
 	<form method="POST">
 		<section>
 			<p>
-				<input bind:value={data.nickname} minlength="3" name="nickname" placeholder="Nickname" required type="text" />
+				<input
+					bind:value={formData.nickname}
+					minlength="3"
+					name="nickname"
+					placeholder="Nickname"
+					required
+					type="text"
+				/>
 			</p>
 
 			<p>
 				<input
-					bind:value={data.password}
+					bind:value={formData.password}
 					minlength="3"
 					name="password"
 					placeholder="Passwort"
@@ -26,7 +33,7 @@
 				/>
 
 				<input
-					bind:value={data.password2}
+					bind:value={formData.password2}
 					minlength="3"
 					name="password2"
 					placeholder="Passwort Wiederholung"
@@ -36,7 +43,10 @@
 			</p>
 
 			<p>
-				<button disabled={data.password !== data.password2 || !data.nickname || !data.password} type="submit">
+				<button
+					disabled={formData.password !== formData.password2 || !formData.nickname || !formData.password}
+					type="submit"
+				>
 					Los gehts!
 				</button>
 				{#if form?.success === false}

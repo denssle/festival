@@ -1,5 +1,5 @@
 import { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
-import { loadFrontEndUserById } from '$lib/services/user.service';
+import { UserService } from '$lib/services/user.service';
 import { BackendFestivalEvent } from '$lib/models/festivalEvent/BackendFestivalEvent';
 import { Model } from 'sequelize';
 import {
@@ -19,24 +19,25 @@ export type FestivalEventAttributes = {
 	updatedAt: Date;
 	startDate: Date;
 	UserId: string;
-	GuestInformations: Model<GuestInformationAttributes, any>[];
+	EventGuests: Model<GuestInformationAttributes, any>[];
 };
 
 export async function mapToFrontendFestivalEvent(event: FestivalEventAttributes): Promise<FrontendFestivalEvent> {
+	const userId = event.UserId || (event as any).userId;
 	return {
 		id: event.id,
 		name: event.name,
 		bringYourOwnBottle: event.bringYourOwnBottle,
 		bringYourOwnFood: event.bringYourOwnFood,
 		createdAt: event.createdAt,
-		createdBy: (await loadFrontEndUserById(event.UserId)) ?? null,
+		createdBy: (await UserService.loadFrontEndUserById(userId)) ?? null,
 		description: event.description,
 		startDate: event.startDate,
 		location: event.location,
 		updatedAt: event.updatedAt,
-		frontendGuestInformation: event.GuestInformations
+		frontendGuestInformation: event.EventGuests
 			? await Promise.all(
-					event.GuestInformations.map((value) => {
+					event.EventGuests.map((value: any) => {
 						return mapToFrontendGuestInformation(value.dataValues);
 					})
 				)
@@ -45,6 +46,7 @@ export async function mapToFrontendFestivalEvent(event: FestivalEventAttributes)
 }
 
 export async function mapToBackendFestivalEvent(event: FestivalEventAttributes): Promise<BackendFestivalEvent> {
+	const userId = event.UserId || (event as any).userId;
 	return {
 		id: event.id,
 		name: event.name,
@@ -54,10 +56,12 @@ export async function mapToBackendFestivalEvent(event: FestivalEventAttributes):
 		location: event.location,
 		description: event.description,
 		startDate: event.startDate,
-		UserId: event.UserId,
+		UserId: userId,
 		updatedAt: event.updatedAt,
-		guestInformation: event.GuestInformations.map((value) => {
-			return mapToBackendGuestInformation(value.dataValues);
-		})
+		guestInformation: event.EventGuests
+			? event.EventGuests.map((value: any) => {
+					return mapToBackendGuestInformation(value.dataValues);
+				})
+			: []
 	};
 }

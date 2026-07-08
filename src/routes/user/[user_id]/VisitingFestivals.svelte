@@ -1,36 +1,26 @@
 <script lang="ts">
 	import type { VisitingFestival } from '$lib/models/user/VisitingFestival';
-	import { afterUpdate, onMount } from 'svelte';
 
-	export let userId: string = '';
+	let { userId = '' } = $props();
 
-	let festivals: VisitingFestival[] = [];
-	let previousUserId: string;
+	let festivals: VisitingFestival[] = $state([]);
 
-	onMount(() => {
-		previousUserId = userId;
-		loadFestivals();
-	});
-
-	afterUpdate(() => {
-		if (previousUserId !== userId) {
-			previousUserId = userId;
+	$effect(() => {
+		if (userId) {
 			loadFestivals();
 		}
 	});
 
-	function loadFestivals() {
-		fetch(userId + '/visiting-festivals', {
+	async function loadFestivals() {
+		const response = await fetch('/user/' + userId + '/visiting-festivals', {
 			method: 'GET'
-		}).then((response) => {
-			response.json().then((data: VisitingFestival[]) => {
-				if (data.length > 0) {
-					festivals = data;
-				} else {
-					festivals = [];
-				}
-			});
 		});
+		const data = await response.json();
+		if (data.length > 0) {
+			festivals = data;
+		} else {
+			festivals = [];
+		}
 	}
 </script>
 
@@ -38,7 +28,9 @@
 	<p>Zu nichts angemeldet.</p>
 {:else}
 	<p>Angemeldet bei:</p>
-	{#each festivals as fest}
-		<a href={'/festival/' + fest.festivalId}>{fest.festivalName}</a>
-	{/each}
+	<ul>
+		{#each festivals as fest (fest.festivalId)}
+			<li><a href={'/festival/' + fest.festivalId}>{fest.festivalName}</a></li>
+		{/each}
+	</ul>
 {/if}

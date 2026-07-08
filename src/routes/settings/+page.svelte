@@ -1,5 +1,8 @@
 <script lang="ts">
-	export let form;
+	import type { ActionData } from './$types';
+	import { MIN_PASSWORD_LENGTH } from '$lib/constants';
+
+	let { form }: { form: ActionData } = $props();
 </script>
 
 <article>
@@ -10,7 +13,7 @@
 				<summary>Passwort</summary>
 				<p>
 					<label for="password">Ändere dein Passwort: </label>
-					<input id="password" name="password" placeholder="Passwort" type="password" value={''} />
+					<input id="password" name="password" placeholder="Passwort" type="password" minlength={MIN_PASSWORD_LENGTH} />
 
 					{#if form?.message}
 						<span>{form.message}</span>

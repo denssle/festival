@@ -1,28 +1,49 @@
-Verhaltenskodex (Code of Conduct) für das **festival** GitHub-Repository
+# Verhaltenskodex für das festival-Repository
 
-### Ziel
+## Zweck
 
-Das Ziel dieses Verhaltenskodex ist es, eine offene und einladende Umgebung für alle Mitwirkenden zu schaffen, unabhängig von Geschlecht, Geschlechtsidentität, sexueller Orientierung, Behinderung, physischem Erscheinungsbild, Körpergröße, Ethnizität, Staatsangehörigkeit, Religion oder Erfahrung.
+Dieser Verhaltenskodex soll eine offene, respektvolle und einladende Umgebung für alle Mitwirkenden schaffen. Unabhängig von Geschlecht, Geschlechtsidentität, sexueller Orientierung, Behinderung, äußerem Erscheinungsbild, Körpergröße, ethnischer Herkunft, Staatsangehörigkeit, Religion oder Erfahrung sollen sich alle sicher und willkommen fühlen.
 
-### Akzeptables Verhalten
+## Erwünschtes Verhalten
 
-    Respektvoller Umgang und Höflichkeit gegenüber anderen Mitwirkenden.
-    Zusammenarbeit in einer positiven und konstruktiven Weise.
-    Offenheit für unterschiedliche Meinungen und Erfahrungen.
-    Fokussierung auf konstruktive Kritik und vermeiden von persönlichen Angriffen.
+Wir erwarten von allen Mitwirkenden:
 
-### Inakzeptables Verhalten
+- respektvollen und höflichen Umgang miteinander
+- konstruktive, sachliche und wertschätzende Zusammenarbeit
+- Offenheit für unterschiedliche Perspektiven und Erfahrungen
+- konzentrierte Kritik an Inhalten statt an Personen
+- einen freundlichen und unterstützenden Umgangston
 
-    Belästigungen in jeglicher Form.
-    Diskriminierung, Herabsetzungen oder Ausgrenzung aufgrund von Geschlecht, Geschlechtsidentität, sexueller Orientierung, Behinderung, Ethnizität, Religion oder anderen Faktoren.
-    Veröffentlichen von persönlichen Informationen anderer ohne deren Zustimmung.
-    Belästigung in öffentlichen oder privaten Kommunikationskanälen.
+## Unerwünschtes Verhalten
 
-### Durchsetzung
+Nicht akzeptabel sind insbesondere:
 
-    Fälle von inakzeptablem Verhalten können an dominik.hellweg@protonmail.com gemeldet werden.
-    Alle gemeldeten Verhaltensweisen werden überprüft und untersucht. Bei Verstößen können angemessene Maßnahmen ergriffen werden, einschließlich Warnungen oder vorübergehenden Ausschlüssen aus dem Repository.
+- Belästigung in jeglicher Form
+- diskriminierende, abwertende oder ausgrenzende Äußerungen oder Handlungen
+- persönliche Angriffe, Beleidigungen oder Einschüchterung
+- das Veröffentlichen persönlicher Informationen anderer Personen ohne deren ausdrückliche Zustimmung
+- unerwünschtes Verhalten in öffentlichen oder privaten Kommunikationskanälen im Zusammenhang mit dem Projekt
 
-### Zustimmung zum Verhaltenskodex
+## Durchsetzung
 
-Mitwirkende an diesem Repository werden gebeten, sich an diesen Verhaltenskodex zu halten. Dies schließt alle Interaktionen innerhalb des Repositories, Pull Requests, Issues und Kommunikation in anderen Kanälen ein.
+Verstöße gegen diesen Verhaltenskodex können an **dominik.hellweg@protonmail.com** gemeldet werden.
+
+Alle Meldungen werden vertraulich behandelt und sorgfältig geprüft. Je nach Schwere und Kontext des Vorfalls können Maßnahmen ergriffen werden, zum Beispiel:
+
+- eine private Rückmeldung oder Verwarnung
+- vorübergehender Ausschluss von Aktivitäten im Repository
+- dauerhafter Ausschluss von der Mitarbeit am Projekt
+
+## Geltungsbereich
+
+Dieser Verhaltenskodex gilt für alle Interaktionen im Zusammenhang mit dem Projekt, insbesondere für:
+
+- Pull Requests
+- Issues
+- Code Reviews
+- Diskussionen im Repository
+- sonstige projektbezogene Kommunikationskanäle
+
+## Zustimmung
+
+Mit der Mitarbeit an diesem Repository erklären sich Mitwirkende damit einverstanden, diesen Verhaltenskodex einzuhalten.
