@@ -42,14 +42,18 @@ jobs:
             # ANNAHME: Supervisor-Service heißt "festival" – bei Bedarf anpassen
             # (Name prüfen mit `supervisorctl status` auf dem Uberspace-Host).
             supervisorctl restart festival
-            # Warten, bis der Dev-Server wieder auf Port 5173 antwortet. Großzügig, da
-            # start-server erst `npm install` ausführt, bevor vite startet (max. ~3 min).
-            for i in $(seq 1 60); do
+            # Warten, bis der Dev-Server wieder auf Port 5173 antwortet. Sehr großzügig
+            # (bis ~10 min), da start-server bei jedem Neustart erst `npm install` ausführt
+            # und dieser Kaltstart auf Uberspace mehrere Minuten dauern kann, in denen der
+            # Port geschlossen ist. (Eigentlicher Fix wäre adapter-node statt vite dev –
+            # siehe TODO, dann startet der Service in Sekunden.)
+            for i in $(seq 1 120); do
               if curl -fsS -o /dev/null http://localhost:5173/; then
-                echo "Service ist nach dem Restart erreichbar."
+                echo "Service ist nach dem Restart erreichbar (nach ~$((i * 5))s)."
                 exit 0
               fi
-              sleep 3
+              [ $((i % 6)) -eq 0 ] && echo "warte auf Service... (~$((i * 5))s)"
+              sleep 5
             done
-            echo "Service kam nach dem Restart nicht hoch (Port 5173 nicht erreichbar)."
+            echo "Service kam nach dem Restart nicht hoch (Port 5173 nach ~10 min nicht erreichbar)."
             exit 1
