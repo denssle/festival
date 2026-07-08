@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { register, getUserId, uniqueName } from './test-utils';
+import { register, getUserId, uniqueName, clickForResponse } from './test-utils';
 
 test.describe.serial('Freundschaftsprozess', () => {
 	const userANickname = uniqueName('UserA');
@@ -41,11 +41,7 @@ test.describe.serial('Freundschaftsprozess', () => {
 		const addFriendButton = pageA.locator('button:has-text("Anfreunden")');
 		await expect(addFriendButton).toBeVisible({ timeout: 10000 });
 
-		const addFriendResponse = pageA.waitForResponse(
-			(r: any) => r.url().includes('/add-friend') && r.request().method() === 'POST'
-		);
-		await addFriendButton.click();
-		await addFriendResponse;
+		await clickForResponse(pageA, addFriendButton, '/add-friend');
 
 		// Warte auf das InfoDialog
 		const dialog = pageA.locator('dialog').filter({ hasText: 'Freundschaftsanfrage wurde geschickt.' });
@@ -64,11 +60,7 @@ test.describe.serial('Freundschaftsprozess', () => {
 		const acceptButton = requestLocator.locator('button:has-text("Annehmen")');
 		await expect(acceptButton).toBeVisible({ timeout: 10000 });
 
-		const acceptResponse = pageB.waitForResponse(
-			(r: any) => r.url().includes('/accept-friend') && r.request().method() === 'POST'
-		);
-		await acceptButton.click();
-		await acceptResponse;
+		await clickForResponse(pageB, acceptButton, '/accept-friend');
 
 		await expect(requestLocator).not.toBeVisible({ timeout: 15000 });
 	});
@@ -98,11 +90,7 @@ test.describe.serial('Freundschaftsprozess', () => {
 		const removeFriendButton = pageA.locator('button:has-text("Freund entfernen")');
 		await expect(removeFriendButton).toBeVisible({ timeout: 15000 });
 
-		const responsePromise = pageA.waitForResponse(
-			(resp: any) => resp.url().includes('/remove-friend') && resp.status() === 200
-		);
-		await removeFriendButton.click();
-		await responsePromise;
+		await clickForResponse(pageA, removeFriendButton, '/remove-friend');
 
 		// Dialog schließen, der durch removeFriend() geöffnet wird
 		const removeDialog = pageA.locator('dialog').filter({ hasText: 'Freundschaft gekündigt.' });
@@ -123,11 +111,7 @@ test.describe.serial('Freundschaftsprozess', () => {
 		const addFriendButton = pageA.locator('button:has-text("Anfreunden")');
 		await expect(addFriendButton).toBeVisible({ timeout: 10000 });
 
-		const addResponse1 = pageA.waitForResponse(
-			(r: any) => r.url().includes('/add-friend') && r.request().method() === 'POST'
-		);
-		await addFriendButton.click();
-		await addResponse1;
+		await clickForResponse(pageA, addFriendButton, '/add-friend');
 
 		// Dialog schließen
 		const dialog = pageA.locator('dialog').filter({ hasText: 'Freundschaftsanfrage wurde geschickt.' });
@@ -142,11 +126,7 @@ test.describe.serial('Freundschaftsprozess', () => {
 			.locator('button:has-text("Zurückziehen")');
 		await expect(cancelBtn).toBeVisible({ timeout: 10000 });
 
-		const cancelResponse = pageA.waitForResponse(
-			(r: any) => r.url().includes('/cancel-request') && r.request().method() === 'POST'
-		);
-		await cancelBtn.click();
-		await cancelResponse;
+		await clickForResponse(pageA, cancelBtn, '/cancel-request');
 		await expect(pageA.locator('.friend-request').filter({ hasText: userBNickname })).not.toBeVisible({
 			timeout: 10000
 		});
@@ -157,11 +137,7 @@ test.describe.serial('Freundschaftsprozess', () => {
 		const addFriendButton = pageA.locator('button:has-text("Anfreunden")');
 		await expect(addFriendButton).toBeVisible({ timeout: 10000 });
 
-		const addResponse2 = pageA.waitForResponse(
-			(r: any) => r.url().includes('/add-friend') && r.request().method() === 'POST'
-		);
-		await addFriendButton.click();
-		await addResponse2;
+		await clickForResponse(pageA, addFriendButton, '/add-friend');
 
 		// Dialog schließen
 		const dialog = pageA.locator('dialog').filter({ hasText: 'Freundschaftsanfrage wurde geschickt.' });
@@ -175,11 +151,7 @@ test.describe.serial('Freundschaftsprozess', () => {
 			.locator('button:has-text("Ablehnen")');
 		await expect(declineBtn).toBeVisible({ timeout: 10000 });
 
-		const declineResponse = pageB.waitForResponse(
-			(r: any) => r.url().includes('/decline-friend') && r.request().method() === 'POST'
-		);
-		await declineBtn.click();
-		await declineResponse;
+		await clickForResponse(pageB, declineBtn, '/decline-friend');
 		await expect(pageB.locator('.friend-request').filter({ hasText: userANickname })).not.toBeVisible({
 			timeout: 10000
 		});

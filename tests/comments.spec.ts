@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { register, getUserId, uniqueName } from './test-utils';
+import { register, getUserId, uniqueName, openDialog, clickForResponse } from './test-utils';
 
 test.describe.serial('Kommentar-Lifecycle', () => {
 	const userANickname = uniqueName('UserA_Comments');
@@ -43,11 +43,7 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 		await expect(textareaElement).toBeVisible();
 		await textareaElement.fill(commentText);
 
-		const postResponse = pageA.waitForResponse(
-			(r: any) => r.url().includes('/comments') && r.request().method() === 'POST'
-		);
-		await pageA.locator('button:has-text("Absenden")').click();
-		await postResponse;
+		await clickForResponse(pageA, pageA.locator('button:has-text("Absenden")'), '/comments', 'POST');
 
 		// Verifizieren, dass der Kommentar erscheint
 		const commentLocator = pageA.locator('fieldset').filter({ hasText: commentText });
@@ -73,11 +69,7 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 		await expect(textareaElement).toBeVisible();
 		await textareaElement.fill(updatedCommentText);
 
-		const putResponse = pageA.waitForResponse(
-			(r: any) => r.url().includes('/comments') && r.request().method() === 'PUT'
-		);
-		await saveButton.click();
-		await putResponse;
+		await clickForResponse(pageA, saveButton, '/comments', 'PUT');
 
 		// Verifizieren der Änderung
 		await expect(pageA.locator('fieldset', { hasText: updatedCommentText })).toBeVisible({ timeout: 10000 });
@@ -100,11 +92,10 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 		const deleteResponse = pageA.waitForResponse(
 			(r: any) => r.url().includes('/comments') && r.request().method() === 'DELETE'
 		);
-		await updatedCommentLocator.locator('button:has-text("Löschen")').click();
 
-		// Dialog bestätigen
+		// Löschen-Button öffnet Bestätigungsdialog (robust gegen Hydration-Race)
 		const dialog = pageA.locator('dialog').filter({ hasText: 'Kommentar löschen' });
-		await dialog.waitFor({ state: 'visible', timeout: 10000 });
+		await openDialog(updatedCommentLocator.locator('button:has-text("Löschen")'), dialog);
 		const reloadResponse = pageA.waitForResponse(
 			(r: any) => r.url().includes('/comments') && r.request().method() === 'GET'
 		);

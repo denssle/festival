@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { register } from './test-utils';
+import { register, openDialog } from './test-utils';
 
 test.describe.serial('Festival-Management Lifecycle', () => {
 	const userNickname = `FestivalCreator_${Date.now()}`;
@@ -113,12 +113,9 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		await page.goto(`/festival/${festivalId}`);
 		await expect(page.locator('h4 u')).toContainText(updatedFestivalName, { timeout: 15000 });
 
-		// Zusagen Button klicken
-		await page.click('button:has-text("Zusagen")');
-
-		// Dialog sollte erscheinen
+		// Zusagen Button klicken -> Dialog öffnet (robust gegen Hydration-Race)
 		const dialog = page.locator('dialog[open]');
-		await expect(dialog).toBeVisible();
+		await openDialog(page.locator('button:has-text("Zusagen")'), dialog);
 		await expect(dialog).toContainText('Bei dem Event bin ich dabei!');
 
 		// Felder ausfüllen (Verwende IDs statt Name, da in JoinEventDialog.svelte IDs genutzt werden)
@@ -148,10 +145,9 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		// Button sollte nun "Zusage bearbeiten" heißen
 		const editJoinButton = page.locator('button:has-text("Zusage bearbeiten")');
 		await expect(editJoinButton).toBeVisible({ timeout: 15000 });
-		await editJoinButton.click();
 
 		const dialog = page.locator('dialog[open]');
-		await expect(dialog).toBeVisible({ timeout: 15000 });
+		await openDialog(editJoinButton, dialog);
 
 		// Daten ändern
 		await dialog.locator('#food').fill('Pasta');
@@ -176,10 +172,9 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		// Absagen Button klicken (In der Button-Leiste am Ende der Seite)
 		const leaveButton = page.locator('article > section').last().locator('button:has-text("Absagen")');
 		await expect(leaveButton).toBeVisible();
-		await leaveButton.click();
 
 		const dialog = page.locator('dialog[open]');
-		await expect(dialog).toBeVisible();
+		await openDialog(leaveButton, dialog);
 		await expect(dialog).toContainText('Leider bin ich / sind wir bei dem Event nicht dabei.');
 
 		// Kommentar hinzufügen
@@ -210,10 +205,9 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		// Button sollte nun "Absage bearbeiten" heißen
 		const editLeaveButton = page.locator('article > section').last().locator('button:has-text("Absage bearbeiten")');
 		await expect(editLeaveButton).toBeVisible();
-		await editLeaveButton.click();
 
 		const dialog = page.locator('dialog[open]');
-		await expect(dialog).toBeVisible();
+		await openDialog(editLeaveButton, dialog);
 
 		// Kommentar ändern
 		await page.fill('#comment', 'Bin doch im Urlaub');
@@ -233,10 +227,9 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		// Wieder auf Zusagen klicken (heißt aktuell "Zusagen", da wir abgesagt haben)
 		const joinButton = page.locator('article > section').last().locator('button:has-text("Zusagen")');
 		await expect(joinButton).toBeVisible();
-		await joinButton.click();
 
 		const dialog = page.locator('dialog[open]');
-		await expect(dialog).toBeVisible();
+		await openDialog(joinButton, dialog);
 
 		await page.fill('#food', 'Salat');
 		await dialog.locator('button:has-text("Beitreten")').click();
@@ -254,11 +247,10 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 
 	test('sollte das Festival löschen können', async () => {
 		await page.goto(`/festival/${festivalId}`);
-		await page.click('button:has-text("Löschen")');
 
-		// Dialog bestätigen
+		// Löschen-Button öffnet Bestätigungsdialog (robust gegen Hydration-Race)
 		const dialog = page.locator('dialog[open]');
-		await expect(dialog).toBeVisible();
+		await openDialog(page.locator('button:has-text("Löschen")'), dialog);
 		await dialog.locator('button:has-text("Ja")').click();
 
 		// Verifizieren: Redirect auf Startseite

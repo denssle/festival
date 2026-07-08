@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { register, TEST_PASSWORD, login, uniqueName } from './test-utils';
+import { register, TEST_PASSWORD, login, uniqueName, openDialog } from './test-utils';
 
 test.describe.serial('Gruppen Management', () => {
 	const userNickname = uniqueName('GroupUser');
@@ -138,10 +138,10 @@ test.describe.serial('Gruppen Management', () => {
 		const deleteButton = page.getByRole('button', { name: 'Gruppe löschen' });
 		await expect(deleteButton).toBeVisible();
 
-		// Löschen klicken -> Bestätigungsdialog (QuestionDialog) mit "Ja" bestätigen
-		await deleteButton.click();
+		// Löschen klicken -> Bestätigungsdialog (QuestionDialog) mit "Ja" bestätigen.
+		// openDialog wiederholt den Klick bei Hydration-Race (verlorener Klick).
 		const confirmDialog = page.locator('dialog', { hasText: 'löschen möchtest' });
-		await confirmDialog.waitFor({ state: 'visible' });
+		await openDialog(deleteButton, confirmDialog);
 		await confirmDialog.getByRole('button', { name: 'Ja' }).click();
 
 		// Nach dem Löschen sollten wir auf der Gruppenseite sein

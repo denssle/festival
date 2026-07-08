@@ -7,6 +7,13 @@ export default defineConfig({
 	testDir: './tests',
 	/* Run tests in files in parallel */
 	fullyParallel: false,
+	/* Globales Test-Timeout großzügig, da alle Specs sich eine In-Memory-DB (ein Dev-Server)
+	 * teilen und unter voller Suite-Last einzelne Requests spürbar langsamer werden. */
+	timeout: 60_000,
+	expect: {
+		/* Web-First-Assertions dürfen länger auf langsame SSR-/Hydration-Renders warten. */
+		timeout: 15_000
+	},
 	/* Fail the build on CI if you accidentally left test.only in the source code. */
 	forbidOnly: !!process.env.CI,
 	/* Retry on CI only */

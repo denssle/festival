@@ -68,18 +68,25 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		// Das <input type="file"> ist per display:none versteckt und wird per JS .click() ausgelöst.
 		// Playwright's filechooser-Event funktioniert nicht bei programmatischem .click().
 		// Stattdessen direkt setInputFiles() auf dem versteckten Input verwenden.
-		const uploadResponse = page.waitForResponse(
-			(r: any) => r.url().includes('/user-image') && r.request().method() === 'POST'
-		);
+		//
+		// Robust gegen Hydration-Race: Der onchange-Handler des Inputs wird erst bei der
+		// Hydration angehängt. Unter voller Suite-Last kann setInputFiles feuern, bevor der
+		// Handler da ist -> kein POST. Daher erneut setzen, bis der Upload-Request rausgeht.
 		const fileInput = page.locator('input[type="file"]');
-		await fileInput.setInputFiles([
-			{
-				name: 'test.png',
-				mimeType: 'image/png',
-				buffer: buffer
-			}
-		]);
-		await uploadResponse;
+		await expect(async () => {
+			const uploadResponse = page.waitForResponse(
+				(r: any) => r.url().includes('/user-image') && r.request().method() === 'POST',
+				{ timeout: 3000 }
+			);
+			await fileInput.setInputFiles([
+				{
+					name: 'test.png',
+					mimeType: 'image/png',
+					buffer: buffer
+				}
+			]);
+			await uploadResponse;
+		}).toPass({ timeout: 30000 });
 
 		// Dialog-Erfolg abwarten - Präziser Selektor um Strict Mode Violation zu vermeiden
 		const dialog = page.locator('dialog').filter({ hasText: 'Okay' });
