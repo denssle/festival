@@ -17,36 +17,54 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.20.0
+
+      - name: Install dependencies
+        run: npm ci
+
+      # adapter-node: erzeugt unter build/ einen eigenständigen Node-Server. Der wird
+      # ausgeliefert und mit `node build` gestartet – kein `vite dev`/`npm install` mehr
+      # bei jedem Restart.
+      - name: Build
+        run: npm run build
+
       - name: rsync deployments
         uses: burnett01/rsync-deployments@7.1.0
         with:
-          switches: -avzr --delete --exclude=".env"
+          # node_modules NICHT mitschicken (plattform-/ABI-abhängige native Module wie
+          # sqlite3/mariadb werden auf dem Host installiert). build/ wird jetzt mitgeliefert.
+          # --exclude bewahrt die ausgeschlossenen Pfade auf dem Host vor --delete.
+          switches: -avzr --delete --exclude=".env" --exclude="node_modules"
           path: /
           remote_path: /home/${{ secrets.UBERSPACE_USER }}/html/
           remote_host: ${{ secrets.UBERSPACE_HOST }}
           remote_user: ${{ secrets.UBERSPACE_USER }}
           remote_key: ${{ secrets.DEPLOY_KEY_PRIVATE }}
 
-      # Ohne Neustart läuft nach dem rsync weiter der alte Prozess: neue Dependencies,
-      # Änderungen an hooks.server.ts/Server-Loadern und startDB() (macht sync({ alter })
-      # nur beim Serverstart) greifen erst nach einem Restart. Danach Health-Check gegen
-      # den Dev-Server-Port, damit ein kaputter Deploy die Pipeline rot färbt statt still
-      # offline zu gehen. Reused dieselben Secrets wie der rsync-Step (kein neues nötig).
-      - name: Restart service & health check
+      # Prod-Abhängigkeiten installieren (läuft, während der alte Service noch läuft →
+      # keine Downtime), dann Service neu starten. `node build` startet in Sekunden, daher
+      # reicht ein kurzes Health-Check-Fenster. Reused dieselben Secrets wie der rsync-Step.
+      - name: Install prod deps, restart & health check
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.UBERSPACE_HOST }}
           username: ${{ secrets.UBERSPACE_USER }}
           key: ${{ secrets.DEPLOY_KEY_PRIVATE }}
           script: |
-            # ANNAHME: Supervisor-Service heißt "festival" – bei Bedarf anpassen
-            # (Name prüfen mit `supervisorctl status` auf dem Uberspace-Host).
+            cd "$HOME/html" || exit 1
+            # Nur Produktions-Abhängigkeiten (dependencies). adapter-node hält diese extern,
+            # sie müssen also im node_modules des Hosts liegen.
+            npm ci --omit=dev
+            # ANNAHME: Supervisor-Service "festival" führt `npm run start-server`
+            # (= PORT=5173 node build) im Verzeichnis ~/html aus. Siehe PR-Beschreibung –
+            # ggf. einmalig das Kommando in ~/etc/services.d/festival.ini anpassen.
             supervisorctl restart festival
-            # Warten, bis der Dev-Server wieder auf Port 5173 antwortet. Großzügig, da
-            # start-server erst `npm install` ausführt, bevor vite startet (max. ~3 min).
-            for i in $(seq 1 60); do
+            for i in $(seq 1 40); do
               if curl -fsS -o /dev/null http://localhost:5173/; then
-                echo "Service ist nach dem Restart erreichbar."
+                echo "Service ist erreichbar (nach ~$((i * 3))s)."
                 exit 0
               fi
               sleep 3

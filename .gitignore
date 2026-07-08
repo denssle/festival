@@ -130,3 +130,6 @@ dist
 *.mjs
 /test-results/
 /playwright-report/
+
+# SvelteKit adapter-node Build-Output
+/build
