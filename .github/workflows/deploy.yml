@@ -26,3 +26,29 @@ jobs:
           remote_host: ${{ secrets.UBERSPACE_HOST }}
           remote_user: ${{ secrets.UBERSPACE_USER }}
           remote_key: ${{ secrets.DEPLOY_KEY_PRIVATE }}
+
+      # Ohne Neustart läuft nach dem rsync weiter der alte Prozess: neue Dependencies,
+      # Änderungen an hooks.server.ts/Server-Loadern und startDB() (macht sync({ alter })
+      # nur beim Serverstart) greifen erst nach einem Restart. Danach Health-Check gegen
+      # den Dev-Server-Port, damit ein kaputter Deploy die Pipeline rot färbt statt still
+      # offline zu gehen. Reused dieselben Secrets wie der rsync-Step (kein neues nötig).
+      - name: Restart service & health check
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.UBERSPACE_HOST }}
+          username: ${{ secrets.UBERSPACE_USER }}
+          key: ${{ secrets.DEPLOY_KEY_PRIVATE }}
+          script: |
+            # ANNAHME: Supervisor-Service heißt "festival" – bei Bedarf anpassen
+            # (Name prüfen mit `supervisorctl status` auf dem Uberspace-Host).
+            supervisorctl restart festival
+            # Warten, bis der Dev-Server wieder auf Port 5173 antwortet (max. ~60s)
+            for i in $(seq 1 30); do
+              if curl -fsS -o /dev/null http://localhost:5173/; then
+                echo "Service ist nach dem Restart erreichbar."
+                exit 0
+              fi
+              sleep 2
+            done
+            echo "Service kam nach dem Restart nicht hoch (Port 5173 nicht erreichbar)."
+            exit 1
