@@ -30,7 +30,7 @@
 - **Primärschlüssel:** `DataTypes.STRING` mit `crypto.randomUUID()` für eindeutige IDs verwenden.
 - **Asynchronität:** **IMMER** `async/await` mit `try/catch` in Services nutzen. `.then()` vermeiden.
 - **Kaskadierung:** `onDelete: 'CASCADE'` in `db.ts` sicherstellen.
-- **Initialisierung:** Erfolgt über `startDB()` in `src/lib/db/db.ts` und nutzt einheitlich `sync({ alter: true })`. In Test-/Dev-Umgebungen läuft die DB als frisches In-Memory-SQLite (siehe `sequelize.ts`) – dort erzeugt `alter` die Tabellen ohnehin von Grund auf. In Produktion (echte MariaDB) erhält `alter` vorhandene Daten; ein `force` (kompletter Wipe) wird nirgends benötigt. Sauberkeit zwischen E2E-Tests stellt der `/api/test/reset`-Endpoint her, nicht der Sync-Modus. Hinweis: `force` und `alter` schließen sich gegenseitig aus und dürfen NICHT gemeinsam übergeben werden.
+- **Initialisierung:** Erfolgt über `startDB()` in `src/lib/db/db.ts` und nutzt ein schlichtes `sync()` (**kein** `alter`/`force`). `sync()` legt fehlende Tabellen an und lässt bestehende unangetastet. In Test-/Dev-Umgebungen läuft die DB als frisches In-Memory-SQLite (siehe `sequelize.ts`) – dort baut `sync()` die Tabellen bei jedem Start von Grund auf. In Produktion (echte MariaDB) werden die Tabellen beim ersten Start angelegt; **spätere Modelländerungen an einer bereits befüllten DB werden NICHT automatisch übernommen** und erfordern echte Migrationen (siehe TODO). `alter` wurde bewusst entfernt, um versehentlichen Datenverlust durch heuristische Schemaänderungen zu vermeiden. Sauberkeit zwischen E2E-Tests stellt der `/api/test/reset`-Endpoint her (truncate, setzt existierende Tabellen voraus).
 - **Eager Loading (Include):** Falls ein Alias in `db.ts` definiert wurde (z.B. `as: 'EventGuests'`), muss dieser Alias zwingend auch im `include`-Statement im Service/Server-Loader verwendet werden, um `SequelizeEagerLoadingError` zu vermeiden. Achten Sie auf eindeutige Aliase bei mehreren Beziehungen zum selben Modell (z.B. `EventGuests` vs. `UserGuestInfos`).
 
 ## 3. SvelteKit & UI
@@ -117,7 +117,7 @@ In `src/lib/db/sequelize.ts` schaltet die App auf eine **flüchtige In-Memory-SQ
 
 ### Altlasten in `.env`
 
-`REDIS_TOKEN`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` wurden **nicht** vom Code genutzt und aus der Vorlage entfernt. Falls sie in einer älteren `.env` (z. B. auf dem Prod-Host) noch vorhanden sind, können sie gelöscht werden. Ein künftiges Rate-Limiting (siehe TODO) müsste eigene, frisch erzeugte Zugangsdaten mitbringen.
+`REDIS_TOKEN`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` waren Überbleibsel eines früheren, letztlich verworfenen Datenspeicher-Ansatzes (Upstash/Redis) vor dem Umstieg auf MariaDB. Sie werden **nirgends im Code genutzt** und wurden entfernt. Falls sie in einer älteren `.env` (z. B. auf dem Prod-Host) noch vorhanden sind, können sie gelöscht werden.
 
 ## 7. Offene Punkte / TODOs
 

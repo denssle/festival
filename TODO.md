@@ -57,7 +57,7 @@ Sortiert nach **Aufwand** (S → M → L), innerhalb jeder Stufe nach **Priorit�
 - [ ] 🟡 **Passwort-Management:** Definition von Passwort-Richtlinien (Komplexität) und Implementierung eines sicheren Passwort-Wiederherstellungsprozesses. _(Sicherheit)_
 - [ ] 🟡 **Datenschutz:** Datenschutzhinweise prüfen, Löschkonzept für Accounts und Daten erstellen. _(Datenschutz)_
 - [ ] 🟡 **Sichtbarkeit:** Festivals nur für Freunde oder Mitglieder von Gruppen zugänglich machen. _(Festivals)_
-- [ ] 🟡 **Schema-Stabilität:** Migrationsstrategie statt reinem `alter-Sync` evaluieren. _(Datenbank)_
+- [ ] 🟡 **Schema-Stabilität:** Echte Migrationsstrategie einführen. _Teilentschärft (v0.7.9): `sync({ alter: true })` → schlichtes `sync()` (kein automatisches Schema-Alter mehr, damit kein heuristischer Datenverlust in Prod). Offen bleibt der eigentliche Punkt: Sobald die Prod-DB befüllt ist, werden Modelländerungen NICHT mehr automatisch übernommen → dafür ein Migrations-Tool (z. B. umzug) einführen._ _(Datenbank)_
 - [ ] 🟢 **Multiple Sitzungen:** Unterstützung für gleichzeitige Logins auf mehreren Geräten bei gleichzeitigem Schutz vor ungewollten Sitzungen. _(Sicherheit)_
 - [ ] 🟢 **E2E-Tests:** Abdeckung von Login/Logout, Registrierung, Event-Teilnahme und Berechtigungen erweitern. _(Testen)_
 - [ ] 🟢 **Bilder in der Datenbank:** User-Bilder werden als Base64-String direkt in der DB gespeichert (`src/lib/services/user.service.ts`). Bei vielen Nutzern belastet das die DB erheblich. Fix: Bilder im Dateisystem oder einem Object Storage ablegen und nur den Pfad in der DB speichern. _(Performance)_
