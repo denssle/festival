@@ -15,6 +15,7 @@ import { SessionToken } from '$lib/db/model/sessionToken';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
 import { isSessionTokenExpired, resolveSessionToken } from '$lib/services/user.logic';
 import { SESSION_MAX_AGE_MS, SESSION_MAX_AGE_SECONDS } from '$lib/constants';
+import { dev } from '$app/environment';
 
 export class UserService {
 	static async userExists(extractedUser: SessionTokenUser | null): Promise<boolean> {
@@ -221,7 +222,13 @@ export class UserService {
 			} as SessionTokenUser),
 			{
 				path: '/',
-				sameSite: 'strict',
+				httpOnly: true, // kein Zugriff via document.cookie (XSS-Schutz)
+				sameSite: 'strict', // Cookie nur bei Same-Site-Requests (CSRF-Schutz)
+				// Secure an den Build-Modus koppeln statt an SvelteKits Auto-Erkennung:
+				// lokal/E2E läuft über http://localhost (Secure würde das Cookie verwerfen),
+				// in Prod steht die Node-App hinter einem HTTPS-Reverse-Proxy, der intern
+				// per HTTP spricht – dort würde die Auto-Erkennung Secure fälschlich weglassen.
+				secure: !dev,
 				maxAge: SESSION_MAX_AGE_SECONDS
 			}
 		);
