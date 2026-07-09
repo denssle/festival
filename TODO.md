@@ -33,7 +33,7 @@ Sortiert nach **Aufwand** (S → M → L), innerhalb jeder Stufe nach **Priorit�
 
 - [ ] 🔴 **Cookie-Sicherheit:** Verwendung von `HttpOnly`, `Secure` und `SameSite=Strict` Flags sowie Signierung von Cookies. _(Sicherheit)_
 - [ ] 🔴 **Access-Control:** Kritische Aktionen und Routen serverseitig auf fehlende Zugriffsberechtigungen prüfen. _(Sicherheit)_
-- [ ] 🔴 **Session-Timeout:** Einführung einer zeitlichen Begrenzung für Session-Token, um das Risiko von Session-Hijacking zu minimieren. Hinweis: `validateSessionToken` enthält bereits ein `// TODO Check token age`. _(Sicherheit)_
+- [x] 🔴 **Session-Timeout:** ~~Einführung einer zeitlichen Begrenzung für Session-Token, um das Risiko von Session-Hijacking zu minimieren.~~ _Erledigt (v0.7.2): absolute Token-Lebensdauer `SESSION_MAX_AGE_MS` (30 Tage), serverseitige Prüfung via `isSessionTokenExpired` in `validateSessionToken`; abgelaufenes Token wird über den Auth-Hook ausgeloggt (DB-Cleanup)._ _(Sicherheit)_
 - [ ] 🔴 **Event-Logik:** Sicherstellen, dass alle kritischen Aktionen (Teilnahme, etc.) autorisiert sind. _(Festivals)_
 - [ ] 🔴 **N+1 Queries – Festival-Ersteller:** `mapToFrontendFestivalEvent` in `src/lib/db/attributes/festivalEvent.attributes.ts` lädt den Festival-Ersteller per separatem `UserService.loadFrontEndUserById()`-Call. Fix: User per Eager Loading (`include: [{ model: User, as: 'User' }]`) in `FestivalEvent.findAll()` / `FestivalEvent.findByPk()` mitladen und direkt aus `event.User` lesen. _(Performance)_
 - [ ] 🟡 **Login-Schutz:** Implementierung von Rate-Limiting / Brute-Force-Schutz. _(Sicherheit)_

@@ -13,7 +13,8 @@ import { User } from '$lib/db/model/user';
 import { UserImage } from '$lib/db/model/userImage';
 import { SessionToken } from '$lib/db/model/sessionToken';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
-import { resolveSessionToken } from '$lib/services/user.logic';
+import { isSessionTokenExpired, resolveSessionToken } from '$lib/services/user.logic';
+import { SESSION_MAX_AGE_MS, SESSION_MAX_AGE_SECONDS } from '$lib/constants';
 
 export class UserService {
 	static async userExists(extractedUser: SessionTokenUser | null): Promise<boolean> {
@@ -92,8 +93,14 @@ export class UserService {
 		if (user) {
 			const found: SessionTokenAttributes | undefined = await this.loadToken(user.id);
 			if (found && found.token) {
-				// TODO Check token age
-				return found.token === user.token;
+				if (found.token !== user.token) {
+					return false;
+				}
+				if (isSessionTokenExpired(found.updatedAt, SESSION_MAX_AGE_MS)) {
+					console.info('session validation: token expired', user.id);
+					return false;
+				}
+				return true;
 			} else {
 				console.error('session validation: no user in db found', user);
 			}
@@ -215,7 +222,7 @@ export class UserService {
 			{
 				path: '/',
 				sameSite: 'strict',
-				maxAge: 60 * 60 * 24 * 30
+				maxAge: SESSION_MAX_AGE_SECONDS
 			}
 		);
 		locals.currentUser = {

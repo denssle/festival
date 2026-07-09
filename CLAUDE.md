@@ -30,7 +30,7 @@
 - **Primärschlüssel:** `DataTypes.STRING` mit `crypto.randomUUID()` für eindeutige IDs verwenden.
 - **Asynchronität:** **IMMER** `async/await` mit `try/catch` in Services nutzen. `.then()` vermeiden.
 - **Kaskadierung:** `onDelete: 'CASCADE'` in `db.ts` sicherstellen.
-- **Initialisierung:** Erfolgt über `startDB()` in `src/lib/db/db.ts`. `force` und `alter` schließen sich gegenseitig aus und dürfen NICHT gemeinsam übergeben werden: In Test-/Dev-Umgebungen (`PLAYWRIGHT`, `NODE_ENV=test`, `MARIA_DB_NAME=dev`) wird `sync({ force: true })` genutzt (Tabellen werden neu erstellt), sonst produktiv `sync({ alter: true })`.
+- **Initialisierung:** Erfolgt über `startDB()` in `src/lib/db/db.ts` und nutzt einheitlich `sync({ alter: true })`. In Test-/Dev-Umgebungen läuft die DB als frisches In-Memory-SQLite (siehe `sequelize.ts`) – dort erzeugt `alter` die Tabellen ohnehin von Grund auf. In Produktion (echte MariaDB) erhält `alter` vorhandene Daten; ein `force` (kompletter Wipe) wird nirgends benötigt. Sauberkeit zwischen E2E-Tests stellt der `/api/test/reset`-Endpoint her, nicht der Sync-Modus. Hinweis: `force` und `alter` schließen sich gegenseitig aus und dürfen NICHT gemeinsam übergeben werden.
 - **Eager Loading (Include):** Falls ein Alias in `db.ts` definiert wurde (z.B. `as: 'EventGuests'`), muss dieser Alias zwingend auch im `include`-Statement im Service/Server-Loader verwendet werden, um `SequelizeEagerLoadingError` zu vermeiden. Achten Sie auf eindeutige Aliase bei mehreren Beziehungen zum selben Modell (z.B. `EventGuests` vs. `UserGuestInfos`).
 
 ## 3. SvelteKit & UI
@@ -94,6 +94,6 @@
 
 ## 7. Offene Punkte / TODOs
 
-- `SessionToken`: Unterstützung mehrerer Sitzungen pro Benutzer evaluieren.
-- **Datenbank-Konsistenz:** Da `sync({ alter: true })` produktiv Risiken birgt, sollte langfristig auf echte Migrationen umgestellt werden.
+- `SessionToken`: Unterstützung mehrerer Sitzungen pro Benutzer evaluieren (aktuell 1 Token/User, da `UserId` = PK). _Erledigt (v0.7.2): serverseitige Token-Ablaufprüfung (`isSessionTokenExpired`, absolute Lebensdauer `SESSION_MAX_AGE_MS`)._
+- **Datenbank-Konsistenz:** Langfristig auf echte Migrationen statt `sync({ alter: true })` umstellen. _Aktuell unkritisch, solange die Prod-DB leer ist (kein Datenverlust-Risiko); vor dem ersten echten Datenbestand angehen._
 - **Frontend-Validierung:** Ergänzung von clientseitiger Validierung (z.B. Zod) zur Verbesserung der UX.
