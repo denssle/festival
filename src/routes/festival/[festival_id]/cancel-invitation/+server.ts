@@ -11,7 +11,7 @@ import { FestivalEventService } from '$lib/services/festival-event.service';
  *
  * @param cookies - Session-Cookie zur Authentifizierung
  * @param params.festival_id - ID des Festivals
- * @param request - Body enthält einen optionalen Kommentar als Plaintext
+ * @param request - Body enthält als JSON einen optionalen Kommentar: { comment?: string }
  * @returns 200 bei Erfolg, 401 wenn nicht eingeloggt, 400 bei fehlender festival_id
  */
 export const POST: RequestHandler = async ({ cookies, params, request }) => {
@@ -20,8 +20,7 @@ export const POST: RequestHandler = async ({ cookies, params, request }) => {
 		return new Response('Unauthorized', { status: 401 });
 	}
 
-	const blob: Blob = await request.blob();
-	const comment: string = await blob.text();
+	const { comment = '' }: { comment?: string } = await request.json();
 
 	if (params.festival_id) {
 		const festival = await FestivalEventService.getFrontEndFestival(params.festival_id);

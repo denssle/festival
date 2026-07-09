@@ -46,6 +46,18 @@ export class UserService {
 		return Boolean(await this.getByEmail(email));
 	}
 
+	/**
+	 * Prüft, ob die E-Mail bereits von einem ANDEREN Nutzer belegt ist.
+	 * Anders als `emailInvalid` erlaubt dies dem Nutzer, seine eigene, unveränderte
+	 * E-Mail beim Profil-Update erneut zu speichern (kein Self-Match als Konflikt).
+	 * Eine leere E-Mail ist optional und daher nie ein Konflikt.
+	 */
+	static async emailTakenByOtherUser(email: string, userId: string): Promise<boolean> {
+		if (!email || email.length === 0) return false;
+		const existing: Model<UserAttributes, any> | null = await this.getByEmail(email);
+		return existing !== null && existing.dataValues.id !== userId;
+	}
+
 	static async register(nickname: string, password: string, email?: string): Promise<BackendUser | null> {
 		if (!(await this.nickNameInvalid(nickname))) {
 			if (email && (await this.emailInvalid(email))) {

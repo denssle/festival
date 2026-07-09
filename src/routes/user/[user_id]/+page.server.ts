@@ -52,6 +52,11 @@ export const actions: Actions = {
 					return { success: false, message: 'Nickname invalid!' };
 				}
 			}
+			// E-Mail darf nicht bereits von einem anderen Nutzer belegt sein
+			// (die eigene, unveränderte E-Mail bleibt erlaubt).
+			if (await UserService.emailTakenByOtherUser(formData.email, oldUser.id)) {
+				return { success: false, message: 'Email already in use!' };
+			}
 			const result: ChangeResult = await UserService.updateUser(oldUser, formData);
 			if (result === 'Success') {
 				// Der Nickname steckt auch im Session-Cookie/locals – bei Änderung aktualisieren

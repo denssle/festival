@@ -98,7 +98,7 @@ export class FestivalEventService {
 	): Promise<ChangeResult> {
 		const festivalModel = await this.getFestivalModel(festivalId);
 		if (festivalModel && user) {
-			const ownerId = festivalModel.dataValues.UserId || (festivalModel.dataValues as any).userId;
+			const ownerId = festivalModel.dataValues.UserId;
 			if (isChangeAllowed(user.id, ownerId)) {
 				festivalModel.set({
 					name: name,
@@ -122,7 +122,7 @@ export class FestivalEventService {
 	static async deleteFestival(user: BackendUser | null | SessionTokenUser, festivalId: string): Promise<ChangeResult> {
 		const festivalModel = await this.getFestivalModel(festivalId);
 		if (user && festivalModel) {
-			const ownerId = festivalModel.dataValues.UserId || (festivalModel.dataValues as any).userId;
+			const ownerId = festivalModel.dataValues.UserId;
 			if (festivalModel && isChangeAllowed(user.id, ownerId)) {
 				await festivalModel.destroy();
 				return 'Success';

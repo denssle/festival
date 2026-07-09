@@ -84,11 +84,13 @@
 						} else {
 							const errorData = await response.json();
 							console.error('Failed to join festival:', errorData);
-							alert('Fehler beim Zusagen: ' + (errorData.message || 'Unbekannter Fehler'));
+							infoDialogData.infoDialogText = 'Fehler beim Zusagen: ' + (errorData.message || 'Unbekannter Fehler');
+							infoDialogData.showDialog = true;
 						}
 					} catch (error) {
 						console.error('Fetch error joining festival:', error);
-						alert('Netzwerkfehler beim Zusagen.');
+						infoDialogData.infoDialogText = 'Netzwerkfehler beim Zusagen.';
+						infoDialogData.showDialog = true;
 					}
 				}
 				dialog.removeEventListener('close', onclose);
@@ -108,7 +110,7 @@
 				if (cancelInvitationDialogData.answerYes) {
 					const response = await fetch('/festival/' + data.festival.id + '/cancel-invitation', {
 						method: 'POST',
-						body: cancelInvitationDialogData.comment
+						body: JSON.stringify({ comment: cancelInvitationDialogData.comment })
 					});
 					if (response.ok) {
 						await afterRequest();

@@ -27,7 +27,7 @@ export type FestivalEventAttributes = {
 };
 
 export async function mapToFrontendFestivalEvent(event: FestivalEventAttributes): Promise<FrontendFestivalEvent> {
-	const userId = event.UserId || (event as any).userId;
+	const userId = event.UserId;
 	// Ersteller bevorzugt aus der eager-geladenen Assoziation lesen (kein N+1);
 	// nur wenn nicht mitgeladen (z. B. direkt nach createFestival) einzeln nachladen.
 	const createdBy = event.User
@@ -55,7 +55,7 @@ export async function mapToFrontendFestivalEvent(event: FestivalEventAttributes)
 }
 
 export async function mapToBackendFestivalEvent(event: FestivalEventAttributes): Promise<BackendFestivalEvent> {
-	const userId = event.UserId || (event as any).userId;
+	const userId = event.UserId;
 	return {
 		id: event.id,
 		name: event.name,

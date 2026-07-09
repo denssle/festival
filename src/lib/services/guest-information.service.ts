@@ -72,7 +72,7 @@ export class GuestInformationService {
 	): Promise<FrontendGuestInformation[]> {
 		const mapped = await Promise.all(
 			guestInformation.map(async (information) => {
-				const userId = information.UserId || (information as any).userId;
+				const userId = information.UserId;
 				const userById = await UserService.loadFrontEndUserById(userId);
 				if (userById) {
 					return {
