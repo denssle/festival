@@ -60,6 +60,14 @@
 	}
 
 	async function joinFestival(): Promise<void> {
+		// Felder einmalig beim Öffnen aus den aktuellen Gastdaten vorbefüllen
+		// (statt via Dauer-Effect, der Nutzereingaben überschreiben könnte).
+		joinDialogData.food = guestFood;
+		joinDialogData.drink = guestDrink;
+		joinDialogData.comment = guestComment;
+		joinDialogData.numberOfOtherGuests = guestNumberOfOtherGuests;
+		joinDialogData.bringYourOwnBottle = festivalBringYourOwnBottle;
+		joinDialogData.bringYourOwnFood = festivalBringYourOwnFood;
 		joinDialogData.showDialog = true;
 		await tick();
 		const dialog = joinDialogData.dialog;
@@ -101,6 +109,8 @@
 	}
 
 	async function cancelInvitation(): Promise<void> {
+		// Kommentar einmalig beim Öffnen aus den aktuellen Gastdaten vorbefüllen.
+		cancelInvitationDialogData.comment = guestComment;
 		cancelInvitationDialogData.showDialog = true;
 		await tick();
 		const dialog = cancelInvitationDialogData.dialog;
@@ -167,15 +177,6 @@
 		answerYes: false
 	});
 
-	$effect(() => {
-		cancelInvitationDialogData.comment = guestComment;
-		joinDialogData.food = guestFood;
-		joinDialogData.drink = guestDrink;
-		joinDialogData.comment = guestComment;
-		joinDialogData.numberOfOtherGuests = guestNumberOfOtherGuests;
-		joinDialogData.bringYourOwnBottle = festivalBringYourOwnBottle;
-		joinDialogData.bringYourOwnFood = festivalBringYourOwnFood;
-	});
 	let questionDialogData: QuestionDialogData = $state({
 		showDialog: false,
 		dialog: undefined,
