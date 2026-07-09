@@ -60,6 +60,14 @@
 	}
 
 	async function joinFestival(): Promise<void> {
+		// Felder einmalig beim Öffnen aus den aktuellen Gastdaten vorbefüllen
+		// (statt via Dauer-Effect, der Nutzereingaben überschreiben könnte).
+		joinDialogData.food = guestFood;
+		joinDialogData.drink = guestDrink;
+		joinDialogData.comment = guestComment;
+		joinDialogData.numberOfOtherGuests = guestNumberOfOtherGuests;
+		joinDialogData.bringYourOwnBottle = festivalBringYourOwnBottle;
+		joinDialogData.bringYourOwnFood = festivalBringYourOwnFood;
 		joinDialogData.showDialog = true;
 		await tick();
 		const dialog = joinDialogData.dialog;
@@ -84,11 +92,13 @@
 						} else {
 							const errorData = await response.json();
 							console.error('Failed to join festival:', errorData);
-							alert('Fehler beim Zusagen: ' + (errorData.message || 'Unbekannter Fehler'));
+							infoDialogData.infoDialogText = 'Fehler beim Zusagen: ' + (errorData.message || 'Unbekannter Fehler');
+							infoDialogData.showDialog = true;
 						}
 					} catch (error) {
 						console.error('Fetch error joining festival:', error);
-						alert('Netzwerkfehler beim Zusagen.');
+						infoDialogData.infoDialogText = 'Netzwerkfehler beim Zusagen.';
+						infoDialogData.showDialog = true;
 					}
 				}
 				dialog.removeEventListener('close', onclose);
@@ -99,6 +109,8 @@
 	}
 
 	async function cancelInvitation(): Promise<void> {
+		// Kommentar einmalig beim Öffnen aus den aktuellen Gastdaten vorbefüllen.
+		cancelInvitationDialogData.comment = guestComment;
 		cancelInvitationDialogData.showDialog = true;
 		await tick();
 		const dialog = cancelInvitationDialogData.dialog;
@@ -108,7 +120,7 @@
 				if (cancelInvitationDialogData.answerYes) {
 					const response = await fetch('/festival/' + data.festival.id + '/cancel-invitation', {
 						method: 'POST',
-						body: cancelInvitationDialogData.comment
+						body: JSON.stringify({ comment: cancelInvitationDialogData.comment })
 					});
 					if (response.ok) {
 						await afterRequest();
@@ -165,15 +177,6 @@
 		answerYes: false
 	});
 
-	$effect(() => {
-		cancelInvitationDialogData.comment = guestComment;
-		joinDialogData.food = guestFood;
-		joinDialogData.drink = guestDrink;
-		joinDialogData.comment = guestComment;
-		joinDialogData.numberOfOtherGuests = guestNumberOfOtherGuests;
-		joinDialogData.bringYourOwnBottle = festivalBringYourOwnBottle;
-		joinDialogData.bringYourOwnFood = festivalBringYourOwnFood;
-	});
 	let questionDialogData: QuestionDialogData = $state({
 		showDialog: false,
 		dialog: undefined,

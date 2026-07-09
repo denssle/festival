@@ -16,12 +16,18 @@ import { BackendGuestInformation } from '$lib/models/guestInformation/BackendGue
 import { VisitingFestival } from '$lib/models/user/VisitingFestival';
 import { GuestInformation } from '$lib/db/model/guestInformation';
 import { FestivalEvent } from '$lib/db/model/festivalEvent';
+import { User } from '$lib/db/model/user';
 import { isChangeAllowed } from './festival-event.logic';
 
 export class FestivalEventService {
 	static async getAllFestivals(): Promise<FrontendFestivalEvent[]> {
 		const allFestivals = await FestivalEvent.findAll({
-			include: { model: GuestInformation, as: 'EventGuests' },
+			include: [
+				{ model: GuestInformation, as: 'EventGuests' },
+				// Ersteller mitladen, damit mapToFrontendFestivalEvent keinen
+				// separaten Query pro Festival braucht (N+1 vermeiden).
+				{ model: User, as: 'User' }
+			],
 			order: [['startDate', 'DESC']]
 		});
 		return Promise.all(
@@ -92,7 +98,7 @@ export class FestivalEventService {
 	): Promise<ChangeResult> {
 		const festivalModel = await this.getFestivalModel(festivalId);
 		if (festivalModel && user) {
-			const ownerId = festivalModel.dataValues.UserId || (festivalModel.dataValues as any).userId;
+			const ownerId = festivalModel.dataValues.UserId;
 			if (isChangeAllowed(user.id, ownerId)) {
 				festivalModel.set({
 					name: name,
@@ -116,7 +122,7 @@ export class FestivalEventService {
 	static async deleteFestival(user: BackendUser | null | SessionTokenUser, festivalId: string): Promise<ChangeResult> {
 		const festivalModel = await this.getFestivalModel(festivalId);
 		if (user && festivalModel) {
-			const ownerId = festivalModel.dataValues.UserId || (festivalModel.dataValues as any).userId;
+			const ownerId = festivalModel.dataValues.UserId;
 			if (festivalModel && isChangeAllowed(user.id, ownerId)) {
 				await festivalModel.destroy();
 				return 'Success';

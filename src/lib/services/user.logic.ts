@@ -23,3 +23,27 @@ export function resolveSessionToken(
 	const token: string = needsNewToken ? generateToken() : existingToken!;
 	return [token, needsNewToken];
 }
+
+/**
+ * Prüft, ob ein Session-Token seine absolute Lebensdauer überschritten hat.
+ *
+ * Grundlage ist der Ausstellungszeitpunkt des Tokens (`updatedAt` der
+ * SessionToken-Zeile). Da bei normaler Session-Validierung kein DB-Upsert
+ * erfolgt, bleibt dieser Zeitstempel stabil auf dem Login-Zeitpunkt und
+ * eignet sich daher als absolute (nicht gleitende) Ablaufgrenze.
+ *
+ * @param issuedAt - Zeitpunkt, zu dem der Token ausgestellt wurde
+ * @param maxAgeMs - Maximale Lebensdauer in Millisekunden
+ * @param now - Aktueller Zeitpunkt (default: jetzt), injizierbar für Tests
+ * @returns true, wenn der Token abgelaufen ist
+ */
+export function isSessionTokenExpired(issuedAt: Date | undefined, maxAgeMs: number, now: Date = new Date()): boolean {
+	if (!issuedAt) {
+		return true;
+	}
+	const issuedMs: number = issuedAt.getTime();
+	if (Number.isNaN(issuedMs)) {
+		return true;
+	}
+	return now.getTime() - issuedMs > maxAgeMs;
+}

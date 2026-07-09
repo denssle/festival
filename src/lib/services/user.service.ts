@@ -13,7 +13,9 @@ import { User } from '$lib/db/model/user';
 import { UserImage } from '$lib/db/model/userImage';
 import { SessionToken } from '$lib/db/model/sessionToken';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
-import { resolveSessionToken } from '$lib/services/user.logic';
+import { isSessionTokenExpired, resolveSessionToken } from '$lib/services/user.logic';
+import { SESSION_MAX_AGE_MS, SESSION_MAX_AGE_SECONDS } from '$lib/constants';
+import { dev } from '$app/environment';
 
 export class UserService {
 	static async userExists(extractedUser: SessionTokenUser | null): Promise<boolean> {
@@ -42,6 +44,18 @@ export class UserService {
 	static async emailInvalid(email: string): Promise<boolean> {
 		if (!email || email.length === 0) return false; // leere E-Mail ist erlaubt (optional)
 		return Boolean(await this.getByEmail(email));
+	}
+
+	/**
+	 * Prüft, ob die E-Mail bereits von einem ANDEREN Nutzer belegt ist.
+	 * Anders als `emailInvalid` erlaubt dies dem Nutzer, seine eigene, unveränderte
+	 * E-Mail beim Profil-Update erneut zu speichern (kein Self-Match als Konflikt).
+	 * Eine leere E-Mail ist optional und daher nie ein Konflikt.
+	 */
+	static async emailTakenByOtherUser(email: string, userId: string): Promise<boolean> {
+		if (!email || email.length === 0) return false;
+		const existing: Model<UserAttributes, any> | null = await this.getByEmail(email);
+		return existing !== null && existing.dataValues.id !== userId;
 	}
 
 	static async register(nickname: string, password: string, email?: string): Promise<BackendUser | null> {
@@ -92,8 +106,14 @@ export class UserService {
 		if (user) {
 			const found: SessionTokenAttributes | undefined = await this.loadToken(user.id);
 			if (found && found.token) {
-				// TODO Check token age
-				return found.token === user.token;
+				if (found.token !== user.token) {
+					return false;
+				}
+				if (isSessionTokenExpired(found.updatedAt, SESSION_MAX_AGE_MS)) {
+					console.info('session validation: token expired', user.id);
+					return false;
+				}
+				return true;
 			} else {
 				console.error('session validation: no user in db found', user);
 			}
@@ -214,8 +234,14 @@ export class UserService {
 			} as SessionTokenUser),
 			{
 				path: '/',
-				sameSite: 'strict',
-				maxAge: 60 * 60 * 24 * 30
+				httpOnly: true, // kein Zugriff via document.cookie (XSS-Schutz)
+				sameSite: 'strict', // Cookie nur bei Same-Site-Requests (CSRF-Schutz)
+				// Secure an den Build-Modus koppeln statt an SvelteKits Auto-Erkennung:
+				// lokal/E2E läuft über http://localhost (Secure würde das Cookie verwerfen),
+				// in Prod steht die Node-App hinter einem HTTPS-Reverse-Proxy, der intern
+				// per HTTP spricht – dort würde die Auto-Erkennung Secure fälschlich weglassen.
+				secure: !dev,
+				maxAge: SESSION_MAX_AGE_SECONDS
 			}
 		);
 		locals.currentUser = {

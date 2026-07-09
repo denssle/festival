@@ -2,6 +2,7 @@ import { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestiva
 import { UserService } from '$lib/services/user.service';
 import { BackendFestivalEvent } from '$lib/models/festivalEvent/BackendFestivalEvent';
 import { Model } from 'sequelize';
+import { convertToBackendUser, UserAttributes } from '$lib/db/attributes/user.attributes';
 import {
 	GuestInformationAttributes,
 	mapToBackendGuestInformation,
@@ -19,18 +20,26 @@ export type FestivalEventAttributes = {
 	updatedAt: Date;
 	startDate: Date;
 	UserId: string;
+	// Optional eager-geladener Ersteller (via include: { model: User, as: 'User' }).
+	// Wird genutzt, um den N+1-Query pro Festival zu vermeiden.
+	User?: Model<UserAttributes, any>;
 	EventGuests: Model<GuestInformationAttributes, any>[];
 };
 
 export async function mapToFrontendFestivalEvent(event: FestivalEventAttributes): Promise<FrontendFestivalEvent> {
-	const userId = event.UserId || (event as any).userId;
+	const userId = event.UserId;
+	// Ersteller bevorzugt aus der eager-geladenen Assoziation lesen (kein N+1);
+	// nur wenn nicht mitgeladen (z. B. direkt nach createFestival) einzeln nachladen.
+	const createdBy = event.User
+		? UserService.parseBackendUserToFrontend(convertToBackendUser(event.User.dataValues))
+		: ((await UserService.loadFrontEndUserById(userId)) ?? null);
 	return {
 		id: event.id,
 		name: event.name,
 		bringYourOwnBottle: event.bringYourOwnBottle,
 		bringYourOwnFood: event.bringYourOwnFood,
 		createdAt: event.createdAt,
-		createdBy: (await UserService.loadFrontEndUserById(userId)) ?? null,
+		createdBy: createdBy,
 		description: event.description,
 		startDate: event.startDate,
 		location: event.location,
@@ -46,7 +55,7 @@ export async function mapToFrontendFestivalEvent(event: FestivalEventAttributes)
 }
 
 export async function mapToBackendFestivalEvent(event: FestivalEventAttributes): Promise<BackendFestivalEvent> {
-	const userId = event.UserId || (event as any).userId;
+	const userId = event.UserId;
 	return {
 		id: event.id,
 		name: event.name,

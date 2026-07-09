@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { resolveSessionToken } from './user.logic';
+import { isSessionTokenExpired, resolveSessionToken } from './user.logic';
 import type { BackendUser } from '$lib/models/user/BackendUser';
 import type { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 
@@ -60,5 +60,38 @@ describe('resolveSessionToken', () => {
 			expect(needsDbUpsert).toBe(true);
 			expect(generate).toHaveBeenCalledOnce();
 		});
+	});
+});
+
+describe('isSessionTokenExpired', () => {
+	const maxAgeMs = 1000 * 60 * 60 * 24 * 30; // 30 Tage
+	const now = new Date('2026-07-09T12:00:00Z');
+
+	it('sollte false liefern für einen frisch ausgestellten Token', () => {
+		const issuedAt = new Date('2026-07-09T11:59:00Z'); // vor 1 Minute
+		expect(isSessionTokenExpired(issuedAt, maxAgeMs, now)).toBe(false);
+	});
+
+	it('sollte false liefern kurz vor Ablauf der Lebensdauer', () => {
+		const issuedAt = new Date(now.getTime() - maxAgeMs + 1000); // 1 Sekunde übrig
+		expect(isSessionTokenExpired(issuedAt, maxAgeMs, now)).toBe(false);
+	});
+
+	it('sollte true liefern für einen abgelaufenen Token', () => {
+		const issuedAt = new Date(now.getTime() - maxAgeMs - 1000); // 1 Sekunde zu alt
+		expect(isSessionTokenExpired(issuedAt, maxAgeMs, now)).toBe(true);
+	});
+
+	it('sollte true liefern, wenn kein Ausstellungszeitpunkt vorhanden ist', () => {
+		expect(isSessionTokenExpired(undefined, maxAgeMs, now)).toBe(true);
+	});
+
+	it('sollte true liefern bei ungültigem Datum', () => {
+		expect(isSessionTokenExpired(new Date('invalid'), maxAgeMs, now)).toBe(true);
+	});
+
+	it('sollte den aktuellen Zeitpunkt verwenden, wenn now nicht übergeben wird', () => {
+		const issuedAt = new Date(Date.now() - maxAgeMs - 10000);
+		expect(isSessionTokenExpired(issuedAt, maxAgeMs)).toBe(true);
 	});
 });

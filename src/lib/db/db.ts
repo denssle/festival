@@ -89,12 +89,15 @@ export async function startDB(): Promise<void> {
 		await sequelize.authenticate();
 		console.log('Connection has been established successfully.');
 
-		// Immer alter: In den Test-/Dev-Umgebungen läuft die DB als frisches In-Memory-SQLite
-		// (siehe sequelize.ts) – dort erzeugt alter die Tabellen ohnehin von Grund auf. In
-		// Produktion (echte MariaDB) erhält alter vorhandene Daten. Ein force (kompletter
-		// Wipe) wird also nirgends benötigt. Sauberkeit zwischen E2E-Tests macht der
-		// /api/test/reset-Endpoint, nicht der Sync-Modus.
-		await sequelize.sync({ alter: true });
+		// Kein alter/force: sync() legt fehlende Tabellen an und lässt bestehende
+		// unangetastet. In Test-/Dev-Umgebungen ist die DB ein frisches In-Memory-SQLite
+		// (siehe sequelize.ts), das sync() bei jedem Prozessstart von Grund auf aufbaut.
+		// In Produktion (echte MariaDB) werden die Tabellen beim ersten Start angelegt;
+		// spätere Modelländerungen an einer bereits befüllten DB erfordern echte Migrationen
+		// (siehe TODO) – bewusst KEIN alter, um versehentlichen Datenverlust durch
+		// heuristische Schemaänderungen zu vermeiden.
+		// Sauberkeit zwischen E2E-Tests stellt der /api/test/reset-Endpoint her.
+		await sequelize.sync();
 		dbStarted = true;
 	} catch (error) {
 		console.error('Unable to connect to the database:', error);

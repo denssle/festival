@@ -1,17 +1,31 @@
 import { writable, Writable } from 'svelte/store';
 import { FALLBACK_PICTURE } from '$lib/constants';
 
+// Obergrenze für den clientseitigen Bild-Cache. Verhindert, dass die Map über
+// die Lebensdauer der SPA hinweg mit jedem betrachteten Profil unbegrenzt wächst.
+const MAX_CACHED_IMAGES = 50;
+
+// LRU-Cache: Map behält die Einfügereihenfolge – der zuletzt genutzte Eintrag
+// wird ans Ende sortiert, überzählige (älteste) Einträge vorne verworfen.
 const map: Map<string, Writable<string>> = new Map<string, Writable<string>>();
 
 export function getUserImageWritable(userId: string): Writable<string> {
-	if (map.has(userId)) {
-		const newVar: Writable<string> | undefined = map.get(userId);
-		if (newVar) {
-			return newVar;
-		}
+	const existing: Writable<string> | undefined = map.get(userId);
+	if (existing) {
+		// Als zuletzt genutzt markieren: entfernen und wieder ans Ende einfügen.
+		map.delete(userId);
+		map.set(userId, existing);
+		return existing;
 	}
 	const stringWritable: Writable<string> = writable('');
 	map.set(userId, stringWritable);
+	// Ältesten Eintrag verwerfen, sobald die Obergrenze überschritten ist.
+	if (map.size > MAX_CACHED_IMAGES) {
+		const oldest: string | undefined = map.keys().next().value;
+		if (oldest !== undefined) {
+			map.delete(oldest);
+		}
+	}
 	return stringWritable;
 }
 
