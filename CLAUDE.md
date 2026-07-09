@@ -8,7 +8,7 @@
 - **Business Logic:** Kapselung in Service-Klassen mit statischen Methoden in `src/lib/services/`. Reine Berechnungs-/Validierungslogik wird in separaten `*.logic.ts`-Dateien (z.B. `festival-event.logic.ts`) ausgelagert und dort auch als Unit-Tests (`*.logic.spec.ts`) abgedeckt.
 - **Authentication:** Gesteuert über `src/hooks.server.ts` unter Verwendung von Session-Tokens in Cookies.
 - **Testing:** Playwright wird für E2E-Tests verwendet (Happy Path, Authentifizierung). Tests befinden sich im Ordner `tests/`.
-- **CI/CD:** Ein einheitlicher GitHub Action Workflow in `.github/workflows/pipeline.yml` führt Playwright-Tests bei jedem Push auf `main` oder Pull Requests aus.
+- **CI/CD:** Zwei GitHub-Action-Workflows: `.github/workflows/tests.yml` führt die Playwright-Tests bei jedem Push auf `main` oder Pull Requests aus; `.github/workflows/deploy.yml` deployt nach erfolgreichem Test-Workflow auf `main` (via `workflow_run`).
   - Deployment erfolgt automatisch per `rsync` auf Uberspace nach erfolgreichen Tests auf dem `main` Branch.
   - **WICHTIG:** Produktion läuft über `@sveltejs/adapter-node`. Die Pipeline baut mit `vite build` einen eigenständigen Node-Server unter `build/`; der Supervisor-Service startet ihn über `npm run start-server` (= `PORT=5173 node build`) im Verzeichnis `~/html`. Die Pipeline installiert vor dem Restart die Produktions-Abhängigkeiten auf dem Host (`npm ci --omit=dev`). Kein `vite dev`/`npm install` mehr bei jedem Restart → Start in Sekunden.
   - Die Pipeline nutzt einen MariaDB Service Container.
@@ -84,13 +84,40 @@
 - **Event-Listener:** `addEventListener('close', handler)` statt der direkten `onclose`-Zuweisung verwenden, um sicherzustellen, dass Handler korrekt registriert und entfernt werden.
 - **Svelte-Version:** Svelte 5 Runes-Syntax (`$state`, `$derived`, `$effect`, etc.) verwenden. Bestehende `$:`-Reaktivität und Svelte 4 Patterns schrittweise migrieren. Snippets statt Slots verwenden.
 
-## 6. Setup-Hinweise
+## 6. Setup- & Umgebungs-Hinweise
 
-- Erfordert `.env` Datei mit Zugangsdaten:
-  - `MARIA_DB_USER`
-  - `MARIA_DB_PASSWORD`
-  - `MARIA_DB_NAME` (Datenbankname in App ist `USER_NAME + '_' + DB_NAME`).
-- Standard-Port: `5173`.
+Die App liest Zugangsdaten aus einer `.env`-Datei (via `$env/dynamic/private`). Die `.env` ist **gitignored** und wird beim Deploy per `--exclude=".env"` vom rsync geschützt, liegt also nur lokal bzw. auf dem Host — sie darf niemals eingecheckt werden.
+
+### Erforderliche App-Env-Variablen
+
+| Variable | Zweck |
+| --- | --- |
+| `MARIA_DB_USER` | MariaDB-Benutzer **und** Präfix des DB-Namens. Der effektive Datenbankname ist `MARIA_DB_USER + '_' + MARIA_DB_NAME`. |
+| `MARIA_DB_PASSWORD` | MariaDB-Passwort. |
+| `MARIA_DB_NAME` | Suffix des DB-Namens (siehe oben). **Siehe SQLite-Falle unten.** |
+
+### ⚠️ SQLite-Falle (kritisch für Produktion)
+
+In `src/lib/db/sequelize.ts` schaltet die App auf eine **flüchtige In-Memory-SQLite-DB** um, sobald **eine** dieser Bedingungen zutrifft: `MARIA_DB_NAME == 'dev'`, `NODE_ENV === 'test'`, `VITEST === 'true'` oder `PLAYWRIGHT === 'true'`. Das ist für lokale Entwicklung/Tests gewollt (kein MariaDB nötig), aber:
+
+- **In Produktion MUSS `MARIA_DB_NAME` einen anderen Wert als `dev` haben** und es dürfen `NODE_ENV=test`/`VITEST`/`PLAYWRIGHT` **nicht** gesetzt sein. Andernfalls läuft die App still auf einer SQLite-DB im RAM → alle Daten sind nach jedem Restart weg.
+- Die lokal committete Entwicklungs-Umgebung nutzt bewusst `MARIA_DB_NAME="dev"`; die `.env` auf dem Prod-Host muss davon abweichen.
+
+### Runtime
+
+- **Node-Version:** `22.20.0` (siehe `deploy.yml`).
+- **Port:** `5173`. Gesetzt über `npm run start-server` (= `PORT=5173 node build`); `@sveltejs/adapter-node` liest `PORT` (optional auch `HOST`).
+- `npm_package_version` wird von npm automatisch gesetzt und auf der About-Seite angezeigt (keine manuelle Pflege nötig).
+
+### Deployment (Uberspace)
+
+- **GitHub-Actions-Secrets** (nicht App-Env, sondern für den Deploy-Workflow): `UBERSPACE_USER`, `UBERSPACE_HOST`, `DEPLOY_KEY_PRIVATE`.
+- **Ablauf:** `deploy.yml` baut `build/` mit `npm run build`, rsynct nach `~/html` (ohne `.env` und `node_modules`), installiert dort Prod-Deps via `npm ci --omit=dev` und startet den Supervisor-Service neu.
+- **Supervisor-Service:** heißt `festival`, führt `npm run start-server` im Verzeichnis `~/html` aus (Config unter `~/etc/services.d/festival.ini`). Restart via `supervisorctl restart festival`; danach Health-Check gegen `http://localhost:5173/`.
+
+### Nicht verwendete Variablen
+
+`REDIS_TOKEN`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` können in bestehenden `.env`-Dateien vorkommen, werden aber aktuell **nirgends im Code genutzt** (reserviert für das geplante Rate-Limiting, siehe TODO). Sie sind für den Betrieb nicht erforderlich.
 
 ## 7. Offene Punkte / TODOs
 
