@@ -115,9 +115,9 @@ In `src/lib/db/sequelize.ts` schaltet die App auf eine **flüchtige In-Memory-SQ
 - **Ablauf:** `deploy.yml` baut `build/` mit `npm run build`, rsynct nach `~/html` (ohne `.env` und `node_modules`), installiert dort Prod-Deps via `npm ci --omit=dev` und startet den Supervisor-Service neu.
 - **Supervisor-Service:** heißt `festival`, führt `npm run start-server` im Verzeichnis `~/html` aus (Config unter `~/etc/services.d/festival.ini`). Restart via `supervisorctl restart festival`; danach Health-Check gegen `http://localhost:5173/`.
 
-### Nicht verwendete Variablen
+### Altlasten in `.env`
 
-`REDIS_TOKEN`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` können in bestehenden `.env`-Dateien vorkommen, werden aber aktuell **nirgends im Code genutzt** (reserviert für das geplante Rate-Limiting, siehe TODO). Sie sind für den Betrieb nicht erforderlich.
+`REDIS_TOKEN`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` wurden **nicht** vom Code genutzt und aus der Vorlage entfernt. Falls sie in einer älteren `.env` (z. B. auf dem Prod-Host) noch vorhanden sind, können sie gelöscht werden. Ein künftiges Rate-Limiting (siehe TODO) müsste eigene, frisch erzeugte Zugangsdaten mitbringen.
 
 ## 7. Offene Punkte / TODOs
 
