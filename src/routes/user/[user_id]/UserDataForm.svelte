@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { FrontendUser } from '$lib/models/user/FrontendUser';
 
-	let { data }: { data: FrontendUser } = $props();
+	let { data, email }: { data: FrontendUser; email: string } = $props();
 </script>
 
 <form autocomplete="on" method="POST">
@@ -34,7 +34,7 @@
 
 	<p>
 		<label for="email">Deine Email: </label>
-		<input autocomplete="email" id="email" name="email" placeholder="Email" type="email" value={data.email} />
+		<input autocomplete="email" id="email" name="email" placeholder="Email" type="email" value={email} />
 	</p>
 	<p>
 		<button type="submit">Speichern</button>

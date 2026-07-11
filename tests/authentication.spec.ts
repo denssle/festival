@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { register } from './test-utils';
+import { register, logout, TEST_PASSWORD } from './test-utils';
 
 test.describe('Authentication Security', () => {
 	test('Erfolgreicher Login setzt Session-Cookie', async ({ page }) => {
@@ -56,6 +56,34 @@ test.describe('Authentication Security', () => {
 
 		// Zugriff auf geschützte Route führt zu Redirect
 		await page.goto('/festival/new');
+		await expect(page).toHaveURL(/\/login/);
+	});
+
+	test('Login wird nach zu vielen Fehlversuchen temporär gesperrt', async ({ page }) => {
+		const nickname = `RateLimit_User_${Date.now()}`;
+		await register(page, nickname);
+		await logout(page);
+
+		// 5 Fehlversuche (LOGIN_MAX_ATTEMPTS) mit falschem Passwort
+		for (let i = 0; i < 5; i++) {
+			await page.fill('input[name="nickname"]', nickname);
+			await page.fill('input[name="password"]', 'FalschesPasswort999!');
+			const responsePromise = page.waitForResponse(
+				(r) => r.url().includes('/login') && r.request().method() === 'POST'
+			);
+			await page.click('button[type="submit"]');
+			await responsePromise;
+		}
+		await expect(page.getByText('Password invalid')).toBeVisible({ timeout: 15000 });
+
+		// Auch mit KORREKTEM Passwort muss der Login jetzt gesperrt sein
+		await page.fill('input[name="nickname"]', nickname);
+		await page.fill('input[name="password"]', TEST_PASSWORD);
+		const blockedResponse = page.waitForResponse((r) => r.url().includes('/login') && r.request().method() === 'POST');
+		await page.click('button[type="submit"]');
+		await blockedResponse;
+
+		await expect(page.getByText('Too many failed login attempts', { exact: false })).toBeVisible({ timeout: 15000 });
 		await expect(page).toHaveURL(/\/login/);
 	});
 });

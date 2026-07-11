@@ -14,8 +14,4 @@
 		<span>Nachnamen:</span>
 		<span>{user.lastname || 'Nicht hinterlegt'}</span>
 	</div>
-	<p>
-		<span>Email: </span>
-		<span>{user.email || 'Keine Email hinterlegt. '}</span>
-	</p>
 </div>

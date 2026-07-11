@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { register, TEST_PASSWORD, login, uniqueName, openDialog } from './test-utils';
+import { register, TEST_PASSWORD, login, logout, uniqueName, openDialog } from './test-utils';
 
 test.describe.serial('Gruppen Management', () => {
 	const userNickname = uniqueName('GroupUser');
@@ -89,12 +89,8 @@ test.describe.serial('Gruppen Management', () => {
 		// URL der Gruppe merken
 		const groupUrl = page.url();
 
-		// Logout
-		const logoutButton = page.getByRole('button', { name: 'Logout' });
-		await expect(logoutButton).toBeVisible();
-		await logoutButton.click();
-		await page.waitForURL('/login', { timeout: 15000 });
-		await page.waitForLoadState('networkidle');
+		// Logout (retry-fest gegen Hydration-Race)
+		await logout(page);
 
 		// Neuer Benutzer registrieren
 		const joinerNickname = uniqueName('Joiner');
@@ -173,10 +169,17 @@ test.describe.serial('Gruppen Management', () => {
 
 		// Wir sollten auf der Edit-Seite sein
 		await expect(page.getByRole('heading', { name: 'Gruppe bearbeiten' })).toBeVisible();
+		await page.waitForLoadState('networkidle');
 
-		// Felder ausfüllen
-		await page.fill('input[name="name"]', updatedName);
-		await page.fill('textarea[name="description"]', updatedDesc);
+		// Felder ausfüllen – retry-fest gegen Hydration-Race: Svelte setzt die Inputs bei
+		// der Hydration auf die Serverwerte zurück; ein zu früher fill() geht dadurch
+		// verloren. Daher füllen und verifizieren, bis die Werte stabil stehen.
+		await expect(async () => {
+			await page.fill('input[name="name"]', updatedName);
+			await page.fill('textarea[name="description"]', updatedDesc);
+			expect(await page.inputValue('input[name="name"]')).toBe(updatedName);
+			expect(await page.inputValue('textarea[name="description"]')).toBe(updatedDesc);
+		}).toPass({ timeout: 15000 });
 		await Promise.all([page.waitForURL(/\/group\/[0-9a-f-]+$/), page.click('button[type="submit"]')]);
 
 		// Wir sollten zurück auf der Detailseite sein
@@ -204,12 +207,8 @@ test.describe.serial('Gruppen Management', () => {
 		// URL der Gruppe merken
 		const groupUrl = page.url();
 
-		// Logout über den Button
-		const logoutButton = page.getByRole('button', { name: 'Logout' });
-		await expect(logoutButton).toBeVisible();
-		await logoutButton.click();
-		await page.waitForURL('/login', { timeout: 15000 });
-		await page.waitForLoadState('networkidle');
+		// Logout über den Button (retry-fest gegen Hydration-Race)
+		await logout(page);
 
 		// Ein anderer Benutzer registriert sich und tritt bei
 		const memberNickname = `MemberLeave_${Date.now()}`;

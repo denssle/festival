@@ -177,15 +177,38 @@ export class UserService {
 	}
 
 	static parseBackendUserToFrontend(user: BackendUser): FrontendUser {
+		// Bewusst KEINE email: FrontendUser ist das öffentliche Modell und wird
+		// an beliebige Clients serialisiert (Updates, Kommentare, Freundeslisten).
 		return {
 			id: user.id,
 			nickname: user.nickname,
 			forename: user.forename,
 			lastname: user.lastname,
-			email: user.email,
 			updatedAt: user.updatedAt,
 			createdAt: user.createdAt
 		};
+	}
+
+	/**
+	 * Lädt mehrere Nutzer mit EINEM Query (WHERE id IN …) und mappt sie aufs
+	 * öffentliche FrontendUser-Modell. Vermeidet N+1-Einzel-Loads in Listen
+	 * (z. B. Freundesliste).
+	 */
+	static async loadFrontendUsersByIds(ids: string[]): Promise<FrontendUser[]> {
+		if (ids.length === 0) {
+			return [];
+		}
+		const models = await User.findAll({ where: { id: ids } });
+		return models.map((model) => this.parseBackendUserToFrontend(convertToBackendUser(model.dataValues)));
+	}
+
+	/**
+	 * Liefert die E-Mail eines Nutzers. Nur fürs EIGENE Profil an den Client
+	 * ausliefern – `FrontendUser` enthält bewusst keine E-Mail.
+	 */
+	static async getEmailById(userId: string): Promise<string> {
+		const user: BackendUser | null = await this.loadUserById(userId);
+		return user?.email ?? '';
 	}
 
 	static async readFormDataFrontEndUser(data: Promise<FormData>): Promise<UserFormData> {

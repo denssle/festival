@@ -95,6 +95,26 @@ export async function getUserId(page: Page): Promise<string> {
 }
 
 /**
+ * Meldet den aktuellen Benutzer über den Logout-Button im Header ab.
+ *
+ * Gleiche Hydration-Race wie bei {@link openDialog}: Der Logout-Button ist serverseitig
+ * gerendert und klickbar, bevor sein Handler angehängt ist – unter Suite-Last geht der
+ * erste Klick verloren und die Navigation nach /login kommt nie. Der Klick wird daher
+ * wiederholt, bis die Login-Seite erreicht ist.
+ */
+export async function logout(page: Page): Promise<void> {
+	const logoutButton = page.getByRole('button', { name: 'Logout' });
+	await expect(logoutButton).toBeVisible({ timeout: 10000 });
+	await expect(async () => {
+		if (!page.url().includes('/login')) {
+			await logoutButton.click({ timeout: 3000 });
+		}
+		await page.waitForURL('/login', { timeout: 3000 });
+	}).toPass({ timeout: 25000 });
+	await page.waitForLoadState('networkidle');
+}
+
+/**
  * Meldet einen Benutzer an.
  * @param page Die Playwright-Page.
  * @param nickname Der Nickname des Benutzers.

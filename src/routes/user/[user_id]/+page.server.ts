@@ -24,12 +24,10 @@ export const load: PageServerLoad = async ({
 		const loaded: FrontendUser | undefined = await UserService.loadFrontEndUserById(userId);
 		if (user && loaded) {
 			const isOwnProfil: boolean = userId === user.id;
-			// E-Mail ist privat und wird nur im eigenen Profil ausgeliefert
-			if (!isOwnProfil) {
-				loaded.email = '';
-			}
 			return {
 				user: loaded,
+				// E-Mail ist privat und wird nur im eigenen Profil ausgeliefert
+				...(isOwnProfil ? { email: await UserService.getEmailById(userId) } : {}),
 				isOwnProfil,
 				yourFriend: await FriendshipService.areFriends(userId, user.id),
 				friendList: await FriendshipService.getFriendList(userId),

@@ -37,6 +37,36 @@ export function resolveSessionToken(
  * @param now - Aktueller Zeitpunkt (default: jetzt), injizierbar für Tests
  * @returns true, wenn der Token abgelaufen ist
  */
+/**
+ * Validiert die Eingaben einer Passwortänderung (reine Formprüfung, kein DB-Zugriff).
+ *
+ * Prüft, dass alle Felder vorhanden sind, das neue Passwort die Mindestlänge
+ * erfüllt und die Wiederholung übereinstimmt (Schutz vor Tippfehler-Aussperrung).
+ * Ob das aktuelle Passwort stimmt, prüft der Aufrufer gegen die DB.
+ *
+ * @returns Fehlermeldung oder null, wenn die Eingaben formal gültig sind
+ */
+export function validatePasswordChange(
+	currentPassword: string | undefined,
+	newPassword: string | undefined,
+	newPasswordRepeat: string | undefined,
+	minLength: number
+): string | null {
+	if (!currentPassword) {
+		return 'Current password is required';
+	}
+	if (!newPassword || !newPasswordRepeat) {
+		return 'New password and repetition are required';
+	}
+	if (newPassword.length < minLength) {
+		return `Password must be at least ${minLength} characters long`;
+	}
+	if (newPassword !== newPasswordRepeat) {
+		return 'Passwords do not match';
+	}
+	return null;
+}
+
 export function isSessionTokenExpired(issuedAt: Date | undefined, maxAgeMs: number, now: Date = new Date()): boolean {
 	if (!issuedAt) {
 		return true;
