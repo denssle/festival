@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { register, TEST_PASSWORD, login, uniqueName, openDialog } from './test-utils';
+import { register, TEST_PASSWORD, login, logout, uniqueName, openDialog } from './test-utils';
 
 test.describe.serial('Gruppen Management', () => {
 	const userNickname = uniqueName('GroupUser');
@@ -89,12 +89,8 @@ test.describe.serial('Gruppen Management', () => {
 		// URL der Gruppe merken
 		const groupUrl = page.url();
 
-		// Logout
-		const logoutButton = page.getByRole('button', { name: 'Logout' });
-		await expect(logoutButton).toBeVisible();
-		await logoutButton.click();
-		await page.waitForURL('/login', { timeout: 15000 });
-		await page.waitForLoadState('networkidle');
+		// Logout (retry-fest gegen Hydration-Race)
+		await logout(page);
 
 		// Neuer Benutzer registrieren
 		const joinerNickname = uniqueName('Joiner');
@@ -204,12 +200,8 @@ test.describe.serial('Gruppen Management', () => {
 		// URL der Gruppe merken
 		const groupUrl = page.url();
 
-		// Logout über den Button
-		const logoutButton = page.getByRole('button', { name: 'Logout' });
-		await expect(logoutButton).toBeVisible();
-		await logoutButton.click();
-		await page.waitForURL('/login', { timeout: 15000 });
-		await page.waitForLoadState('networkidle');
+		// Logout über den Button (retry-fest gegen Hydration-Race)
+		await logout(page);
 
 		// Ein anderer Benutzer registriert sich und tritt bei
 		const memberNickname = `MemberLeave_${Date.now()}`;

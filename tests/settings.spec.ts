@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { register, getUserId } from './test-utils';
+import { register, getUserId, logout } from './test-utils';
 
 test.describe('Benutzereinstellungen und Profilbild', () => {
 	test.beforeAll(async ({ browser }) => {
@@ -43,9 +43,8 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		const successMessage = page.locator('span', { hasText: 'Password changed' });
 		await expect(successMessage).toBeVisible({ timeout: 15000 });
 
-		// Logout über den Button im Header
-		await page.click('nav button:has-text("Logout")');
-		await page.waitForURL('/login', { timeout: 15000 });
+		// Logout über den Button im Header (retry-fest gegen Hydration-Race)
+		await logout(page);
 
 		// Login mit neuem Passwort verifizieren
 		await page.fill('input[name="nickname"]', testNickname);
@@ -78,8 +77,7 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		await expect(page.locator('span', { hasText: 'Current password is incorrect' })).toBeVisible({ timeout: 15000 });
 
 		// Login mit dem ALTEN Passwort muss weiterhin funktionieren
-		await page.click('nav button:has-text("Logout")');
-		await page.waitForURL('/login', { timeout: 15000 });
+		await logout(page);
 		await page.fill('input[name="nickname"]', testNickname);
 		await page.fill('input[name="password"]', initialPassword);
 		await page.click('button[type="submit"]');

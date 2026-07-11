@@ -27,7 +27,7 @@
 
 	<section>
 		{#if data.isOwnProfil}
-			<UserDataForm data={data.user} />
+			<UserDataForm data={data.user} email={data.email ?? ''} />
 		{:else}
 			<UserDataReadOnly user={data.user} />
 		{/if}
