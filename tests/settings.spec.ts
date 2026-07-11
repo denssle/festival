@@ -19,9 +19,11 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		// Das Passwort-Feld ist in einem <details> verborgen
 		await page.locator('summary', { hasText: 'Passwort' }).click();
 
-		const passwordInput = page.locator('input[name="password"]');
-		await expect(passwordInput).toBeVisible();
-		await passwordInput.fill(newPassword);
+		const currentPasswordInput = page.locator('input[name="currentPassword"]');
+		await expect(currentPasswordInput).toBeVisible();
+		await currentPasswordInput.fill(initialPassword);
+		await page.locator('input[name="password"]').fill(newPassword);
+		await page.locator('input[name="passwordRepeat"]').fill(newPassword);
 
 		// Klick auf Speichern und warten auf Antwort
 		const responsePromise = page.waitForResponse((r: any) => r.url().includes('/settings') && r.status() === 200);
@@ -50,6 +52,37 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		await page.fill('input[name="password"]', newPassword);
 		await page.click('button[type="submit"]');
 
+		await expect(page).toHaveURL('/', { timeout: 15000 });
+	});
+
+	test('sollte die Passwortänderung bei falschem aktuellen Passwort ablehnen', async ({ page }) => {
+		const testNickname = `WrongPass_User_${Date.now()}`;
+		const initialPassword = 'InitialPassword123!';
+		await register(page, testNickname, initialPassword);
+		await page.goto('/settings');
+		await page.locator('summary', { hasText: 'Passwort' }).click();
+
+		await page.locator('input[name="currentPassword"]').fill('FalschesPasswort999!');
+		await page.locator('input[name="password"]').fill('NewSecurePassword456!');
+		await page.locator('input[name="passwordRepeat"]').fill('NewSecurePassword456!');
+
+		const responsePromise = page.waitForResponse((r: any) => r.url().includes('/settings') && r.status() === 200);
+		await page.click('button[type="submit"]');
+		await responsePromise;
+		await page.waitForLoadState('networkidle');
+
+		const details = page.locator('details');
+		if (!(await details.evaluate((node) => (node as HTMLDetailsElement).open))) {
+			await page.locator('summary', { hasText: 'Passwort' }).click();
+		}
+		await expect(page.locator('span', { hasText: 'Current password is incorrect' })).toBeVisible({ timeout: 15000 });
+
+		// Login mit dem ALTEN Passwort muss weiterhin funktionieren
+		await page.click('nav button:has-text("Logout")');
+		await page.waitForURL('/login', { timeout: 15000 });
+		await page.fill('input[name="nickname"]', testNickname);
+		await page.fill('input[name="password"]', initialPassword);
+		await page.click('button[type="submit"]');
 		await expect(page).toHaveURL('/', { timeout: 15000 });
 	});
 
