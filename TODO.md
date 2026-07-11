@@ -21,6 +21,7 @@ Sortiert nach **Aufwand** (S → M → L), innerhalb jeder Stufe nach **Priorit�
 
 ## [S] Klein (< 1h)
 
+- [x] 🟡 **GitHub-Actions – Node-20-Deprecation:** ~~`actions/checkout@v4` und `actions/setup-node@v4` laufen noch auf Node 20.~~ _Erledigt (v0.7.10): `checkout@v5`, `setup-node@v5` und `upload-artifact@v5` (alle Node-24-nativ) in `tests.yml` und `deploy.yml`._ _(Deployment)_
 - [x] 🟡 **Dokumentation:** ~~Produktions-Umgebung (env) sauber dokumentieren.~~ _Erledigt (v0.7.6): CLAUDE.md Abschnitt 6 um erforderliche Env-Variablen, die SQLite-Falle (`MARIA_DB_NAME != 'dev'` in Prod), Runtime/Port, Deploy-Secrets, Supervisor-Service und ungenutzte Redis-Variablen ergänzt; `pipeline.yml`-Referenz auf `tests.yml`/`deploy.yml` korrigiert._ _(Deployment)_
 - [x] 🟢 **E-Mail-Eindeutigkeit beim Update:** ~~Die Profil-Update-Action prüft die Eindeutigkeit des Nicknames, aber nicht der E-Mail.~~ _Erledigt (v0.7.5): neue `UserService.emailTakenByOtherUser(email, userId)` (erlaubt die eigene unveränderte E-Mail, blockt fremde) wird in der Update-Action vor `updateUser` geprüft._ _(Datenschutz)_
 - [x] 🟢 **Fremdschlüssel-Casing:** ~~Der Workaround `event.UserId || (event as any).userId` deutet auf uneinheitliches FK-Casing hin.~~ _Erledigt (v0.7.5): Modelle definieren `UserId` explizit (Triad korrekt), die `as any`-Krücke an allen 5 Stellen entfernt (festivalEvent.attributes.ts 2×, festival-event.service.ts 2×, guest-information.service.ts 1×)._ _(Datenbank)_
