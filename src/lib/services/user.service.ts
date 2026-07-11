@@ -190,6 +190,19 @@ export class UserService {
 	}
 
 	/**
+	 * Lädt mehrere Nutzer mit EINEM Query (WHERE id IN …) und mappt sie aufs
+	 * öffentliche FrontendUser-Modell. Vermeidet N+1-Einzel-Loads in Listen
+	 * (z. B. Freundesliste).
+	 */
+	static async loadFrontendUsersByIds(ids: string[]): Promise<FrontendUser[]> {
+		if (ids.length === 0) {
+			return [];
+		}
+		const models = await User.findAll({ where: { id: ids } });
+		return models.map((model) => this.parseBackendUserToFrontend(convertToBackendUser(model.dataValues)));
+	}
+
+	/**
 	 * Liefert die E-Mail eines Nutzers. Nur fürs EIGENE Profil an den Client
 	 * ausliefern – `FrontendUser` enthält bewusst keine E-Mail.
 	 */

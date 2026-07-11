@@ -6,6 +6,7 @@ import { FriendRequestData } from '$lib/models/updates/FriendRequestData';
 import { UserService } from '$lib/services/user.service';
 import { FriendRequest } from '$lib/db/model/friendRequest';
 import { Friendship } from '$lib/db/model/friendship';
+import { User } from '$lib/db/model/user';
 
 export class FriendshipService {
 	static async getFriends(userId: string): Promise<FriendAttributes[]> {
@@ -17,19 +18,11 @@ export class FriendshipService {
 		return model.map((value) => value.dataValues);
 	}
 
-	static async getFriendList(userId: string): Promise<(FrontendUser | undefined)[]> {
+	static async getFriendList(userId: string): Promise<FrontendUser[]> {
 		const friends = await this.getFriends(userId);
-		return await Promise.all(
-			friends
-				.map((value) => {
-					if (value.friend1Id === userId) {
-						return UserService.loadFrontEndUserById(value.friend2Id);
-					} else {
-						return UserService.loadFrontEndUserById(value.friend1Id);
-					}
-				})
-				.filter((value) => Boolean(value))
-		);
+		// Alle Freund-IDs einsammeln und mit EINEM Query laden (kein N+1 pro Freund)
+		const friendIds: string[] = friends.map((value) => (value.friend1Id === userId ? value.friend2Id : value.friend1Id));
+		return UserService.loadFrontendUsersByIds(friendIds);
 	}
 
 	static async areFriends(userId: string, userId2: string): Promise<boolean> {
@@ -87,7 +80,12 @@ export class FriendshipService {
 		const model: Model<FriendRequestAttributes, any>[] = await FriendRequest.findAll({
 			where: {
 				receiverId: receiverId
-			}
+			},
+			// Absender/Empfänger direkt mitladen (kein N+1 pro Anfrage)
+			include: [
+				{ model: User, as: 'sender' },
+				{ model: User, as: 'receiver' }
+			]
 		});
 		return Promise.all(model.map((value) => convertToFriendRequest(value.dataValues)));
 	}
@@ -96,7 +94,12 @@ export class FriendshipService {
 		const model: Model<FriendRequestAttributes, any>[] = await FriendRequest.findAll({
 			where: {
 				senderId: senderId
-			}
+			},
+			// Absender/Empfänger direkt mitladen (kein N+1 pro Anfrage)
+			include: [
+				{ model: User, as: 'sender' },
+				{ model: User, as: 'receiver' }
+			]
 		});
 		return Promise.all(model.map((value) => convertToFriendRequest(value.dataValues)));
 	}

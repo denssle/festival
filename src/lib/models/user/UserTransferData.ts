@@ -7,6 +7,6 @@ export interface UserTransferData {
 	email?: string;
 	isOwnProfil: boolean;
 	yourFriend: boolean;
-	friendList: (FrontendUser | undefined)[];
+	friendList: FrontendUser[];
 	groupList: GroupAttributes[];
 }

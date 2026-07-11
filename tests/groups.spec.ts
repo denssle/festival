@@ -169,10 +169,17 @@ test.describe.serial('Gruppen Management', () => {
 
 		// Wir sollten auf der Edit-Seite sein
 		await expect(page.getByRole('heading', { name: 'Gruppe bearbeiten' })).toBeVisible();
+		await page.waitForLoadState('networkidle');
 
-		// Felder ausfüllen
-		await page.fill('input[name="name"]', updatedName);
-		await page.fill('textarea[name="description"]', updatedDesc);
+		// Felder ausfüllen – retry-fest gegen Hydration-Race: Svelte setzt die Inputs bei
+		// der Hydration auf die Serverwerte zurück; ein zu früher fill() geht dadurch
+		// verloren. Daher füllen und verifizieren, bis die Werte stabil stehen.
+		await expect(async () => {
+			await page.fill('input[name="name"]', updatedName);
+			await page.fill('textarea[name="description"]', updatedDesc);
+			expect(await page.inputValue('input[name="name"]')).toBe(updatedName);
+			expect(await page.inputValue('textarea[name="description"]')).toBe(updatedDesc);
+		}).toPass({ timeout: 15000 });
 		await Promise.all([page.waitForURL(/\/group\/[0-9a-f-]+$/), page.click('button[type="submit"]')]);
 
 		// Wir sollten zurück auf der Detailseite sein
