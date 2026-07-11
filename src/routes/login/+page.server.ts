@@ -5,6 +5,8 @@ import { UserService } from '$lib/services/user.service';
 import type { BackendUser } from '$lib/models/user/BackendUser';
 import { StandardResponse } from '$lib/models/transferData/StandardResponse';
 import { NickPassData } from '$lib/models/transferData/NickPassData';
+import { loginRateLimiter } from '$lib/services/login-rate-limit';
+import { loginRateLimitKey } from '$lib/services/rate-limit.logic';
 
 /**
  * load – GET /login
@@ -31,25 +33,27 @@ export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): P
  *
  * Formularfelder: nickname (string), password (string)
  *
- * @returns { success: false, message } bei ungültigen Daten oder falschem Passwort
+ * Brute-Force-Schutz: Nach zu vielen Fehlversuchen (pro IP+Nickname) wird der
+ * Login temporär gesperrt, ohne das Passwort überhaupt zu prüfen.
+ *
+ * @returns { success: false, message } bei ungültigen Daten, falschem Passwort
+ *          oder aktiver Sperre
  */
 export const actions: Actions = {
-	default: async ({
-		cookies,
-		request,
-		locals
-	}: {
-		cookies: Cookies;
-		request: Request;
-		locals: App.Locals;
-	}): Promise<StandardResponse> => {
+	default: async ({ cookies, request, locals, getClientAddress }): Promise<StandardResponse> => {
 		const formData: NickPassData | undefined = await UserService.readNickPass(request.formData());
 		if (formData) {
+			const rateLimitKey: string = loginRateLimitKey(getClientAddress(), formData.nickname);
+			if (loginRateLimiter.isBlocked(rateLimitKey)) {
+				return { success: false, message: 'Too many failed login attempts. Please try again later.' };
+			}
 			const user: BackendUser | null = await UserService.loginWithCredentials(formData.nickname, formData.password);
 			if (user) {
+				loginRateLimiter.reset(rateLimitKey);
 				await UserService.createSessionCookie(cookies, locals, user, true);
 				redirect(302, '/');
 			} else {
+				loginRateLimiter.recordFailure(rateLimitKey);
 				return { success: false, message: 'Password invalid' };
 			}
 		}
