@@ -3,6 +3,9 @@ node_modules
 /build
 /.svelte-kit
 /package
+
+# Lokale Tooling-Konfiguration (nicht im Repo)
+/.claude
 .env
 .env.*
 !.env.example
