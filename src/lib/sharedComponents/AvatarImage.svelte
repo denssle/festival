@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import Spinner from '$lib/sharedComponents/Spinner.svelte';
 	import { goto } from '$app/navigation';
 	import { getUserImageWritable, loadUserImage } from '$lib/stores/userImage.store';
@@ -30,7 +31,7 @@
 	}
 
 	function onImageClick() {
-		goto('/user/' + userId);
+		goto(resolve('/user/[user_id]', { user_id: userId }));
 	}
 </script>
 

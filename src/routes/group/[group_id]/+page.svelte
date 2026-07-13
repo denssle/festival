@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
 	import { tick } from 'svelte';
@@ -46,7 +47,7 @@
 			<h1>{group.name}</h1>
 			<div class="header-actions">
 				{#if currentUser && group.ownerId === currentUser.id}
-					<a href="/group/{group.id}/edit" class="button">Bearbeiten</a>
+					<a href={resolve('/group/[group_id]/edit', { group_id: group.id })} class="button">Bearbeiten</a>
 					<form method="POST" action="?/delete" use:enhance bind:this={deleteForm}>
 						<button type="button" class="button danger" onclick={askDeleteGroup}>Gruppe löschen</button>
 					</form>
@@ -82,7 +83,7 @@
 			<ul>
 				{#each members as member (member.id)}
 					<li>
-						<a href="/user/{member.id}">{member.nickname}</a>
+						<a href={resolve('/user/[user_id]', { user_id: member.id })}>{member.nickname}</a>
 						{#if member.id === group.ownerId}
 							<span class="badge">Besitzer</span>
 						{/if}

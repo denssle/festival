@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { resolve } from '$app/paths';
 	import { getTotalNumberOfComingGuests } from '$lib/utils/festivalEvent.util';
 
 	let { data }: { data: PageData } = $props();
@@ -10,14 +11,16 @@
 	<p>Willkommen hier.</p>
 
 	<section>
-		<a class="button" href="/festival/new">Neues Fest anlegen</a>
+		<a class="button" href={resolve('/festival/new')}>Neues Fest anlegen</a>
 
 		{#each data.festivalEvents as loadedEvent (loadedEvent.id)}
 			<fieldset>
 				<legend>
-					<a href="/festival/{loadedEvent.id}">{loadedEvent.name}</a>
+					<a href={resolve('/festival/[festival_id]', { festival_id: loadedEvent.id })}>{loadedEvent.name}</a>
 					{#if loadedEvent.createdBy}
-						von <a href="/user/{loadedEvent.createdBy.id}">{loadedEvent.createdBy.nickname}</a>
+						von <a href={resolve('/user/[user_id]', { user_id: loadedEvent.createdBy.id })}
+							>{loadedEvent.createdBy.nickname}</a
+						>
 					{/if}
 				</legend>
 				<i>Start: {loadedEvent.startDate?.toLocaleString()}</i>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { FrontendComment } from '$lib/models/transferData/FrontendComment';
 	import type { QuestionDialogData } from '$lib/models/dialogData/QuestionDialogData';
 	import QuestionDialog from '$lib/sharedComponents/QuestionDialog.svelte';
@@ -135,7 +136,7 @@
 	<fieldset>
 		<legend>
 			<AvatarImage userId={comment.writtenBy?.id} size={4}></AvatarImage>
-			<a href="/user/{comment.writtenBy?.id}">{comment.writtenBy?.nickname}</a>
+			<a href={resolve('/user/[user_id]', { user_id: comment.writtenBy?.id ?? '' })}>{comment.writtenBy?.nickname}</a>
 		</legend>
 		{#if comment.editMode}
 			<textarea name="updateComment" bind:value={comment.comment}></textarea>

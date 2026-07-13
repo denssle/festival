@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { LoginRegisterFormData } from '$lib/models/transferData/LoginRegisterFormData';
 	import type { ActionData } from './$types';
 
@@ -57,7 +58,7 @@
 
 		<section>
 			<p>
-				Bereits ein Konto? <a href="/login">Hier geht es zur Anmeldung.</a>
+				Bereits ein Konto? <a href={resolve('/login')}>Hier geht es zur Anmeldung.</a>
 			</p>
 		</section>
 	</form>

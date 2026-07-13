@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 </script>
 
 <article>
@@ -31,7 +32,7 @@
 			</p>
 
 			<button type="submit">Speichern</button>
-			<a class="button" href="/">Zurück</a>
+			<a class="button" href={resolve('/')}>Zurück</a>
 		</form>
 	</section>
 </article>
