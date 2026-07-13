@@ -25,6 +25,8 @@
 					<span>Bisherige Gäste: {getTotalNumberOfComingGuests(loadedEvent)}</span>
 				</p>
 			</fieldset>
+		{:else}
+			<p>Es gibt noch keine Feste. Leg das erste an!</p>
 		{/each}
 	</section>
 </article>
