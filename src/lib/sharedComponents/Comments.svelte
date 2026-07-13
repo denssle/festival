@@ -157,6 +157,8 @@
 		{/if}
 		<CreationChangedDate createdAt={comment.createdAt} updatedAt={comment.updatedAt} />
 	</fieldset>
+{:else}
+	<p>Noch keine Kommentare. Schreib den ersten!</p>
 {/each}
 
 <style>
