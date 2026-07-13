@@ -21,7 +21,9 @@ export class FriendshipService {
 	static async getFriendList(userId: string): Promise<FrontendUser[]> {
 		const friends = await this.getFriends(userId);
 		// Alle Freund-IDs einsammeln und mit EINEM Query laden (kein N+1 pro Freund)
-		const friendIds: string[] = friends.map((value) => (value.friend1Id === userId ? value.friend2Id : value.friend1Id));
+		const friendIds: string[] = friends.map((value) =>
+			value.friend1Id === userId ? value.friend2Id : value.friend1Id
+		);
 		return UserService.loadFrontendUsersByIds(friendIds);
 	}
 
@@ -124,6 +126,11 @@ export class FriendshipService {
 	}
 
 	static async addFriend(userId: string, userId2: string): Promise<void> {
+		// Der Unique-Index deckt nur (friend1Id, friend2Id) ab – die gespiegelte Zeile
+		// (friend2Id, friend1Id) wäre auf DB-Ebene erlaubt. Deshalb hier prüfen.
+		if (userId === userId2 || (await this.areFriends(userId, userId2))) {
+			return;
+		}
 		await Friendship.create({
 			id: crypto.randomUUID(),
 			friend1Id: userId,

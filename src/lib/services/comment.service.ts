@@ -49,6 +49,20 @@ export class CommentService {
 		}));
 	}
 
+	/**
+	 * Löscht alle Kommentare, die an ein Ziel (Festival oder Profil) geschrieben wurden.
+	 * `writtenTo` ist polymorph (Festival- ODER User-ID) und kann daher keinen FK mit
+	 * ON DELETE CASCADE haben – die Kommentare müssen beim Löschen des Ziels explizit
+	 * mitentfernt werden, sonst bleiben sie als Waisen in der DB zurück.
+	 */
+	static async deleteCommentsWrittenTo(writtenTo: string): Promise<number> {
+		return await Comment.destroy({
+			where: {
+				writtenTo: writtenTo
+			}
+		});
+	}
+
 	static async deleteComment(userId: string, commentId: string): Promise<ChangeResult> {
 		if (commentId && userId) {
 			const model = await Comment.findByPk(commentId);
