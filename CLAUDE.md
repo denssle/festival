@@ -11,7 +11,7 @@
 - **CI/CD:** Zwei GitHub-Action-Workflows: `.github/workflows/tests.yml` führt die Playwright-Tests bei jedem Push auf `main` oder Pull Requests aus; `.github/workflows/deploy.yml` deployt nach erfolgreichem Test-Workflow auf `main` (via `workflow_run`).
   - Deployment erfolgt automatisch per `rsync` auf Uberspace nach erfolgreichen Tests auf dem `main` Branch.
   - **WICHTIG:** Produktion läuft über `@sveltejs/adapter-node`. Die Pipeline baut mit `vite build` einen eigenständigen Node-Server unter `build/`; der Supervisor-Service startet ihn über `npm run start-server` (= `PORT=5173 node build`) im Verzeichnis `~/html`. Die Pipeline installiert vor dem Restart die Produktions-Abhängigkeiten auf dem Host (`npm ci --omit=dev`). Kein `vite dev`/`npm install` mehr bei jedem Restart → Start in Sekunden.
-  - Die Pipeline nutzt einen MariaDB Service Container.
+  - **Die Pipeline nutzt KEINEN MariaDB-Service-Container.** `tests.yml` startet nur Node + Playwright; die E2E-Tests laufen dort (wie lokal) über `PLAYWRIGHT=true` gegen eine In-Memory-SQLite (siehe `sequelize.ts`). **Konsequenz:** MariaDB-spezifisches SQL wird in keiner automatisierten Prüfung getestet — relevant, sobald echte Migrationen eingeführt werden (siehe TODO „Schema-Stabilität", dort ist ein MariaDB-Job als Drift-Schutz Teil des Plans).
 
 ## 2. Datenbank (Sequelize) Best Practices
 
