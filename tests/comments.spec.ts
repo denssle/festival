@@ -39,7 +39,7 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 		await expect(pageA.locator('h2')).toContainText(userBNickname);
 
 		// User A schreibt einen Kommentar
-		let textareaElement = pageA.locator('textarea[name="comment"]');
+		const textareaElement = pageA.locator('textarea[name="comment"]');
 		await expect(textareaElement).toBeVisible();
 		await textareaElement.fill(commentText);
 
@@ -58,12 +58,12 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 		const commentLocator = pageA.locator('fieldset').filter({ hasText: commentText });
 		await expect(commentLocator).toBeVisible({ timeout: 10000 });
 
-		let bearbeitenLocator = commentLocator.locator('button:has-text("Bearbeiten")');
+		const bearbeitenLocator = commentLocator.locator('button:has-text("Bearbeiten")');
 		await expect(bearbeitenLocator).toBeVisible({ timeout: 10000 });
 		await bearbeitenLocator.click();
 
-		let textareaElement = pageA.locator('textarea[name="updateComment"]');
-		let saveButton = pageA.locator('button:has-text("Speichern")');
+		const textareaElement = pageA.locator('textarea[name="updateComment"]');
+		const saveButton = pageA.locator('button:has-text("Speichern")');
 		await expect(saveButton).toBeVisible();
 		await expect(saveButton).not.toBeDisabled();
 		await expect(textareaElement).toBeVisible();

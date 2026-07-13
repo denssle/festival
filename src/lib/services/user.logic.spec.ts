@@ -104,18 +104,26 @@ describe('validatePasswordChange', () => {
 	});
 
 	it('sollte das aktuelle Passwort verlangen', () => {
-		expect(validatePasswordChange(undefined, 'newPass456', 'newPass456', minLength)).toBe('Current password is required');
+		expect(validatePasswordChange(undefined, 'newPass456', 'newPass456', minLength)).toBe(
+			'Current password is required'
+		);
 		expect(validatePasswordChange('', 'newPass456', 'newPass456', minLength)).toBe('Current password is required');
 	});
 
 	it('sollte neues Passwort und Wiederholung verlangen', () => {
-		expect(validatePasswordChange('oldPass123', undefined, 'newPass456', minLength)).toBe('New password and repetition are required');
-		expect(validatePasswordChange('oldPass123', 'newPass456', undefined, minLength)).toBe('New password and repetition are required');
+		expect(validatePasswordChange('oldPass123', undefined, 'newPass456', minLength)).toBe(
+			'New password and repetition are required'
+		);
+		expect(validatePasswordChange('oldPass123', 'newPass456', undefined, minLength)).toBe(
+			'New password and repetition are required'
+		);
 		expect(validatePasswordChange('oldPass123', '', '', minLength)).toBe('New password and repetition are required');
 	});
 
 	it('sollte die Mindestlänge des neuen Passworts prüfen', () => {
-		expect(validatePasswordChange('oldPass123', 'short', 'short', minLength)).toBe(`Password must be at least ${minLength} characters long`);
+		expect(validatePasswordChange('oldPass123', 'short', 'short', minLength)).toBe(
+			`Password must be at least ${minLength} characters long`
+		);
 	});
 
 	it('sollte nicht übereinstimmende Passwörter ablehnen', () => {

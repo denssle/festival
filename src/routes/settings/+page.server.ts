@@ -32,7 +32,12 @@ export const actions: Actions = {
 		const password: string | undefined = data.get('password')?.toString();
 		const passwordRepeat: string | undefined = data.get('passwordRepeat')?.toString();
 
-		const validationError: string | null = validatePasswordChange(currentPassword, password, passwordRepeat, MIN_PASSWORD_LENGTH);
+		const validationError: string | null = validatePasswordChange(
+			currentPassword,
+			password,
+			passwordRepeat,
+			MIN_PASSWORD_LENGTH
+		);
 		if (validationError) {
 			return { success: false, message: validationError };
 		}
