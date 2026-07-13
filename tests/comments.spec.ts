@@ -1,14 +1,14 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page, type BrowserContext, type Response } from '@playwright/test';
 import { register, getUserId, uniqueName, openDialog, clickForResponse } from './test-utils';
 
 test.describe.serial('Kommentar-Lifecycle', () => {
 	const userANickname = uniqueName('UserA_Comments');
 	const userBNickname = uniqueName('UserB_Comments');
 	let userBId: string;
-	let pageA: any;
-	let pageB: any;
-	let contextA: any;
-	let contextB: any;
+	let pageA: Page;
+	let pageB: Page;
+	let contextA: BrowserContext;
+	let contextB: BrowserContext;
 	const commentText = 'Hallo UserB, das ist ein Test-Kommentar von UserA!';
 	const updatedCommentText = 'Hallo UserB, dieser Kommentar wurde bearbeitet!';
 
@@ -90,14 +90,14 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 		await expect(updatedCommentLocator).toBeVisible({ timeout: 10000 });
 
 		const deleteResponse = pageA.waitForResponse(
-			(r: any) => r.url().includes('/comments') && r.request().method() === 'DELETE'
+			(r: Response) => r.url().includes('/comments') && r.request().method() === 'DELETE'
 		);
 
 		// Löschen-Button öffnet Bestätigungsdialog (robust gegen Hydration-Race)
 		const dialog = pageA.locator('dialog').filter({ hasText: 'Kommentar löschen' });
 		await openDialog(updatedCommentLocator.locator('button:has-text("Löschen")'), dialog);
 		const reloadResponse = pageA.waitForResponse(
-			(r: any) => r.url().includes('/comments') && r.request().method() === 'GET'
+			(r: Response) => r.url().includes('/comments') && r.request().method() === 'GET'
 		);
 		await dialog.locator('button:has-text("Ja")').click();
 		await deleteResponse;

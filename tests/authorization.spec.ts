@@ -1,4 +1,4 @@
-import { test, expect, type Response } from '@playwright/test';
+import { test, expect, type Response, type Page, type BrowserContext } from '@playwright/test';
 import { register, getUserId, uniqueName } from './test-utils';
 
 test.describe.serial('Profile Festivals Authorization', () => {
@@ -6,13 +6,13 @@ test.describe.serial('Profile Festivals Authorization', () => {
 	const user2Nickname = uniqueName('User2');
 	const festivalName = uniqueName('Festival');
 
-	let user1Context: any;
-	let user1Page: any;
+	let user1Context: BrowserContext;
+	let user1Page: Page;
 	let user1Id: string;
 	let festivalId: string;
 
-	let user2Context: any;
-	let user2Page: any;
+	let user2Context: BrowserContext;
+	let user2Page: Page;
 
 	test.beforeAll(async ({ browser }) => {
 		// User 1 registrieren

@@ -19,7 +19,9 @@ export default ts.config(
 		},
 		rules: {
 			'@typescript-eslint/no-unused-vars': 'warn',
-			'@typescript-eslint/no-explicit-any': 'warn',
+			// Scharf ab v0.7.18: src und tests sind any-frei. Sequelize-Modelle nutzen
+			// abgeleitete *CreationAttributes-Typen statt `Model<T, any>` – kein neues any.
+			'@typescript-eslint/no-explicit-any': 'error',
 			// Neu in eslint-plugin-svelte 3: verlangt resolve() um jede href/goto-Ziel-URL.
 			// Betrifft ~37 Stellen und ist eine eigene Migration (siehe TODO) – bis dahin
 			// als Warnung sichtbar, damit `npm run lint` nicht rot ist.

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Response } from '@playwright/test';
 import { register, TEST_PASSWORD, login, logout, uniqueName, openDialog } from './test-utils';
 
 test.describe.serial('Gruppen Management', () => {
@@ -106,7 +106,7 @@ test.describe.serial('Gruppen Management', () => {
 
 		// Beitreten klicken und auf Seitenaktualisierung warten
 		await Promise.all([
-			page.waitForResponse((resp: any) => resp.url().includes('/join'), { timeout: 30000 }),
+			page.waitForResponse((resp: Response) => resp.url().includes('/join'), { timeout: 30000 }),
 			page.click('form[action="?/join"] button:has-text("Beitreten")')
 		]);
 		await page.waitForLoadState('networkidle');
@@ -221,7 +221,7 @@ test.describe.serial('Gruppen Management', () => {
 		await expect(joinButton).toBeVisible({ timeout: 15000 });
 
 		await Promise.all([
-			page.waitForResponse((resp: any) => resp.url().includes('/join'), { timeout: 15000 }),
+			page.waitForResponse((resp: Response) => resp.url().includes('/join'), { timeout: 15000 }),
 			joinButton.click()
 		]);
 		await page.waitForLoadState('networkidle');
@@ -235,7 +235,7 @@ test.describe.serial('Gruppen Management', () => {
 
 		// Verlassen klicken und auf Response warten
 		await Promise.all([
-			page.waitForResponse((resp: any) => resp.url().includes('/leave'), { timeout: 15000 }),
+			page.waitForResponse((resp: Response) => resp.url().includes('/leave'), { timeout: 15000 }),
 			leaveButton.click()
 		]);
 		await page.waitForLoadState('networkidle');

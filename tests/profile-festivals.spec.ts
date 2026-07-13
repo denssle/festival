@@ -1,12 +1,12 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page, type BrowserContext, type Response } from '@playwright/test';
 import { register, getUserId } from './test-utils';
 
 test.describe.serial('Profile Festivals Display', () => {
 	const userNickname = `FestivalUser_${Date.now()}`;
 	const festivalName = `Unique Festival ${Date.now()}`;
 
-	let page: any;
-	let context: any;
+	let page: Page;
+	let context: BrowserContext;
 	let userId: string;
 
 	test.beforeAll(async ({ browser }) => {
@@ -52,7 +52,7 @@ test.describe.serial('Profile Festivals Display', () => {
 	test('sollte das Festival nur einmal im Profil anzeigen', async () => {
 		// Zum Profil navigieren und auf den visiting-festivals fetch warten
 		const festivalsResponse = page.waitForResponse(
-			(r: any) => r.url().includes('/visiting-festivals') && r.request().method() === 'GET'
+			(r: Response) => r.url().includes('/visiting-festivals') && r.request().method() === 'GET'
 		);
 		await page.goto(`/user/${userId}`);
 		await festivalsResponse;

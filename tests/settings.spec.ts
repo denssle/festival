@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Response } from '@playwright/test';
 import { register, getUserId, logout } from './test-utils';
 
 test.describe('Benutzereinstellungen und Profilbild', () => {
@@ -26,7 +26,7 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		await page.locator('input[name="passwordRepeat"]').fill(newPassword);
 
 		// Klick auf Speichern und warten auf Antwort
-		const responsePromise = page.waitForResponse((r: any) => r.url().includes('/settings') && r.status() === 200);
+		const responsePromise = page.waitForResponse((r: Response) => r.url().includes('/settings') && r.status() === 200);
 		await page.click('button[type="submit"]');
 		await responsePromise;
 		await page.waitForLoadState('networkidle');
@@ -65,7 +65,7 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		await page.locator('input[name="password"]').fill('NewSecurePassword456!');
 		await page.locator('input[name="passwordRepeat"]').fill('NewSecurePassword456!');
 
-		const responsePromise = page.waitForResponse((r: any) => r.url().includes('/settings') && r.status() === 200);
+		const responsePromise = page.waitForResponse((r: Response) => r.url().includes('/settings') && r.status() === 200);
 		await page.click('button[type="submit"]');
 		await responsePromise;
 		await page.waitForLoadState('networkidle');
@@ -106,7 +106,7 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		const fileInput = page.locator('input[type="file"]');
 		await expect(async () => {
 			const uploadResponse = page.waitForResponse(
-				(r: any) => r.url().includes('/user-image') && r.request().method() === 'POST',
+				(r: Response) => r.url().includes('/user-image') && r.request().method() === 'POST',
 				{ timeout: 3000 }
 			);
 			await fileInput.setInputFiles([
