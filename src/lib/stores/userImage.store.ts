@@ -33,7 +33,12 @@ export async function loadUserImage(userId: string): Promise<void> {
 	const imageWritable: Writable<string> = getUserImageWritable(userId);
 	try {
 		const response = await fetch('/user-image/' + userId, { method: 'GET' });
-		if (response.ok) {
+		// 204 = Nutzer hat kein Bild hinterlegt (kein Fehler). Wichtig: `response.ok` ist
+		// bei 204 ebenfalls true, der Body aber leer – ohne diese Prüfung würde ein leerer
+		// String als Bild gesetzt und der Spinner liefe endlos weiter.
+		if (response.status === 204) {
+			imageWritable.set(FALLBACK_PICTURE);
+		} else if (response.ok) {
 			const text: string = await (await response.blob()).text();
 			imageWritable.set(text);
 		} else {
