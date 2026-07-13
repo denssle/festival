@@ -90,11 +90,11 @@ Die App liest Zugangsdaten aus einer `.env`-Datei (via `$env/dynamic/private`). 
 
 ### Erforderliche App-Env-Variablen
 
-| Variable | Zweck |
-| --- | --- |
-| `MARIA_DB_USER` | MariaDB-Benutzer **und** Präfix des DB-Namens. Der effektive Datenbankname ist `MARIA_DB_USER + '_' + MARIA_DB_NAME`. |
-| `MARIA_DB_PASSWORD` | MariaDB-Passwort. |
-| `MARIA_DB_NAME` | Suffix des DB-Namens (siehe oben). **Siehe SQLite-Falle unten.** |
+| Variable            | Zweck                                                                                                                 |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `MARIA_DB_USER`     | MariaDB-Benutzer **und** Präfix des DB-Namens. Der effektive Datenbankname ist `MARIA_DB_USER + '_' + MARIA_DB_NAME`. |
+| `MARIA_DB_PASSWORD` | MariaDB-Passwort.                                                                                                     |
+| `MARIA_DB_NAME`     | Suffix des DB-Namens (siehe oben). **Siehe SQLite-Falle unten.**                                                      |
 
 ### ⚠️ SQLite-Falle (kritisch für Produktion)
 
