@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page, type BrowserContext } from '@playwright/test';
 import { register, openDialog } from './test-utils';
 
 test.describe.serial('Festival-Management Lifecycle', () => {
@@ -6,8 +6,8 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 	const festivalName = `Mein Super Festival ${Date.now()}`;
 	const updatedFestivalName = `Bearbeitetes Festival ${Date.now()}`;
 
-	let page: any;
-	let context: any;
+	let page: Page;
+	let context: BrowserContext;
 	let festivalId: string;
 
 	test.beforeAll(async ({ browser }) => {

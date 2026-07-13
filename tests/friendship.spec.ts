@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page, type BrowserContext } from '@playwright/test';
 import { register, getUserId, uniqueName, clickForResponse } from './test-utils';
 
 test.describe.serial('Freundschaftsprozess', () => {
@@ -6,10 +6,10 @@ test.describe.serial('Freundschaftsprozess', () => {
 	const userBNickname = uniqueName('UserB');
 	let userAId: string;
 	let userBId: string;
-	let pageA: any;
-	let pageB: any;
-	let contextA: any;
-	let contextB: any;
+	let pageA: Page;
+	let pageB: Page;
+	let contextA: BrowserContext;
+	let contextB: BrowserContext;
 
 	test.beforeAll(async ({ browser }) => {
 		const requestContext = await browser.newContext();

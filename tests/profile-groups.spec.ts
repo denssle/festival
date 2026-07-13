@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Response } from '@playwright/test';
 import { register, getUserId } from './test-utils';
 
 test.describe.serial('Profil Gruppen Anzeige', () => {
@@ -15,7 +15,7 @@ test.describe.serial('Profil Gruppen Anzeige', () => {
 		await page.goto('/group/new', { waitUntil: 'networkidle' });
 		await page.fill('input[name="name"]', groupName);
 		await page.fill('textarea[name="description"]', 'Eine Testgruppe für das Profil.');
-		const responsePromise = page.waitForResponse((r: any) => r.url().includes('/group') && r.status() === 200);
+		const responsePromise = page.waitForResponse((r: Response) => r.url().includes('/group') && r.status() === 200);
 		await page.click('button[type="submit"]');
 		await responsePromise;
 

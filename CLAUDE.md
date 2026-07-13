@@ -16,9 +16,10 @@
 ## 2. Datenbank (Sequelize) Best Practices
 
 - **Triad Rule:** Bei JEDER Änderung an Datenbankfeldern müssen IMMER diese drei Stellen aktualisiert werden:
-  1. `src/lib/db/attributes/*.attributes.ts` (Interface)
+  1. `src/lib/db/attributes/*.attributes.ts` (Interface **und** der zugehörige `*CreationAttributes`-Typ)
   2. `src/lib/db/model/*.ts` (Sequelize Model Definition)
   3. `src/lib/db/db.ts` (Assoziationen/Beziehungen)
+- **Typisierte Modelle (kein `any`):** Jedes Modell ist als `ModelStatic<Model<XAttributes, XCreationAttributes>>` typisiert. Der Creation-Typ wird in der Attributes-Datei per `Optional<XAttributes, K>` abgeleitet; optional sind dort genau die Zeitstempel (`createdAt`/`updatedAt`), die `allowNull`-Spalten und die nur per `include` geladenen Assoziationen. Damit prüft TypeScript alle `.create()`-Aufrufe. `@typescript-eslint/no-explicit-any` steht auf `error` – neue `any` lassen den Lint fehlschlagen.
 - **Explizite Fremdschlüssel:** Um "Duplicate column name"-Fehler bei `sequelize.sync({ alter: true })` zu vermeiden, müssen Fremdschlüssel (z. B. `UserId`, `FestivalEventId`) **sowohl** in der Model-Definition (`src/lib/db/model/*.ts`) **als auch** explizit in der Assoziationsdefinition (`src/lib/db/db.ts`) unter `foreignKey` angegeben werden.
 - **Modelle & Beziehungen:**
   - **User:** Zentrale Entität hat 1:1 zu `UserImage` und `SessionToken`.
