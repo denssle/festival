@@ -1,3 +1,5 @@
+import type { Optional } from 'sequelize';
+
 export type FriendAttributes = {
 	id: string;
 	friend1Id: string;
@@ -5,3 +7,6 @@ export type FriendAttributes = {
 	createdAt: Date;
 	updatedAt: Date;
 };
+
+/** Attribute beim Anlegen: Zeitstempel setzt Sequelize. */
+export type FriendCreationAttributes = Optional<FriendAttributes, 'createdAt' | 'updatedAt'>;

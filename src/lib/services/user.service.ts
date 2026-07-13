@@ -3,10 +3,10 @@ import type { BackendUser } from '../models/user/BackendUser';
 import type { FrontendUser } from '../models/user/FrontendUser';
 import type { UserFormData } from '$lib/models/user/UserFormData';
 import type { Cookies } from '@sveltejs/kit';
-import { convertToBackendUser, UserAttributes } from '$lib/db/attributes/user.attributes';
+import { convertToBackendUser, UserAttributes, UserCreationAttributes } from '$lib/db/attributes/user.attributes';
 import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 import { Model } from 'sequelize';
-import { UserImageAttributes } from '$lib/db/attributes/userImage.attributes';
+import { UserImageAttributes, UserImageCreationAttributes } from '$lib/db/attributes/userImage.attributes';
 import { NickPassData } from '$lib/models/transferData/NickPassData';
 import { SessionTokenAttributes } from '$lib/db/attributes/sessionToken.attributes';
 import { User } from '$lib/db/model/user';
@@ -25,7 +25,7 @@ export class UserService {
 		return false;
 	}
 
-	private static async getByNickname(nickname: string): Promise<Model<UserAttributes, any> | null> {
+	private static async getByNickname(nickname: string): Promise<Model<UserAttributes, UserCreationAttributes> | null> {
 		return await User.findOne({
 			where: {
 				nickname: nickname
@@ -33,7 +33,7 @@ export class UserService {
 		});
 	}
 
-	private static async getByEmail(email: string): Promise<Model<UserAttributes, any> | null> {
+	private static async getByEmail(email: string): Promise<Model<UserAttributes, UserCreationAttributes> | null> {
 		return await User.findOne({
 			where: {
 				email: email
@@ -54,7 +54,7 @@ export class UserService {
 	 */
 	static async emailTakenByOtherUser(email: string, userId: string): Promise<boolean> {
 		if (!email || email.length === 0) return false;
-		const existing: Model<UserAttributes, any> | null = await this.getByEmail(email);
+		const existing: Model<UserAttributes, UserCreationAttributes> | null = await this.getByEmail(email);
 		return existing !== null && existing.dataValues.id !== userId;
 	}
 
@@ -276,7 +276,7 @@ export class UserService {
 	}
 
 	static async updateUser(oldUser: SessionTokenUser, formData: UserFormData): Promise<ChangeResult> {
-		const model: Model<UserAttributes, any> | null = await User.findByPk(oldUser.id);
+		const model: Model<UserAttributes, UserCreationAttributes> | null = await User.findByPk(oldUser.id);
 		if (model) {
 			if (this.isChangeAllowed(oldUser.id, model.dataValues)) {
 				model.set({
@@ -299,7 +299,7 @@ export class UserService {
 	}
 
 	static async updatePassword(oldUser: SessionTokenUser, password: string): Promise<ChangeResult> {
-		const model: Model<UserAttributes, any> | null = await User.findByPk(oldUser.id);
+		const model: Model<UserAttributes, UserCreationAttributes> | null = await User.findByPk(oldUser.id);
 		if (model) {
 			if (this.isChangeAllowed(oldUser.id, model.dataValues)) {
 				model.set({
@@ -315,7 +315,9 @@ export class UserService {
 	}
 
 	static async saveUserImage(userId: string, image: string): Promise<string> {
-		const model: Model<UserImageAttributes, any> | null = await UserImage.findOne({ where: { UserId: userId } });
+		const model: Model<UserImageAttributes, UserImageCreationAttributes> | null = await UserImage.findOne({
+			where: { UserId: userId }
+		});
 		if (model) {
 			await model.update({ image: Buffer.from(image) });
 		} else {
@@ -325,7 +327,9 @@ export class UserService {
 	}
 
 	static async getUserImage(userId: string): Promise<string | null> {
-		const model: Model<UserImageAttributes, any> | null = await UserImage.findOne({ where: { UserId: userId } });
+		const model: Model<UserImageAttributes, UserImageCreationAttributes> | null = await UserImage.findOne({
+			where: { UserId: userId }
+		});
 		return model ? model.dataValues.image.toString() : null;
 	}
 }

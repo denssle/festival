@@ -1,3 +1,5 @@
+import type { Optional } from 'sequelize';
+
 export interface CommentAttributes {
 	id: string;
 	writtenBy: string;
@@ -6,3 +8,6 @@ export interface CommentAttributes {
 	createdAt: Date;
 	updatedAt: Date;
 }
+
+/** Attribute beim Anlegen: Pflicht sind nur `id`, `writtenBy` und `writtenTo`. */
+export type CommentCreationAttributes = Optional<CommentAttributes, 'createdAt' | 'updatedAt' | 'comment'>;

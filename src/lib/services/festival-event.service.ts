@@ -5,6 +5,7 @@ import type { FrontendUser } from '../models/user/FrontendUser';
 import { UserService } from './user.service';
 import {
 	FestivalEventAttributes,
+	FestivalEventCreationAttributes,
 	mapToBackendFestivalEvent,
 	mapToFrontendFestivalEvent
 } from '$lib/db/attributes/festivalEvent.attributes';
@@ -32,7 +33,7 @@ export class FestivalEventService {
 			order: [['startDate', 'DESC']]
 		});
 		return Promise.all(
-			allFestivals.map((value: Model<FestivalEventAttributes, any>) => {
+			allFestivals.map((value: Model<FestivalEventAttributes, FestivalEventCreationAttributes>) => {
 				return mapToFrontendFestivalEvent(value.dataValues);
 			})
 		);
@@ -75,7 +76,9 @@ export class FestivalEventService {
 				name: name,
 				description: description,
 				UserId: user.id,
-				startDate: startDate,
+				// Wie in updateFestival: der Timestamp aus dem Formular wird zu einem Date
+				// konvertiert (Spalte ist DataTypes.DATE).
+				startDate: startDate ? new Date(startDate) : undefined,
 				bringYourOwnBottle: bringYourOwnBottle,
 				bringYourOwnFood: bringYourOwnFood,
 				location: location

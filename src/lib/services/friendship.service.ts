@@ -1,7 +1,11 @@
 import { Model, Op } from 'sequelize';
 import type { FrontendUser } from '$lib/models/user/FrontendUser';
 import { FriendAttributes } from '$lib/db/attributes/friend.attributes';
-import { convertToFriendRequest, FriendRequestAttributes } from '$lib/db/attributes/friendRequest.attributes';
+import {
+	convertToFriendRequest,
+	FriendRequestAttributes,
+	FriendRequestCreationAttributes
+} from '$lib/db/attributes/friendRequest.attributes';
 import { FriendRequestData } from '$lib/models/updates/FriendRequestData';
 import { UserService } from '$lib/services/user.service';
 import { FriendRequest } from '$lib/db/model/friendRequest';
@@ -40,7 +44,7 @@ export class FriendshipService {
 	}
 
 	static async friendRequestExisting(id: string, params_id: string): Promise<boolean> {
-		const model: Model<FriendRequestAttributes, any> | null = await FriendRequest.findOne({
+		const model: Model<FriendRequestAttributes, FriendRequestCreationAttributes> | null = await FriendRequest.findOne({
 			where: {
 				[Op.or]: [
 					{ [Op.and]: [{ senderId: id }, { receiverId: params_id }] },
@@ -56,7 +60,7 @@ export class FriendshipService {
 	 * und `senderId` der Absender ist. Nötig, damit nur der Empfänger annehmen kann.
 	 */
 	static async receivedFriendRequestExists(receiverId: string, senderId: string): Promise<boolean> {
-		const model: Model<FriendRequestAttributes, any> | null = await FriendRequest.findOne({
+		const model: Model<FriendRequestAttributes, FriendRequestCreationAttributes> | null = await FriendRequest.findOne({
 			where: { senderId: senderId, receiverId: receiverId }
 		});
 		return Boolean(model);
@@ -79,7 +83,7 @@ export class FriendshipService {
 	}
 
 	static async getReceivedFriendRequests(receiverId: string): Promise<FriendRequestData[]> {
-		const model: Model<FriendRequestAttributes, any>[] = await FriendRequest.findAll({
+		const model: Model<FriendRequestAttributes, FriendRequestCreationAttributes>[] = await FriendRequest.findAll({
 			where: {
 				receiverId: receiverId
 			},
@@ -93,7 +97,7 @@ export class FriendshipService {
 	}
 
 	static async getSentFriendRequests(senderId: string): Promise<FriendRequestData[]> {
-		const model: Model<FriendRequestAttributes, any>[] = await FriendRequest.findAll({
+		const model: Model<FriendRequestAttributes, FriendRequestCreationAttributes>[] = await FriendRequest.findAll({
 			where: {
 				senderId: senderId
 			},

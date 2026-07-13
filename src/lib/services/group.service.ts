@@ -90,7 +90,9 @@ export class GroupService {
 			include: [{ model: Group, as: 'Group' }]
 		});
 
-		return members.map((m: any) => m.Group?.dataValues as GroupAttributes).filter(Boolean);
+		return members
+			.map((m) => m.dataValues.Group?.dataValues)
+			.filter((group): group is GroupAttributes => group !== undefined);
 	}
 
 	static async joinGroup(userId: string, groupId: string): Promise<ChangeResult> {

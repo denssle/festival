@@ -1,10 +1,11 @@
 import { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 import { UserService } from '$lib/services/user.service';
 import { BackendFestivalEvent } from '$lib/models/festivalEvent/BackendFestivalEvent';
-import { Model } from 'sequelize';
-import { convertToBackendUser, UserAttributes } from '$lib/db/attributes/user.attributes';
+import { Model, type Optional } from 'sequelize';
+import { convertToBackendUser, UserAttributes, UserCreationAttributes } from '$lib/db/attributes/user.attributes';
 import {
 	GuestInformationAttributes,
+	GuestInformationCreationAttributes,
 	mapToBackendGuestInformation,
 	mapToFrontendGuestInformation
 } from '$lib/db/attributes/guestInformation.attributes';
@@ -22,9 +23,27 @@ export type FestivalEventAttributes = {
 	UserId: string;
 	// Optional eager-geladener Ersteller (via include: { model: User, as: 'User' }).
 	// Wird genutzt, um den N+1-Query pro Festival zu vermeiden.
-	User?: Model<UserAttributes, any>;
-	EventGuests: Model<GuestInformationAttributes, any>[];
+	User?: Model<UserAttributes, UserCreationAttributes>;
+	EventGuests: Model<GuestInformationAttributes, GuestInformationCreationAttributes>[];
 };
+
+/**
+ * Attribute beim Anlegen: Zeitstempel setzt Sequelize, die `allowNull`-Spalten
+ * (siehe src/lib/db/model/festivalEvent.ts) sind optional, und die Assoziationen
+ * werden nur beim Lesen per `include` befüllt – nie beim Create übergeben.
+ */
+export type FestivalEventCreationAttributes = Optional<
+	FestivalEventAttributes,
+	| 'createdAt'
+	| 'updatedAt'
+	| 'description'
+	| 'location'
+	| 'bringYourOwnBottle'
+	| 'bringYourOwnFood'
+	| 'startDate'
+	| 'User'
+	| 'EventGuests'
+>;
 
 export async function mapToFrontendFestivalEvent(event: FestivalEventAttributes): Promise<FrontendFestivalEvent> {
 	const userId = event.UserId;
@@ -46,7 +65,7 @@ export async function mapToFrontendFestivalEvent(event: FestivalEventAttributes)
 		updatedAt: event.updatedAt,
 		frontendGuestInformation: event.EventGuests
 			? await Promise.all(
-					event.EventGuests.map((value: any) => {
+					event.EventGuests.map((value) => {
 						return mapToFrontendGuestInformation(value.dataValues);
 					})
 				)
@@ -68,7 +87,7 @@ export async function mapToBackendFestivalEvent(event: FestivalEventAttributes):
 		UserId: userId,
 		updatedAt: event.updatedAt,
 		guestInformation: event.EventGuests
-			? event.EventGuests.map((value: any) => {
+			? event.EventGuests.map((value) => {
 					return mapToBackendGuestInformation(value.dataValues);
 				})
 			: []

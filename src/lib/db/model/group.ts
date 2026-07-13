@@ -1,9 +1,9 @@
 import { DataTypes, Model, ModelStatic } from 'sequelize';
-import { GroupAttributes } from '$lib/db/attributes/group.attributes';
+import { GroupAttributes, GroupCreationAttributes } from '$lib/db/attributes/group.attributes';
 
 import { sequelize } from '$lib/db/sequelize';
 
-export const Group: ModelStatic<Model<GroupAttributes, any>> = sequelize.define(
+export const Group: ModelStatic<Model<GroupAttributes, GroupCreationAttributes>> = sequelize.define(
 	'group',
 	{
 		id: { type: DataTypes.STRING, primaryKey: true, allowNull: false },
