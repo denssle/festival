@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { ActionData } from './$types';
 
 	let { form }: { form: ActionData } = $props();
@@ -42,7 +43,7 @@
 
 		<section>
 			<p>
-				Noch nicht angemeldet? Dann <a href="/registration">hier registrieren.</a>
+				Noch nicht angemeldet? Dann <a href={resolve('/registration')}>hier registrieren.</a>
 			</p>
 		</section>
 	</form>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import AvatarImage from '$lib/sharedComponents/AvatarImage.svelte';
 	import AvatarUpload from './AvatarUpload.svelte';
 	import UserDataForm from './UserDataForm.svelte';
@@ -54,7 +55,7 @@
 		{#if data.groupList && data.groupList.length > 0}
 			<ul>
 				{#each data.groupList as group (group.id)}
-					<li><a href="/group/{group.id}">{group.name}</a></li>
+					<li><a href={resolve('/group/[group_id]', { group_id: group.id })}>{group.name}</a></li>
 				{/each}
 			</ul>
 		{:else}

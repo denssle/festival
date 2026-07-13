@@ -22,10 +22,10 @@ export default ts.config(
 			// Scharf ab v0.7.18: src und tests sind any-frei. Sequelize-Modelle nutzen
 			// abgeleitete *CreationAttributes-Typen statt `Model<T, any>` – kein neues any.
 			'@typescript-eslint/no-explicit-any': 'error',
-			// Neu in eslint-plugin-svelte 3: verlangt resolve() um jede href/goto-Ziel-URL.
-			// Betrifft ~37 Stellen und ist eine eigene Migration (siehe TODO) – bis dahin
-			// als Warnung sichtbar, damit `npm run lint` nicht rot ist.
-			'svelte/no-navigation-without-resolve': 'warn'
+			// Scharf ab v0.7.20: alle href/goto-Ziele laufen über resolve() aus $app/paths.
+			// Dynamische Routen nutzen die Route-ID plus Parameter, z. B.
+			// resolve('/user/[user_id]', { user_id: id }) – damit prüft TypeScript die Route.
+			'svelte/no-navigation-without-resolve': 'error'
 		}
 	},
 	{

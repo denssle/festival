@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { tick } from 'svelte';
 	import { formateDateTime } from '$lib/utils/date.util';
@@ -20,7 +21,7 @@
 
 	async function editFestival(): Promise<void> {
 		if (data.yourFestival) {
-			await goto('/festival/' + data.festival.id + '/edit');
+			await goto(resolve('/festival/[festival_id]/edit', { festival_id: data.festival.id }));
 		} else {
 			infoDialogData.infoDialogText = 'Das ist nicht dein Event. ';
 			infoDialogData.showDialog = true;
@@ -42,7 +43,7 @@
 							method: 'DELETE'
 						});
 						if (response.ok) {
-							await goto('/');
+							await goto(resolve('/'));
 						} else {
 							infoDialogData.infoDialogText = 'Löschen fehlgeschlagen.';
 							infoDialogData.showDialog = true;
@@ -194,7 +195,11 @@
 	<section>
 		<h4><u>{data.festival.name}</u></h4>
 		{#if data.festival.createdBy}
-			<p>Organisiert von <a href="/user/{data.festival.createdBy.id}">{data.festival.createdBy.nickname}</a></p>
+			<p>
+				Organisiert von <a href={resolve('/user/[user_id]', { user_id: data.festival.createdBy.id })}
+					>{data.festival.createdBy.nickname}</a
+				>
+			</p>
 		{/if}
 		<mark>Startdatum: {formateDateTime(data.festival.startDate)}</mark>
 
@@ -223,7 +228,7 @@
 		<button onclick={deleteFestival}>Löschen</button>
 		<button onclick={cancelInvitation}>{cancelFestivalButtonText}</button>
 		<button onclick={joinFestival}>{joinFestivalButtonText}</button>
-		<a class="button" href="/">Zurück</a>
+		<a class="button" href={resolve('/')}>Zurück</a>
 	</section>
 
 	<FestivalComments whereId={data.festival.id} />

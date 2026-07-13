@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { getTotalNumberOfNotComingGuests } from '$lib/utils/festivalEvent.util';
 	import type { FestivalTransferData } from '$lib/models/transferData/FestivalTransferData';
 
@@ -19,7 +20,7 @@
 				{#each data.festival.frontendGuestInformation.filter((value) => !value.coming) as guest (guest.user?.id)}
 					<tr>
 						<td>
-							<a href="/user/{guest.user?.id}">{guest.user?.nickname}</a>
+							<a href={resolve('/user/[user_id]', { user_id: guest.user?.id ?? '' })}>{guest.user?.nickname}</a>
 						</td>
 						<td>
 							{guest.comment}

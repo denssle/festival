@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto, invalidateAll } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import type { CurrentUser } from '$lib/models/user/CurrentUser';
 	import type { Snippet } from 'svelte';
 
@@ -16,22 +17,22 @@
 			method: 'POST'
 		});
 		await invalidateAll();
-		await goto('/login');
+		await goto(resolve('/login'));
 	}
 </script>
 
 <header>
 	<nav>
 		{#if data?.currentUser?.isAuthenticated}
-			<a href="/">Festivals</a>
-			<a href="/group">Gruppen</a>
-			<a href="/user/{data.currentUser.id}">{data.currentUser.nickname}</a>
-			<a href="/updates">Updates</a>
-			<a href="/settings">Einstellungen</a>
+			<a href={resolve('/')}>Festivals</a>
+			<a href={resolve('/group')}>Gruppen</a>
+			<a href={resolve('/user/[user_id]', { user_id: data.currentUser.id })}>{data.currentUser.nickname}</a>
+			<a href={resolve('/updates')}>Updates</a>
+			<a href={resolve('/settings')}>Einstellungen</a>
 			<button onclick={logout}>Logout</button>
 		{:else}
-			<a href="/login">Anmelden</a>
-			<a href="/registration">Registrieren</a>
+			<a href={resolve('/login')}>Anmelden</a>
+			<a href={resolve('/registration')}>Registrieren</a>
 		{/if}
 	</nav>
 </header>
@@ -40,8 +41,8 @@
 
 <footer>
 	<nav>
-		<a href="/about">About</a>
-		<a href="/impressum">Impressum</a>
+		<a href={resolve('/about')}>About</a>
+		<a href={resolve('/impressum')}>Impressum</a>
 	</nav>
 </footer>
 

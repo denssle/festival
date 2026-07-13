@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { VisitingFestival } from '$lib/models/user/VisitingFestival';
 
 	let { userId = '' } = $props();
@@ -30,7 +31,7 @@
 	<p>Angemeldet bei:</p>
 	<ul>
 		{#each festivals as fest (fest.festivalId)}
-			<li><a href={'/festival/' + fest.festivalId}>{fest.festivalName}</a></li>
+			<li><a href={resolve('/festival/[festival_id]', { festival_id: fest.festivalId })}>{fest.festivalName}</a></li>
 		{/each}
 	</ul>
 {/if}

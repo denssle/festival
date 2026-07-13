@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -13,7 +14,7 @@
 		{#if data.groups && data.groups.length > 0}
 			<ul>
 				{#each data.groups as group (group.id)}
-					<li><a href="/group/{group.id}">{group.name}</a></li>
+					<li><a href={resolve('/group/[group_id]', { group_id: group.id })}>{group.name}</a></li>
 				{/each}
 			</ul>
 		{:else}
@@ -34,7 +35,7 @@
 				<ul>
 					{#each data.searchResults as group (group.id)}
 						<li>
-							<a href="/group/{group.id}">{group.name}</a>
+							<a href={resolve('/group/[group_id]', { group_id: group.id })}>{group.name}</a>
 							{#if group.description}
 								<p class="description">{group.description}</p>
 							{/if}
@@ -50,7 +51,7 @@
 	<section>
 		<h3>Neue Gruppe</h3>
 		<div class="actions">
-			<a class="button" href="/group/new">Neue Gruppe anlegen</a>
+			<a class="button" href={resolve('/group/new')}>Neue Gruppe anlegen</a>
 		</div>
 	</section>
 </article>

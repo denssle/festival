@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { untrack } from 'svelte';
 	import { dateToHHMM, dateToString } from '$lib/utils/date.util';
 	import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
@@ -53,6 +54,6 @@
 		</p>
 
 		<button type="submit">Speichern</button>
-		<a class="button" href={'/festival/' + data.id}>Zurück</a>
+		<a class="button" href={resolve('/festival/[festival_id]', { festival_id: data.id })}>Zurück</a>
 	</form>
 </article>

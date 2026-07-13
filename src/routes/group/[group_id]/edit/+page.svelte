@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
 
@@ -24,7 +25,7 @@
 			{/if}
 
 			<button type="submit">Speichern</button>
-			<a class="button secondary" href="/group/{data.group.id}">Abbrechen</a>
+			<a class="button secondary" href={resolve('/group/[group_id]', { group_id: data.group.id })}>Abbrechen</a>
 		</form>
 	</section>
 </article>

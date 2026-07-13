@@ -1,3 +1,7 @@
+<script lang="ts">
+	import { resolve } from '$app/paths';
+</script>
+
 <article>
 	<h2>Neue Gruppe anlegen</h2>
 	<section>
@@ -8,7 +12,7 @@
 			</p>
 
 			<button type="submit">Speichern</button>
-			<a class="button" href="/group">Zurück</a>
+			<a class="button" href={resolve('/group')}>Zurück</a>
 		</form>
 	</section>
 </article>
