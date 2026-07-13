@@ -1,9 +1,9 @@
 import { DataTypes, Model, ModelStatic } from 'sequelize';
-import { CommentAttributes } from '$lib/db/attributes/comment.attributes';
+import { CommentAttributes, CommentCreationAttributes } from '$lib/db/attributes/comment.attributes';
 
 import { sequelize } from '$lib/db/sequelize';
 
-export const Comment: ModelStatic<Model<CommentAttributes, any>> = sequelize.define(
+export const Comment: ModelStatic<Model<CommentAttributes, CommentCreationAttributes>> = sequelize.define(
 	'comment',
 	{
 		id: { type: DataTypes.STRING, primaryKey: true, allowNull: false },

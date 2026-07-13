@@ -1,6 +1,7 @@
 import { BackendGuestInformation } from '$lib/models/guestInformation/BackendGuestInformation';
 import { FrontendGuestInformation } from '$lib/models/guestInformation/FrontendGuestInformation';
 import { UserService } from '$lib/services/user.service';
+import type { Optional } from 'sequelize';
 
 export type GuestInformationAttributes = {
 	id: string;
@@ -14,6 +15,12 @@ export type GuestInformationAttributes = {
 	FestivalEventId: string;
 	UserId: string;
 };
+
+/** Attribute beim Anlegen: Pflicht sind nur `id`, `FestivalEventId` und `UserId`. */
+export type GuestInformationCreationAttributes = Optional<
+	GuestInformationAttributes,
+	'createdAt' | 'updatedAt' | 'food' | 'drink' | 'numberOfOtherGuests' | 'coming' | 'comment'
+>;
 
 export async function mapToFrontendGuestInformation(
 	dataValues: GuestInformationAttributes

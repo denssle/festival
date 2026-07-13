@@ -1,3 +1,5 @@
+import type { Optional } from 'sequelize';
+
 export type UserImageAttributes = {
 	id: string;
 	UserId: string;
@@ -5,3 +7,6 @@ export type UserImageAttributes = {
 	createdAt: Date;
 	updatedAt: Date;
 };
+
+/** Attribute beim Anlegen: Zeitstempel setzt Sequelize. */
+export type UserImageCreationAttributes = Optional<UserImageAttributes, 'createdAt' | 'updatedAt'>;

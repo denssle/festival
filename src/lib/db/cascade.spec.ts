@@ -15,6 +15,7 @@ import { FestivalEventService } from '$lib/services/festival-event.service';
 import { GroupService } from '$lib/services/group.service';
 import { FriendshipService } from '$lib/services/friendship.service';
 import { CommentService } from '$lib/services/comment.service';
+import type { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
 
 async function createUser(nickname: string): Promise<string> {
 	const id = crypto.randomUUID();
@@ -47,7 +48,7 @@ describe('Beziehungen & Kaskadenlöschungen', () => {
 		const userId = await createUser('owner' + Date.now());
 		const otherId = await createUser('other' + Date.now());
 
-		await UserImage.create({ id: crypto.randomUUID(), UserId: userId, image: 'data:image/png;base64,AA' });
+		await UserImage.create({ id: crypto.randomUUID(), UserId: userId, image: Buffer.from('fake-image') });
 		await SessionToken.create({ UserId: userId, token: 'token' });
 		const festivalId = await createFestival(userId);
 		await GuestInformation.create({
@@ -95,7 +96,8 @@ describe('Beziehungen & Kaskadenlöschungen', () => {
 		await CommentService.saveComment(guestId, festivalId, 'Bin dabei');
 		await CommentService.saveComment(guestId, otherFestivalId, 'Anderes Festival');
 
-		const result = await FestivalEventService.deleteFestival({ id: ownerId } as any, festivalId);
+		const owner: SessionTokenUser = { id: ownerId, token: 'test-token', nickname: 'fowner', email: '' };
+		const result = await FestivalEventService.deleteFestival(owner, festivalId);
 
 		expect(result).toBe('Success');
 		expect(await GuestInformation.count()).toBe(0);

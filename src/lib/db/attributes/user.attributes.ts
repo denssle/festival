@@ -1,4 +1,5 @@
 import type { BackendUser } from '$lib/models/user/BackendUser';
+import type { Optional } from 'sequelize';
 
 export type UserAttributes = {
 	id: string;
@@ -10,6 +11,16 @@ export type UserAttributes = {
 	createdAt: Date;
 	updatedAt: Date;
 };
+
+/**
+ * Attribute beim Anlegen (2. Generic von `Model<TAttributes, TCreationAttributes>`):
+ * Zeitstempel setzt Sequelize, die restlichen Felder sind in der Model-Definition
+ * `allowNull` (siehe src/lib/db/model/user.ts).
+ */
+export type UserCreationAttributes = Optional<
+	UserAttributes,
+	'createdAt' | 'updatedAt' | 'forename' | 'lastname' | 'email'
+>;
 
 export function convertToBackendUser(dataValues: UserAttributes): BackendUser {
 	return {

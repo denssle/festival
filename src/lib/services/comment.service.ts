@@ -6,7 +6,7 @@ import { User } from '$lib/db/model/user';
 import { Op } from 'sequelize';
 import { FrontendUser } from '$lib/models/user/FrontendUser';
 import { UserService } from '$lib/services/user.service';
-import { UserAttributes } from '$lib/db/attributes/user.attributes';
+import { convertToBackendUser, UserAttributes } from '$lib/db/attributes/user.attributes';
 
 export class CommentService {
 	static async saveComment(who: string, where: string, comment: string) {
@@ -34,7 +34,7 @@ export class CommentService {
 		const userMap = new Map<string, FrontendUser>();
 		for (const u of users) {
 			const attrs = u.get({ plain: true }) as UserAttributes;
-			userMap.set(attrs.id, UserService.parseBackendUserToFrontend(attrs as any));
+			userMap.set(attrs.id, UserService.parseBackendUserToFrontend(convertToBackendUser(attrs)));
 		}
 
 		return comments.map((value) => ({

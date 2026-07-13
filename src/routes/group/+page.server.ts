@@ -19,7 +19,9 @@ export const load: PageServerLoad = async ({ cookies, url }) => {
 			include: [{ model: Group, as: 'Group' }]
 		});
 
-		groups = members.map((m: any) => m.Group?.dataValues as GroupAttributes).filter(Boolean);
+		groups = members
+			.map((m) => m.dataValues.Group?.dataValues)
+			.filter((group): group is GroupAttributes => group !== undefined);
 	}
 
 	if (searchTerm) {

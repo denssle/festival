@@ -4,6 +4,7 @@ import { Group } from '$lib/db/model/group';
 import { GroupMember } from '$lib/db/model/groupMember';
 import { User } from '$lib/db/model/user';
 import type { GroupAttributes } from '$lib/db/attributes/group.attributes';
+import { convertToBackendUser, type UserAttributes } from '$lib/db/attributes/user.attributes';
 import { UserService } from '$lib/services/user.service';
 import { GroupService } from '$lib/services/group.service';
 
@@ -22,11 +23,16 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
 		include: [{ model: User, as: 'User' }]
 	});
 
-	const isMember = user ? members.some((m: any) => m.UserId === user.id) : false;
+	const isMember = user ? members.some((m) => m.dataValues.UserId === user.id) : false;
 
 	return {
 		group: groupModel.dataValues as GroupAttributes,
-		members: members.map((m: any) => m.User?.dataValues).filter(Boolean),
+		// Nur FrontendUser ausliefern: die rohen UserAttributes enthalten Passwort-Hash
+		// und E-Mail und dürfen den Server nicht verlassen.
+		members: members
+			.map((m) => m.dataValues.User?.dataValues)
+			.filter((attrs): attrs is UserAttributes => attrs !== undefined)
+			.map((attrs) => UserService.parseBackendUserToFrontend(convertToBackendUser(attrs))),
 		// Nur die für die UI nötigen Felder ausliefern – niemals das Session-Token an den Client geben
 		currentUser: user ? { id: user.id, nickname: user.nickname } : null,
 		isMember

@@ -1,7 +1,7 @@
 import { FriendRequestData } from '$lib/models/updates/FriendRequestData';
 import { UserService } from '$lib/services/user.service';
-import { Model } from 'sequelize';
-import { convertToBackendUser, UserAttributes } from '$lib/db/attributes/user.attributes';
+import { Model, type Optional } from 'sequelize';
+import { convertToBackendUser, UserAttributes, UserCreationAttributes } from '$lib/db/attributes/user.attributes';
 
 export type FriendRequestAttributes = {
 	id: string;
@@ -11,9 +11,15 @@ export type FriendRequestAttributes = {
 	updatedAt: Date;
 	// Optional eager-geladene Nutzer (via include: { model: User, as: 'sender'/'receiver' }).
 	// Werden genutzt, um den N+1-Query pro Anfrage zu vermeiden.
-	sender?: Model<UserAttributes, any>;
-	receiver?: Model<UserAttributes, any>;
+	sender?: Model<UserAttributes, UserCreationAttributes>;
+	receiver?: Model<UserAttributes, UserCreationAttributes>;
 };
+
+/** Attribute beim Anlegen: Pflicht sind nur `id`, `senderId` und `receiverId`. */
+export type FriendRequestCreationAttributes = Optional<
+	FriendRequestAttributes,
+	'createdAt' | 'updatedAt' | 'sender' | 'receiver'
+>;
 
 export async function convertToFriendRequest(attribute: FriendRequestAttributes): Promise<FriendRequestData> {
 	// Nutzer bevorzugt aus den eager-geladenen Assoziationen lesen (kein N+1);
