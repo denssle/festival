@@ -37,6 +37,24 @@ export default ts.config(
 		}
 	},
 	{
+		// Scharf ab v0.7.23: Identität kommt ausschließlich aus locals.currentUser
+		// (vom Auth-Hook aus der DB geladen). Direkter Zugriff auf den Session-Cookie
+		// ist nur im Hook selbst und im UserService (createSession/logout) erlaubt –
+		// überall sonst wäre er eine Umgehung der zentralen Session-Validierung.
+		files: ['src/**/*.ts', 'src/**/*.svelte'],
+		ignores: ['src/hooks.server.ts', 'src/lib/services/user.service.ts'],
+		rules: {
+			'no-restricted-syntax': [
+				'error',
+				{
+					selector: "CallExpression[callee.property.name=/^(get|set|delete)$/][arguments.0.value='session']",
+					message:
+						'Session-Cookie nicht direkt lesen/schreiben – Identität kommt aus locals.currentUser (Auth-Hook); Session-Verwaltung gehört in den UserService.'
+				}
+			]
+		}
+	},
+	{
 		// Ersetzt die frühere .eslintignore (ab ESLint 9 nicht mehr unterstützt)
 		ignores: [
 			'.DS_Store',
