@@ -15,10 +15,11 @@
 
 ## 2. Datenbank (Sequelize) Best Practices
 
-- **Triad Rule:** Bei JEDER Änderung an Datenbankfeldern müssen IMMER diese drei Stellen aktualisiert werden:
+- **Quadrat Rule (früher Triad):** Bei JEDER Änderung an Datenbankfeldern müssen IMMER diese vier Stellen aktualisiert werden:
   1. `src/lib/db/attributes/*.attributes.ts` (Interface **und** der zugehörige `*CreationAttributes`-Typ)
   2. `src/lib/db/model/*.ts` (Sequelize Model Definition)
   3. `src/lib/db/db.ts` (Assoziationen/Beziehungen)
+  4. **Neue Migrationsdatei** in `src/lib/db/migrations/` (fortlaufend nummeriert, z. B. `0002-<beschreibung>.ts`, mit `up`/`down` auf `QueryInterface`). Die Baseline `0001-initial-schema.ts` ist EINGEFROREN und wird nie geändert. Der Drift-Test `migrations.spec.ts` schlägt fehl, wenn Modelle und Migrationen nicht mehr dasselbe Schema ergeben – er ist die Absicherung dieser Regel.
 - **Typisierte Modelle (kein `any`):** Jedes Modell ist als `ModelStatic<Model<XAttributes, XCreationAttributes>>` typisiert. Der Creation-Typ wird in der Attributes-Datei per `Optional<XAttributes, K>` abgeleitet; optional sind dort genau die Zeitstempel (`createdAt`/`updatedAt`), die `allowNull`-Spalten und die nur per `include` geladenen Assoziationen. Damit prüft TypeScript alle `.create()`-Aufrufe. `@typescript-eslint/no-explicit-any` steht auf `error` – neue `any` lassen den Lint fehlschlagen.
 - **Explizite Fremdschlüssel:** Um "Duplicate column name"-Fehler bei `sequelize.sync({ alter: true })` zu vermeiden, müssen Fremdschlüssel (z. B. `UserId`, `FestivalEventId`) **sowohl** in der Model-Definition (`src/lib/db/model/*.ts`) **als auch** explizit in der Assoziationsdefinition (`src/lib/db/db.ts`) unter `foreignKey` angegeben werden.
 - **Modelle & Beziehungen:**
@@ -31,7 +32,11 @@
 - **Primärschlüssel:** `DataTypes.STRING` mit `crypto.randomUUID()` für eindeutige IDs verwenden.
 - **Asynchronität:** **IMMER** `async/await` mit `try/catch` in Services nutzen. `.then()` vermeiden.
 - **Kaskadierung:** `onDelete: 'CASCADE'` in `db.ts` sicherstellen.
-- **Initialisierung:** Erfolgt über `startDB()` in `src/lib/db/db.ts` und nutzt ein schlichtes `sync()` (**kein** `alter`/`force`). `sync()` legt fehlende Tabellen an und lässt bestehende unangetastet. In Test-/Dev-Umgebungen läuft die DB als frisches In-Memory-SQLite (siehe `sequelize.ts`) – dort baut `sync()` die Tabellen bei jedem Start von Grund auf. In Produktion (echte MariaDB) werden die Tabellen beim ersten Start angelegt; **spätere Modelländerungen an einer bereits befüllten DB werden NICHT automatisch übernommen** und erfordern echte Migrationen (siehe TODO). `alter` wurde bewusst entfernt, um versehentlichen Datenverlust durch heuristische Schemaänderungen zu vermeiden. Sauberkeit zwischen E2E-Tests stellt der `/api/test/reset`-Endpoint her (truncate, setzt existierende Tabellen voraus).
+- **Initialisierung (seit v0.7.24 zweigleisig):** Erfolgt über `startDB()` in `src/lib/db/db.ts` und verzweigt nach Dialekt:
+  - **MariaDB (Prod):** Schema kommt AUSSCHLIESSLICH aus Migrationen. `umzug.up()` (Runner in `src/lib/db/migrations.ts`, Dateien in `src/lib/db/migrations/`, Protokoll in Tabelle `SequelizeMeta`) führt beim Serverstart nur Pending-Migrationen aus – idempotent. Die Migrationen werden per `import.meta.glob` zur Build-Zeit ins Bundle eingesammelt (kein Dateisystem-Ordner zur Laufzeit, keine CLI auf dem Host). Kein `sync()`/`alter` gegen die echte DB. Eine fehlgeschlagene Migration verhindert den Serverstart (fail-fast, beabsichtigt).
+  - **SQLite (Dev/Tests):** frisches In-Memory-SQLite (siehe `sequelize.ts`), `sync()` baut die Tabellen bei jedem Start dialektfrei aus den Modellen auf. Dass beide Pfade dasselbe Schema ergeben, sichert der Drift-Test `src/lib/db/migrations.spec.ts`.
+  - `startDB()` wirft bei DB-/Migrationsfehlern (fail-fast statt „erfolgreich" ohne DB zu starten); der Fehler propagiert durchs Top-Level-await in `hooks.server.ts`, der Prozess startet nicht.
+  - Sauberkeit zwischen E2E-Tests stellt der `/api/test/reset`-Endpoint her (truncate, setzt existierende Tabellen voraus).
 - **Eager Loading (Include):** Falls ein Alias in `db.ts` definiert wurde (z.B. `as: 'EventGuests'`), muss dieser Alias zwingend auch im `include`-Statement im Service/Server-Loader verwendet werden, um `SequelizeEagerLoadingError` zu vermeiden. Achten Sie auf eindeutige Aliase bei mehreren Beziehungen zum selben Modell (z.B. `EventGuests` vs. `UserGuestInfos`).
 
 ## 3. SvelteKit & UI
@@ -123,5 +128,5 @@ In `src/lib/db/sequelize.ts` schaltet die App auf eine **flüchtige In-Memory-SQ
 ## 7. Offene Punkte / TODOs
 
 - `SessionToken`: Unterstützung mehrerer Sitzungen pro Benutzer evaluieren (aktuell 1 Token/User, da `UserId` = PK). _Erledigt (v0.7.2): serverseitige Token-Ablaufprüfung (`isSessionTokenExpired`, absolute Lebensdauer `SESSION_MAX_AGE_MS`)._
-- **Datenbank-Konsistenz:** Langfristig auf echte Migrationen statt `sync({ alter: true })` umstellen. _Aktuell unkritisch, solange die Prod-DB leer ist (kein Datenverlust-Risiko); vor dem ersten echten Datenbestand angehen._
+- **Datenbank-Konsistenz:** ~~Langfristig auf echte Migrationen statt `sync({ alter: true })` umstellen.~~ _Erledigt (v0.7.24): umzug-Migrationen für MariaDB (siehe Abschnitt 2, „Initialisierung"). Offen bleibt der CI-Job mit MariaDB-Container als dialektspezifischer Drift-Schutz (siehe TODO.md)._
 - **Frontend-Validierung:** Ergänzung von clientseitiger Validierung (z.B. Zod) zur Verbesserung der UX.

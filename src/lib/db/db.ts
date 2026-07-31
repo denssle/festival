@@ -5,6 +5,7 @@ import { SessionToken } from '$lib/db/model/sessionToken';
 import { Group } from '$lib/db/model/group';
 import { FestivalEvent } from '$lib/db/model/festivalEvent';
 import { sequelize } from '$lib/db/sequelize';
+import { createMigrator } from '$lib/db/migrations';
 import { FriendRequest } from '$lib/db/model/friendRequest';
 import { GroupMember } from '$lib/db/model/groupMember';
 import { Friendship } from '$lib/db/model/friendship';
@@ -89,17 +90,26 @@ export async function startDB(): Promise<void> {
 		await sequelize.authenticate();
 		console.log('Connection has been established successfully.');
 
-		// Kein alter/force: sync() legt fehlende Tabellen an und lässt bestehende
-		// unangetastet. In Test-/Dev-Umgebungen ist die DB ein frisches In-Memory-SQLite
-		// (siehe sequelize.ts), das sync() bei jedem Prozessstart von Grund auf aufbaut.
-		// In Produktion (echte MariaDB) werden die Tabellen beim ersten Start angelegt;
-		// spätere Modelländerungen an einer bereits befüllten DB erfordern echte Migrationen
-		// (siehe TODO) – bewusst KEIN alter, um versehentlichen Datenverlust durch
-		// heuristische Schemaänderungen zu vermeiden.
-		// Sauberkeit zwischen E2E-Tests stellt der /api/test/reset-Endpoint her.
-		await sequelize.sync();
+		if (sequelize.getDialect() === 'mariadb') {
+			// Produktion: Schema kommt AUSSCHLIESSLICH aus Migrationen (umzug, Tabelle
+			// SequelizeMeta). Führt nur Pending-Migrationen aus → idempotent bei jedem
+			// Start. Modelländerungen brauchen eine neue Migrationsdatei (Quadrat-Regel
+			// in CLAUDE.md) – bewusst kein sync()/alter gegen die echte DB.
+			await createMigrator(sequelize).up();
+		} else {
+			// Dev/Tests: frisches In-Memory-SQLite (siehe sequelize.ts) – sync() baut die
+			// Tabellen bei jedem Prozessstart dialektfrei aus den Modellen auf. Dass
+			// Migrationen und Modelle dasselbe Schema ergeben, sichert migrations.spec.ts.
+			// Sauberkeit zwischen E2E-Tests stellt der /api/test/reset-Endpoint her.
+			await sequelize.sync();
+		}
 		dbStarted = true;
 	} catch (error) {
-		console.error('Unable to connect to the database:', error);
+		// Fail-fast: ohne DB (oder mit fehlgeschlagener Migration) darf der Server nicht
+		// "erfolgreich" starten und dann auf jedem Request werfen. Der Fehler propagiert
+		// durch das Top-Level-await in hooks.server.ts → Prozess startet nicht; Supervisor
+		// + Health-Check im Deploy machen das sichtbar.
+		console.error('Unable to start the database:', error);
+		throw error;
 	}
 }
