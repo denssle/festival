@@ -10,15 +10,14 @@ import { MIN_PASSWORD_LENGTH } from '$lib/constants';
 /**
  * load – GET /registration
  *
- * Prüft ob der Nutzer bereits eingeloggt ist.
+ * Prüft ob der Nutzer bereits eingeloggt ist (Session hat der Auth-Hook
+ * bereits validiert und in locals abgelegt).
  * Leitet bei gültiger Session auf die Startseite weiter.
  *
- * @param cookies - Session-Cookie zur Validierung
  * @returns { success: true } wenn kein aktiver Login vorhanden
  */
-export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): Promise<StandardResponse> => {
-	const valid: boolean = await UserService.validateSessionToken(cookies.get('session'));
-	if (valid) {
+export const load: PageServerLoad = async ({ locals }): Promise<StandardResponse> => {
+	if (locals.currentUser) {
 		redirect(303, '/');
 	}
 	return { success: true };
@@ -55,7 +54,7 @@ export const actions: Actions = {
 			} else {
 				const user: BackendUser | null = await UserService.register(formData.nickname, formData.password);
 				if (user) {
-					await UserService.createSessionCookie(cookies, locals, user, true);
+					await UserService.createSession(cookies, locals, user);
 					redirect(302, '/');
 				} else {
 					return { success: false, message: 'User creation failed' };

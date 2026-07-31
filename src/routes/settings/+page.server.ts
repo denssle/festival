@@ -1,5 +1,5 @@
 import { type Actions } from '@sveltejs/kit';
-import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
+import { CurrentUser } from '$lib/models/user/CurrentUser';
 import { UserService } from '$lib/services/user.service';
 import { StandardResponse } from '$lib/models/transferData/StandardResponse';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
@@ -23,7 +23,7 @@ import { validatePasswordChange } from '$lib/services/user.logic';
  */
 export const actions: Actions = {
 	default: async ({ cookies, request, locals }): Promise<StandardResponse> => {
-		const user: SessionTokenUser | null = UserService.extractUser(cookies.get('session'));
+		const user: CurrentUser | undefined = locals.currentUser;
 		if (!user) {
 			return { success: false, message: 'Password change failed' };
 		}
@@ -46,10 +46,10 @@ export const actions: Actions = {
 			return { success: false, message: 'Current password is incorrect' };
 		}
 
-		const result: ChangeResult = await UserService.updatePassword(user, password!);
+		const result: ChangeResult = await UserService.updatePassword(user.id, password!);
 		if (result === 'Success') {
 			// Session-Token rotieren: Alt-Token wird in der DB ersetzt und verliert Gültigkeit.
-			await UserService.createSessionCookie(cookies, locals, user, true);
+			await UserService.createSession(cookies, locals, user);
 			return { success: true, message: 'Password changed' };
 		}
 		return { success: false, message: result };

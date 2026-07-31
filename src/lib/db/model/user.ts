@@ -8,7 +8,9 @@ export const User: ModelStatic<Model<UserAttributes, UserCreationAttributes>> = 
 	{
 		id: { type: DataTypes.STRING, primaryKey: true, allowNull: false },
 		password: { type: DataTypes.STRING, allowNull: false },
-		nickname: { type: DataTypes.STRING, allowNull: false },
+		// unique: Eindeutigkeit muss die DB erzwingen – die check-then-create-Prüfungen
+		// in den Services sind bei parallelen Requests nicht ausreichend (Race Condition).
+		nickname: { type: DataTypes.STRING, allowNull: false, unique: true },
 		forename: { type: DataTypes.STRING },
 		lastname: { type: DataTypes.STRING },
 		email: { type: DataTypes.STRING }

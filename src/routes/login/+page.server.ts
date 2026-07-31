@@ -1,4 +1,4 @@
-import type { Actions, Cookies } from '@sveltejs/kit';
+import type { Actions } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { UserService } from '$lib/services/user.service';
@@ -11,15 +11,14 @@ import { loginRateLimitKey } from '$lib/services/rate-limit.logic';
 /**
  * load – GET /login
  *
- * Prüft ob der Nutzer bereits eingeloggt ist.
+ * Prüft ob der Nutzer bereits eingeloggt ist (Session hat der Auth-Hook
+ * bereits validiert und in locals abgelegt).
  * Leitet bei gültiger Session auf die Startseite weiter.
  *
- * @param cookies - Session-Cookie zur Validierung
  * @returns { success: true } wenn kein aktiver Login vorhanden
  */
-export const load: PageServerLoad = async ({ cookies }: { cookies: Cookies }): Promise<StandardResponse> => {
-	const valid: boolean = await UserService.validateSessionToken(cookies.get('session'));
-	if (valid) {
+export const load: PageServerLoad = async ({ locals }): Promise<StandardResponse> => {
+	if (locals.currentUser) {
 		redirect(303, '/');
 	}
 	return { success: true };
@@ -50,7 +49,7 @@ export const actions: Actions = {
 			const user: BackendUser | null = await UserService.loginWithCredentials(formData.nickname, formData.password);
 			if (user) {
 				loginRateLimiter.reset(rateLimitKey);
-				await UserService.createSessionCookie(cookies, locals, user, true);
+				await UserService.createSession(cookies, locals, user);
 				redirect(302, '/');
 			} else {
 				loginRateLimiter.recordFailure(rateLimitKey);

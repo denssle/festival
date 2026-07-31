@@ -2,7 +2,7 @@ import { Group } from '$lib/db/model/group';
 import { GroupMember } from '$lib/db/model/groupMember';
 import { GroupAttributes } from '$lib/db/attributes/group.attributes';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
-import { Op } from 'sequelize';
+import { Op, UniqueConstraintError } from 'sequelize';
 import { sequelize } from '$lib/db/sequelize';
 
 export class GroupService {
@@ -116,6 +116,10 @@ export class GroupService {
 
 			return 'Success';
 		} catch (error) {
+			// Paralleler Request war schneller – der Unique-Index (GroupId, UserId) greift
+			if (error instanceof UniqueConstraintError) {
+				return 'Already in Group';
+			}
 			console.error('Fehler beim Beitreten der Gruppe:', error);
 			return 'Failure';
 		}

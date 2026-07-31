@@ -23,6 +23,9 @@ export const FriendRequest: ModelStatic<Model<FriendRequestAttributes, FriendReq
 		{
 			timestamps: true,
 			createdAt: true,
-			updatedAt: true
+			updatedAt: true,
+			// Deckt nur die Richtung (senderId, receiverId) ab – die Gegenrichtung wird
+			// in FriendshipService.createFriendRequest per friendRequestExisting geprüft.
+			indexes: [{ unique: true, fields: ['senderId', 'receiverId'] }]
 		}
 	);

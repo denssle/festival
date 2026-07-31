@@ -2,12 +2,11 @@ import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { Group } from '$lib/db/model/group';
 import type { GroupAttributes } from '$lib/db/attributes/group.attributes';
-import { UserService } from '$lib/services/user.service';
 import { GroupService } from '$lib/services/group.service';
 
-export const load: PageServerLoad = async ({ params, cookies }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
 	const { group_id } = params;
-	const user = UserService.extractUser(cookies.get('session'));
+	const user = locals.currentUser ?? null;
 
 	if (!user) {
 		throw redirect(302, '/login');
@@ -31,9 +30,9 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
 };
 
 export const actions: Actions = {
-	default: async ({ params, cookies, request }) => {
+	default: async ({ params, locals, request }) => {
 		const { group_id } = params;
-		const user = UserService.extractUser(cookies.get('session'));
+		const user = locals.currentUser ?? null;
 
 		if (!user) {
 			return fail(401, { message: 'Nicht angemeldet' });

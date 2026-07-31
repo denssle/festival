@@ -4,8 +4,8 @@ import type { FrontendUser } from '../models/user/FrontendUser';
 import type { UserFormData } from '$lib/models/user/UserFormData';
 import type { Cookies } from '@sveltejs/kit';
 import { convertToBackendUser, UserAttributes, UserCreationAttributes } from '$lib/db/attributes/user.attributes';
-import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
-import { Model } from 'sequelize';
+import { CurrentUser } from '$lib/models/user/CurrentUser';
+import { Model, UniqueConstraintError } from 'sequelize';
 import { UserImageAttributes, UserImageCreationAttributes } from '$lib/db/attributes/userImage.attributes';
 import { NickPassData } from '$lib/models/transferData/NickPassData';
 import { SessionTokenAttributes } from '$lib/db/attributes/sessionToken.attributes';
@@ -13,18 +13,11 @@ import { User } from '$lib/db/model/user';
 import { UserImage } from '$lib/db/model/userImage';
 import { SessionToken } from '$lib/db/model/sessionToken';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
-import { isSessionTokenExpired, resolveSessionToken } from '$lib/services/user.logic';
+import { isSessionTokenExpired } from '$lib/services/user.logic';
 import { SESSION_MAX_AGE_MS, SESSION_MAX_AGE_SECONDS } from '$lib/constants';
 import { dev } from '$app/environment';
 
 export class UserService {
-	static async userExists(extractedUser: SessionTokenUser | null): Promise<boolean> {
-		if (extractedUser) {
-			return (await this.getByNickname(extractedUser?.nickname)) !== null;
-		}
-		return false;
-	}
-
 	private static async getByNickname(nickname: string): Promise<Model<UserAttributes, UserCreationAttributes> | null> {
 		return await User.findOne({
 			where: {
@@ -63,13 +56,21 @@ export class UserService {
 			if (email && (await this.emailInvalid(email))) {
 				return null;
 			}
-			const model = await User.create({
-				id: crypto.randomUUID(),
-				nickname: nickname,
-				password: this.saltPassword(password),
-				...(email ? { email } : {})
-			});
-			return convertToBackendUser(model.dataValues);
+			try {
+				const model = await User.create({
+					id: crypto.randomUUID(),
+					nickname: nickname,
+					password: this.saltPassword(password),
+					...(email ? { email } : {})
+				});
+				return convertToBackendUser(model.dataValues);
+			} catch (error) {
+				// Paralleler Request hat den Nickname zuerst registriert – der Unique-Index greift
+				if (error instanceof UniqueConstraintError) {
+					return null;
+				}
+				throw error;
+			}
 		}
 		return null;
 	}
@@ -88,63 +89,53 @@ export class UserService {
 		return null;
 	}
 
-	static async logout(user: SessionTokenUser | null, cookies: Cookies, locals: App.Locals): Promise<void> {
+	static async logout(cookies: Cookies, locals: App.Locals): Promise<void> {
+		const token: string | undefined = cookies.get('session');
 		locals.currentUser = undefined;
 		cookies.delete('session', { path: '/' });
-		if (user) {
+		if (token) {
 			await SessionToken.destroy({
 				where: {
-					UserId: user.id,
-					token: user.token
+					token: token
 				}
 			});
 		}
 	}
 
-	static async validateSessionToken(userString: string | undefined): Promise<boolean> {
-		const user: SessionTokenUser | null = this.extractUser(userString);
-		if (user) {
-			const found: SessionTokenAttributes | undefined = await this.loadToken(user.id);
-			if (found && found.token) {
-				if (found.token !== user.token) {
-					return false;
-				}
-				if (isSessionTokenExpired(found.updatedAt, SESSION_MAX_AGE_MS)) {
-					console.info('session validation: token expired', user.id);
-					return false;
-				}
-				return true;
-			} else {
-				console.error('session validation: no user in db found', user);
-			}
-		}
-		return false;
-	}
-
-	private static async loadToken(userId: string): Promise<SessionTokenAttributes | undefined> {
-		const model = await SessionToken.findOne({
-			where: {
-				UserId: userId
-			}
-		});
-		return model?.dataValues;
-	}
-
-	static extractUser(sessionToken: string | undefined): SessionTokenUser | null {
-		if (sessionToken) {
-			try {
-				const maybeUser: SessionTokenUser = JSON.parse(sessionToken);
-				if (maybeUser) {
-					return maybeUser;
-				} else {
-					console.error('User parsing failed!');
-				}
-			} catch (e) {
-				console.error('error parsing user', e);
-			}
+	/**
+	 * Löst ein opakes Session-Token (Cookie-Wert) in den zugehörigen Nutzer auf.
+	 *
+	 * Der Cookie enthält NUR den Zufalls-Token – Identität (id/nickname/email) kommt
+	 * ausschließlich aus der DB und ist damit nicht client-manipulierbar. Abgelaufene
+	 * Tokens werden dabei direkt aus der DB entfernt.
+	 *
+	 * @returns CurrentUser bei gültiger Session, sonst null
+	 */
+	static async getCurrentUserBySessionToken(token: string | undefined): Promise<CurrentUser | null> {
+		if (!token) {
 			return null;
 		}
-		return null;
+		const model = await SessionToken.findOne({ where: { token: token } });
+		if (!model) {
+			return null;
+		}
+		const session: SessionTokenAttributes = model.dataValues;
+		if (isSessionTokenExpired(session.updatedAt, SESSION_MAX_AGE_MS)) {
+			console.info('session validation: token expired', session.UserId);
+			await model.destroy();
+			return null;
+		}
+		const user: BackendUser | null = await this.loadUserById(session.UserId);
+		if (!user) {
+			console.error('session validation: no user in db found', session.UserId);
+			return null;
+		}
+		return {
+			isAuthenticated: true,
+			id: user.id,
+			nickname: user.nickname,
+			email: user.email ?? ''
+		};
 	}
 
 	static async nickNameInvalid(nickname: string): Promise<boolean> {
@@ -233,59 +224,61 @@ export class UserService {
 		}
 	}
 
-	static async createSessionCookie(
-		cookies: Cookies,
-		locals: App.Locals,
-		user: BackendUser | SessionTokenUser,
-		forceNewToken: boolean = false
-	): Promise<void> {
-		const [token, needsDbUpsert] = resolveSessionToken(user, forceNewToken);
+	/**
+	 * Erstellt eine neue Session: generiert IMMER einen frischen Zufalls-Token,
+	 * persistiert ihn (ersetzt einen evtl. vorhandenen Token des Nutzers) und setzt
+	 * den Cookie. Wird bei Login, Registrierung und Passwortänderung (Rotation)
+	 * aufgerufen – NICHT mehr pro Request: Der Auth-Hook liest die Session nur noch.
+	 */
+	static async createSession(cookies: Cookies, locals: App.Locals, user: BackendUser | CurrentUser): Promise<void> {
+		const token: string = crypto.randomUUID();
 
-		if (needsDbUpsert) {
-			await SessionToken.upsert({
-				UserId: user.id,
-				token: token
-			});
-		}
+		await SessionToken.upsert({
+			UserId: user.id,
+			token: token
+		});
 
-		cookies.set(
-			'session',
-			JSON.stringify({
-				id: user.id,
-				token: token,
-				nickname: user.nickname
-			} as SessionTokenUser),
-			{
-				path: '/',
-				httpOnly: true, // kein Zugriff via document.cookie (XSS-Schutz)
-				sameSite: 'strict', // Cookie nur bei Same-Site-Requests (CSRF-Schutz)
-				// Secure an den Build-Modus koppeln statt an SvelteKits Auto-Erkennung:
-				// lokal/E2E läuft über http://localhost (Secure würde das Cookie verwerfen),
-				// in Prod steht die Node-App hinter einem HTTPS-Reverse-Proxy, der intern
-				// per HTTP spricht – dort würde die Auto-Erkennung Secure fälschlich weglassen.
-				secure: !dev,
-				maxAge: SESSION_MAX_AGE_SECONDS
-			}
-		);
+		// Der Cookie enthält NUR den opaken Token – niemals Identitätsdaten,
+		// die der Client manipulieren könnte.
+		cookies.set('session', token, {
+			path: '/',
+			httpOnly: true, // kein Zugriff via document.cookie (XSS-Schutz)
+			sameSite: 'strict', // Cookie nur bei Same-Site-Requests (CSRF-Schutz)
+			// Secure an den Build-Modus koppeln statt an SvelteKits Auto-Erkennung:
+			// lokal/E2E läuft über http://localhost (Secure würde das Cookie verwerfen),
+			// in Prod steht die Node-App hinter einem HTTPS-Reverse-Proxy, der intern
+			// per HTTP spricht – dort würde die Auto-Erkennung Secure fälschlich weglassen.
+			secure: !dev,
+			maxAge: SESSION_MAX_AGE_SECONDS
+		});
 		locals.currentUser = {
 			isAuthenticated: true,
 			id: user.id,
-			email: user.email,
+			email: user.email ?? '',
 			nickname: user.nickname
 		};
 	}
 
-	static async updateUser(oldUser: SessionTokenUser, formData: UserFormData): Promise<ChangeResult> {
-		const model: Model<UserAttributes, UserCreationAttributes> | null = await User.findByPk(oldUser.id);
+	static async updateUser(userId: string, formData: UserFormData): Promise<ChangeResult> {
+		const model: Model<UserAttributes, UserCreationAttributes> | null = await User.findByPk(userId);
 		if (model) {
-			if (this.isChangeAllowed(oldUser.id, model.dataValues)) {
+			if (this.isChangeAllowed(userId, model.dataValues)) {
 				model.set({
 					email: formData.email,
 					lastname: formData.lastname,
 					forename: formData.forename,
 					nickname: formData.nickname
 				});
-				await model.save();
+				try {
+					await model.save();
+				} catch (error) {
+					// Nickname-Kollision (Unique-Index) – z. B. paralleler Request oder
+					// eine Race mit der vorgelagerten nickNameInvalid-Prüfung
+					if (error instanceof UniqueConstraintError) {
+						return 'Failure';
+					}
+					throw error;
+				}
 				return 'Success';
 			} else {
 				return 'Not authorized';
@@ -298,10 +291,10 @@ export class UserService {
 		return dataValues.id === userId;
 	}
 
-	static async updatePassword(oldUser: SessionTokenUser, password: string): Promise<ChangeResult> {
-		const model: Model<UserAttributes, UserCreationAttributes> | null = await User.findByPk(oldUser.id);
+	static async updatePassword(userId: string, password: string): Promise<ChangeResult> {
+		const model: Model<UserAttributes, UserCreationAttributes> | null = await User.findByPk(userId);
 		if (model) {
-			if (this.isChangeAllowed(oldUser.id, model.dataValues)) {
+			if (this.isChangeAllowed(userId, model.dataValues)) {
 				model.set({
 					password: this.saltPassword(password)
 				});

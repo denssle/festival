@@ -1,4 +1,3 @@
-import { UserService } from '$lib/services/user.service';
 import type { RequestHandler } from '@sveltejs/kit';
 import { GuestInformationService } from '$lib/services/guest-information.service';
 import { FestivalEventService } from '$lib/services/festival-event.service';
@@ -14,9 +13,9 @@ import { FestivalEventService } from '$lib/services/festival-event.service';
  * @param request - Body enthält als JSON einen optionalen Kommentar: { comment?: string }
  * @returns 200 bei Erfolg, 401 wenn nicht eingeloggt, 400 bei fehlender festival_id
  */
-export const POST: RequestHandler = async ({ cookies, params, request }) => {
-	const extractUser = UserService.extractUser(cookies.get('session'));
-	if (!extractUser) {
+export const POST: RequestHandler = async ({ locals, params, request }) => {
+	const currentUser = locals.currentUser ?? null;
+	if (!currentUser) {
 		return new Response('Unauthorized', { status: 401 });
 	}
 
@@ -27,7 +26,7 @@ export const POST: RequestHandler = async ({ cookies, params, request }) => {
 		if (!festival) {
 			return new Response('Festival not found', { status: 404 });
 		}
-		await GuestInformationService.cancelInvitation(extractUser, params.festival_id, comment);
+		await GuestInformationService.cancelInvitation(currentUser, params.festival_id, comment);
 		return new Response(null, { status: 200 });
 	}
 	return new Response('Bad Request', { status: 400 });

@@ -11,6 +11,6 @@ import { UserService } from '$lib/services/user.service';
  * @returns 303 Redirect zur Startseite
  */
 export const POST: RequestHandler = async ({ cookies, locals }): Promise<Response> => {
-	await UserService.logout(UserService.extractUser(cookies.get('session')), cookies, locals);
+	await UserService.logout(cookies, locals);
 	return new Response(null, { status: 303 });
 };

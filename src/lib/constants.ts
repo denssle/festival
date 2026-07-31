@@ -1,9 +1,9 @@
-export const MIN_PASSWORD_LENGTH = 3;
+export const MIN_PASSWORD_LENGTH = 8;
 
 /**
  * Maximale absolute Lebensdauer eines Session-Tokens.
  * Wird sowohl für das Cookie-`maxAge` als auch für die serverseitige
- * Ablaufprüfung in `validateSessionToken` verwendet, damit beide konsistent sind.
+ * Ablaufprüfung in `getCurrentUserBySessionToken` verwendet, damit beide konsistent sind.
  */
 export const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30; // 30 Tage
 export const SESSION_MAX_AGE_MS = SESSION_MAX_AGE_SECONDS * 1000;

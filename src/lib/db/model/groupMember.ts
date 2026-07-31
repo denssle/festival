@@ -12,6 +12,7 @@ export const GroupMember: ModelStatic<Model<GroupMemberAttributes, GroupMemberCr
 	{
 		timestamps: true,
 		createdAt: true,
-		updatedAt: true
+		updatedAt: true,
+		indexes: [{ unique: true, fields: ['GroupId', 'UserId'] }]
 	}
 );

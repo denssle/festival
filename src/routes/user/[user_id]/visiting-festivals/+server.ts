@@ -2,7 +2,6 @@ import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { FestivalEventService } from '$lib/services/festival-event.service';
 import { VisitingFestival } from '$lib/models/user/VisitingFestival';
-import { UserService } from '$lib/services/user.service';
 import { FriendshipService } from '$lib/services/friendship.service';
 
 /**
@@ -17,9 +16,9 @@ import { FriendshipService } from '$lib/services/friendship.service';
  *          403 wenn nicht befreundet und nicht der eigene Account,
  *          400 bei fehlender user_id
  */
-export const GET: RequestHandler = async ({ params, cookies }): Promise<Response> => {
+export const GET: RequestHandler = async ({ params, locals }): Promise<Response> => {
 	const pathId: string | undefined = params.user_id;
-	const user = UserService.extractUser(cookies.get('session'));
+	const user = locals.currentUser;
 
 	if (!user) {
 		throw error(401, 'Unauthorized');

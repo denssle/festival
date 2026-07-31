@@ -15,7 +15,7 @@ import { FestivalEventService } from '$lib/services/festival-event.service';
 import { GroupService } from '$lib/services/group.service';
 import { FriendshipService } from '$lib/services/friendship.service';
 import { CommentService } from '$lib/services/comment.service';
-import type { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
+import type { CurrentUser } from '$lib/models/user/CurrentUser';
 
 async function createUser(nickname: string): Promise<string> {
 	const id = crypto.randomUUID();
@@ -96,7 +96,7 @@ describe('Beziehungen & Kaskadenlöschungen', () => {
 		await CommentService.saveComment(guestId, festivalId, 'Bin dabei');
 		await CommentService.saveComment(guestId, otherFestivalId, 'Anderes Festival');
 
-		const owner: SessionTokenUser = { id: ownerId, token: 'test-token', nickname: 'fowner', email: '' };
+		const owner: CurrentUser = { isAuthenticated: true, id: ownerId, nickname: 'fowner', email: '' };
 		const result = await FestivalEventService.deleteFestival(owner, festivalId);
 
 		expect(result).toBe('Success');

@@ -1,4 +1,4 @@
-import { Model, Op } from 'sequelize';
+import { Model, Op, UniqueConstraintError } from 'sequelize';
 import type { FrontendUser } from '$lib/models/user/FrontendUser';
 import { FriendAttributes } from '$lib/db/attributes/friend.attributes';
 import {
@@ -74,11 +74,18 @@ export class FriendshipService {
 			return;
 		}
 		if (!(await this.friendRequestExisting(senderId, receiverId))) {
-			await FriendRequest.create({
-				id: crypto.randomUUID(),
-				senderId: senderId,
-				receiverId: receiverId
-			});
+			try {
+				await FriendRequest.create({
+					id: crypto.randomUUID(),
+					senderId: senderId,
+					receiverId: receiverId
+				});
+			} catch (error) {
+				// Paralleler Request hat die Anfrage bereits angelegt – idempotent ignorieren
+				if (!(error instanceof UniqueConstraintError)) {
+					throw error;
+				}
+			}
 		}
 	}
 
@@ -130,16 +137,24 @@ export class FriendshipService {
 	}
 
 	static async addFriend(userId: string, userId2: string): Promise<void> {
-		// Der Unique-Index deckt nur (friend1Id, friend2Id) ab – die gespiegelte Zeile
-		// (friend2Id, friend1Id) wäre auf DB-Ebene erlaubt. Deshalb hier prüfen.
+		// Der Unique-Index (im friendship-Modell definiert) deckt nur (friend1Id, friend2Id)
+		// ab – die gespiegelte Zeile (friend2Id, friend1Id) wäre auf DB-Ebene erlaubt.
+		// Deshalb hier prüfen.
 		if (userId === userId2 || (await this.areFriends(userId, userId2))) {
 			return;
 		}
-		await Friendship.create({
-			id: crypto.randomUUID(),
-			friend1Id: userId,
-			friend2Id: userId2
-		});
+		try {
+			await Friendship.create({
+				id: crypto.randomUUID(),
+				friend1Id: userId,
+				friend2Id: userId2
+			});
+		} catch (error) {
+			// Paralleler Request hat die Freundschaft bereits angelegt – idempotent ignorieren
+			if (!(error instanceof UniqueConstraintError)) {
+				throw error;
+			}
+		}
 	}
 
 	private static async deleteFriendRequest(id: string, params_id: string): Promise<void> {

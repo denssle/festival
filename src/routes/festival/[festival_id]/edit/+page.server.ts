@@ -1,11 +1,9 @@
-import type { Cookies } from '@sveltejs/kit';
 import { type Actions, error, fail, redirect } from '@sveltejs/kit';
-import type { PageServerLoad, RouteParams } from './$types';
+import type { PageServerLoad } from './$types';
 import { FestivalEventService } from '$lib/services/festival-event.service';
-import { UserService } from '$lib/services/user.service';
 import { getDateFromString } from '$lib/utils/date.util';
 import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
-import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
+import { CurrentUser } from '$lib/models/user/CurrentUser';
 import { ChangeResult, getHTTPCodeForChangeResult } from '$lib/models/updates/ChangeResult';
 
 /**
@@ -15,22 +13,16 @@ import { ChangeResult, getHTTPCodeForChangeResult } from '$lib/models/updates/Ch
  * Nur der Ersteller des Festivals darf diese Seite aufrufen.
  * Andere Nutzer werden zur Startseite weitergeleitet, unbekannte Festivals ergeben 404.
  *
- * @param cookies - Session-Cookie zur Authentifizierung
+ * @param locals - enthält den vom Auth-Hook geladenen currentUser
  * @param params.festival_id - ID des zu bearbeitenden Festivals
  * @returns FrontendFestivalEvent-Objekt mit allen Festival-Daten
  */
-export const load: PageServerLoad = async ({
-	cookies,
-	params
-}: {
-	cookies: Cookies;
-	params: RouteParams;
-}): Promise<FrontendFestivalEvent> => {
+export const load: PageServerLoad = async ({ locals, params }): Promise<FrontendFestivalEvent> => {
 	const festival_id: string = params.festival_id;
 	if (festival_id) {
 		const festival: FrontendFestivalEvent | null = await FestivalEventService.getFrontEndFestival(festival_id);
 		if (festival) {
-			const user: SessionTokenUser | null = UserService.extractUser(cookies.get('session'));
+			const user: CurrentUser | undefined = locals.currentUser;
 			if (user && user.id === festival.createdBy?.id) {
 				return festival;
 			} else {
@@ -55,11 +47,11 @@ export const load: PageServerLoad = async ({
  * @returns Redirect zu /festival/:id bei Erfolg, 500 bei Fehler
  */
 export const actions: Actions = {
-	default: async ({ cookies, request, params }) => {
+	default: async ({ locals, request, params }) => {
 		const festivalId: string | undefined = params.festival_id;
 		const values: FormData = await request.formData();
 		const name: FormDataEntryValue | null = values.get('name');
-		const user = UserService.extractUser(cookies.get('session'));
+		const user = locals.currentUser ?? null;
 
 		if (!user) {
 			throw redirect(302, '/login');

@@ -8,9 +8,9 @@ import { convertToBackendUser, type UserAttributes } from '$lib/db/attributes/us
 import { UserService } from '$lib/services/user.service';
 import { GroupService } from '$lib/services/group.service';
 
-export const load: PageServerLoad = async ({ params, cookies }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
 	const { group_id } = params;
-	const user = UserService.extractUser(cookies.get('session'));
+	const user = locals.currentUser ?? null;
 
 	const groupModel = await Group.findByPk(group_id);
 
@@ -40,9 +40,9 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
 };
 
 export const actions: Actions = {
-	join: async ({ params, cookies }) => {
+	join: async ({ params, locals }) => {
 		const { group_id } = params;
-		const user = UserService.extractUser(cookies.get('session'));
+		const user = locals.currentUser ?? null;
 
 		if (!user) {
 			return fail(401, { success: false, message: 'Nicht angemeldet' });
@@ -56,9 +56,9 @@ export const actions: Actions = {
 			return fail(400, { success: false, message: result });
 		}
 	},
-	delete: async ({ params, cookies }) => {
+	delete: async ({ params, locals }) => {
 		const { group_id } = params;
-		const user = UserService.extractUser(cookies.get('session'));
+		const user = locals.currentUser ?? null;
 
 		if (!user) {
 			return fail(401, { success: false, message: 'Nicht angemeldet' });
@@ -72,9 +72,9 @@ export const actions: Actions = {
 			return fail(400, { success: false, message: result });
 		}
 	},
-	leave: async ({ params, cookies }) => {
+	leave: async ({ params, locals }) => {
 		const { group_id } = params;
-		const user = UserService.extractUser(cookies.get('session'));
+		const user = locals.currentUser ?? null;
 
 		if (!user) {
 			return fail(401, { success: false, message: 'Nicht angemeldet' });

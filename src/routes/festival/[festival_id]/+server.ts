@@ -1,5 +1,4 @@
 import { FestivalEventService } from '$lib/services/festival-event.service';
-import { UserService } from '$lib/services/user.service';
 import type { RequestHandler } from '@sveltejs/kit';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
 
@@ -13,10 +12,10 @@ import { ChangeResult } from '$lib/models/updates/ChangeResult';
  * @param params.festival_id - ID des zu löschenden Festivals
  * @returns 200 bei Erfolg, 403 bei fehlender Berechtigung, 400 bei ungültiger Anfrage
  */
-export const DELETE: RequestHandler = async ({ cookies, params }): Promise<Response> => {
+export const DELETE: RequestHandler = async ({ locals, params }): Promise<Response> => {
 	if (params && params.festival_id) {
 		const result: ChangeResult = await FestivalEventService.deleteFestival(
-			UserService.extractUser(cookies.get('session')),
+			locals.currentUser ?? null,
 			params.festival_id
 		);
 		if (result === 'Success') {

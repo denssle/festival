@@ -1,7 +1,7 @@
 import { Handle } from '@sveltejs/kit';
 import { UserService } from '$lib/services/user.service';
 import { startDB } from '$lib/db/db';
-import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
+import { CurrentUser } from '$lib/models/user/CurrentUser';
 
 await startDB();
 
@@ -13,17 +13,23 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 	if (pathname.startsWith('/_app/') || pathname.startsWith('/favicon')) {
 		return resolve(event);
 	}
-	const sessionToken: string | undefined = event.cookies.get('session');
-	const isSessionValid: boolean = await UserService.validateSessionToken(sessionToken);
-	const extractedUser: SessionTokenUser | null = UserService.extractUser(sessionToken);
 
-	if (extractedUser && isSessionValid) {
-		await UserService.createSessionCookie(event.cookies, event.locals, extractedUser);
+	// Der Cookie enthält nur einen opaken Zufalls-Token; die Identität kommt aus der DB.
+	const sessionToken: string | undefined = event.cookies.get('session');
+	const currentUser: CurrentUser | null = await UserService.getCurrentUserBySessionToken(sessionToken);
+
+	if (currentUser) {
+		event.locals.currentUser = currentUser;
 	} else {
-		await UserService.logout(extractedUser, event.cookies, event.locals);
+		event.locals.currentUser = undefined;
+		if (sessionToken) {
+			// Ungültiger/abgelaufener Token: Cookie aufräumen (DB-Cleanup übernimmt
+			// getCurrentUserBySessionToken bei Ablauf selbst)
+			event.cookies.delete('session', { path: '/' });
+		}
 	}
 
-	if (noAuthURLs.includes(pathname) || isSessionValid) {
+	if (noAuthURLs.includes(pathname) || currentUser) {
 		return resolve(event);
 	} else {
 		return new Response('Redirect', { status: 303, headers: { Location: '/login' } });

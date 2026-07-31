@@ -1,13 +1,13 @@
 {
 	"name": "festival",
-	"version": "0.7.21",
+	"version": "0.7.22",
 	"private": true,
 	"license": "MIT",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
 		"start": "node build",
-		"start-server": "PORT=5173 node build",
+		"start-server": "PORT=5173 BODY_SIZE_LIMIT=2M node build",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check . && eslint .",

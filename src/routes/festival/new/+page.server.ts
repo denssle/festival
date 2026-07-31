@@ -1,7 +1,6 @@
 import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
-import { UserService } from '$lib/services/user.service';
 import { getDateFromString } from '$lib/utils/date.util';
-import { type Actions, type Cookies, fail, redirect } from '@sveltejs/kit';
+import { type Actions, fail, redirect } from '@sveltejs/kit';
 import { FestivalEventService } from '$lib/services/festival-event.service';
 
 /**
@@ -18,8 +17,8 @@ import { FestivalEventService } from '$lib/services/festival-event.service';
  * @returns Redirect zu /festival/:id bei Erfolg, 404 wenn kein Name angegeben
  */
 export const actions: Actions = {
-	default: async ({ cookies, request }: { cookies: Cookies; request: Request }) => {
-		const user = UserService.extractUser(cookies.get('session'));
+	default: async ({ locals, request }) => {
+		const user = locals.currentUser ?? null;
 		if (!user) {
 			throw redirect(302, '/login');
 		}

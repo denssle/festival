@@ -1,5 +1,4 @@
-import type { BackendUser } from '$lib/models/user/BackendUser';
-import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
+import { CurrentUser } from '$lib/models/user/CurrentUser';
 import type { BaseGuestInformation } from '$lib/models/guestInformation/BaseGuestInformation';
 import { mapToBackendGuestInformation } from '$lib/db/attributes/guestInformation.attributes';
 import type { BackendGuestInformation } from '$lib/models/guestInformation/BackendGuestInformation';
@@ -9,7 +8,7 @@ import { GuestInformation } from '$lib/db/model/guestInformation';
 
 export class GuestInformationService {
 	static async joinFestival(
-		user: BackendUser | null | SessionTokenUser,
+		user: CurrentUser | null,
 		festivalId: string,
 		eventData: BaseGuestInformation
 	): Promise<void> {
@@ -40,11 +39,7 @@ export class GuestInformationService {
 		}
 	}
 
-	static async cancelInvitation(
-		user: BackendUser | null | SessionTokenUser,
-		festivalId: string,
-		comment: string
-	): Promise<void> {
+	static async cancelInvitation(user: CurrentUser | null, festivalId: string, comment: string): Promise<void> {
 		if (user && festivalId) {
 			const guestInfoModel = await this.getGuestInformationModel(user.id, festivalId);
 			if (guestInfoModel) {

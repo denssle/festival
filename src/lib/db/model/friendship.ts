@@ -12,6 +12,10 @@ export const Friendship: ModelStatic<Model<FriendAttributes, FriendCreationAttri
 	{
 		timestamps: true,
 		createdAt: true,
-		updatedAt: true
+		updatedAt: true,
+		// Deckt nur die Richtung (friend1Id, friend2Id) ab – die gespiegelte Zeile
+		// (friend2Id, friend1Id) bleibt auf DB-Ebene erlaubt und wird in
+		// FriendshipService.addFriend per areFriends-Prüfung verhindert.
+		indexes: [{ unique: true, fields: ['friend1Id', 'friend2Id'] }]
 	}
 );

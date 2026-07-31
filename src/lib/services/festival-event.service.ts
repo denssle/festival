@@ -1,6 +1,5 @@
 import type { FrontendFestivalEvent } from '../models/festivalEvent/FrontendFestivalEvent';
 import type { BackendFestivalEvent } from '../models/festivalEvent/BackendFestivalEvent';
-import type { BackendUser } from '../models/user/BackendUser';
 import type { FrontendUser } from '../models/user/FrontendUser';
 import { UserService } from './user.service';
 import {
@@ -10,7 +9,7 @@ import {
 	mapToFrontendFestivalEvent
 } from '$lib/db/attributes/festivalEvent.attributes';
 import { Model } from 'sequelize';
-import { SessionTokenUser } from '$lib/models/user/SessionTokenUser';
+import { CurrentUser } from '$lib/models/user/CurrentUser';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
 import { GuestInformationService } from '$lib/services/guest-information.service';
 import { BackendGuestInformation } from '$lib/models/guestInformation/BackendGuestInformation';
@@ -62,7 +61,7 @@ export class FestivalEventService {
 	}
 
 	static async createFestival(
-		user: BackendUser | null | SessionTokenUser,
+		user: CurrentUser | null,
 		name: string,
 		description: string,
 		startDate: number | null,
@@ -91,7 +90,7 @@ export class FestivalEventService {
 	}
 
 	static async updateFestival(
-		user: BackendUser | null | SessionTokenUser,
+		user: CurrentUser | null,
 		festivalId: string,
 		name: string,
 		description: string,
@@ -123,7 +122,7 @@ export class FestivalEventService {
 		}
 	}
 
-	static async deleteFestival(user: BackendUser | null | SessionTokenUser, festivalId: string): Promise<ChangeResult> {
+	static async deleteFestival(user: CurrentUser | null, festivalId: string): Promise<ChangeResult> {
 		const festivalModel = await this.getFestivalModel(festivalId);
 		if (user && festivalModel) {
 			const ownerId = festivalModel.dataValues.UserId;

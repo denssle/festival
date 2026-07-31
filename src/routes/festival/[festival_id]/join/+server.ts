@@ -2,7 +2,6 @@ import { FestivalEventService } from '$lib/services/festival-event.service';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { BaseGuestInformation } from '$lib/models/guestInformation/BaseGuestInformation';
 import { GuestInformationService } from '$lib/services/guest-information.service';
-import { UserService } from '$lib/services/user.service';
 
 /**
  * POST /festival/:festival_id/join
@@ -19,11 +18,11 @@ import { UserService } from '$lib/services/user.service';
  *          400 bei fehlenden Daten,
  *          500 bei internem Fehler
  */
-export const POST: RequestHandler = async ({ cookies, params, request }): Promise<Response> => {
+export const POST: RequestHandler = async ({ locals, params, request }): Promise<Response> => {
 	try {
 		const baseGuestInformation: BaseGuestInformation = await request.json();
 		baseGuestInformation.coming = true;
-		const user = UserService.extractUser(cookies.get('session'));
+		const user = locals.currentUser ?? null;
 
 		if (!user) {
 			return new Response(JSON.stringify({ success: false, message: 'Unauthorized' }), { status: 401 });

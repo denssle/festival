@@ -1,12 +1,11 @@
 import { type PageServerLoad } from './$types';
-import { UserService } from '$lib/services/user.service';
 import { Group } from '$lib/db/model/group';
 import { GroupMember } from '$lib/db/model/groupMember';
 import type { GroupAttributes } from '$lib/db/attributes/group.attributes';
 import { GroupService } from '$lib/services/group.service';
 
-export const load: PageServerLoad = async ({ cookies, url }) => {
-	const user = UserService.extractUser(cookies.get('session'));
+export const load: PageServerLoad = async ({ locals, url }) => {
+	const user = locals.currentUser ?? null;
 	const searchTerm = url.searchParams.get('q');
 
 	let groups: GroupAttributes[] = [];

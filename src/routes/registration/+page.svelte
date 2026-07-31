@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import { MIN_PASSWORD_LENGTH } from '$lib/constants';
 	import type { LoginRegisterFormData } from '$lib/models/transferData/LoginRegisterFormData';
 	import type { ActionData } from './$types';
 
@@ -26,7 +27,7 @@
 			<p>
 				<input
 					bind:value={formData.password}
-					minlength="3"
+					minlength={MIN_PASSWORD_LENGTH}
 					name="password"
 					placeholder="Passwort"
 					required
@@ -35,7 +36,7 @@
 
 				<input
 					bind:value={formData.password2}
-					minlength="3"
+					minlength={MIN_PASSWORD_LENGTH}
 					name="password2"
 					placeholder="Passwort Wiederholung"
 					required
