@@ -120,7 +120,8 @@ In `src/lib/db/sequelize.ts` schaltet die App auf eine **flüchtige In-Memory-SQ
 
 - **GitHub-Actions-Secrets** (nicht App-Env, sondern für den Deploy-Workflow): `UBERSPACE_USER`, `UBERSPACE_HOST`, `DEPLOY_KEY_PRIVATE`.
 - **Ablauf:** `deploy.yml` baut `build/` mit `npm run build`, rsynct nach `~/html` (ohne `.env` und `node_modules`), installiert dort Prod-Deps via `npm ci --omit=dev` und startet den Supervisor-Service neu.
-- **Supervisor-Service:** heißt `festival`, führt `npm run start-server` im Verzeichnis `~/html` aus (Config unter `~/etc/services.d/festival.ini`). Restart via `supervisorctl restart festival`; danach Health-Check gegen `http://localhost:5173/`.
+- **Supervisor-Service:** heißt `festival`, führt `npm run start-server` im Verzeichnis `~/html` aus (Config unter `~/etc/services.d/festival.ini`). Restart via `supervisorctl restart festival`; danach Readiness-Check gegen `http://localhost:5173/api/health`.
+- **Readiness-Endpunkt `GET /api/health`:** setzt ein `SELECT 1` ab und meldet im MariaDB-Zweig die Anzahl ausstehender Migrationen; 200 bei `status: 'ok'`, sonst 503. Fehlerdetails gehen bewusst nur ins Server-Log (`supervisorctl tail -100 festival`), da DB-Fehler Benutzer- und Hostnamen enthalten. Der Endpunkt wird in `hooks.server.ts` **vor** der Session-Auflösung durchgereicht, damit er auch bei nicht erreichbarer DB noch antwortet. **Nicht gegen `/` prüfen:** Diese Route fasst ohne Session-Cookie keine DB an und antwortet mit 303 auf `/login`, was `curl --fail` als Erfolg wertet – ein toter DB-Zustand bliebe unsichtbar (genau dieser Fall in v0.7.25).
 
 ### Altlasten in `.env`
 

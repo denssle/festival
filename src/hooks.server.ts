@@ -14,6 +14,13 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 		return resolve(event);
 	}
 
+	// Readiness-Check vor der Session-Auflösung durchreichen: Er soll gerade dann noch
+	// antworten, wenn die DB nicht erreichbar ist – die Session-Prüfung unten würde in
+	// dem Fall (bei gesetztem Cookie) selbst werfen und den Check unbrauchbar machen.
+	if (pathname === '/api/health') {
+		return resolve(event);
+	}
+
 	// Der Cookie enthält nur einen opaken Zufalls-Token; die Identität kommt aus der DB.
 	const sessionToken: string | undefined = event.cookies.get('session');
 	const currentUser: CurrentUser | null = await UserService.getCurrentUserBySessionToken(sessionToken);
