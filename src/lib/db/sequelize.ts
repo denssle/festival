@@ -8,6 +8,17 @@ const isTestOrLocal =
 	process.env.VITEST === 'true' ||
 	process.env.PLAYWRIGHT === 'true';
 
+// Ohne Zugangsdaten würde sich der mariadb-Treiber als Benutzer '' ohne Passwort
+// verbinden und mit einem nichtssagenden "Access denied for ''@..." (Fehler 1045)
+// abbrechen. Häufigste Ursache: `node build` lädt – anders als `vite dev` – keine
+// .env; das Startskript muss sie per --env-file mitgeben (siehe package.json).
+if (!isTestOrLocal && !(MARIA_DB_USER && MARIA_DB_PASSWORD)) {
+	throw new Error(
+		'DB-Zugangsdaten fehlen: MARIA_DB_USER und/oder MARIA_DB_PASSWORD sind nicht gesetzt. ' +
+			'Liegt eine .env im Arbeitsverzeichnis und wird sie geladen (npm run start-server nutzt --env-file=.env)?'
+	);
+}
+
 const options: Options = isTestOrLocal
 	? {
 			dialect: 'sqlite',
