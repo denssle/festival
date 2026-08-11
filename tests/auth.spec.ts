@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { register, TEST_PASSWORD } from './test-utils';
+import { logout, register, TEST_PASSWORD } from './test-utils';
 
 test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () => {
 	test.beforeAll(async ({ browser }) => {
@@ -20,13 +20,10 @@ test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () =>
 		await expect(page).toHaveURL('/festival/');
 
 		// 2. SCHRITT: Logout
-		// Der Logout-Button befindet sich im Header
-		const logoutButton = page.getByRole('button', { name: 'Logout' });
-		await expect(logoutButton).toBeVisible();
-		await logoutButton.click();
-
-		// Nach Logout sollte ein Reload den User-Status aktualisieren
-		await page.reload();
+		// Über den Helper, weil der Logout-Button serverseitig gerendert und schon klickbar ist,
+		// bevor sein Handler bei der Hydration hängt – unter Suite-Last ging der Klick sonst
+		// verloren, die Session blieb bestehen und /login leitete zurück auf die Startseite.
+		await logout(page);
 
 		// Nach Logout sollten wir auf der Login-Seite landen
 		await page.goto('/festival/login');

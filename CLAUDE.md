@@ -62,7 +62,7 @@
 ## 4. Coding Style
 
 - Bestehende Namenskonventionen einhalten (camelCase für Eigenschaften, PascalCase für Modelle).
-- `bcrypt-ts` für alle passwortbezogenen Operationen verwenden.
+- `bcrypt-ts` für alle passwortbezogenen Operationen verwenden – und zwar die **asynchronen** Varianten (`hash`/`compare`, seit v0.7.37). Die App läuft in einem einzigen Node-Prozess; `hashSync`/`compareSync` blockieren dessen Event-Loop für die vollen ~100 ms der Berechnung.
 - Trennung zwischen `FrontendUser`, `BackendUser` und `CurrentUser` beibehalten.
 - Transfer-Modelle in `src/lib/models/transferData/` (z.B. `FrontendComment`, `StandardResponse`) für die Kommunikation zwischen Frontend und Backend verwenden.
 - `isChangeAllowed(userId, ownerId)` aus `src/lib/services/festival-event.logic.ts` für Berechtigungsprüfungen in Services nutzen (statt inline-Vergleiche).

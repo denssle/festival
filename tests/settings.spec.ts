@@ -155,4 +155,46 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		expect(results.tooBig).toBe(413);
 		expect(results.malformed).toBe(400);
 	});
+
+	test('sollte Avatare mit Cache-Headern ausliefern und bei passendem ETag 304 antworten', async ({ page }) => {
+		await register(page, `Cache_User_${Date.now()}`, 'InitialPassword123!');
+		const userId = await getUserId(page);
+		const imageUrl = `/festival/user-image/${userId}`;
+
+		// Ohne hinterlegtes Bild: 204, aber ebenfalls cachebar (der häufigste Fall).
+		const withoutImage = await page.request.get(imageUrl);
+		expect(withoutImage.status()).toBe(204);
+		expect(withoutImage.headers()['cache-control']).toContain('private');
+
+		// Bild direkt über den Endpoint hinterlegen (umgeht den Datei-Dialog).
+		const uploadStatus = await page.evaluate(
+			async () =>
+				(
+					await fetch('/festival/user-image', {
+						method: 'POST',
+						body:
+							'data:image/png;base64,' +
+							'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
+					})
+				).status
+		);
+		expect(uploadStatus).toBe(200);
+
+		// Mit Bild: 200 samt ETag. page.request nutzt den Browser-Cache NICHT – die Antworten
+		// kommen also garantiert vom Server, das bedingte Request stellen wir selbst.
+		const withImage = await page.request.get(imageUrl);
+		expect(withImage.status()).toBe(200);
+		const etag = withImage.headers()['etag'];
+		expect(etag).toBeTruthy();
+		expect(withImage.headers()['cache-control']).toContain('max-age');
+
+		// Gleicher ETag -> 304 ohne Bilddaten
+		const revalidated = await page.request.get(imageUrl, { headers: { 'If-None-Match': etag } });
+		expect(revalidated.status()).toBe(304);
+		expect((await revalidated.body()).length).toBe(0);
+
+		// Fremder ETag -> volle Antwort
+		const stale = await page.request.get(imageUrl, { headers: { 'If-None-Match': '"veraltet"' } });
+		expect(stale.status()).toBe(200);
+	});
 });

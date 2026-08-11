@@ -1,4 +1,4 @@
-import { compareSync, genSaltSync, hashSync } from 'bcrypt-ts';
+import { compare, hash } from 'bcrypt-ts';
 import type { BackendUser } from '../models/user/BackendUser';
 import type { FrontendUser } from '../models/user/FrontendUser';
 import type { UserFormData } from '$lib/models/user/UserFormData';
@@ -60,7 +60,7 @@ export class UserService {
 				const model = await User.create({
 					id: crypto.randomUUID(),
 					nickname: nickname,
-					password: this.saltPassword(password),
+					password: await this.saltPassword(password),
 					...(email ? { email } : {})
 				});
 				return convertToBackendUser(model.dataValues);
@@ -75,14 +75,24 @@ export class UserService {
 		return null;
 	}
 
-	static saltPassword(password: string): string {
-		return hashSync(password, genSaltSync(10));
+	/**
+	 * Hasht ein Passwort mit bcrypt (10 Runden; `hash` erzeugt das Salt selbst).
+	 *
+	 * Bewusst die asynchrone Variante: bcrypt kostet ~100 ms Rechenzeit, und die App läuft
+	 * in EINEM Node-Prozess. `hashSync` blockierte damit den Event-Loop – jeder Login/jede
+	 * Registrierung legte alle parallelen Requests für diese Zeit still. `hash`/`compare`
+	 * aus bcrypt-ts stückeln die Berechnung über `setImmediate` und geben den Loop zwischen
+	 * den Runden frei (kein Thread-Pool; die einzelne Operation dauert dadurch minimal
+	 * länger, der Prozess bleibt aber ansprechbar).
+	 */
+	static async saltPassword(password: string): Promise<string> {
+		return await hash(password, 10);
 	}
 
 	static async loginWithCredentials(nickname: string, password: string): Promise<BackendUser | null> {
 		const user: BackendUser | null = await this.loadUserByNickname(nickname);
 		if (user && user.password) {
-			if (compareSync(password, user.password)) {
+			if (await compare(password, user.password)) {
 				return user;
 			}
 		}
@@ -310,7 +320,7 @@ export class UserService {
 		if (model) {
 			if (this.isChangeAllowed(userId, model.dataValues)) {
 				model.set({
-					password: this.saltPassword(password)
+					password: await this.saltPassword(password)
 				});
 				await model.save();
 				return 'Success';

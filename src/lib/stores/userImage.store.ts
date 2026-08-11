@@ -30,10 +30,22 @@ export function getUserImageWritable(userId: string): Writable<string> {
 	return stringWritable;
 }
 
-export async function loadUserImage(userId: string): Promise<void> {
+/**
+ * Lädt das Profilbild eines Nutzers und schreibt es in den zugehörigen Store.
+ *
+ * @param userId ID des Nutzers
+ * @param forceReload Umgeht den HTTP-Cache des Browsers. Nötig direkt nach einem Upload:
+ *   Der Endpoint liefert die Avatare mit kurzem `max-age`, ein normaler Request würde in
+ *   diesem Fenster noch das ALTE Bild aus dem Cache beantworten. `cache: 'reload'` holt
+ *   frisch vom Server und aktualisiert dabei den Cache-Eintrag mit.
+ */
+export async function loadUserImage(userId: string, forceReload = false): Promise<void> {
 	const imageWritable: Writable<string> = getUserImageWritable(userId);
 	try {
-		const response = await fetch(resolve('/user-image/[user_id]', { user_id: userId }), { method: 'GET' });
+		const response = await fetch(resolve('/user-image/[user_id]', { user_id: userId }), {
+			method: 'GET',
+			cache: forceReload ? 'reload' : 'default'
+		});
 		// 204 = Nutzer hat kein Bild hinterlegt (kein Fehler). Wichtig: `response.ok` ist
 		// bei 204 ebenfalls true, der Body aber leer – ohne diese Prüfung würde ein leerer
 		// String als Bild gesetzt und der Spinner liefe endlos weiter.

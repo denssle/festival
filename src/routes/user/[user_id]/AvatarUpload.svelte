@@ -43,7 +43,8 @@
 			});
 			if (value.ok) {
 				openDialog('Bild erfolgreich hochgeladen und gespeichert. ');
-				loadUserImage(userId);
+				// forceReload: das gerade ersetzte Bild liegt noch frisch im Browser-Cache
+				loadUserImage(userId, true);
 			} else {
 				openDialog('Bildupload gescheitert. ');
 			}
