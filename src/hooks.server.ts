@@ -7,7 +7,9 @@ import { SESSION_COOKIE_PATH } from '$lib/constants';
 
 await startDB();
 
-const noAuthURLs: string[] = ['/login', '/registration', '/about', '/impressum'];
+// Impressum und Datenschutzerklärung müssen ohne Anmeldung erreichbar sein – gerade
+// vor der Registrierung, wo die Einwilligung in die Datenverarbeitung fällt.
+const noAuthURLs: string[] = ['/login', '/registration', '/about', '/impressum', '/datenschutz'];
 
 export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 	// Die App laeuft unter dem Base-Pfad (siehe svelte.config.js), `event.url.pathname`

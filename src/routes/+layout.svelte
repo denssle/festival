@@ -43,6 +43,7 @@
 	<nav>
 		<a href={resolve('/about')}>About</a>
 		<a href={resolve('/impressum')}>Impressum</a>
+		<a href={resolve('/datenschutz')}>Datenschutz</a>
 	</nav>
 </footer>
 
