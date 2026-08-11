@@ -113,7 +113,7 @@ In `src/lib/db/sequelize.ts` schaltet die App auf eine **flüchtige In-Memory-SQ
 
 - **Node-Version:** `22.20.0` (siehe `deploy.yml`).
 - **Port:** `5173`. Gesetzt über `npm run start-server` (= `PORT=5173 BODY_SIZE_LIMIT=2M node --env-file=.env build`); `@sveltejs/adapter-node` liest `PORT` (optional auch `HOST`).
-- **⚠️ `.env` muss explizit geladen werden:** `node build` liest – anders als `vite dev` – **keine** `.env`. `$env/dynamic/private` greift zur Laufzeit nur auf `process.env` zu. Deshalb gibt `start-server` die Datei per `--env-file=.env` mit (relativ zum Arbeitsverzeichnis `~/html`). Fehlt sie, ist `MARIA_DB_USER` leer und MariaDB antwortet mit dem irreführenden `Access denied for user ''@… (using password: NO)` (Fehler 1045); `sequelize.ts` fängt das seit v0.7.25 mit einer sprechenden Meldung ab.
+- **⚠️ `.env` muss explizit geladen werden:** `node build` liest – anders als `vite dev` – **keine** `.env`. `$env/dynamic/private` greift zur Laufzeit nur auf `process.env` zu. Deshalb gibt `start-server` die Datei per `--env-file=.env` mit (relativ zum Arbeitsverzeichnis `~/html`). Fehlt sie, ist `MARIA_DB_USER` leer und MariaDB antwortet mit dem irreführenden `Access denied for user ''@… (using password: NO)` (Fehler 1045); `assertDatabaseCredentials()` (aufgerufen in `startDB()`) fängt das seit v0.7.25 mit einer sprechenden Meldung ab. **Der Check darf nicht auf Modulebene stehen:** `vite build` importiert die Servermodule in seiner Analyse-Phase, ein Fehler beim Import bricht damit schon den Build ab – auch in der CI, die diese Variablen gar nicht kennt (passiert in v0.7.26).
 - `npm_package_version` wird von npm automatisch gesetzt und auf der About-Seite angezeigt (keine manuelle Pflege nötig).
 
 ### Deployment (Uberspace)

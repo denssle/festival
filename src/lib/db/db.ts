@@ -4,7 +4,7 @@ import { GuestInformation } from '$lib/db/model/guestInformation';
 import { SessionToken } from '$lib/db/model/sessionToken';
 import { Group } from '$lib/db/model/group';
 import { FestivalEvent } from '$lib/db/model/festivalEvent';
-import { sequelize } from '$lib/db/sequelize';
+import { assertDatabaseCredentials, sequelize } from '$lib/db/sequelize';
 import { createMigrator } from '$lib/db/migrations';
 import { FriendRequest } from '$lib/db/model/friendRequest';
 import { GroupMember } from '$lib/db/model/groupMember';
@@ -87,6 +87,9 @@ let dbStarted = false;
 export async function startDB(): Promise<void> {
 	if (dbStarted) return;
 	try {
+		// Vor dem Verbindungsaufbau, damit fehlende Zugangsdaten als klare Meldung
+		// auffallen statt als "Access denied for ''@…" aus dem Treiber.
+		assertDatabaseCredentials();
 		await sequelize.authenticate();
 		console.log('Connection has been established successfully.');
 

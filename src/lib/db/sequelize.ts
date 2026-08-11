@@ -8,15 +8,26 @@ const isTestOrLocal =
 	process.env.VITEST === 'true' ||
 	process.env.PLAYWRIGHT === 'true';
 
-// Ohne Zugangsdaten würde sich der mariadb-Treiber als Benutzer '' ohne Passwort
-// verbinden und mit einem nichtssagenden "Access denied for ''@..." (Fehler 1045)
-// abbrechen. Häufigste Ursache: `node build` lädt – anders als `vite dev` – keine
-// .env; das Startskript muss sie per --env-file mitgeben (siehe package.json).
-if (!isTestOrLocal && !(MARIA_DB_USER && MARIA_DB_PASSWORD)) {
-	throw new Error(
-		'DB-Zugangsdaten fehlen: MARIA_DB_USER und/oder MARIA_DB_PASSWORD sind nicht gesetzt. ' +
-			'Liegt eine .env im Arbeitsverzeichnis und wird sie geladen (npm run start-server nutzt --env-file=.env)?'
-	);
+/**
+ * Prüft die Zugangsdaten, bevor eine Verbindung aufgebaut wird.
+ *
+ * Ohne sie verbindet sich der mariadb-Treiber als Benutzer '' ohne Passwort und
+ * bricht mit einem nichtssagenden "Access denied for ''@..." (Fehler 1045) ab.
+ * Häufigste Ursache: `node build` lädt – anders als `vite dev` – keine .env; das
+ * Startskript muss sie per --env-file mitgeben (siehe package.json).
+ *
+ * Bewusst eine Funktion und KEIN Check auf Modulebene: `vite build` importiert die
+ * Servermodule in seiner Analyse-Phase, ein Fehler beim Import würde also schon den
+ * Build abbrechen – auch in der CI, die diese Variablen gar nicht kennt (v0.7.26).
+ * Aufgerufen wird sie in startDB(), wo die Verbindung tatsächlich zustande kommt.
+ */
+export function assertDatabaseCredentials(): void {
+	if (!isTestOrLocal && !(MARIA_DB_USER && MARIA_DB_PASSWORD)) {
+		throw new Error(
+			'DB-Zugangsdaten fehlen: MARIA_DB_USER und/oder MARIA_DB_PASSWORD sind nicht gesetzt. ' +
+				'Liegt eine .env im Arbeitsverzeichnis und wird sie geladen (npm run start-server nutzt --env-file=.env)?'
+		);
+	}
 }
 
 const options: Options = isTestOrLocal
