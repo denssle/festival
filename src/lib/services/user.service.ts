@@ -14,7 +14,7 @@ import { UserImage } from '$lib/db/model/userImage';
 import { SessionToken } from '$lib/db/model/sessionToken';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
 import { isSessionTokenExpired, readTextField } from '$lib/services/user.logic';
-import { SESSION_MAX_AGE_MS, SESSION_MAX_AGE_SECONDS } from '$lib/constants';
+import { SESSION_COOKIE_PATH, SESSION_MAX_AGE_MS, SESSION_MAX_AGE_SECONDS } from '$lib/constants';
 import { dev } from '$app/environment';
 
 export class UserService {
@@ -92,7 +92,7 @@ export class UserService {
 	static async logout(cookies: Cookies, locals: App.Locals): Promise<void> {
 		const token: string | undefined = cookies.get('session');
 		locals.currentUser = undefined;
-		cookies.delete('session', { path: '/' });
+		cookies.delete('session', { path: SESSION_COOKIE_PATH });
 		if (token) {
 			await SessionToken.destroy({
 				where: {
@@ -247,7 +247,7 @@ export class UserService {
 		// Der Cookie enthält NUR den opaken Token – niemals Identitätsdaten,
 		// die der Client manipulieren könnte.
 		cookies.set('session', token, {
-			path: '/',
+			path: SESSION_COOKIE_PATH,
 			httpOnly: true, // kein Zugriff via document.cookie (XSS-Schutz)
 			sameSite: 'strict', // Cookie nur bei Same-Site-Requests (CSRF-Schutz)
 			// Secure an den Build-Modus koppeln statt an SvelteKits Auto-Erkennung:

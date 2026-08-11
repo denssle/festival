@@ -13,7 +13,7 @@ test.describe.serial('Freundschaftsprozess', () => {
 
 	test.beforeAll(async ({ browser }) => {
 		const requestContext = await browser.newContext();
-		await requestContext.request.post('/api/test/reset');
+		await requestContext.request.post('/festival/api/test/reset');
 		await requestContext.close();
 
 		contextA = await browser.newContext();
@@ -35,7 +35,7 @@ test.describe.serial('Freundschaftsprozess', () => {
 	});
 
 	test('User A sollte eine Freundschaftsanfrage an User B senden', async () => {
-		await pageA.goto(`/user/${userBId}`);
+		await pageA.goto(`/festival/user/${userBId}`);
 		await expect(pageA.locator('h2')).toContainText(userBNickname);
 
 		const addFriendButton = pageA.locator('button:has-text("Anfreunden")');
@@ -51,7 +51,7 @@ test.describe.serial('Freundschaftsprozess', () => {
 	});
 
 	test('User B sollte die Freundschaftsanfrage annehmen', async () => {
-		await pageB.goto('/updates', { waitUntil: 'networkidle' });
+		await pageB.goto('/festival/updates', { waitUntil: 'networkidle' });
 
 		// Warte auf das Element der Freundschaftsanfrage
 		const requestLocator = pageB.locator('.friend-request').filter({ hasText: userANickname });
@@ -67,7 +67,7 @@ test.describe.serial('Freundschaftsprozess', () => {
 
 	test('Freundschaft sollte auf beiden Profilen verifiziert werden', async () => {
 		// Auf Profil B für User A
-		await pageA.goto(`/user/${userBId}`);
+		await pageA.goto(`/festival/user/${userBId}`);
 		await pageA.reload(); // Force reload to bypass potential cache
 		await pageA.waitForLoadState('load');
 
@@ -76,7 +76,7 @@ test.describe.serial('Freundschaftsprozess', () => {
 		await expect(pageA.getByRole('article').getByRole('link', { name: userANickname })).toBeVisible({ timeout: 10000 });
 
 		// Auf Profil A für User B
-		await pageB.goto(`/user/${userAId}`);
+		await pageB.goto(`/festival/user/${userAId}`);
 		await pageB.reload(); // Force reload to bypass potential cache
 		await pageB.waitForLoadState('load');
 		await expect(pageB.locator('button:has-text("Freund entfernen")')).toBeVisible({ timeout: 30000 });
@@ -84,7 +84,7 @@ test.describe.serial('Freundschaftsprozess', () => {
 	});
 
 	test('User A sollte User B als Freund entfernen können', async () => {
-		await pageA.goto(`/user/${userBId}`);
+		await pageA.goto(`/festival/user/${userBId}`);
 		await pageA.reload();
 		await pageA.waitForLoadState('load');
 		const removeFriendButton = pageA.locator('button:has-text("Freund entfernen")');
@@ -101,13 +101,13 @@ test.describe.serial('Freundschaftsprozess', () => {
 		await pageA.waitForLoadState('networkidle');
 		await expect(pageA.locator('button:has-text("Anfreunden")')).toBeVisible({ timeout: 10000 });
 
-		await pageB.goto(`/user/${userAId}`, { waitUntil: 'networkidle' });
-		await expect(pageB).toHaveURL(`/user/${userAId}`, { timeout: 10000 });
+		await pageB.goto(`/festival/user/${userAId}`, { waitUntil: 'networkidle' });
+		await expect(pageB).toHaveURL(`/festival/user/${userAId}`, { timeout: 10000 });
 		await expect(pageB.locator('button:has-text("Anfreunden")')).toBeVisible({ timeout: 15000 });
 	});
 
 	test('User A sollte eine Anfrage senden und wieder zurückziehen können', async () => {
-		await pageA.goto(`/user/${userBId}`, { waitUntil: 'networkidle' });
+		await pageA.goto(`/festival/user/${userBId}`, { waitUntil: 'networkidle' });
 		const addFriendButton = pageA.locator('button:has-text("Anfreunden")');
 		await expect(addFriendButton).toBeVisible({ timeout: 10000 });
 
@@ -119,7 +119,7 @@ test.describe.serial('Freundschaftsprozess', () => {
 		await dialog.locator('button:has-text("Okay")').click();
 		await dialog.waitFor({ state: 'hidden', timeout: 10000 });
 
-		await pageA.goto('/updates', { waitUntil: 'networkidle' });
+		await pageA.goto('/festival/updates', { waitUntil: 'networkidle' });
 		const cancelBtn = pageA
 			.locator('.friend-request')
 			.filter({ hasText: userBNickname })
@@ -133,7 +133,7 @@ test.describe.serial('Freundschaftsprozess', () => {
 	});
 
 	test('User A sollte eine Anfrage senden und User B diese ablehnen können', async () => {
-		await pageA.goto(`/user/${userBId}`, { waitUntil: 'networkidle' });
+		await pageA.goto(`/festival/user/${userBId}`, { waitUntil: 'networkidle' });
 		const addFriendButton = pageA.locator('button:has-text("Anfreunden")');
 		await expect(addFriendButton).toBeVisible({ timeout: 10000 });
 
@@ -144,7 +144,7 @@ test.describe.serial('Freundschaftsprozess', () => {
 		await dialog.waitFor({ state: 'visible', timeout: 10000 });
 		await dialog.locator('button:has-text("Okay")').click();
 
-		await pageB.goto('/updates', { waitUntil: 'networkidle' });
+		await pageB.goto('/festival/updates', { waitUntil: 'networkidle' });
 		const declineBtn = pageB
 			.locator('.friend-request')
 			.filter({ hasText: userANickname })

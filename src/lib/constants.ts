@@ -1,4 +1,14 @@
+import { base } from '$app/paths';
+
 export const MIN_PASSWORD_LENGTH = 8;
+
+/**
+ * Pfad des Session-Cookies. Entspricht dem Base-Pfad der App (siehe svelte.config.js),
+ * damit der Cookie nur an diese Anwendung geht und nicht an andere Projekte, die unter
+ * derselben Domain liegen. Muss beim Setzen UND beim Löschen identisch sein – sonst
+ * findet der Browser das zu löschende Cookie nicht.
+ */
+export const SESSION_COOKIE_PATH = base || '/';
 
 /**
  * Maximale absolute Lebensdauer eines Session-Tokens.

@@ -4,7 +4,7 @@ import { register, getUserId, logout } from './test-utils';
 test.describe('Benutzereinstellungen und Profilbild', () => {
 	test.beforeAll(async ({ browser }) => {
 		const requestContext = await browser.newContext();
-		await requestContext.request.post('/api/test/reset');
+		await requestContext.request.post('/festival/api/test/reset');
 		await requestContext.close();
 	});
 
@@ -13,7 +13,7 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		const initialPassword = 'InitialPassword123!';
 		const newPassword = 'NewSecurePassword456!';
 		await register(page, testNickname, initialPassword);
-		await page.goto('/settings');
+		await page.goto('/festival/settings');
 		await expect(page.locator('h2')).toContainText('Einstellungen');
 
 		// Das Passwort-Feld ist in einem <details> verborgen
@@ -51,14 +51,14 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		await page.fill('input[name="password"]', newPassword);
 		await page.click('button[type="submit"]');
 
-		await expect(page).toHaveURL('/', { timeout: 15000 });
+		await expect(page).toHaveURL('/festival/', { timeout: 15000 });
 	});
 
 	test('sollte die Passwortänderung bei falschem aktuellen Passwort ablehnen', async ({ page }) => {
 		const testNickname = `WrongPass_User_${Date.now()}`;
 		const initialPassword = 'InitialPassword123!';
 		await register(page, testNickname, initialPassword);
-		await page.goto('/settings');
+		await page.goto('/festival/settings');
 		await page.locator('summary', { hasText: 'Passwort' }).click();
 
 		await page.locator('input[name="currentPassword"]').fill('FalschesPasswort999!');
@@ -81,14 +81,14 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		await page.fill('input[name="nickname"]', testNickname);
 		await page.fill('input[name="password"]', initialPassword);
 		await page.click('button[type="submit"]');
-		await expect(page).toHaveURL('/', { timeout: 15000 });
+		await expect(page).toHaveURL('/festival/', { timeout: 15000 });
 	});
 
 	test('sollte ein Profilbild hochladen können', async ({ page }) => {
 		await register(page, `Profilbild_User_${Date.now()}`, 'InitialPassword123!');
 		const userId = await getUserId(page);
-		await page.goto(`/user/${userId}`);
-		await expect(page).toHaveURL(`/user/${userId}`, { timeout: 15000 });
+		await page.goto(`/festival/user/${userId}`);
+		await expect(page).toHaveURL(`/festival/user/${userId}`, { timeout: 15000 });
 
 		// Ein minimales valides PNG (1x1 Pixel)
 		const buffer = Buffer.from(
@@ -126,7 +126,7 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		await dialog.locator('button:has-text("Okay")').click();
 
 		// Sicherstellen, dass wir noch auf der User-Profilseite sind (und nicht redirected wurden)
-		await expect(page).toHaveURL(`/user/${userId}`, { timeout: 15000 });
+		await expect(page).toHaveURL(`/festival/user/${userId}`, { timeout: 15000 });
 
 		// Prüfen ob das Bild im Avatar geladen wird
 		// Alt-Text in AvatarImage.svelte ist "alt avatar"
@@ -143,7 +143,7 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		// Direkt gegen den Endpoint (umgeht die clientseitige Prüfung in AvatarUpload.svelte).
 		// page.evaluate -> Browser sendet seine Session-Cookies mit.
 		const results = await page.evaluate(async () => {
-			const post = (body: string) => fetch('/user-image', { method: 'POST', body }).then((r) => r.status);
+			const post = (body: string) => fetch('/festival/user-image', { method: 'POST', body }).then((r) => r.status);
 			return {
 				wrongType: await post('data:image/gif;base64,R0lGODlhAQABAAAAACw='),
 				tooBig: await post('data:image/png;base64,' + 'A'.repeat(1_500_000)),

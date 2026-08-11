@@ -42,7 +42,9 @@ export default defineConfig({
 	/* Run your local dev server before starting the tests */
 	webServer: {
 		command: 'npm run dev',
-		url: 'http://localhost:5173',
+		// Muss den Base-Pfad enthalten (siehe svelte.config.js): Unter / liegt die App
+		// nicht mehr, Playwright würde dort auf eine Antwort warten, die nie kommt.
+		url: 'http://localhost:5173/festival',
 		reuseExistingServer: !process.env.CI,
 		env: {
 			PLAYWRIGHT: 'true'

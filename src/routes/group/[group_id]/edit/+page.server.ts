@@ -3,13 +3,14 @@ import type { PageServerLoad, Actions } from './$types';
 import { Group } from '$lib/db/model/group';
 import type { GroupAttributes } from '$lib/db/attributes/group.attributes';
 import { GroupService } from '$lib/services/group.service';
+import { resolve } from '$app/paths';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const { group_id } = params;
 	const user = locals.currentUser ?? null;
 
 	if (!user) {
-		throw redirect(302, '/login');
+		throw redirect(302, resolve('/login'));
 	}
 
 	const groupModel = await Group.findByPk(group_id);
@@ -49,7 +50,7 @@ export const actions: Actions = {
 		const result = await GroupService.updateGroup(user.id, group_id, name, description);
 
 		if (result === 'Success') {
-			throw redirect(303, `/group/${group_id}`);
+			throw redirect(303, resolve('/group/[group_id]', { group_id }));
 		} else {
 			return fail(400, { message: result });
 		}

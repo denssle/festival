@@ -12,6 +12,16 @@ const config = {
 		// gestartet mit `node build`. Ersetzt den früheren `vite dev`-Betrieb in Produktion
 		// (schneller Start, kein npm install / Vite pro Restart).
 		adapter: adapter(),
+		paths: {
+			// Die App wird unter https://enzlor.uber.space/festival ausgeliefert; die
+			// Wurzel der Domain gehoert einem anderen Projekt. SvelteKit stellt diesen
+			// Praefix allen Asset- und Formular-URLs voran. Im Code deshalb NIE absolute
+			// Pfade verwenden, sondern `resolve()` aus '$app/paths' (Client wie Server) -
+			// das setzt den Praefix automatisch. Auf dem Host reicht der Praefix
+			// unveraendert an die App durch (`uberspace web backend set /festival`, ohne
+			// --remove-prefix), weshalb `event.url.pathname` ihn ebenfalls enthaelt.
+			base: '/festival'
+		},
 		csrf: {
 			trustedOrigins: ['*']
 		}

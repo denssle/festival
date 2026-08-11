@@ -11,7 +11,7 @@ import { test, expect } from '@playwright/test';
  */
 test.describe('Readiness-Endpunkt /api/health', () => {
 	test('ist ohne Anmeldung erreichbar und meldet den DB-Status', async ({ request }) => {
-		const response = await request.get('/api/health');
+		const response = await request.get('/festival/api/health');
 
 		expect(response.status()).toBe(200);
 
@@ -26,13 +26,13 @@ test.describe('Readiness-Endpunkt /api/health', () => {
 	test('leitet nicht auf /login um (sonst wäre der Deploy-Check blind)', async ({ request }) => {
 		// maxRedirects: 0 deckt auf, wenn der Endpunkt hinter die Auth-Prüfung rutscht:
 		// Ein 303 käme bei `curl --fail` als Erfolg an und der Health-Check wäre wertlos.
-		const response = await request.get('/api/health', { maxRedirects: 0 });
+		const response = await request.get('/festival/api/health', { maxRedirects: 0 });
 
 		expect(response.status()).toBe(200);
 	});
 
 	test('wird nicht gecacht', async ({ request }) => {
-		const response = await request.get('/api/health');
+		const response = await request.get('/festival/api/health');
 
 		expect(response.headers()['cache-control']).toContain('no-store');
 	});

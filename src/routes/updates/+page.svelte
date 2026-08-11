@@ -6,17 +6,17 @@
 	let { data }: { data: UpdateTransferData } = $props();
 
 	async function acceptFriendRequest(id: string | undefined) {
-		await fetch(`/updates/accept-friend`, { method: 'POST', body: id });
+		await fetch(resolve('/updates/accept-friend'), { method: 'POST', body: id });
 		await invalidateAll();
 	}
 
 	async function declineFriendRequest(id: string | undefined) {
-		await fetch(`/updates/decline-friend`, { method: 'POST', body: id });
+		await fetch(resolve('/updates/decline-friend'), { method: 'POST', body: id });
 		await invalidateAll();
 	}
 
 	async function cancelFriendRequest(id: string | undefined) {
-		await fetch(`/updates/cancel-request`, { method: 'POST', body: id });
+		await fetch(resolve('/updates/cancel-request'), { method: 'POST', body: id });
 		await invalidateAll();
 	}
 </script>

@@ -11,7 +11,7 @@ test.describe.serial('Profile Festivals Display', () => {
 
 	test.beforeAll(async ({ browser }) => {
 		const requestContext = await browser.newContext();
-		await requestContext.request.post('/api/test/reset');
+		await requestContext.request.post('/festival/api/test/reset');
 		await requestContext.close();
 
 		context = await browser.newContext();
@@ -26,7 +26,7 @@ test.describe.serial('Profile Festivals Display', () => {
 
 	test('sollte ein Festival anlegen und beitreten', async () => {
 		// 1. Festival erstellen
-		await page.goto('/festival/new');
+		await page.goto('/festival/festival/new');
 		await page.fill('input[name="name"]', festivalName);
 		await page.fill('textarea[name="description"]', 'Test');
 		await page.fill('textarea[name="location"]', 'Test');
@@ -54,7 +54,7 @@ test.describe.serial('Profile Festivals Display', () => {
 		const festivalsResponse = page.waitForResponse(
 			(r: Response) => r.url().includes('/visiting-festivals') && r.request().method() === 'GET'
 		);
-		await page.goto(`/user/${userId}`);
+		await page.goto(`/festival/user/${userId}`);
 		await festivalsResponse;
 
 		// Sektion "Festivals" finden

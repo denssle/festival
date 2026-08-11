@@ -1,5 +1,6 @@
 import { writable, Writable } from 'svelte/store';
 import { FALLBACK_PICTURE } from '$lib/constants';
+import { resolve } from '$app/paths';
 
 // Obergrenze für den clientseitigen Bild-Cache. Verhindert, dass die Map über
 // die Lebensdauer der SPA hinweg mit jedem betrachteten Profil unbegrenzt wächst.
@@ -32,7 +33,7 @@ export function getUserImageWritable(userId: string): Writable<string> {
 export async function loadUserImage(userId: string): Promise<void> {
 	const imageWritable: Writable<string> = getUserImageWritable(userId);
 	try {
-		const response = await fetch('/user-image/' + userId, { method: 'GET' });
+		const response = await fetch(resolve('/user-image/[user_id]', { user_id: userId }), { method: 'GET' });
 		// 204 = Nutzer hat kein Bild hinterlegt (kein Fehler). Wichtig: `response.ok` ist
 		// bei 204 ebenfalls true, der Body aber leer – ohne diese Prüfung würde ein leerer
 		// String als Bild gesetzt und der Spinner liefe endlos weiter.

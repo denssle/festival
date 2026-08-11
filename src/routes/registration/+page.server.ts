@@ -6,6 +6,7 @@ import { StandardResponse } from '$lib/models/transferData/StandardResponse';
 import { BackendUser } from '$lib/models/user/BackendUser';
 import { NickPassData } from '$lib/models/transferData/NickPassData';
 import { MIN_PASSWORD_LENGTH } from '$lib/constants';
+import { resolve } from '$app/paths';
 
 /**
  * load – GET /registration
@@ -18,7 +19,7 @@ import { MIN_PASSWORD_LENGTH } from '$lib/constants';
  */
 export const load: PageServerLoad = async ({ locals }): Promise<StandardResponse> => {
 	if (locals.currentUser) {
-		redirect(303, '/');
+		redirect(303, resolve('/'));
 	}
 	return { success: true };
 };
@@ -55,7 +56,7 @@ export const actions: Actions = {
 				const user: BackendUser | null = await UserService.register(formData.nickname, formData.password);
 				if (user) {
 					await UserService.createSession(cookies, locals, user);
-					redirect(302, '/');
+					redirect(302, resolve('/'));
 				} else {
 					return { success: false, message: 'User creation failed' };
 				}

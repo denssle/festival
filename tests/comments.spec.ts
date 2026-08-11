@@ -14,7 +14,7 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 
 	test.beforeAll(async ({ browser }) => {
 		const requestContext = await browser.newContext();
-		await requestContext.request.post('/api/test/reset');
+		await requestContext.request.post('/festival/api/test/reset');
 		await requestContext.close();
 
 		contextA = await browser.newContext();
@@ -35,7 +35,7 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 
 	test('User A sollte einen Kommentar auf dem Profil von User B erstellen', async () => {
 		// User A navigiert zum Profil von User B
-		await pageA.goto(`/user/${userBId}`);
+		await pageA.goto(`/festival/user/${userBId}`);
 		await expect(pageA.locator('h2')).toContainText(userBNickname);
 
 		// User A schreibt einen Kommentar
@@ -52,7 +52,7 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 	});
 
 	test('User A sollte den Kommentar bearbeiten können', async () => {
-		await pageA.goto(`/user/${userBId}`);
+		await pageA.goto(`/festival/user/${userBId}`);
 		await expect(pageA.locator('h2')).toContainText(userBNickname);
 
 		const commentLocator = pageA.locator('fieldset').filter({ hasText: commentText });
@@ -80,12 +80,12 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 	});
 
 	test('User B sollte den bearbeiteten Kommentar sehen', async () => {
-		await pageB.goto(`/user/${userBId}`);
+		await pageB.goto(`/festival/user/${userBId}`);
 		await expect(pageB.locator('fieldset').filter({ hasText: updatedCommentText })).toBeVisible({ timeout: 15000 });
 	});
 
 	test('User A sollte den Kommentar löschen können', async () => {
-		await pageA.goto(`/user/${userBId}`);
+		await pageA.goto(`/festival/user/${userBId}`);
 		const updatedCommentLocator = pageA.locator('fieldset').filter({ hasText: updatedCommentText });
 		await expect(updatedCommentLocator).toBeVisible({ timeout: 10000 });
 
@@ -108,7 +108,7 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 	});
 
 	test('User B sollte den gelöschten Kommentar nicht mehr sehen', async () => {
-		await pageB.goto(`/user/${userBId}`);
+		await pageB.goto(`/festival/user/${userBId}`);
 		await expect(pageB.locator('fieldset').filter({ hasText: updatedCommentText })).not.toBeVisible({ timeout: 15000 });
 	});
 });

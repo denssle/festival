@@ -39,7 +39,7 @@
 				dialog.showModal();
 				const onclose = async () => {
 					if (questionDialogData.answerYes) {
-						const response = await fetch('/festival/' + data.festival.id, {
+						const response = await fetch(resolve('/festival/[festival_id]', { festival_id: data.festival.id }), {
 							method: 'DELETE'
 						});
 						if (response.ok) {
@@ -84,7 +84,7 @@
 						comment: ''
 					};
 					try {
-						const response = await fetch('/festival/' + data.festival.id + '/join', {
+						const response = await fetch(resolve('/festival/[festival_id]/join', { festival_id: data.festival.id }), {
 							method: 'POST',
 							body: JSON.stringify(eventData)
 						});
@@ -119,10 +119,13 @@
 			dialog.showModal();
 			const onclose = async () => {
 				if (cancelInvitationDialogData.answerYes) {
-					const response = await fetch('/festival/' + data.festival.id + '/cancel-invitation', {
-						method: 'POST',
-						body: JSON.stringify({ comment: cancelInvitationDialogData.comment })
-					});
+					const response = await fetch(
+						resolve('/festival/[festival_id]/cancel-invitation', { festival_id: data.festival.id }),
+						{
+							method: 'POST',
+							body: JSON.stringify({ comment: cancelInvitationDialogData.comment })
+						}
+					);
 					if (response.ok) {
 						await afterRequest();
 					} else {

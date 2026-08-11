@@ -4,7 +4,7 @@ import { register, TEST_PASSWORD } from './test-utils';
 test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () => {
 	test.beforeAll(async ({ browser }) => {
 		const requestContext = await browser.newContext();
-		await requestContext.request.post('/api/test/reset');
+		await requestContext.request.post('/festival/api/test/reset');
 		await requestContext.close();
 	});
 
@@ -17,7 +17,7 @@ test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () =>
 		await register(page, testNickname, testPassword);
 
 		// Verifikation des Logins: Wir prüfen ob wir auf der Startseite sind
-		await expect(page).toHaveURL('/');
+		await expect(page).toHaveURL('/festival/');
 
 		// 2. SCHRITT: Logout
 		// Der Logout-Button befindet sich im Header
@@ -29,26 +29,26 @@ test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () =>
 		await page.reload();
 
 		// Nach Logout sollten wir auf der Login-Seite landen
-		await page.goto('/login');
-		await expect(page).toHaveURL('/login');
+		await page.goto('/festival/login');
+		await expect(page).toHaveURL('/festival/login');
 
 		// Im Header sollten nun wieder "Anmelden" und "Registrieren" Links zu sehen sein
 		await expect(page.getByRole('link', { name: 'Anmelden' })).toBeVisible();
 		await expect(page.getByRole('link', { name: 'Registrieren', exact: true })).toBeVisible();
 
 		// 3. SCHRITT: Login mit dem gerade erstellten User
-		await page.goto('/login');
+		await page.goto('/festival/login');
 		await page.fill('input[name="nickname"]', testNickname);
 		await page.fill('input[name="password"]', testPassword);
 		await page.click('button[type="submit"]');
 
 		// Verifizieren, dass wir wieder angemeldet sind
-		await expect(page).toHaveURL('/');
+		await expect(page).toHaveURL('/festival/');
 		await expect(page.getByRole('link', { name: testNickname })).toBeVisible();
 	});
 
 	test('Registrierung sollte bei ungleichen Passwörtern deaktiviert sein', async ({ page }) => {
-		await page.goto('/registration');
+		await page.goto('/festival/registration');
 
 		await page.fill('input[name="nickname"]', 'InvalidUser');
 		await page.fill('input[name="password"]', 'password123');
@@ -71,7 +71,7 @@ test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () =>
 		await page.waitForURL(/\/login/);
 
 		// Login mit falschem Passwort
-		await page.goto('/login');
+		await page.goto('/festival/login');
 		await page.fill('input[name="nickname"]', nickname);
 		await page.fill('input[name="password"]', 'WrongPassword999!');
 		await page.click('button[type="submit"]');
@@ -91,7 +91,7 @@ test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () =>
 		await firstContext.close();
 
 		// Zweite Registrierung mit demselben Nickname
-		await page.goto('/registration');
+		await page.goto('/festival/registration');
 		await page.fill('input[name="nickname"]', nickname);
 		await page.fill('input[name="password"]', TEST_PASSWORD);
 		await page.fill('input[name="password2"]', TEST_PASSWORD);

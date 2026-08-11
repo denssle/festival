@@ -2,6 +2,7 @@ import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFe
 import { getDateFromString } from '$lib/utils/date.util';
 import { type Actions, fail, redirect } from '@sveltejs/kit';
 import { FestivalEventService } from '$lib/services/festival-event.service';
+import { resolve } from '$app/paths';
 
 /**
  * actions.default – POST /festival/new
@@ -20,7 +21,7 @@ export const actions: Actions = {
 	default: async ({ locals, request }) => {
 		const user = locals.currentUser ?? null;
 		if (!user) {
-			throw redirect(302, '/login');
+			throw redirect(302, resolve('/login'));
 		}
 
 		const values: FormData = await request.formData();
@@ -46,7 +47,7 @@ export const actions: Actions = {
 			location
 		);
 		if (newFestival && newFestival.id) {
-			redirect(302, '/festival/' + newFestival.id);
+			redirect(302, resolve('/festival/[festival_id]', { festival_id: newFestival.id }));
 		}
 		return fail(500, { message: 'Festival creation failed' });
 	}

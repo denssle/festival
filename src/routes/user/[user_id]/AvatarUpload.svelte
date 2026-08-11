@@ -2,6 +2,7 @@
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
 	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
 	import { loadUserImage } from '$lib/stores/userImage.store';
+	import { resolve } from '$app/paths';
 
 	let { isOwnProfil, userId = '' }: { isOwnProfil: boolean; userId?: string } = $props();
 
@@ -32,7 +33,7 @@
 
 	async function uploadFunction(imgBase64: string): Promise<void> {
 		try {
-			const value: Response = await fetch(`/user-image`, {
+			const value: Response = await fetch(resolve('/user-image'), {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',

@@ -7,6 +7,7 @@ import { StandardResponse } from '$lib/models/transferData/StandardResponse';
 import { NickPassData } from '$lib/models/transferData/NickPassData';
 import { loginRateLimiter } from '$lib/services/login-rate-limit';
 import { loginRateLimitKey } from '$lib/services/rate-limit.logic';
+import { resolve } from '$app/paths';
 
 /**
  * load – GET /login
@@ -19,7 +20,7 @@ import { loginRateLimitKey } from '$lib/services/rate-limit.logic';
  */
 export const load: PageServerLoad = async ({ locals }): Promise<StandardResponse> => {
 	if (locals.currentUser) {
-		redirect(303, '/');
+		redirect(303, resolve('/'));
 	}
 	return { success: true };
 };
@@ -50,7 +51,7 @@ export const actions: Actions = {
 			if (user) {
 				loginRateLimiter.reset(rateLimitKey);
 				await UserService.createSession(cookies, locals, user);
-				redirect(302, '/');
+				redirect(302, resolve('/'));
 			} else {
 				loginRateLimiter.recordFailure(rateLimitKey);
 				return { success: false, message: 'Password invalid' };

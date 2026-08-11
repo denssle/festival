@@ -28,7 +28,7 @@ DB_PASSWORD="${MARIA_DB_PASSWORD:-festivalpw}"
 DB_NAME="${MARIA_DB_NAME:-prod}"
 DB_HOST="${DB_HOST:-127.0.0.1}"
 FULL_DB_NAME="${DB_USER}_${DB_NAME}"
-HEALTH_URL="http://localhost:5173/api/health"
+HEALTH_URL="http://localhost:5173/festival/api/health"
 
 server_pid=""
 env_backup=""

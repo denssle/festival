@@ -43,6 +43,15 @@
 
 ## 3. SvelteKit & UI
 
+- **Base-Pfad `/festival` (seit v0.7.36):** Die App wird unter `https://enzlor.uber.space/festival` ausgeliefert; die Domain-Wurzel gehört einem anderen Projekt. Gesetzt über `kit.paths.base` in `svelte.config.js`. Daraus folgt:
+  - **Niemals absolute Pfade im Code.** Für Links, `goto()`, `redirect()` und `fetch()` immer `resolve()` aus `$app/paths` verwenden (typsicher, auch für dynamische Routen: `resolve('/festival/[festival_id]', { festival_id: id })`).
+  - **Ausnahme `Location`-Header:** `resolve()` liefert einen **relativen** Pfad (`./login`). In SvelteKits `redirect()` ist das korrekt (Auflösung gegen die Request-URL), in einem selbst gebauten `new Response(...)` mit `Location` dagegen nicht – dort `${base}/…` verwenden. Sonst zielt ein Redirect bei Datenrequests (`/…/__data.json` nach `invalidateAll()`) ins Leere; genau dieser Fall brach in v0.7.36 den Logout.
+  - `event.url.pathname` enthält den Präfix. `hooks.server.ts` schneidet ihn einmal ab (`.slice(base.length)`), damit die Pfadvergleiche mit den Route-eigenen Pfaden arbeiten.
+  - Der Session-Cookie liegt auf `SESSION_COOKIE_PATH` (= Base-Pfad, `src/lib/constants.ts`), damit er nicht an fremde Projekte derselben Domain geht. Beim Setzen und Löschen muss der Pfad identisch sein.
+  - Die Route `/festival/[festival_id]` ergibt zusammen mit dem Präfix `/festival/festival/<id>`. Das ist so gewollt.
+  - E2E-Tests führen den Präfix mit (`BASE_PATH` in `tests/test-utils.ts`); `playwright.config.ts` zeigt mit `webServer.url` auf `http://localhost:5173/festival`.
+- **Host-Konfiguration (einmalig):** `uberspace web backend set /festival --http --port 5173` (ohne `--remove-prefix`, die App erwartet den Präfix). Die Wurzel wird mit `uberspace web backend set / --apache` freigegeben. Prüfen mit `uberspace web backend list`.
+
 - **Form-Actions:** Das `StandardResponse`-Modell für die Rückgabe von Daten aus Server-Actions verwenden.
 - **Checkbox-Handling:** In Server-Actions müssen Checkboxen gegen den String `'on'` geprüft werden (`formData.get('name') === 'on'`), da sie bei Nicht-Selektion `null` zurückgeben, was bei einer einfachen `Boolean()`-Konvertierung zu Fehlern führen kann.
 - **Access Control:** Immer `locals.currentUser` in `+page.server.ts` oder Actions prüfen. In Services `isChangeAllowed` zur Validierung nutzen.
@@ -122,8 +131,8 @@ In `src/lib/db/sequelize.ts` schaltet die App auf eine **flüchtige In-Memory-SQ
 
 - **GitHub-Actions-Secrets** (nicht App-Env, sondern für den Deploy-Workflow): `UBERSPACE_USER`, `UBERSPACE_HOST`, `DEPLOY_KEY_PRIVATE`.
 - **Ablauf:** `deploy.yml` baut `build/` mit `npm run build`, rsynct nach `~/html` (ohne `.env` und `node_modules`), installiert dort Prod-Deps via `npm ci --omit=dev` und startet den Supervisor-Service neu.
-- **Supervisor-Service:** heißt `festival`, führt `npm run start-server` im Verzeichnis `~/html` aus (Config unter `~/etc/services.d/festival.ini`). Restart via `supervisorctl restart festival`; danach Readiness-Check gegen `http://localhost:5173/api/health`.
-- **Readiness-Endpunkt `GET /api/health`:** setzt ein `SELECT 1` ab und meldet im MariaDB-Zweig die Anzahl ausstehender Migrationen; 200 bei `status: 'ok'`, sonst 503. Fehlerdetails gehen bewusst nur ins Server-Log (`supervisorctl tail -100 festival`), da DB-Fehler Benutzer- und Hostnamen enthalten. Der Endpunkt wird in `hooks.server.ts` **vor** der Session-Auflösung durchgereicht, damit er auch bei nicht erreichbarer DB noch antwortet. **Nicht gegen `/` prüfen:** Diese Route fasst ohne Session-Cookie keine DB an und antwortet mit 303 auf `/login`, was `curl --fail` als Erfolg wertet – ein toter DB-Zustand bliebe unsichtbar (genau dieser Fall in v0.7.25).
+- **Supervisor-Service:** heißt `festival`, führt `npm run start-server` im Verzeichnis `~/html` aus (Config unter `~/etc/services.d/festival.ini`). Restart via `supervisorctl restart festival`; danach Readiness-Check gegen `http://localhost:5173/festival/api/health`.
+- **Readiness-Endpunkt `GET /api/health`** (durch den Base-Pfad erreichbar unter `/festival/api/health`)**:** setzt ein `SELECT 1` ab und meldet im MariaDB-Zweig die Anzahl ausstehender Migrationen; 200 bei `status: 'ok'`, sonst 503. Fehlerdetails gehen bewusst nur ins Server-Log (`supervisorctl tail -100 festival`), da DB-Fehler Benutzer- und Hostnamen enthalten. Der Endpunkt wird in `hooks.server.ts` **vor** der Session-Auflösung durchgereicht, damit er auch bei nicht erreichbarer DB noch antwortet. **Nicht gegen `/` prüfen:** Diese Route fasst ohne Session-Cookie keine DB an und antwortet mit 303 auf `/login`, was `curl --fail` als Erfolg wertet – ein toter DB-Zustand bliebe unsichtbar (genau dieser Fall in v0.7.25).
 
 ### Altlasten in `.env`
 

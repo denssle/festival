@@ -2,12 +2,13 @@
 	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
 	import { invalidateAll } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
 	let { yourFriend = false, friendId }: { yourFriend?: boolean; friendId: string } = $props();
 
 	async function addFriend(): Promise<void> {
 		try {
-			const value = await fetch(`/user/` + friendId + `/add-friend`, { method: 'POST' });
+			const value = await fetch(resolve('/user/[user_id]/add-friend', { user_id: friendId }), { method: 'POST' });
 			if (value.ok) {
 				openDialog('Freundschaftsanfrage wurde geschickt.', false);
 			} else {
@@ -20,7 +21,7 @@
 
 	async function removeFriend(): Promise<void> {
 		try {
-			const value = await fetch(`/user/` + friendId + `/remove-friend`, { method: 'POST' });
+			const value = await fetch(resolve('/user/[user_id]/remove-friend', { user_id: friendId }), { method: 'POST' });
 			if (value.ok) {
 				openDialog('Freundschaft gekündigt.', true);
 			} else {

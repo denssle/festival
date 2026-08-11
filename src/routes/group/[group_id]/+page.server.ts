@@ -7,6 +7,7 @@ import type { GroupAttributes } from '$lib/db/attributes/group.attributes';
 import { convertToBackendUser, type UserAttributes } from '$lib/db/attributes/user.attributes';
 import { UserService } from '$lib/services/user.service';
 import { GroupService } from '$lib/services/group.service';
+import { resolve } from '$app/paths';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const { group_id } = params;
@@ -67,7 +68,7 @@ export const actions: Actions = {
 		const result = await GroupService.deleteGroup(user.id, group_id);
 
 		if (result === 'Success') {
-			throw redirect(303, '/group');
+			throw redirect(303, resolve('/group'));
 		} else {
 			return fail(400, { success: false, message: result });
 		}

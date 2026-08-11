@@ -17,7 +17,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		await page.waitForLoadState('networkidle');
 
 		// Festival vorab anlegen, damit festivalId für alle Tests verfügbar ist
-		await page.goto('/festival/new', { waitUntil: 'networkidle' });
+		await page.goto('/festival/festival/new', { waitUntil: 'networkidle' });
 		await page.fill('input[name="name"]', festivalName);
 		await page.fill('textarea[name="description"]', 'Dies ist eine Test-Beschreibung für unser Festival.');
 		await page.fill('textarea[name="location"]', 'Test-Ort im Grünen');
@@ -40,29 +40,29 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 
 	test('sollte ein neues Festival anlegen können', async () => {
 		// Festival wurde in beforeAll angelegt – hier nur verifizieren
-		await page.goto(`/festival/${festivalId}`);
+		await page.goto(`/festival/festival/${festivalId}`);
 		await page.waitForLoadState('networkidle');
 		await expect(page.locator('h4 u')).toContainText(festivalName, { timeout: 30000 });
 	});
 
 	test('sollte das Anlegen eines Festivals ohne Name verhindern', async () => {
-		await page.goto('/festival/new');
+		await page.goto('/festival/festival/new');
 		await page.fill('input[name="name"]', '');
 		await page.fill('textarea[name="description"]', 'Kein Name Test');
 		await page.fill('textarea[name="location"]', 'Test-Ort');
 		await page.click('button:has-text("Speichern")');
 		// URL sollte gleich bleiben (keine Navigation)
 		await page.waitForLoadState('networkidle');
-		await expect(page).toHaveURL('/festival/new');
+		await expect(page).toHaveURL('/festival/festival/new');
 	});
 
 	test('sollte das Festival bearbeiten können', async () => {
-		await page.goto(`/festival/${festivalId}`);
+		await page.goto(`/festival/festival/${festivalId}`);
 		await page.waitForLoadState('networkidle');
 		await expect(page.locator('h4 u')).toContainText(festivalName, { timeout: 15000 });
 
-		await page.goto(`/festival/${festivalId}/edit`);
-		await expect(page).toHaveURL(`/festival/${festivalId}/edit`, { timeout: 15000 });
+		await page.goto(`/festival/festival/${festivalId}/edit`);
+		await expect(page).toHaveURL(`/festival/festival/${festivalId}/edit`, { timeout: 15000 });
 
 		const nameInput = page.locator('input[name="name"]');
 		await expect(nameInput).toBeVisible({ timeout: 15000 });
@@ -99,7 +99,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 	});
 
 	test('sollte zu einem Festival zusagen können', async () => {
-		await page.goto(`/festival/${festivalId}`);
+		await page.goto(`/festival/festival/${festivalId}`);
 		await expect(page.locator('h4 u')).toContainText(updatedFestivalName, { timeout: 15000 });
 
 		// Zusagen Button klicken -> Dialog öffnet (robust gegen Hydration-Race)
@@ -129,7 +129,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 	});
 
 	test('sollte eine Zusage bearbeiten können', async () => {
-		await page.goto(`/festival/${festivalId}`);
+		await page.goto(`/festival/festival/${festivalId}`);
 
 		// Button sollte nun "Zusage bearbeiten" heißen
 		const editJoinButton = page.locator('button:has-text("Zusage bearbeiten")');
@@ -156,7 +156,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 	});
 
 	test('sollte zum Festival absagen können', async () => {
-		await page.goto(`/festival/${festivalId}`);
+		await page.goto(`/festival/festival/${festivalId}`);
 
 		// Absagen Button klicken (In der Button-Leiste am Ende der Seite)
 		const leaveButton = page.locator('article > section').last().locator('button:has-text("Absagen")');
@@ -189,7 +189,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 	});
 
 	test('sollte eine Absage bearbeiten können', async () => {
-		await page.goto(`/festival/${festivalId}`);
+		await page.goto(`/festival/festival/${festivalId}`);
 
 		// Button sollte nun "Absage bearbeiten" heißen
 		const editLeaveButton = page.locator('article > section').last().locator('button:has-text("Absage bearbeiten")');
@@ -211,7 +211,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 	});
 
 	test('sollte von einer Absage wieder zur Zusage wechseln können', async () => {
-		await page.goto(`/festival/${festivalId}`);
+		await page.goto(`/festival/festival/${festivalId}`);
 
 		// Wieder auf Zusagen klicken (heißt aktuell "Zusagen", da wir abgesagt haben)
 		const joinButton = page.locator('article > section').last().locator('button:has-text("Zusagen")');
@@ -235,7 +235,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 	});
 
 	test('sollte das Festival löschen können', async () => {
-		await page.goto(`/festival/${festivalId}`);
+		await page.goto(`/festival/festival/${festivalId}`);
 
 		// Löschen-Button öffnet Bestätigungsdialog (robust gegen Hydration-Race)
 		const dialog = page.locator('dialog[open]');
@@ -243,7 +243,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		await dialog.locator('button:has-text("Ja")').click();
 
 		// Verifizieren: Redirect auf Startseite
-		await expect(page).toHaveURL('/');
+		await expect(page).toHaveURL('/festival/');
 
 		// Optional: Prüfen, dass das Festival nicht mehr in der Liste ist (falls es eine Liste gibt)
 		await expect(page.locator('body')).not.toContainText(updatedFestivalName);

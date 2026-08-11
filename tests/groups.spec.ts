@@ -8,7 +8,7 @@ test.describe.serial('Gruppen Management', () => {
 
 	test.beforeAll(async ({ browser }) => {
 		const requestContext = await browser.newContext();
-		await requestContext.request.post('/api/test/reset');
+		await requestContext.request.post('/festival/api/test/reset');
 		await requestContext.close();
 
 		const page = await browser.newPage();
@@ -16,7 +16,7 @@ test.describe.serial('Gruppen Management', () => {
 		await page.waitForLoadState('networkidle');
 
 		// Gruppe vorab anlegen, damit sie für alle Tests verfügbar ist
-		await page.goto('/group/new', { waitUntil: 'networkidle' });
+		await page.goto('/festival/group/new', { waitUntil: 'networkidle' });
 		await page.fill('input[name="name"]', groupName);
 		await page.fill('textarea[name="description"]', groupDescription);
 		await Promise.all([
@@ -31,7 +31,7 @@ test.describe.serial('Gruppen Management', () => {
 		// Gruppe wurde in beforeAll angelegt – hier nur verifizieren
 		await login(page, userNickname, TEST_PASSWORD);
 		await page.waitForLoadState('networkidle');
-		await page.goto('/group', { waitUntil: 'networkidle' });
+		await page.goto('/festival/group', { waitUntil: 'networkidle' });
 		await expect(page.getByText(groupName)).toBeVisible({ timeout: 15000 });
 	});
 
@@ -41,7 +41,7 @@ test.describe.serial('Gruppen Management', () => {
 		await page.waitForLoadState('networkidle');
 
 		// Zur Gruppenseite navigieren
-		await page.goto('/group', { waitUntil: 'networkidle' });
+		await page.goto('/festival/group', { waitUntil: 'networkidle' });
 
 		// Suche nach der zuvor erstellten Gruppe
 		const searchInput = page.locator('input[name="q"]');
@@ -68,7 +68,7 @@ test.describe.serial('Gruppen Management', () => {
 		const emptyUser = uniqueName('EmptyGroupUser');
 		await register(page, emptyUser, TEST_PASSWORD);
 
-		await page.goto('/group');
+		await page.goto('/festival/group');
 		await expect(page.getByText('Du bist in keiner Gruppe.')).toBeVisible();
 	});
 
@@ -79,7 +79,7 @@ test.describe.serial('Gruppen Management', () => {
 		await register(page, creatorNickname, TEST_PASSWORD);
 
 		// Gruppe erstellen
-		await page.goto('/group/new');
+		await page.goto('/festival/group/new');
 		await page.fill('input[name="name"]', joinableGroupName);
 		await page.click('button[type="submit"]');
 		await expect(page).toHaveURL(/\/group\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/, {
@@ -125,7 +125,7 @@ test.describe.serial('Gruppen Management', () => {
 		await register(page, ownerNickname, TEST_PASSWORD);
 
 		// Gruppe erstellen
-		await page.goto('/group/new');
+		await page.goto('/festival/group/new');
 		await page.fill('input[name="name"]', groupToDel);
 		await page.click('button[type="submit"]');
 
@@ -141,7 +141,7 @@ test.describe.serial('Gruppen Management', () => {
 		await confirmDialog.getByRole('button', { name: 'Ja' }).click();
 
 		// Nach dem Löschen sollten wir auf der Gruppenseite sein
-		await expect(page).toHaveURL('/group');
+		await expect(page).toHaveURL('/festival/group');
 
 		// Die Gruppe sollte nicht mehr als Link auf der Gruppenseite erscheinen
 		await expect(page.getByRole('link', { name: groupToDel })).toHaveCount(0);
@@ -155,7 +155,7 @@ test.describe.serial('Gruppen Management', () => {
 		await register(page, ownerNickname, TEST_PASSWORD);
 
 		// Gruppe erstellen
-		await page.goto('/group/new');
+		await page.goto('/festival/group/new');
 		await page.fill('input[name="name"]', originalName);
 		await page.click('button[type="submit"]');
 
@@ -197,7 +197,7 @@ test.describe.serial('Gruppen Management', () => {
 		await register(page, creatorNickname, TEST_PASSWORD);
 
 		// Gruppe erstellen
-		await page.goto('/group/new');
+		await page.goto('/festival/group/new');
 		await page.fill('input[name="name"]', leaveGroupName);
 		await page.click('button[type="submit"]');
 		await expect(page).toHaveURL(/\/group\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/, {

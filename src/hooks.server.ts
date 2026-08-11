@@ -2,13 +2,18 @@ import { Handle } from '@sveltejs/kit';
 import { UserService } from '$lib/services/user.service';
 import { startDB } from '$lib/db/db';
 import { CurrentUser } from '$lib/models/user/CurrentUser';
+import { base } from '$app/paths';
+import { SESSION_COOKIE_PATH } from '$lib/constants';
 
 await startDB();
 
 const noAuthURLs: string[] = ['/login', '/registration', '/about', '/impressum'];
 
 export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
-	const pathname: string = event.url.pathname;
+	// Die App laeuft unter dem Base-Pfad (siehe svelte.config.js), `event.url.pathname`
+	// enthaelt ihn also. Einmal abschneiden, damit alle Vergleiche unten mit den
+	// route-eigenen Pfaden arbeiten koennen ('/festival/login' -> '/login').
+	const pathname: string = event.url.pathname.slice(base.length) || '/';
 
 	if (pathname.startsWith('/_app/') || pathname.startsWith('/favicon')) {
 		return resolve(event);
@@ -32,13 +37,19 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
 		if (sessionToken) {
 			// Ungültiger/abgelaufener Token: Cookie aufräumen (DB-Cleanup übernimmt
 			// getCurrentUserBySessionToken bei Ablauf selbst)
-			event.cookies.delete('session', { path: '/' });
+			event.cookies.delete('session', { path: SESSION_COOKIE_PATH });
 		}
 	}
 
 	if (noAuthURLs.includes(pathname) || currentUser) {
 		return resolve(event);
 	} else {
-		return new Response('Redirect', { status: 303, headers: { Location: '/login' } });
+		// Bewusst `${base}` statt resolve(): resolve() liefert einen RELATIVEN Pfad
+		// ('./login'), den der Browser gegen die angefragte Ressource auflöst. Bei einem
+		// Datenrequest (z. B. /festival/settings/__data.json nach invalidateAll()) landet
+		// das Ziel dann nicht auf der Login-Seite. Ein Location-Header braucht hier den
+		// absoluten Pfad. In SvelteKits eigenem redirect() ist resolve() dagegen korrekt,
+		// weil es gegen die Request-URL aufgelöst wird.
+		return new Response('Redirect', { status: 303, headers: { Location: `${base}/login` } });
 	}
 };

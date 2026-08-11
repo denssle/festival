@@ -68,13 +68,13 @@ jobs:
             # Session-Cookie keine Datenbank an. Genau so blieb der Ausfall in v0.7.25
             # unbemerkt. --fail laesst curl bei 503 mit Exit != 0 abbrechen.
             for i in $(seq 1 40); do
-              if response=$(curl -fsS http://localhost:5173/api/health); then
+              if response=$(curl -fsS http://localhost:5173/festival/api/health); then
                 echo "Service ist bereit (nach ~$((i * 3))s): $response"
                 exit 0
               fi
               sleep 3
             done
             echo "Service wurde nach dem Restart nicht bereit (/api/health lieferte kein OK)."
-            echo "Letzte Antwort: $(curl -sS -o - -w ' [HTTP %{http_code}]' http://localhost:5173/api/health || echo 'keine Verbindung')"
+            echo "Letzte Antwort: $(curl -sS -o - -w ' [HTTP %{http_code}]' http://localhost:5173/festival/api/health || echo 'keine Verbindung')"
             echo "Details stehen im Log des Supervisor-Service: supervisorctl tail -100 festival"
             exit 1

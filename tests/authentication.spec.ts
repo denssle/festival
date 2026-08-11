@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { register, logout, TEST_PASSWORD } from './test-utils';
+import { register, logout, TEST_PASSWORD, BASE_PATH } from './test-utils';
 
 test.describe('Authentication Security', () => {
 	test('Erfolgreicher Login setzt Session-Cookie', async ({ page }) => {
@@ -15,7 +15,7 @@ test.describe('Authentication Security', () => {
 
 	test('Zugriff auf geschützte Route ohne Login führt zu Redirect', async ({ page }) => {
 		// Direkt zu einer geschützten Route gehen
-		await page.goto('/festival/new');
+		await page.goto('/festival/festival/new');
 		await expect(page).toHaveURL(/\/login/);
 	});
 
@@ -23,17 +23,19 @@ test.describe('Authentication Security', () => {
 		const nickname = `ManipUser_${Date.now()}`;
 		await register(page, nickname);
 
-		// Cookie manipulieren
+		// Cookie manipulieren. Der Pfad muss dem echten Session-Cookie entsprechen
+		// (SESSION_COOKIE_PATH = Base-Pfad), sonst legt der Browser ein ZWEITES Cookie
+		// gleichen Namens an und sendet weiterhin auch das gültige mit.
 		await context.addCookies([
 			{
 				name: 'session',
 				value: JSON.stringify({ id: 'wrong-id', token: 'fake-token', nickname: nickname, email: 'fake@email.com' }),
 				domain: 'localhost',
-				path: '/'
+				path: BASE_PATH
 			}
 		]);
 
-		await page.goto('/festival/new');
+		await page.goto('/festival/festival/new');
 		await expect(page).toHaveURL(/\/login/);
 	});
 
@@ -55,7 +57,7 @@ test.describe('Authentication Security', () => {
 		expect(sessionCookie).toBeUndefined();
 
 		// Zugriff auf geschützte Route führt zu Redirect
-		await page.goto('/festival/new');
+		await page.goto('/festival/festival/new');
 		await expect(page).toHaveURL(/\/login/);
 	});
 

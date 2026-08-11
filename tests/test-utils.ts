@@ -3,6 +3,15 @@ import { expect, type Locator, type Page } from '@playwright/test';
 export const TEST_PASSWORD = 'TestPassword123!';
 
 /**
+ * Base-Pfad der App (siehe `kit.paths.base` in svelte.config.js). Alle von SvelteKit
+ * erzeugten `href`s tragen diesen Präfix, Selektoren müssen ihn daher mitführen.
+ */
+export const BASE_PATH = '/festival';
+
+/** Profil-Link im Header – zeigt an, dass die Session im UI angekommen ist. */
+const PROFILE_LINK_SELECTOR = `header nav a[href^="${BASE_PATH}/user/"]`;
+
+/**
  * Klickt einen Trigger-Button und stellt sicher, dass der zugehörige Dialog sichtbar wird.
  *
  * Hintergrund: SvelteKit rendert den Button serverseitig; er ist bereits klickbar, bevor bei
@@ -61,7 +70,7 @@ export const uniqueName = (prefix: string) => `${prefix}_${Date.now()}_${Math.ra
  * @param password Das Passwort (optional, nutzt Standard falls nicht angegeben).
  */
 export async function register(page: Page, nickname: string, password = TEST_PASSWORD) {
-	await page.goto('/registration');
+	await page.goto('/festival/registration');
 	await page.fill('input[name="nickname"]', nickname);
 	await page.fill('input[name="password"]', password);
 	await page.fill('input[name="password2"]', password);
@@ -72,10 +81,10 @@ export async function register(page: Page, nickname: string, password = TEST_PAS
 
 	await submitButton.click();
 
-	await expect(page).toHaveURL('/', { timeout: 15000 });
+	await expect(page).toHaveURL('/festival/', { timeout: 15000 });
 
 	// Sicherstellen, dass die Session im Header reflektiert wird (Hydration / Login-Status)
-	await expect(page.locator('header nav a[href^="/user/"]')).toBeVisible({ timeout: 10000 });
+	await expect(page.locator(PROFILE_LINK_SELECTOR)).toBeVisible({ timeout: 10000 });
 	console.log(`Registered user: ${nickname}`);
 }
 
@@ -85,7 +94,7 @@ export async function register(page: Page, nickname: string, password = TEST_PAS
  * @returns Die extrahierte ID.
  */
 export async function getUserId(page: Page): Promise<string> {
-	const profileLink = page.locator('header nav a[href^="/user/"]');
+	const profileLink = page.locator(PROFILE_LINK_SELECTOR);
 	// Sicherstellen, dass der Link da ist, bevor wir das Attribut lesen
 	await expect(profileLink).toBeVisible({ timeout: 10000 });
 	const href = await profileLink.getAttribute('href');
@@ -109,7 +118,7 @@ export async function logout(page: Page): Promise<void> {
 		if (!page.url().includes('/login')) {
 			await logoutButton.click({ timeout: 3000 });
 		}
-		await page.waitForURL('/login', { timeout: 3000 });
+		await page.waitForURL('/festival/login', { timeout: 3000 });
 	}).toPass({ timeout: 25000 });
 	await page.waitForLoadState('networkidle');
 }
@@ -121,13 +130,13 @@ export async function logout(page: Page): Promise<void> {
  * @param password Das Passwort.
  */
 export async function login(page: Page, nickname: string, password = TEST_PASSWORD) {
-	await page.goto('/login');
+	await page.goto('/festival/login');
 	await page.fill('input[name="nickname"]', nickname);
 	await page.fill('input[name="password"]', password);
 	const submitButton = page.locator('button[type="submit"]');
-	await Promise.all([page.waitForURL('/', { timeout: 15000 }), submitButton.click()]);
+	await Promise.all([page.waitForURL('/festival/', { timeout: 15000 }), submitButton.click()]);
 
 	// Sicherstellen, dass der Login erfolgreich war (Redirect zur Home-Seite)
-	await expect(page.locator('header nav a[href^="/user/"]')).toBeVisible({ timeout: 10000 });
+	await expect(page.locator(PROFILE_LINK_SELECTOR)).toBeVisible({ timeout: 10000 });
 	console.log(`Logged in user: ${nickname}`);
 }

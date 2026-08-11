@@ -5,6 +5,7 @@ import { getDateFromString } from '$lib/utils/date.util';
 import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 import { CurrentUser } from '$lib/models/user/CurrentUser';
 import { ChangeResult, getHTTPCodeForChangeResult } from '$lib/models/updates/ChangeResult';
+import { resolve } from '$app/paths';
 
 /**
  * load – GET /festival/:festival_id/edit
@@ -26,7 +27,7 @@ export const load: PageServerLoad = async ({ locals, params }): Promise<Frontend
 			if (user && user.id === festival.createdBy?.id) {
 				return festival;
 			} else {
-				redirect(303, '/');
+				redirect(303, resolve('/'));
 			}
 		}
 	}
@@ -54,7 +55,7 @@ export const actions: Actions = {
 		const user = locals.currentUser ?? null;
 
 		if (!user) {
-			throw redirect(302, '/login');
+			throw redirect(302, resolve('/login'));
 		}
 
 		if (!festivalId || !name) {
@@ -79,7 +80,7 @@ export const actions: Actions = {
 			location
 		);
 		if (result === 'Success') {
-			redirect(302, '/festival/' + festivalId);
+			redirect(302, resolve('/festival/[festival_id]', { festival_id: festivalId }));
 		}
 		return fail(getHTTPCodeForChangeResult(result), { message: result });
 	}

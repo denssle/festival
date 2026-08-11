@@ -13,7 +13,7 @@
 	} = $props();
 
 	async function logout() {
-		await fetch('/logout', {
+		await fetch(resolve('/logout'), {
 			method: 'POST'
 		});
 		await invalidateAll();
