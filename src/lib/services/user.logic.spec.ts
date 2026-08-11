@@ -1,5 +1,37 @@
 import { describe, it, expect } from 'vitest';
-import { isSessionTokenExpired, validatePasswordChange } from './user.logic';
+import { isSessionTokenExpired, readTextField, validatePasswordChange } from './user.logic';
+
+describe('readTextField', () => {
+	it('sollte den Wert eines vorhandenen Feldes liefern', () => {
+		const values = new FormData();
+		values.set('email', 'test@example.com');
+		expect(readTextField(values, 'email')).toBe('test@example.com');
+	});
+
+	// Der eigentliche Fehler: String(null) ergab den Text "null", der so in der DB landete.
+	it('sollte einen leeren String liefern, wenn das Feld gar nicht gesendet wurde', () => {
+		expect(readTextField(new FormData(), 'email')).toBe('');
+	});
+
+	it('sollte einen leeren String liefern, wenn das Feld leer gesendet wurde', () => {
+		const values = new FormData();
+		values.set('lastname', '');
+		expect(readTextField(values, 'lastname')).toBe('');
+	});
+
+	// Sonst stünde "[object File]" im Namensfeld.
+	it('sollte einen leeren String liefern, wenn das Feld eine Datei ist', () => {
+		const values = new FormData();
+		values.set('forename', new File(['inhalt'], 'bild.png', { type: 'image/png' }));
+		expect(readTextField(values, 'forename')).toBe('');
+	});
+
+	it('sollte Leerzeichen im Wert unangetastet lassen', () => {
+		const values = new FormData();
+		values.set('forename', '  Anna  ');
+		expect(readTextField(values, 'forename')).toBe('  Anna  ');
+	});
+});
 
 describe('isSessionTokenExpired', () => {
 	const maxAgeMs = 1000 * 60 * 60 * 24 * 30; // 30 Tage

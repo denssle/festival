@@ -13,7 +13,7 @@ import { User } from '$lib/db/model/user';
 import { UserImage } from '$lib/db/model/userImage';
 import { SessionToken } from '$lib/db/model/sessionToken';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
-import { isSessionTokenExpired } from '$lib/services/user.logic';
+import { isSessionTokenExpired, readTextField } from '$lib/services/user.logic';
 import { SESSION_MAX_AGE_MS, SESSION_MAX_AGE_SECONDS } from '$lib/constants';
 import { dev } from '$app/environment';
 
@@ -202,13 +202,19 @@ export class UserService {
 		return user?.email ?? '';
 	}
 
+	/**
+	 * Liest die Profilfelder aus dem Formular. Fehlende Felder ergeben einen leeren
+	 * String – ein früheres `String(values.get(...))` machte daraus den Text "null",
+	 * der als E-Mail bzw. Name in der Datenbank landete (und in `emailTakenByOtherUser`
+	 * dazu führte, dass zwei Nutzer ohne E-Mail sich gegenseitig blockierten).
+	 */
 	static async readFormDataFrontEndUser(data: Promise<FormData>): Promise<UserFormData> {
 		const values: FormData = await data;
 		return {
-			email: String(values.get('email')),
-			nickname: String(values.get('nickname')),
-			forename: String(values.get('forename')),
-			lastname: String(values.get('lastname'))
+			email: readTextField(values, 'email'),
+			nickname: readTextField(values, 'nickname'),
+			forename: readTextField(values, 'forename'),
+			lastname: readTextField(values, 'lastname')
 		};
 	}
 
