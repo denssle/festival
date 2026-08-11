@@ -38,9 +38,12 @@ export async function GET(): Promise<Response> {
 	};
 
 	try {
-		// Trifft die DB wirklich an – authenticate() allein liefe ggf. auf einem
-		// Pool-Eintrag ohne echten Roundtrip.
-		await sequelize.query('SELECT 1');
+		// authenticate() setzt ein echtes `SELECT 1+1 AS result` ab, ist also ein
+		// vollwertiger Roundtrip zur DB. Bewusst KEIN eigenes sequelize.query('SELECT 1'):
+		// Das bricht auf MariaDB in Sequelizes formatResults mit "Cannot delete property
+		// 'meta' of [object Array]" ab, weil der mariadb-Treiber das Ergebnis-Array mit
+		// einer nicht löschbaren meta-Eigenschaft liefert (auf SQLite fällt das nicht auf).
+		await sequelize.authenticate();
 
 		if (sequelize.getDialect() === 'mariadb') {
 			// Im SQLite-Zweig (Dev/Tests) baut sync() das Schema aus den Modellen auf;
