@@ -30,3 +30,61 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
+
+  # Die Playwright-Suite laeuft ueber PLAYWRIGHT=true gegen In-Memory-SQLite und fasst
+  # damit weder `node build` noch den MariaDB-Zweig von startDB() an. Dieser Job startet
+  # das gebaute Artefakt gegen eine echte MariaDB - genau so, wie der Supervisor es auf
+  # dem Uberspace tut. Er gehoert in DIESEN Workflow, weil deploy.yml per workflow_run
+  # an dessen Gesamtergebnis haengt: schlaegt der Smoke-Test fehl, wird nicht deployt.
+  smoke:
+    name: Produktions-Smoke-Test (MariaDB)
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          # Der effektive DB-Name ist MARIA_DB_USER + '_' + MARIA_DB_NAME (sequelize.ts)
+          MARIADB_DATABASE: festival_prod
+          MARIADB_USER: festival
+          MARIADB_PASSWORD: festivalpw
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22.20.0
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Baut mit vollen Abhaengigkeiten. Dieser Schritt allein haette den Fehler aus
+      # v0.7.27 gefangen (Guard auf Modulebene brach den Build ohne MARIA_DB_*-Vars).
+      - name: Build
+        run: npm run build
+
+      # Wie auf dem Host: nur Produktions-Abhaengigkeiten. Faellt eine Runtime-Dependency
+      # faelschlich unter devDependencies, startet der Server hier nicht mehr.
+      - name: Nur Produktions-Abhaengigkeiten installieren
+        run: npm ci --omit=dev
+
+      - name: MariaDB-Client bereitstellen
+        run: command -v mysql || sudo apt-get install -y --no-install-recommends mariadb-client
+
+      - name: Smoke-Test gegen MariaDB
+        run: bash scripts/smoke-test.sh
+
+      - name: Serverlog bei Fehlschlag sichern
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v5
+        with:
+          name: smoke-server-log
+          path: smoke-server.log
+          retention-days: 7

@@ -133,3 +133,6 @@ dist
 
 # SvelteKit adapter-node Build-Output
 /build
+
+# Smoke-Test-Artefakte (scripts/smoke-test.sh)
+smoke-health.json
