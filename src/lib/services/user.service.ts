@@ -266,6 +266,14 @@ export class UserService {
 	}
 
 	static async updateUser(userId: string, formData: UserFormData): Promise<ChangeResult> {
+		// Ohne brauchbaren Nickname wäre der Account nicht mehr anmeldbar (der Login
+		// läuft darüber). Den komplett leeren Fall fängt bereits `nickNameInvalid` in der
+		// Update-Action ab; ein Name aus reinen Leerzeichen kommt dort aber durch, weil er
+		// nicht leer und auch nicht vergeben ist. Sicherheitsnetz auf Service-Ebene, das
+		// unabhängig vom Aufrufer greift.
+		if (formData.nickname.trim().length === 0) {
+			return 'Data Missing';
+		}
 		const model: Model<UserAttributes, UserCreationAttributes> | null = await User.findByPk(userId);
 		if (model) {
 			if (this.isChangeAllowed(userId, model.dataValues)) {
