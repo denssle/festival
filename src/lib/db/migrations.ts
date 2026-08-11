@@ -44,6 +44,20 @@ export function createMigrator(sequelize: Sequelize): Umzug<QueryInterface> {
 export const BASELINE_MIGRATION = '0001-initial-schema';
 
 /**
+ * Vereinheitlicht die Rückgabe von `showAllTables()` zu Tabellennamen.
+ *
+ * Die Methode ist dialektabhängig: SQLite liefert Strings, MariaDB Objekte der Form
+ * `{ tableName, schema }`. Die Sequelize-Typen kennen nur den String-Fall, weshalb der
+ * MariaDB-Pfad ohne Normalisierung mit "table.toLowerCase is not a function" abbricht –
+ * und Tests auf SQLite davon nichts bemerken (gefunden vom Smoke-Test, v0.7.30).
+ */
+export function normalizeTableNames(tables: unknown[]): string[] {
+	return tables.map((table) =>
+		typeof table === 'string' ? table : String((table as { tableName?: string })?.tableName ?? table)
+	);
+}
+
+/**
  * Trägt die Baseline als ausgeführt ein, OHNE sie auszuführen – für Datenbanken, die
  * noch aus der `sync({ alter: true })`-Zeit stammen und deren Schema deshalb bereits
  * steht, aber kein `SequelizeMeta` besitzen.
@@ -70,7 +84,7 @@ export async function stampBaselineIfLegacySchema(
 	}
 
 	const tables = await sequelize.getQueryInterface().showAllTables();
-	const hasLegacySchema = tables.some((table) => table.toLowerCase() === 'users');
+	const hasLegacySchema = normalizeTableNames(tables).some((name) => name.toLowerCase() === 'users');
 	if (!hasLegacySchema) {
 		return false;
 	}

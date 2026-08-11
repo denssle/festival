@@ -1,6 +1,11 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { Sequelize } from 'sequelize';
-import { BASELINE_MIGRATION, createMigrator, stampBaselineIfLegacySchema } from '$lib/db/migrations';
+import {
+	BASELINE_MIGRATION,
+	createMigrator,
+	normalizeTableNames,
+	stampBaselineIfLegacySchema
+} from '$lib/db/migrations';
 
 /**
  * Absicherung des Baseline-Stempels. Die Funktion überspringt bewusst eine Migration –
@@ -12,10 +17,15 @@ import { BASELINE_MIGRATION, createMigrator, stampBaselineIfLegacySchema } from 
  * `ADD UNIQUE INDEX` in "Duplicate key name" (Fehler 1061) – der Serverstart brach ab.
  */
 describe('Baseline-Stempel für Datenbanken aus der sync()-Zeit', () => {
-	let db: Sequelize;
+	// Nur die Tests, die eine DB anlegen, haben eine zu schließen – der reine
+	// Funktionstest unten kommt ohne aus.
+	let db: Sequelize | undefined;
 
 	afterEach(async () => {
-		await db.close();
+		if (db) {
+			await db.close();
+			db = undefined;
+		}
 	});
 
 	function freshDb(): Sequelize {
@@ -45,6 +55,18 @@ describe('Baseline-Stempel für Datenbanken aus der sync()-Zeit', () => {
 		await migrator.up();
 		const tables = await empty.getQueryInterface().showAllTables();
 		expect(tables.map(String)).toContain('users');
+	});
+
+	// Der Objekt-Fall lässt sich auf SQLite nicht erzeugen, ist aber genau der, an dem
+	// der Stempel in Produktion scheiterte – deshalb hier direkt gegen die reine Funktion.
+	it('versteht beide Rückgabeformen von showAllTables (SQLite: String, MariaDB: Objekt)', () => {
+		expect(normalizeTableNames(['users', 'comments'])).toEqual(['users', 'comments']);
+		expect(
+			normalizeTableNames([
+				{ tableName: 'users', schema: 'festival_prod' },
+				{ tableName: 'comments', schema: 'festival_prod' }
+			])
+		).toEqual(['users', 'comments']);
 	});
 
 	it('rührt eine bereits migrierte DB nicht an', async () => {
