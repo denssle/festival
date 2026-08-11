@@ -62,19 +62,30 @@ start_server() {
 	# ausfuehrt, inklusive --env-file=.env. Ein Fehler darin faellt so hier auf.
 	# Angehaengt (>>), damit das Log beider Szenarien im Artefakt erhalten bleibt.
 	echo "--- Serverstart ---" >> smoke-server.log
-	npm run start-server >> smoke-server.log 2>&1 &
+	# setsid gibt dem Server eine eigene Prozessgruppe (PGID = PID), damit unten die
+	# GANZE Gruppe beendet werden kann - npm startet node ueber eine sh-Zwischenschicht,
+	# node ist also ein Enkel und ueberlebt ein `pkill -P` auf den npm-Prozess.
+	if command -v setsid > /dev/null 2>&1; then
+		setsid npm run start-server >> smoke-server.log 2>&1 &
+	else
+		npm run start-server >> smoke-server.log 2>&1 &
+	fi
 	server_pid=$!
 }
 
-# `npm run` startet node als KINDPROZESS. Nur den npm-Wrapper zu killen laesst node
-# weiterlaufen, der Port bleibt belegt und der naechste Start scheitert mit EADDRINUSE.
+# Beendet den Server samt Kindern. Nur den npm-Wrapper zu killen reicht nicht: node
+# laeuft als Enkel weiter, haelt Port 5173 und der naechste Start scheitert mit
+# EADDRINUSE. Deshalb erst die Prozessgruppe (negative PID), dann die Einzelprozesse,
+# zuletzt ein Fallback auf das Startkommando selbst.
 kill_server() {
 	if [[ -n "$server_pid" ]]; then
+		kill -- -"$server_pid" 2>/dev/null || true
 		pkill -P "$server_pid" 2>/dev/null || true
 		kill "$server_pid" 2>/dev/null || true
 		wait "$server_pid" 2>/dev/null || true
 		server_pid=""
 	fi
+	pkill -f "node --env-file=.env build" 2>/dev/null || true
 }
 
 # Beenden und sicherstellen, dass der Port wirklich frei ist, bevor neu gestartet wird.
