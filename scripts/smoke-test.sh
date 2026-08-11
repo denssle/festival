@@ -34,10 +34,9 @@ server_pid=""
 env_backup=""
 
 cleanup() {
-	if [[ -n "$server_pid" ]] && kill -0 "$server_pid" 2>/dev/null; then
-		kill "$server_pid" 2>/dev/null || true
-		wait "$server_pid" 2>/dev/null || true
-	fi
+	# Nur beenden, nicht auf den Port warten: cleanup laeuft im EXIT-Trap, ein
+	# fail() von dort waere wenig hilfreich und wuerde den echten Fehler verdecken.
+	kill_server
 	# Eine lokal vorhandene .env unbedingt zurueckspielen - der Test schreibt eine
 	# eigene und wuerde die Entwicklungs-Konfiguration sonst zerstoeren.
 	if [[ -n "$env_backup" && -f "$env_backup" ]]; then
@@ -61,16 +60,41 @@ mysql_exec() {
 start_server() {
 	# Bewusst ueber `npm run start-server` - genau das Kommando, das der Supervisor
 	# ausfuehrt, inklusive --env-file=.env. Ein Fehler darin faellt so hier auf.
-	npm run start-server > smoke-server.log 2>&1 &
+	# Angehaengt (>>), damit das Log beider Szenarien im Artefakt erhalten bleibt.
+	echo "--- Serverstart ---" >> smoke-server.log
+	npm run start-server >> smoke-server.log 2>&1 &
 	server_pid=$!
 }
 
-stop_server() {
+# `npm run` startet node als KINDPROZESS. Nur den npm-Wrapper zu killen laesst node
+# weiterlaufen, der Port bleibt belegt und der naechste Start scheitert mit EADDRINUSE.
+kill_server() {
 	if [[ -n "$server_pid" ]]; then
+		pkill -P "$server_pid" 2>/dev/null || true
 		kill "$server_pid" 2>/dev/null || true
 		wait "$server_pid" 2>/dev/null || true
 		server_pid=""
 	fi
+}
+
+# Beenden und sicherstellen, dass der Port wirklich frei ist, bevor neu gestartet wird.
+stop_server() {
+	kill_server
+	wait_for_port_free
+}
+
+# Wartet, bis auf Port 5173 nichts mehr antwortet. Bewusst `curl` OHNE --fail: Ein
+# laufender Server, der 503 meldet, ist ebenfalls "belegt" - mit --fail wuerde er
+# faelschlich als beendet gelten.
+wait_for_port_free() {
+	local attempt
+	for attempt in $(seq 1 20); do
+		if ! curl -s -o /dev/null "$HEALTH_URL" 2>/dev/null; then
+			return 0
+		fi
+		sleep 1
+	done
+	fail "Port 5173 ist noch belegt - der vorherige Serverprozess laeuft weiter"
 }
 
 # Wartet auf HTTP 200 von /api/health. Bricht sofort ab, wenn der Serverprozess
@@ -111,6 +135,10 @@ MARIA_DB_USER="${DB_USER}"
 MARIA_DB_PASSWORD="${DB_PASSWORD}"
 MARIA_DB_NAME="${DB_NAME}"
 EOF
+
+# Frisches Log, damit die Pruefungen unten nicht auf Treffer eines frueheren Laufs
+# hereinfallen (im CI immer frisch, lokal nicht zwingend).
+: > smoke-server.log
 
 echo "==> Szenario 1: frische Datenbank, Schema kommt aus den Migrationen"
 start_server
