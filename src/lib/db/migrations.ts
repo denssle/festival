@@ -39,3 +39,45 @@ export function createMigrator(sequelize: Sequelize): Umzug<QueryInterface> {
 		logger: console
 	});
 }
+
+/** Name der Baseline-Migration – das komplette Schema zum Stand v0.7.23. */
+export const BASELINE_MIGRATION = '0001-initial-schema';
+
+/**
+ * Trägt die Baseline als ausgeführt ein, OHNE sie auszuführen – für Datenbanken, die
+ * noch aus der `sync({ alter: true })`-Zeit stammen und deren Schema deshalb bereits
+ * steht, aber kein `SequelizeMeta` besitzen.
+ *
+ * Ohne diesen Stempel hält umzug die Baseline für ausstehend und legt das Schema ein
+ * zweites Mal an. Die `CREATE TABLE IF NOT EXISTS` laufen dabei folgenlos durch, aber
+ * `ADD UNIQUE INDEX` kennt kein IF NOT EXISTS und bricht mit "Duplicate key name"
+ * (Fehler 1061) ab – genau so blieb die Produktion nach v0.7.24 unten.
+ *
+ * Greift bewusst eng: nur wenn NOCH KEINE Migration protokolliert ist (frisch
+ * angelegtes, leeres SequelizeMeta) UND die Tabelle `users` bereits existiert. Eine
+ * leere Datenbank läuft damit weiter regulär durch alle Migrationen.
+ *
+ * @returns true, wenn gestempelt wurde
+ */
+export async function stampBaselineIfLegacySchema(
+	sequelize: Sequelize,
+	migrator: Umzug<QueryInterface>
+): Promise<boolean> {
+	// Legt SequelizeMeta an, falls noch nicht vorhanden, und liefert das Protokoll.
+	const executed = await migrator.executed();
+	if (executed.length > 0) {
+		return false;
+	}
+
+	const tables = await sequelize.getQueryInterface().showAllTables();
+	const hasLegacySchema = tables.some((table) => table.toLowerCase() === 'users');
+	if (!hasLegacySchema) {
+		return false;
+	}
+
+	await sequelize.getQueryInterface().bulkInsert('SequelizeMeta', [{ name: BASELINE_MIGRATION }]);
+	console.info(
+		`Bestehendes Schema ohne Migrationsprotokoll erkannt: '${BASELINE_MIGRATION}' als ausgeführt eingetragen (nicht ausgeführt).`
+	);
+	return true;
+}

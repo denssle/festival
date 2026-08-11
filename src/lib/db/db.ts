@@ -5,7 +5,7 @@ import { SessionToken } from '$lib/db/model/sessionToken';
 import { Group } from '$lib/db/model/group';
 import { FestivalEvent } from '$lib/db/model/festivalEvent';
 import { assertDatabaseCredentials, sequelize } from '$lib/db/sequelize';
-import { createMigrator } from '$lib/db/migrations';
+import { createMigrator, stampBaselineIfLegacySchema } from '$lib/db/migrations';
 import { FriendRequest } from '$lib/db/model/friendRequest';
 import { GroupMember } from '$lib/db/model/groupMember';
 import { Friendship } from '$lib/db/model/friendship';
@@ -98,7 +98,11 @@ export async function startDB(): Promise<void> {
 			// SequelizeMeta). Führt nur Pending-Migrationen aus → idempotent bei jedem
 			// Start. Modelländerungen brauchen eine neue Migrationsdatei (Quadrat-Regel
 			// in CLAUDE.md) – bewusst kein sync()/alter gegen die echte DB.
-			await createMigrator(sequelize).up();
+			const migrator = createMigrator(sequelize);
+			// Bestands-DB aus der sync()-Zeit einmalig auf die Baseline stempeln, sonst
+			// legt umzug das bereits vorhandene Schema erneut an (siehe migrations.ts).
+			await stampBaselineIfLegacySchema(sequelize, migrator);
+			await migrator.up();
 		} else {
 			// Dev/Tests: frisches In-Memory-SQLite (siehe sequelize.ts) – sync() baut die
 			// Tabellen bei jedem Prozessstart dialektfrei aus den Modellen auf. Dass
