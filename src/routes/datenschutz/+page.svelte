@@ -109,10 +109,12 @@
 	<section>
 		<h3>Speicherdauer</h3>
 		<p>
-			Konto- und Inhaltsdaten werden gespeichert, solange das Benutzerkonto besteht. Wird das Konto gelöscht, werden die
-			damit verknüpften Daten – Profilbild, eigene Festivals, Zu- und Absagen, Kommentare, Gruppenmitgliedschaften,
-			Freundschaften und Anfragen – mitgelöscht. Sitzungstoken verfallen spätestens nach 30 Tagen. Zur Löschdauer der
-			Server-Protokolle gelten die Fristen des Hosters.
+			Konto- und Inhaltsdaten werden gespeichert, solange das Benutzerkonto besteht. Das Konto lässt sich jederzeit
+			selbst in den <a href={resolve('/settings')}>Einstellungen</a> löschen; dabei werden alle verknüpften Daten unwiderruflich
+			mitgelöscht: Profil und Profilbild, die eigenen Festivals samt der Zu- und Absagen aller Gäste, die eigenen Gruppen,
+			sämtliche Kommentare – die selbst geschriebenen ebenso wie die, die andere auf dem eigenen Profil und an den eigenen
+			Festivals hinterlassen haben –, Freundschaften, offene Freundschaftsanfragen sowie die Zusagen zu fremden Festivals.
+			Sitzungstoken verfallen spätestens nach 30 Tagen. Zur Löschdauer der Server-Protokolle gelten die Fristen des Hosters.
 		</p>
 	</section>
 
@@ -125,10 +127,11 @@
 			werden; die Rechtmäßigkeit der bis dahin erfolgten Verarbeitung bleibt unberührt.
 		</p>
 		<p>
-			Viele dieser Rechte lassen sich unmittelbar in der Anwendung ausüben: Profilangaben und Passwort sind in den
-			<a href={resolve('/settings')}>Einstellungen</a> änderbar, eigene Festivals und Kommentare dort löschbar, wo sie
-			angezeigt werden. Für alles Weitere – insbesondere Auskunft und vollständige Kontolöschung – genügt eine Nachricht
-			an die im <a href={resolve('/impressum')}>Impressum</a> genannte Adresse.
+			Die wichtigsten dieser Rechte lassen sich unmittelbar in der Anwendung ausüben: Profilangaben und Passwort sind in
+			den <a href={resolve('/settings')}>Einstellungen</a> änderbar, eigene Festivals und Kommentare dort löschbar, wo
+			sie angezeigt werden, und das gesamte Konto lässt sich in den Einstellungen unter „Konto löschen“ selbst entfernen
+			– ohne Umweg über eine Anfrage. Für alles Weitere, etwa eine Auskunft nach Art. 15 DSGVO, genügt eine Nachricht an
+			die im <a href={resolve('/impressum')}>Impressum</a> genannte Adresse.
 		</p>
 		<p>
 			Zudem besteht ein Beschwerderecht bei einer Datenschutz-Aufsichtsbehörde, für den Verantwortlichen zuständig ist

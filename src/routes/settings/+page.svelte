@@ -9,8 +9,11 @@
 	let { form }: { form: ActionData } = $props();
 
 	// Beide Formulare teilen sich `form`; der Scope entscheidet, wo die Meldung
-	// erscheint. Der zugehörige Bereich klappt dann auf – sonst stünde die
-	// Fehlermeldung in einem geschlossenen <details> und bliebe unsichtbar.
+	// erscheint. Sie steht bewusst AUSSERHALB des jeweiligen <details>, damit sie
+	// auch im zugeklappten Zustand sichtbar ist. Der naheliegende Weg – <details
+	// open={...}> – ist eine Falle: Svelte kontrolliert das Attribut dann reaktiv
+	// und klappt den Bereich beim nächsten Re-Render wieder zu, obwohl ihn gerade
+	// jemand geöffnet hat.
 	let passwordMessage: string | undefined = $derived(form?.scope === PASSWORD_SCOPE ? form?.message : undefined);
 	let accountMessage: string | undefined = $derived(form?.scope === ACCOUNT_SCOPE ? form?.message : undefined);
 
@@ -61,7 +64,7 @@
 	<h2>Einstellungen</h2>
 	<form autocomplete="on" method="POST" action="?/changePassword">
 		<section>
-			<details open={Boolean(passwordMessage)}>
+			<details>
 				<summary>Passwort</summary>
 				<p>
 					<label for="currentPassword">Aktuelles Passwort: </label>
@@ -97,22 +100,21 @@
 						minlength={MIN_PASSWORD_LENGTH}
 						required
 					/>
-
-					{#if passwordMessage}
-						<span>{passwordMessage}</span>
-					{/if}
 				</p>
 			</details>
 
 			<p>
 				<button type="submit">Speichern</button>
+				{#if passwordMessage}
+					<span>{passwordMessage}</span>
+				{/if}
 			</p>
 		</section>
 	</form>
 
 	<form bind:this={deleteForm} method="POST" action="?/deleteAccount" onsubmit={confirmDeletion}>
 		<section>
-			<details open={Boolean(accountMessage)}>
+			<details>
 				<summary>Konto löschen</summary>
 				<p>
 					Beim Löschen des Kontos werden alle zugehörigen Daten entfernt: Profil und Profilbild, die von dir angelegten
@@ -133,11 +135,11 @@
 				</p>
 				<p>
 					<button type="submit">Konto löschen</button>
-					{#if accountMessage}
-						<span>{accountMessage}</span>
-					{/if}
 				</p>
 			</details>
+			{#if accountMessage}
+				<p><span>{accountMessage}</span></p>
+			{/if}
 		</section>
 	</form>
 </article>
