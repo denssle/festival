@@ -3,7 +3,7 @@ import { FrontendComment } from '$lib/models/transferData/FrontendComment';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
 import { Comment } from '$lib/db/model/comment';
 import { User } from '$lib/db/model/user';
-import { Op } from 'sequelize';
+import { Op, Transaction } from 'sequelize';
 import { FrontendUser } from '$lib/models/user/FrontendUser';
 import { UserService } from '$lib/services/user.service';
 import { convertToBackendUser, UserAttributes } from '$lib/db/attributes/user.attributes';
@@ -54,12 +54,21 @@ export class CommentService {
 	 * `writtenTo` ist polymorph (Festival- ODER User-ID) und kann daher keinen FK mit
 	 * ON DELETE CASCADE haben – die Kommentare müssen beim Löschen des Ziels explizit
 	 * mitentfernt werden, sonst bleiben sie als Waisen in der DB zurück.
+	 *
+	 * Nimmt auch eine Liste von Zielen entgegen (ein Query statt N), was die
+	 * Kontolöschung braucht: dort sind das Profil UND alle Festivals des Nutzers
+	 * aufzuräumen. Der optionale `transaction`-Parameter bindet das Löschen in die
+	 * umgebende Transaktion ein (siehe UserService.deleteAccount).
 	 */
-	static async deleteCommentsWrittenTo(writtenTo: string): Promise<number> {
+	static async deleteCommentsWrittenTo(writtenTo: string | string[], transaction?: Transaction): Promise<number> {
+		if (Array.isArray(writtenTo) && writtenTo.length === 0) {
+			return 0;
+		}
 		return await Comment.destroy({
 			where: {
 				writtenTo: writtenTo
-			}
+			},
+			transaction: transaction
 		});
 	}
 

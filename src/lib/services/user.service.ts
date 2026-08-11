@@ -5,13 +5,16 @@ import type { UserFormData } from '$lib/models/user/UserFormData';
 import type { Cookies } from '@sveltejs/kit';
 import { convertToBackendUser, UserAttributes, UserCreationAttributes } from '$lib/db/attributes/user.attributes';
 import { CurrentUser } from '$lib/models/user/CurrentUser';
-import { Model, UniqueConstraintError } from 'sequelize';
+import { Model, Transaction, UniqueConstraintError } from 'sequelize';
 import { UserImageAttributes, UserImageCreationAttributes } from '$lib/db/attributes/userImage.attributes';
 import { NickPassData } from '$lib/models/transferData/NickPassData';
 import { SessionTokenAttributes } from '$lib/db/attributes/sessionToken.attributes';
 import { User } from '$lib/db/model/user';
 import { UserImage } from '$lib/db/model/userImage';
 import { SessionToken } from '$lib/db/model/sessionToken';
+import { FestivalEvent } from '$lib/db/model/festivalEvent';
+import { CommentService } from '$lib/services/comment.service';
+import { sequelize } from '$lib/db/sequelize';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
 import { isSessionTokenExpired, readTextField } from '$lib/services/user.logic';
 import { SESSION_COOKIE_PATH, SESSION_MAX_AGE_MS, SESSION_MAX_AGE_SECONDS } from '$lib/constants';
@@ -329,6 +332,47 @@ export class UserService {
 			}
 		}
 		return 'Data Missing';
+	}
+
+	/**
+	 * Löscht ein Konto samt aller daran hängenden personenbezogenen Daten (Art. 17 DSGVO).
+	 *
+	 * Den Großteil erledigt die FK-Kaskade (siehe db.ts und die Baseline-Migration):
+	 * Profilbild, Session, eigene Festivals, eigene Gruppen, Zu-/Absagen,
+	 * Gruppenmitgliedschaften, Freundschaften, Freundschaftsanfragen und alle vom
+	 * Nutzer VERFASSTEN Kommentare (`writtenBy`).
+	 *
+	 * Zwei Lücken lässt die Kaskade offen, beide über `writtenTo` – die Spalte ist
+	 * polymorph (Festival- ODER User-ID) und hat deshalb bewusst keinen FK:
+	 *   1. Kommentare, die andere auf DAS PROFIL dieses Nutzers geschrieben haben.
+	 *   2. Kommentare an seinen Festivals. Die Festivals selbst verschwinden per Kaskade –
+	 *      und zwar an `FestivalEventService.deleteFestival` vorbei, das diesen Fall sonst
+	 *      abräumt. Die Festival-IDs müssen daher VOR dem Löschen eingesammelt werden,
+	 *      danach sind sie nicht mehr ermittelbar.
+	 *
+	 * Alles läuft in einer Transaktion: Ein Fehler auf halbem Weg darf kein Konto
+	 * hinterlassen, dessen Daten teilweise entfernt sind.
+	 */
+	static async deleteAccount(userId: string): Promise<ChangeResult> {
+		if (!userId) {
+			return 'Data Missing';
+		}
+		const model: Model<UserAttributes, UserCreationAttributes> | null = await User.findByPk(userId);
+		if (!model) {
+			return 'Data Missing';
+		}
+
+		await sequelize.transaction(async (transaction: Transaction) => {
+			const festivals = await FestivalEvent.findAll({
+				where: { UserId: userId },
+				attributes: ['id'],
+				transaction: transaction
+			});
+			const commentTargets: string[] = [userId, ...festivals.map((festival) => festival.dataValues.id)];
+			await CommentService.deleteCommentsWrittenTo(commentTargets, transaction);
+			await model.destroy({ transaction: transaction });
+		});
+		return 'Success';
 	}
 
 	static async saveUserImage(userId: string, image: string): Promise<string> {

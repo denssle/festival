@@ -1,5 +1,14 @@
-import { test, expect, type Response } from '@playwright/test';
+import { test, expect, type Locator, type Page, type Response } from '@playwright/test';
 import { register, getUserId, logout } from './test-utils';
+
+/**
+ * Die Einstellungsseite trägt zwei Formulare (Passwort ändern, Konto löschen), jedes
+ * mit eigenem <details> und eigenem Submit-Button. Ohne Eingrenzung laufen Locators
+ * wie `button[type="submit"]` in eine Strict-mode-Verletzung.
+ */
+function passwordForm(page: Page): Locator {
+	return page.locator('form[action="?/changePassword"]');
+}
 
 test.describe('Benutzereinstellungen und Profilbild', () => {
 	test.beforeAll(async ({ browser }) => {
@@ -25,15 +34,17 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		await page.locator('input[name="password"]').fill(newPassword);
 		await page.locator('input[name="passwordRepeat"]').fill(newPassword);
 
-		// Klick auf Speichern und warten auf Antwort
+		// Klick auf Speichern und warten auf Antwort. Locator aufs Passwort-Formular
+		// eingegrenzt: die Seite trägt seit v0.7.41 zusätzlich das Lösch-Formular
+		// mit eigenem <details> und eigenem Submit-Button.
 		const responsePromise = page.waitForResponse((r: Response) => r.url().includes('/settings') && r.status() === 200);
-		await page.click('button[type="submit"]');
+		await passwordForm(page).locator('button[type="submit"]').click();
 		await responsePromise;
 		await page.waitForLoadState('networkidle');
 
 		// Das <details> muss eventuell wieder geöffnet werden, falls es nach Reload geschlossen ist
 		const summary = page.locator('summary', { hasText: 'Passwort' });
-		const details = page.locator('details');
+		const details = passwordForm(page).locator('details');
 		const isOpen = await details.evaluate((node) => (node as HTMLDetailsElement).open);
 		if (!isOpen) {
 			await summary.click();
@@ -66,11 +77,11 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		await page.locator('input[name="passwordRepeat"]').fill('NewSecurePassword456!');
 
 		const responsePromise = page.waitForResponse((r: Response) => r.url().includes('/settings') && r.status() === 200);
-		await page.click('button[type="submit"]');
+		await passwordForm(page).locator('button[type="submit"]').click();
 		await responsePromise;
 		await page.waitForLoadState('networkidle');
 
-		const details = page.locator('details');
+		const details = passwordForm(page).locator('details');
 		if (!(await details.evaluate((node) => (node as HTMLDetailsElement).open))) {
 			await page.locator('summary', { hasText: 'Passwort' }).click();
 		}
