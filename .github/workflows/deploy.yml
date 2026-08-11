@@ -39,7 +39,12 @@ jobs:
           # --exclude bewahrt die ausgeschlossenen Pfade auf dem Host vor --delete.
           switches: -avzr --delete --exclude=".env" --exclude="node_modules"
           path: /
-          remote_path: /home/${{ secrets.UBERSPACE_USER }}/html/
+          # NICHT ~/html (= Apache-Docroot). Dort liegt das "website"-Projekt, dessen rsync
+          # mit --delete und ohne excludes arbeitet – es hat diese App am 2026-08-11 samt
+          # .env geloescht (Ausfall v0.7.37). Die App wird ohnehin von Node auf Port 5173
+          # ausgeliefert, nicht von Apache, und gehoert deshalb nicht in den Docroot;
+          # nebenbei war so der komplette Quellbaum oeffentlich lesbar.
+          remote_path: /home/${{ secrets.UBERSPACE_USER }}/festival-app/
           remote_host: ${{ secrets.UBERSPACE_HOST }}
           remote_user: ${{ secrets.UBERSPACE_USER }}
           remote_key: ${{ secrets.DEPLOY_KEY_PRIVATE }}
@@ -54,13 +59,21 @@ jobs:
           username: ${{ secrets.UBERSPACE_USER }}
           key: ${{ secrets.DEPLOY_KEY_PRIVATE }}
           script: |
-            cd "$HOME/html" || exit 1
+            cd "$HOME/festival-app" || exit 1
+            # Die .env liegt nur auf dem Host (gitignored, per --exclude vor --delete
+            # geschuetzt) – fehlt sie, startet `node --env-file=.env build` gar nicht erst.
+            # Vor dem Restart pruefen, damit der Grund sofort dasteht statt erst nach zwei
+            # Minuten Health-Check-Timeout (genau dieser Fall in v0.7.37).
+            if [ ! -f .env ]; then
+              echo "FEHLER: $PWD/.env fehlt. Ohne sie startet der Service nicht."
+              echo "Anlegen mit MARIA_DB_USER/MARIA_DB_PASSWORD/MARIA_DB_NAME, dann Deploy erneut starten."
+              exit 1
+            fi
             # Nur Produktions-Abhängigkeiten (dependencies). adapter-node hält diese extern,
             # sie müssen also im node_modules des Hosts liegen.
             npm ci --omit=dev
-            # ANNAHME: Supervisor-Service "festival" führt `npm run start-server`
-            # (= PORT=5173 node build) im Verzeichnis ~/html aus. Siehe PR-Beschreibung –
-            # ggf. einmalig das Kommando in ~/etc/services.d/festival.ini anpassen.
+            # Supervisor-Service "festival" führt `npm run start-server` (= PORT=5173
+            # node build) im Verzeichnis ~/festival-app aus (~/etc/services.d/festival.ini).
             supervisorctl restart festival
             # Readiness statt blosser Erreichbarkeit: /api/health setzt ein SELECT 1 ab und
             # meldet ausstehende Migrationen (503, falls die DB nicht nutzbar ist). Ein
