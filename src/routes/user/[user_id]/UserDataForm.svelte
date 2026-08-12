@@ -6,7 +6,7 @@
 
 <form autocomplete="on" method="POST">
 	<p>
-		<label for="nickname">Deine Nickname: </label>
+		<label for="nickname">Dein Nickname: </label>
 		<input id="nickname" name="nickname" placeholder="Nickname" type="text" value={data.nickname} />
 	</p>
 

@@ -101,14 +101,14 @@
 						required
 					/>
 				</p>
+				<p>
+					<button type="submit">Speichern</button>
+				</p>
 			</details>
 
-			<p>
-				<button type="submit">Speichern</button>
-				{#if passwordMessage}
-					<span>{passwordMessage}</span>
-				{/if}
-			</p>
+			{#if passwordMessage}
+				<p><span>{passwordMessage}</span></p>
+			{/if}
 		</section>
 	</form>
 
