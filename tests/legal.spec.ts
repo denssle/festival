@@ -40,10 +40,12 @@ test.describe('Rechtliche Seiten', () => {
 		const serverHtml = (await response?.text()) ?? '';
 
 		// Serverseitig darf die Adresse nur in umschriebener Form auftauchen.
-		expect(serverHtml).not.toContain('fdhellweg@web.de');
-		expect(serverHtml).toContain('fdhellweg (at) web.de');
+		expect(serverHtml).not.toContain('dominik.hellweg@protonmail.com');
+		expect(serverHtml).toContain('dominik.hellweg (at) protonmail.com');
 
 		// Nach der Hydration steht ein echter, klickbarer mailto-Link da.
-		await expect(page.locator('address a[href="mailto:fdhellweg@web.de"]')).toHaveText('fdhellweg@web.de');
+		await expect(page.locator('address a[href="mailto:dominik.hellweg@protonmail.com"]')).toHaveText(
+			'dominik.hellweg@protonmail.com'
+		);
 	});
 });

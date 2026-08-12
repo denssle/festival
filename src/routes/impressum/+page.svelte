@@ -8,8 +8,8 @@
 	// umschriebene Form stehen, die für Menschen und Screenreader lesbar ist.
 	// Bewusst `onMount` statt `$derived`: Letzteres würde beim SSR mitlaufen und die
 	// fertige Adresse doch wieder ins ausgelieferte HTML schreiben.
-	const mailUser: string = 'fdhellweg';
-	const mailHost: string = 'web.de';
+	const mailUser: string = 'dominik.hellweg';
+	const mailHost: string = 'protonmail.com';
 
 	let mailAddress: string | undefined = $state(undefined);
 
