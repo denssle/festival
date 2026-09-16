@@ -86,7 +86,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		}
 		 */
 
-		const saveButton = page.locator('button[type="submit"]', { hasText: 'Speichern' });
+		const saveButton = page.locator('article button[type="submit"]', { hasText: 'Speichern' });
 		await Promise.all([
 			page.waitForURL(new RegExp(`/festival/${festivalId}$`), { timeout: 15000 }),
 			saveButton.click()

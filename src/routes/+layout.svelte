@@ -3,12 +3,14 @@
 	import { resolve } from '$app/paths';
 	import type { CurrentUser } from '$lib/models/user/CurrentUser';
 	import type { Snippet } from 'svelte';
+	import { type Locale, t } from '$lib/i18n';
+	import LanguageSwitcher from '$lib/sharedComponents/LanguageSwitcher.svelte';
 
 	let {
 		data,
 		children
 	}: {
-		data: { currentUser: CurrentUser | undefined };
+		data: { currentUser: CurrentUser | undefined; locale: Locale };
 		children: Snippet;
 	} = $props();
 
@@ -24,15 +26,15 @@
 <header>
 	<nav>
 		{#if data?.currentUser?.isAuthenticated}
-			<a href={resolve('/')}>Festivals</a>
-			<a href={resolve('/group')}>Gruppen</a>
+			<a href={resolve('/')}>{t(data.locale, 'nav.festivals')}</a>
+			<a href={resolve('/group')}>{t(data.locale, 'nav.groups')}</a>
 			<a href={resolve('/user/[user_id]', { user_id: data.currentUser.id })}>{data.currentUser.nickname}</a>
-			<a href={resolve('/updates')}>Updates</a>
-			<a href={resolve('/settings')}>Einstellungen</a>
-			<button onclick={logout}>Logout</button>
+			<a href={resolve('/updates')}>{t(data.locale, 'nav.updates')}</a>
+			<a href={resolve('/settings')}>{t(data.locale, 'nav.settings')}</a>
+			<button onclick={logout}>{t(data.locale, 'nav.logout')}</button>
 		{:else}
-			<a href={resolve('/login')}>Anmelden</a>
-			<a href={resolve('/registration')}>Registrieren</a>
+			<a href={resolve('/login')}>{t(data.locale, 'nav.login')}</a>
+			<a href={resolve('/registration')}>{t(data.locale, 'nav.register')}</a>
 		{/if}
 	</nav>
 </header>
@@ -41,10 +43,11 @@
 
 <footer>
 	<nav>
-		<a href={resolve('/about')}>About</a>
-		<a href={resolve('/impressum')}>Impressum</a>
-		<a href={resolve('/datenschutz')}>Datenschutz</a>
+		<a href={resolve('/about')}>{t(data.locale, 'footer.about')}</a>
+		<a href={resolve('/impressum')}>{t(data.locale, 'footer.imprint')}</a>
+		<a href={resolve('/datenschutz')}>{t(data.locale, 'footer.privacy')}</a>
 	</nav>
+	<LanguageSwitcher locale={data.locale} />
 </footer>
 
 <style global>

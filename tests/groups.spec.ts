@@ -21,7 +21,7 @@ test.describe.serial('Gruppen Management', () => {
 		await page.fill('textarea[name="description"]', groupDescription);
 		await Promise.all([
 			page.waitForURL(/\/group\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/),
-			page.click('button[type="submit"]')
+			page.click('article button[type="submit"]')
 		]);
 		await page.waitForLoadState('networkidle');
 		await page.close();
@@ -49,7 +49,7 @@ test.describe.serial('Gruppen Management', () => {
 		await searchInput.fill(groupName);
 
 		// Klick auf Suchen und auf Seitenaktualisierung warten
-		await Promise.all([page.waitForLoadState('networkidle'), page.click('button[type="submit"]')]);
+		await Promise.all([page.waitForLoadState('networkidle'), page.click('article button[type="submit"]')]);
 
 		// Verifizieren, dass die Suchergebnisse angezeigt werden
 		await expect(page.locator('h4')).toContainText(`Suchergebnisse für "${groupName}"`, { timeout: 15000 });
@@ -59,7 +59,7 @@ test.describe.serial('Gruppen Management', () => {
 
 		// Suche nach einem Begriff, der keine Ergebnisse liefert
 		await page.fill('input[name="q"]', 'NichtExistierendeGruppe_XYZ_123');
-		await page.click('button[type="submit"]');
+		await page.click('article button[type="submit"]');
 
 		await expect(page.getByText('Keine Gruppen gefunden.')).toBeVisible({ timeout: 15000 });
 	});
@@ -81,7 +81,7 @@ test.describe.serial('Gruppen Management', () => {
 		// Gruppe erstellen
 		await page.goto('/festival/group/new');
 		await page.fill('input[name="name"]', joinableGroupName);
-		await page.click('button[type="submit"]');
+		await page.click('article button[type="submit"]');
 		await expect(page).toHaveURL(/\/group\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/, {
 			timeout: 15000
 		});
@@ -127,7 +127,7 @@ test.describe.serial('Gruppen Management', () => {
 		// Gruppe erstellen
 		await page.goto('/festival/group/new');
 		await page.fill('input[name="name"]', groupToDel);
-		await page.click('button[type="submit"]');
+		await page.click('article button[type="submit"]');
 
 		// Auf der Detailseite sollte der Löschen-Button sichtbar sein
 		await expect(page).toHaveURL(/\/group\/([0-9a-f-]+)/);
@@ -157,7 +157,7 @@ test.describe.serial('Gruppen Management', () => {
 		// Gruppe erstellen
 		await page.goto('/festival/group/new');
 		await page.fill('input[name="name"]', originalName);
-		await page.click('button[type="submit"]');
+		await page.click('article button[type="submit"]');
 
 		// Auf der Detailseite sollte der Bearbeiten-Button sichtbar sein
 		await expect(page).toHaveURL(/\/group\/([0-9a-f-]+)/);
@@ -180,7 +180,7 @@ test.describe.serial('Gruppen Management', () => {
 			expect(await page.inputValue('input[name="name"]')).toBe(updatedName);
 			expect(await page.inputValue('textarea[name="description"]')).toBe(updatedDesc);
 		}).toPass({ timeout: 15000 });
-		await Promise.all([page.waitForURL(/\/group\/[0-9a-f-]+$/), page.click('button[type="submit"]')]);
+		await Promise.all([page.waitForURL(/\/group\/[0-9a-f-]+$/), page.click('article button[type="submit"]')]);
 
 		// Wir sollten zurück auf der Detailseite sein
 		await expect(page).not.toHaveURL(/\/edit/);
@@ -199,7 +199,7 @@ test.describe.serial('Gruppen Management', () => {
 		// Gruppe erstellen
 		await page.goto('/festival/group/new');
 		await page.fill('input[name="name"]', leaveGroupName);
-		await page.click('button[type="submit"]');
+		await page.click('article button[type="submit"]');
 		await expect(page).toHaveURL(/\/group\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/, {
 			timeout: 15000
 		});

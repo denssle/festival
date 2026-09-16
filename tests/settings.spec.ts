@@ -60,7 +60,7 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		// Login mit neuem Passwort verifizieren
 		await page.fill('input[name="nickname"]', testNickname);
 		await page.fill('input[name="password"]', newPassword);
-		await page.click('button[type="submit"]');
+		await page.click('article button[type="submit"]');
 
 		await expect(page).toHaveURL('/festival/', { timeout: 15000 });
 	});
@@ -91,7 +91,7 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		await logout(page);
 		await page.fill('input[name="nickname"]', testNickname);
 		await page.fill('input[name="password"]', initialPassword);
-		await page.click('button[type="submit"]');
+		await page.click('article button[type="submit"]');
 		await expect(page).toHaveURL('/festival/', { timeout: 15000 });
 	});
 

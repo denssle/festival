@@ -37,7 +37,7 @@ test.describe('Kontolöschung', () => {
 		// Der Login mit den alten Daten darf nicht mehr funktionieren.
 		await page.fill('input[name="nickname"]', nickname);
 		await page.fill('input[name="password"]', PASSWORD);
-		await page.click('button[type="submit"]');
+		await page.click('article button[type="submit"]');
 		await expect(page).not.toHaveURL('/festival/', { timeout: 15000 });
 	});
 
@@ -57,7 +57,7 @@ test.describe('Kontolöschung', () => {
 		await logout(page);
 		await page.fill('input[name="nickname"]', nickname);
 		await page.fill('input[name="password"]', PASSWORD);
-		await page.click('button[type="submit"]');
+		await page.click('article button[type="submit"]');
 		await expect(page).toHaveURL('/festival/', { timeout: 15000 });
 	});
 
@@ -78,7 +78,7 @@ test.describe('Kontolöschung', () => {
 		await logout(page);
 		await page.fill('input[name="nickname"]', nickname);
 		await page.fill('input[name="password"]', PASSWORD);
-		await page.click('button[type="submit"]');
+		await page.click('article button[type="submit"]');
 		await expect(page).toHaveURL('/festival/', { timeout: 15000 });
 	});
 });

@@ -76,7 +76,7 @@ export async function register(page: Page, nickname: string, password = TEST_PAS
 	await page.fill('input[name="password2"]', password);
 	await page.waitForTimeout(500);
 
-	const submitButton = page.locator('button[type="submit"]');
+	const submitButton = page.locator('article button[type="submit"]');
 	await expect(submitButton).toBeEnabled();
 
 	await submitButton.click();
@@ -133,7 +133,7 @@ export async function login(page: Page, nickname: string, password = TEST_PASSWO
 	await page.goto('/festival/login');
 	await page.fill('input[name="nickname"]', nickname);
 	await page.fill('input[name="password"]', password);
-	const submitButton = page.locator('button[type="submit"]');
+	const submitButton = page.locator('article button[type="submit"]');
 	await Promise.all([page.waitForURL('/festival/', { timeout: 15000 }), submitButton.click()]);
 
 	// Sicherstellen, dass der Login erfolgreich war (Redirect zur Home-Seite)

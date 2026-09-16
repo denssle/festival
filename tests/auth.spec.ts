@@ -37,7 +37,7 @@ test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () =>
 		await page.goto('/festival/login');
 		await page.fill('input[name="nickname"]', testNickname);
 		await page.fill('input[name="password"]', testPassword);
-		await page.click('button[type="submit"]');
+		await page.click('article button[type="submit"]');
 
 		// Verifizieren, dass wir wieder angemeldet sind
 		await expect(page).toHaveURL('/festival/');
@@ -51,7 +51,7 @@ test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () =>
 		await page.fill('input[name="password"]', 'password123');
 		await page.fill('input[name="password2"]', 'different123');
 
-		const submitButton = page.locator('button[type="submit"]');
+		const submitButton = page.locator('article button[type="submit"]');
 		await expect(submitButton).toBeDisabled();
 	});
 
@@ -71,7 +71,7 @@ test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () =>
 		await page.goto('/festival/login');
 		await page.fill('input[name="nickname"]', nickname);
 		await page.fill('input[name="password"]', 'WrongPassword999!');
-		await page.click('button[type="submit"]');
+		await page.click('article button[type="submit"]');
 
 		// Wir bleiben auf /login und sehen die Fehlermeldung
 		await expect(page).toHaveURL(/\/login/);
@@ -92,7 +92,7 @@ test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () =>
 		await page.fill('input[name="nickname"]', nickname);
 		await page.fill('input[name="password"]', TEST_PASSWORD);
 		await page.fill('input[name="password2"]', TEST_PASSWORD);
-		const submitButton = page.locator('button[type="submit"]');
+		const submitButton = page.locator('article button[type="submit"]');
 		await expect(submitButton).toBeEnabled();
 		await submitButton.click();
 

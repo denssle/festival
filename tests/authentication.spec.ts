@@ -73,7 +73,7 @@ test.describe('Authentication Security', () => {
 			const responsePromise = page.waitForResponse(
 				(r) => r.url().includes('/login') && r.request().method() === 'POST'
 			);
-			await page.click('button[type="submit"]');
+			await page.click('article button[type="submit"]');
 			await responsePromise;
 		}
 		await expect(page.getByText('Password invalid')).toBeVisible({ timeout: 15000 });
@@ -82,7 +82,7 @@ test.describe('Authentication Security', () => {
 		await page.fill('input[name="nickname"]', nickname);
 		await page.fill('input[name="password"]', TEST_PASSWORD);
 		const blockedResponse = page.waitForResponse((r) => r.url().includes('/login') && r.request().method() === 'POST');
-		await page.click('button[type="submit"]');
+		await page.click('article button[type="submit"]');
 		await blockedResponse;
 
 		await expect(page.getByText('Too many failed login attempts', { exact: false })).toBeVisible({ timeout: 15000 });

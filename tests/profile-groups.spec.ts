@@ -16,7 +16,7 @@ test.describe.serial('Profil Gruppen Anzeige', () => {
 		await page.fill('input[name="name"]', groupName);
 		await page.fill('textarea[name="description"]', 'Eine Testgruppe für das Profil.');
 		const responsePromise = page.waitForResponse((r: Response) => r.url().includes('/group') && r.status() === 200);
-		await page.click('button[type="submit"]');
+		await page.click('article button[type="submit"]');
 		await responsePromise;
 
 		// Redirect zur Gruppenseite prüfen

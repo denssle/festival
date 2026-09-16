@@ -27,6 +27,13 @@ export default defineConfig({
 		/* Base URL to use in actions like `await page.goto('/')`. */
 		baseURL: 'http://localhost:5173',
 
+		/* Sprache der Oberfläche festnageln. Die App wertet `Accept-Language` aus (siehe
+		 * `sprache`-Hook in `hooks.server.ts`); Playwrights Chromium schickt von Haus aus
+		 * `en-US` und bekäme damit die englische Fassung, während die Specs auf deutsche
+		 * Beschriftungen prüfen. Ohne diese Zeile hängt das Ergebnis der Suite an der
+		 * Browser-Voreinstellung – das ist keine Eigenschaft, die man testen will. */
+		locale: 'de-DE',
+
 		/* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
 		trace: 'on-first-retry'
 	},
