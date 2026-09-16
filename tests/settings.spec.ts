@@ -51,7 +51,7 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		}
 
 		// Erfolgsmeldung prüfen - sie ist in einem span innerhalb des p-tags
-		const successMessage = page.locator('span', { hasText: 'Password changed' });
+		const successMessage = page.locator('span', { hasText: 'Passwort geändert.' });
 		await expect(successMessage).toBeVisible({ timeout: 15000 });
 
 		// Logout über den Button im Header (retry-fest gegen Hydration-Race)
@@ -85,7 +85,9 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		if (!(await details.evaluate((node) => (node as HTMLDetailsElement).open))) {
 			await page.locator('summary', { hasText: 'Passwort' }).click();
 		}
-		await expect(page.locator('span', { hasText: 'Current password is incorrect' })).toBeVisible({ timeout: 15000 });
+		await expect(page.locator('span', { hasText: 'Das aktuelle Passwort ist falsch.' })).toBeVisible({
+			timeout: 15000
+		});
 
 		// Login mit dem ALTEN Passwort muss weiterhin funktionieren
 		await logout(page);

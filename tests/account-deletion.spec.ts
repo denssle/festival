@@ -72,7 +72,9 @@ test.describe('Kontolöschung', () => {
 		await dialog.waitFor({ state: 'visible' });
 		await dialog.locator('button', { hasText: 'Endgültig löschen' }).click();
 
-		await expect(page.locator('span', { hasText: 'Current password is incorrect' })).toBeVisible({ timeout: 15000 });
+		await expect(page.locator('span', { hasText: 'Das aktuelle Passwort ist falsch.' })).toBeVisible({
+			timeout: 15000
+		});
 
 		// Konto besteht weiter: Login mit den echten Daten geht noch.
 		await logout(page);

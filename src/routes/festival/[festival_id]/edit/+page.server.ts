@@ -4,8 +4,9 @@ import { FestivalEventService } from '$lib/services/festival-event.service';
 import { getDateFromString } from '$lib/utils/date.util';
 import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 import { CurrentUser } from '$lib/models/user/CurrentUser';
-import { ChangeResult, getHTTPCodeForChangeResult } from '$lib/models/updates/ChangeResult';
+import { ChangeResult, getHTTPCodeForChangeResult, getMessageForChangeResult } from '$lib/models/updates/ChangeResult';
 import { resolve } from '$app/paths';
+import { t } from '$lib/i18n';
 
 /**
  * load – GET /festival/:festival_id/edit
@@ -59,7 +60,7 @@ export const actions: Actions = {
 		}
 
 		if (!festivalId || !name) {
-			return fail(400, { message: 'Missing festival id or name' });
+			return fail(400, { message: t(locals.locale, 'festival.error.missingIdOrName') });
 		}
 
 		const description = values.get('description')?.toString() ?? '';
@@ -82,6 +83,6 @@ export const actions: Actions = {
 		if (result === 'Success') {
 			redirect(302, resolve('/festival/[festival_id]', { festival_id: festivalId }));
 		}
-		return fail(getHTTPCodeForChangeResult(result), { message: result });
+		return fail(getHTTPCodeForChangeResult(result), { message: getMessageForChangeResult(locals.locale, result) });
 	}
 };

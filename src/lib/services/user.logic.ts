@@ -1,3 +1,5 @@
+import type { TranslationKey } from '$lib/i18n';
+
 /**
  * Liest ein Formularfeld als Text.
  *
@@ -22,25 +24,30 @@ export function readTextField(values: FormData, field: string): string {
  * erfüllt und die Wiederholung übereinstimmt (Schutz vor Tippfehler-Aussperrung).
  * Ob das aktuelle Passwort stimmt, prüft der Aufrufer gegen die DB.
  *
- * @returns Fehlermeldung oder null, wenn die Eingaben formal gültig sind
+ * Liefert einen Übersetzungsschlüssel statt eines fertigen Textes: Diese Datei ist reine
+ * Logik ohne Kenntnis der gewählten Sprache, und vorher wanderten die englischen Texte
+ * von hier unverändert in eine deutsche Oberfläche. Der Aufrufer übersetzt mit `t()` und
+ * reicht dabei die Parameter durch (`{min}` bei `auth.error.passwordTooShort`).
+ *
+ * @returns Übersetzungsschlüssel oder null, wenn die Eingaben formal gültig sind
  */
 export function validatePasswordChange(
 	currentPassword: string | undefined,
 	newPassword: string | undefined,
 	newPasswordRepeat: string | undefined,
 	minLength: number
-): string | null {
+): TranslationKey | null {
 	if (!currentPassword) {
-		return 'Current password is required';
+		return 'auth.error.currentPasswordRequired';
 	}
 	if (!newPassword || !newPasswordRepeat) {
-		return 'New password and repetition are required';
+		return 'auth.error.newPasswordRequired';
 	}
 	if (newPassword.length < minLength) {
-		return `Password must be at least ${minLength} characters long`;
+		return 'auth.error.passwordTooShort';
 	}
 	if (newPassword !== newPasswordRepeat) {
-		return 'Passwords do not match';
+		return 'auth.error.passwordsDoNotMatch';
 	}
 	return null;
 }

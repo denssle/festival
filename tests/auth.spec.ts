@@ -75,7 +75,7 @@ test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () =>
 
 		// Wir bleiben auf /login und sehen die Fehlermeldung
 		await expect(page).toHaveURL(/\/login/);
-		await expect(page.getByText('Password invalid')).toBeVisible();
+		await expect(page.getByText('Passwort ungültig.')).toBeVisible();
 	});
 
 	test('Registrierung mit bereits vergebenem Nickname zeigt eine Fehlermeldung', async ({ page, browser }) => {
@@ -98,6 +98,6 @@ test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () =>
 
 		// Wir bleiben auf /registration und sehen die Fehlermeldung
 		await expect(page).toHaveURL(/\/registration/);
-		await expect(page.getByText('Invalid Nickname')).toBeVisible();
+		await expect(page.getByText('Ungültiger Nickname.')).toBeVisible();
 	});
 });

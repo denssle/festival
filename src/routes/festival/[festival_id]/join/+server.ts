@@ -2,6 +2,7 @@ import { FestivalEventService } from '$lib/services/festival-event.service';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { BaseGuestInformation } from '$lib/models/guestInformation/BaseGuestInformation';
 import { GuestInformationService } from '$lib/services/guest-information.service';
+import { t } from '$lib/i18n';
 
 /**
  * POST /festival/:festival_id/join
@@ -25,13 +26,17 @@ export const POST: RequestHandler = async ({ locals, params, request }): Promise
 		const user = locals.currentUser ?? null;
 
 		if (!user) {
-			return new Response(JSON.stringify({ success: false, message: 'Unauthorized' }), { status: 401 });
+			return new Response(JSON.stringify({ success: false, message: t(locals.locale, 'error.notAuthenticated') }), {
+				status: 401
+			});
 		}
 
 		if (params.festival_id && baseGuestInformation) {
 			const festival = await FestivalEventService.getFrontEndFestival(params.festival_id);
 			if (!festival) {
-				return new Response(JSON.stringify({ success: false, message: 'Festival not found' }), { status: 404 });
+				return new Response(JSON.stringify({ success: false, message: t(locals.locale, 'festival.error.notFound') }), {
+					status: 404
+				});
 			}
 			await GuestInformationService.joinFestival(user, params.festival_id, baseGuestInformation);
 			return new Response(JSON.stringify({ success: true }), { status: 200 });
@@ -41,9 +46,13 @@ export const POST: RequestHandler = async ({ locals, params, request }): Promise
 			user: !!user,
 			parsed: !!baseGuestInformation
 		});
-		return new Response(JSON.stringify({ success: false, message: 'Missing data' }), { status: 400 });
+		return new Response(JSON.stringify({ success: false, message: t(locals.locale, 'error.missingData') }), {
+			status: 400
+		});
 	} catch (e) {
 		console.error('Error joining festival:', e);
-		return new Response(JSON.stringify({ success: false, message: 'Internal server error' }), { status: 500 });
+		return new Response(JSON.stringify({ success: false, message: t(locals.locale, 'error.internal') }), {
+			status: 500
+		});
 	}
 };

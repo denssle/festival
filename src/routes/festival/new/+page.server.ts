@@ -3,6 +3,7 @@ import { getDateFromString } from '$lib/utils/date.util';
 import { type Actions, fail, redirect } from '@sveltejs/kit';
 import { FestivalEventService } from '$lib/services/festival-event.service';
 import { resolve } from '$app/paths';
+import { t } from '$lib/i18n';
 
 /**
  * actions.default – POST /festival/new
@@ -27,7 +28,7 @@ export const actions: Actions = {
 		const values: FormData = await request.formData();
 		const name: FormDataEntryValue | null = values.get('name');
 		if (!name) {
-			return fail(400, { message: 'Name is required' });
+			return fail(400, { message: t(locals.locale, 'error.nameRequired') });
 		}
 
 		const description = values.get('description')?.toString() ?? '';
@@ -49,6 +50,6 @@ export const actions: Actions = {
 		if (newFestival && newFestival.id) {
 			redirect(302, resolve('/festival/[festival_id]', { festival_id: newFestival.id }));
 		}
-		return fail(500, { message: 'Festival creation failed' });
+		return fail(500, { message: t(locals.locale, 'festival.error.creationFailed') });
 	}
 };

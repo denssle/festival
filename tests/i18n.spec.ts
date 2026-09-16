@@ -62,6 +62,25 @@ test.describe('Sprachumschalter', () => {
 		await expect(page.locator('html')).toHaveAttribute('lang', 'en');
 	});
 
+	test('übersetzt auch die Meldungen vom Server', async ({ page }) => {
+		// Der Nachweis für Schritt 2: Die Meldung entsteht in einer Form-Action, nicht im
+		// Markup. Sie wird serverseitig über `locals.locale` übersetzt – ohne das stünde
+		// hier weiterhin der fest verdrahtete englische Text, unabhängig von der Sprache.
+		await page.goto(`${BASE_PATH}/login`);
+		await page.fill('input[name="nickname"]', 'GibtEsNicht_i18n');
+		await page.fill('input[name="password"]', 'FalschesPasswort123!');
+		await page.locator('article button[type="submit"]').click();
+		await expect(page.getByText('Passwort ungültig.')).toBeVisible();
+
+		await page.locator(`${switcher} button[value="en"]`).click();
+		await page.waitForURL(`**${BASE_PATH}/login`);
+
+		await page.fill('input[name="nickname"]', 'GibtEsNicht_i18n');
+		await page.fill('input[name="password"]', 'FalschesPasswort123!');
+		await page.locator('article button[type="submit"]').click();
+		await expect(page.getByText('Invalid password.')).toBeVisible();
+	});
+
 	test('gilt auch auf der Wurzel unterhalb des Base-Pfads', async ({ page }) => {
 		// Eigener Test, weil genau dieser Pfad die Stolperstelle ist: Der Cookie liegt auf
 		// '/festival' (ohne Schrägstrich), gelesen wird er unter anderem auf '/festival/'.

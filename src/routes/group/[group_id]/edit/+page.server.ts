@@ -4,6 +4,8 @@ import { Group } from '$lib/db/model/group';
 import type { GroupAttributes } from '$lib/db/attributes/group.attributes';
 import { GroupService } from '$lib/services/group.service';
 import { resolve } from '$app/paths';
+import { t } from '$lib/i18n';
+import { getMessageForChangeResult } from '$lib/models/updates/ChangeResult';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const { group_id } = params;
@@ -36,7 +38,7 @@ export const actions: Actions = {
 		const user = locals.currentUser ?? null;
 
 		if (!user) {
-			return fail(401, { message: 'Nicht angemeldet' });
+			return fail(401, { message: t(locals.locale, 'error.notAuthenticated') });
 		}
 
 		const data = await request.formData();
@@ -44,7 +46,7 @@ export const actions: Actions = {
 		const description = data.get('description') as string;
 
 		if (!name) {
-			return fail(400, { message: 'Name ist erforderlich' });
+			return fail(400, { message: t(locals.locale, 'error.nameRequired') });
 		}
 
 		const result = await GroupService.updateGroup(user.id, group_id, name, description);
@@ -52,7 +54,7 @@ export const actions: Actions = {
 		if (result === 'Success') {
 			throw redirect(303, resolve('/group/[group_id]', { group_id }));
 		} else {
-			return fail(400, { message: result });
+			return fail(400, { message: getMessageForChangeResult(locals.locale, result) });
 		}
 	}
 };
