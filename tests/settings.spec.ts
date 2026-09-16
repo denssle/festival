@@ -1,5 +1,5 @@
 import { test, expect, type Locator, type Page, type Response } from '@playwright/test';
-import { register, getUserId, logout } from './test-utils';
+import { getUserId, logout, register, uiText } from './test-utils';
 
 /**
  * Die Einstellungsseite trägt zwei Formulare (Passwort ändern, Konto löschen), jedes
@@ -26,7 +26,7 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		await expect(page.locator('h2')).toContainText('Einstellungen');
 
 		// Das Passwort-Feld ist in einem <details> verborgen
-		await page.locator('summary', { hasText: 'Passwort' }).click();
+		await page.getByTestId('password-section').click();
 
 		const currentPasswordInput = page.locator('input[name="currentPassword"]');
 		await expect(currentPasswordInput).toBeVisible();
@@ -43,7 +43,7 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		await page.waitForLoadState('networkidle');
 
 		// Das <details> muss eventuell wieder geöffnet werden, falls es nach Reload geschlossen ist
-		const summary = page.locator('summary', { hasText: 'Passwort' });
+		const summary = page.getByTestId('password-section');
 		const details = passwordForm(page).locator('details');
 		const isOpen = await details.evaluate((node) => (node as HTMLDetailsElement).open);
 		if (!isOpen) {
@@ -51,7 +51,7 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		}
 
 		// Erfolgsmeldung prüfen - sie ist in einem span innerhalb des p-tags
-		const successMessage = page.locator('span', { hasText: 'Passwort geändert.' });
+		const successMessage = page.locator('span', { hasText: uiText('settings.password.changed') });
 		await expect(successMessage).toBeVisible({ timeout: 15000 });
 
 		// Logout über den Button im Header (retry-fest gegen Hydration-Race)
@@ -70,7 +70,7 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		const initialPassword = 'InitialPassword123!';
 		await register(page, testNickname, initialPassword);
 		await page.goto('/festival/settings');
-		await page.locator('summary', { hasText: 'Passwort' }).click();
+		await page.getByTestId('password-section').click();
 
 		await page.locator('input[name="currentPassword"]').fill('FalschesPasswort999!');
 		await page.locator('input[name="password"]').fill('NewSecurePassword456!');
@@ -83,9 +83,9 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 
 		const details = passwordForm(page).locator('details');
 		if (!(await details.evaluate((node) => (node as HTMLDetailsElement).open))) {
-			await page.locator('summary', { hasText: 'Passwort' }).click();
+			await page.getByTestId('password-section').click();
 		}
-		await expect(page.locator('span', { hasText: 'Das aktuelle Passwort ist falsch.' })).toBeVisible({
+		await expect(page.locator('span', { hasText: uiText('settings.password.currentIncorrect') })).toBeVisible({
 			timeout: 15000
 		});
 
@@ -133,10 +133,10 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		}).toPass({ timeout: 30000 });
 
 		// Dialog-Erfolg abwarten - Präziser Selektor um Strict Mode Violation zu vermeiden
-		const dialog = page.locator('dialog').filter({ hasText: 'Okay' });
+		const dialog = page.getByTestId('info-dialog');
 		await dialog.waitFor({ state: 'visible', timeout: 15000 });
 		await expect(dialog).toContainText('Bild erfolgreich hochgeladen');
-		await dialog.locator('button:has-text("Okay")').click();
+		await dialog.getByTestId('info-ok').click();
 
 		// Sicherstellen, dass wir noch auf der User-Profilseite sind (und nicht redirected wurden)
 		await expect(page).toHaveURL(`/festival/user/${userId}`, { timeout: 15000 });

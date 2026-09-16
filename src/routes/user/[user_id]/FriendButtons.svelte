@@ -56,8 +56,8 @@
 <InfoDialog bind:infoDialogData />
 <div>
 	{#if yourFriend}
-		<button onclick={() => removeFriend()}> Freund entfernen</button>
+		<button data-testid="friend-remove" onclick={() => removeFriend()}> Freund entfernen</button>
 	{:else}
-		<button onclick={() => addFriend()}> Anfreunden</button>
+		<button data-testid="friend-add" onclick={() => addFriend()}> Anfreunden</button>
 	{/if}
 </div>

@@ -11,7 +11,7 @@
 				<textarea name="description" placeholder="Kurze Beschreibung"></textarea>
 			</p>
 
-			<button type="submit">Speichern</button>
+			<button type="submit" data-testid="group-save">Speichern</button>
 			<a class="button" href={resolve('/group')}>Zurück</a>
 		</form>
 	</section>

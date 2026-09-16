@@ -3,7 +3,7 @@
 </script>
 
 <article>
-	<h2>Datenschutzerklärung</h2>
+	<h2 data-testid="privacy-heading">Datenschutzerklärung</h2>
 
 	<section>
 		<h3>Verantwortlicher</h3>

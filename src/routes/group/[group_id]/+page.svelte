@@ -39,7 +39,7 @@
 	}
 </script>
 
-<QuestionDialog bind:questionDialogData={deleteDialogData} />
+<QuestionDialog bind:questionDialogData={deleteDialogData} testId="group-delete-dialog" />
 
 <article>
 	<header>
@@ -47,19 +47,23 @@
 			<h1>{group.name}</h1>
 			<div class="header-actions">
 				{#if currentUser && group.ownerId === currentUser.id}
-					<a href={resolve('/group/[group_id]/edit', { group_id: group.id })} class="button">Bearbeiten</a>
+					<a href={resolve('/group/[group_id]/edit', { group_id: group.id })} class="button" data-testid="group-edit"
+						>Bearbeiten</a
+					>
 					<form method="POST" action="?/delete" use:enhance bind:this={deleteForm}>
-						<button type="button" class="button danger" onclick={askDeleteGroup}>Gruppe löschen</button>
+						<button type="button" class="button danger" data-testid="group-delete" onclick={askDeleteGroup}
+							>Gruppe löschen</button
+						>
 					</form>
 				{/if}
 				{#if currentUser && !isMember}
 					<form method="POST" action="?/join" use:enhance>
-						<button type="submit" class="button primary">Beitreten</button>
+						<button type="submit" class="button primary" data-testid="group-join">Beitreten</button>
 					</form>
 				{/if}
 				{#if currentUser && isMember && group.ownerId !== currentUser.id}
 					<form method="POST" action="?/leave" use:enhance>
-						<button type="submit" class="button danger">Gruppe verlassen</button>
+						<button type="submit" class="button danger" data-testid="group-leave">Gruppe verlassen</button>
 					</form>
 				{/if}
 			</div>

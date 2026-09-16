@@ -58,14 +58,18 @@
 	}
 </script>
 
-<QuestionDialog bind:questionDialogData buttonLabels={{ yes: 'Endgültig löschen', no: 'Abbrechen' }} />
+<QuestionDialog
+	bind:questionDialogData
+	buttonLabels={{ yes: 'Endgültig löschen', no: 'Abbrechen' }}
+	testId="account-delete-dialog"
+/>
 
 <article>
 	<h2>Einstellungen</h2>
 	<form autocomplete="on" method="POST" action="?/changePassword">
 		<section>
 			<details>
-				<summary>Passwort</summary>
+				<summary data-testid="password-section">Passwort</summary>
 				<p>
 					<label for="currentPassword">Aktuelles Passwort: </label>
 					<input
@@ -102,7 +106,7 @@
 					/>
 				</p>
 				<p>
-					<button type="submit">Speichern</button>
+					<button type="submit" data-testid="password-save">Speichern</button>
 				</p>
 			</details>
 
@@ -115,7 +119,7 @@
 	<form bind:this={deleteForm} method="POST" action="?/deleteAccount" onsubmit={confirmDeletion}>
 		<section>
 			<details>
-				<summary>Konto löschen</summary>
+				<summary data-testid="account-section">Konto löschen</summary>
 				<p>
 					Beim Löschen des Kontos werden alle zugehörigen Daten entfernt: Profil und Profilbild, die von dir angelegten
 					Festivals samt Zu- und Absagen deiner Gäste, deine Gruppen, deine Kommentare sowie Freundschaften und offene
@@ -134,7 +138,7 @@
 					/>
 				</p>
 				<p>
-					<button type="submit">Konto löschen</button>
+					<button type="submit" data-testid="account-delete">Konto löschen</button>
 				</p>
 			</details>
 			{#if accountMessage}

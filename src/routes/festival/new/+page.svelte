@@ -31,7 +31,7 @@
 				</label>
 			</p>
 
-			<button type="submit">Speichern</button>
+			<button type="submit" data-testid="festival-save">Speichern</button>
 			<a class="button" href={resolve('/')}>Zurück</a>
 		</form>
 	</section>

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { register, logout, TEST_PASSWORD, BASE_PATH } from './test-utils';
+import { BASE_PATH, logout, register, TEST_PASSWORD, uiText } from './test-utils';
 
 test.describe('Authentication Security', () => {
 	test('Erfolgreicher Login setzt Session-Cookie', async ({ page }) => {
@@ -47,7 +47,7 @@ test.describe('Authentication Security', () => {
 		const logoutResponse = page.waitForResponse(
 			(resp) => resp.url().includes('/logout') && resp.request().method() === 'POST'
 		);
-		await page.getByRole('button', { name: 'Logout' }).click();
+		await page.getByTestId('nav-logout').click();
 		await logoutResponse;
 		await page.waitForURL(/\/login/);
 
@@ -76,7 +76,7 @@ test.describe('Authentication Security', () => {
 			await page.click('article button[type="submit"]');
 			await responsePromise;
 		}
-		await expect(page.getByText('Passwort ungültig.')).toBeVisible({ timeout: 15000 });
+		await expect(page.getByText(uiText('auth.error.passwordInvalid'))).toBeVisible({ timeout: 15000 });
 
 		// Auch mit KORREKTEM Passwort muss der Login jetzt gesperrt sein
 		await page.fill('input[name="nickname"]', nickname);
@@ -85,7 +85,7 @@ test.describe('Authentication Security', () => {
 		await page.click('article button[type="submit"]');
 		await blockedResponse;
 
-		await expect(page.getByText('Zu viele Fehlversuche', { exact: false })).toBeVisible({ timeout: 15000 });
+		await expect(page.getByText(uiText('auth.error.rateLimited'))).toBeVisible({ timeout: 15000 });
 		await expect(page).toHaveURL(/\/login/);
 	});
 });

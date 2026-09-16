@@ -6,7 +6,11 @@
 		$props();
 </script>
 
-<BaseDialog bind:dialogData={cancelInvitationDialogData} buttonLabels={{ yes: 'Absagen', no: 'Zurück' }}>
+<BaseDialog
+	bind:dialogData={cancelInvitationDialogData}
+	buttonLabels={{ yes: 'Absagen', no: 'Zurück' }}
+	testId="cancel-dialog"
+>
 	<p>Leider bin ich / sind wir bei dem Event nicht dabei.</p>
 
 	<section>

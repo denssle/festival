@@ -5,10 +5,13 @@
 	let {
 		dialogData = $bindable(),
 		buttonLabels = { yes: 'Ja', no: 'Nope' },
+		testId = 'base-dialog',
 		children
 	}: {
 		dialogData: BaseDialogData;
 		buttonLabels?: { yes: string; no: string };
+		/** Kennung fuer E2E-Tests. Ueberschreiben, wenn eine Seite mehrere Dialoge zeigt. */
+		testId?: string;
 		children?: Snippet;
 	} = $props();
 
@@ -34,11 +37,11 @@
 	}
 </script>
 
-<dialog bind:this={dialogData.dialog}>
+<dialog bind:this={dialogData.dialog} data-testid={testId}>
 	{@render children?.()}
 
 	<section style="text-align: right;">
-		<button onclick={() => onNo()}>{buttonLabels.no}</button>
-		<button onclick={() => onYes()}>{buttonLabels.yes}</button>
+		<button data-testid="dialog-no" onclick={() => onNo()}>{buttonLabels.no}</button>
+		<button data-testid="dialog-yes" onclick={() => onYes()}>{buttonLabels.yes}</button>
 	</section>
 </dialog>

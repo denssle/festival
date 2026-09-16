@@ -1,17 +1,17 @@
 import { expect, test, type Page } from '@playwright/test';
-import { register, logout } from './test-utils';
+import { logout, register, uiText } from './test-utils';
 
 const PASSWORD = 'DeleteMePassword123!';
 
 /** Öffnet den Lösch-Bereich und trägt das Passwort ein. */
 async function openDeleteSection(page: Page, password: string): Promise<void> {
 	await page.goto('/festival/settings');
-	await page.locator('summary', { hasText: 'Konto löschen' }).click();
+	await page.getByTestId('account-section').click();
 	await page.locator('input[name="deletePassword"]').fill(password);
 }
 
 const deleteForm = (page: Page) => page.locator('form[action="?/deleteAccount"]');
-const confirmDialog = (page: Page) => page.locator('dialog:has-text("Konto endgültig löschen?")');
+const confirmDialog = (page: Page) => page.getByTestId('account-delete-dialog');
 
 test.describe('Kontolöschung', () => {
 	test.beforeAll(async ({ browser }) => {
@@ -29,7 +29,7 @@ test.describe('Kontolöschung', () => {
 
 		const dialog = confirmDialog(page);
 		await dialog.waitFor({ state: 'visible' });
-		await dialog.locator('button', { hasText: 'Endgültig löschen' }).click();
+		await dialog.getByTestId('dialog-yes').click();
 
 		// Nach dem Löschen ist die Session weg – der Redirect führt auf die Anmeldung.
 		await page.waitForURL('**/festival/login', { timeout: 15000 });
@@ -50,7 +50,7 @@ test.describe('Kontolöschung', () => {
 
 		const dialog = confirmDialog(page);
 		await dialog.waitFor({ state: 'visible' });
-		await dialog.locator('button', { hasText: 'Abbrechen' }).click();
+		await dialog.getByTestId('dialog-no').click();
 
 		// Auf der Seite bleiben, Session intakt – und der Login funktioniert weiterhin.
 		await expect(page).toHaveURL('/festival/settings');
@@ -70,9 +70,9 @@ test.describe('Kontolöschung', () => {
 
 		const dialog = confirmDialog(page);
 		await dialog.waitFor({ state: 'visible' });
-		await dialog.locator('button', { hasText: 'Endgültig löschen' }).click();
+		await dialog.getByTestId('dialog-yes').click();
 
-		await expect(page.locator('span', { hasText: 'Das aktuelle Passwort ist falsch.' })).toBeVisible({
+		await expect(page.locator('span', { hasText: uiText('settings.password.currentIncorrect') })).toBeVisible({
 			timeout: 15000
 		});
 

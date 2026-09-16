@@ -18,7 +18,7 @@
 				{/each}
 			</ul>
 		{:else}
-			<p>Du bist in keiner Gruppe.</p>
+			<p data-testid="my-groups-empty">Du bist in keiner Gruppe.</p>
 		{/if}
 	</section>
 
@@ -43,7 +43,7 @@
 					{/each}
 				</ul>
 			{:else}
-				<p>Keine Gruppen gefunden.</p>
+				<p data-testid="group-search-empty">Keine Gruppen gefunden.</p>
 			{/if}
 		{/if}
 	</section>

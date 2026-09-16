@@ -19,7 +19,7 @@
 </script>
 
 <article>
-	<h2>Impressum</h2>
+	<h2 data-testid="imprint-heading">Impressum</h2>
 
 	<section>
 		<h3>Angaben gemäß § 5 DDG</h3>

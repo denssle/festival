@@ -46,7 +46,7 @@
 	</section>
 
 	<section>
-		<h4>Festivals:</h4>
+		<h4 data-testid="profile-festivals-heading">Festivals:</h4>
 		<VisitingFestivals userId={data.user.id} />
 	</section>
 

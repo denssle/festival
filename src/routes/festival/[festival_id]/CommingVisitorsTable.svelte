@@ -6,8 +6,8 @@
 	let { data }: { data: FestivalTransferData } = $props();
 </script>
 
-<section>
-	<h5>Zusagen:</h5>
+<section data-testid="festival-coming-section">
+	<h5 data-testid="festival-coming-heading">Zusagen:</h5>
 	{#if getTotalNumberOfComingGuests(data.festival)}
 		<p>Bisher haben sich angemeldet:</p>
 		<table style="width: 100%">

@@ -41,22 +41,22 @@ test.describe.serial('Profile Festivals Authorization', () => {
 		await user1Page.fill('input[name="startTime"]', '18:00');
 		await Promise.all([
 			user1Page.waitForURL(/\/festival\/[a-z0-9-]+$/),
-			user1Page.click('button:has-text("Speichern")')
+			user1Page.getByTestId('festival-save').click()
 		]);
 		await user1Page.waitForLoadState('networkidle');
 		const url = user1Page.url();
 		const parts = url.split('/');
 		festivalId = parts[parts.length - 1];
 
-		const zusagenButton = user1Page.getByRole('button', { name: 'Zusagen' });
+		const zusagenButton = user1Page.getByTestId('festival-join');
 		await expect(zusagenButton).toBeVisible({ timeout: 10000 });
 		await zusagenButton.click();
 
-		const dialog = user1Page.locator('dialog:has-text("Bei dem Event bin ich dabei!")');
+		const dialog = user1Page.getByTestId('join-dialog');
 		await dialog.waitFor({ state: 'visible', timeout: 15000 });
 		await Promise.all([
 			user1Page.waitForResponse((resp: Response) => resp.url().includes('/join') && resp.status() === 200),
-			dialog.locator('button:has-text("Beitreten")').click()
+			dialog.getByTestId('dialog-yes').click()
 		]);
 	});
 
@@ -79,7 +79,7 @@ test.describe.serial('Profile Festivals Authorization', () => {
 		// User 2 sucht User 1 und schickt Anfrage
 		await user2Page.goto(`/festival/user/${user1Id}`);
 		await user2Page.waitForLoadState('networkidle');
-		const addFriendButton = user2Page.getByRole('button', { name: 'Anfreunden' });
+		const addFriendButton = user2Page.getByTestId('friend-add');
 		await expect(addFriendButton).toBeVisible({ timeout: 10000 });
 
 		const responsePromise = user2Page.waitForResponse(
@@ -92,7 +92,7 @@ test.describe.serial('Profile Festivals Authorization', () => {
 		// User 1 nimmt an
 		await user1Page.goto('/festival/updates');
 		await user1Page.waitForLoadState('networkidle');
-		const acceptButton = user1Page.getByRole('button', { name: 'Annehmen' }).first();
+		const acceptButton = user1Page.getByTestId('request-accept').first();
 		await expect(acceptButton).toBeVisible({ timeout: 15000 });
 
 		// Klick und warten auf Response

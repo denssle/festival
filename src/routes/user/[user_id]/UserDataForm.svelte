@@ -37,6 +37,6 @@
 		<input autocomplete="email" id="email" name="email" placeholder="Email" type="email" value={email} />
 	</p>
 	<p>
-		<button type="submit">Speichern</button>
+		<button type="submit" data-testid="profile-save">Speichern</button>
 	</p>
 </form>

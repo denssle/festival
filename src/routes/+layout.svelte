@@ -26,15 +26,17 @@
 <header>
 	<nav>
 		{#if data?.currentUser?.isAuthenticated}
-			<a href={resolve('/')}>{t(data.locale, 'nav.festivals')}</a>
-			<a href={resolve('/group')}>{t(data.locale, 'nav.groups')}</a>
-			<a href={resolve('/user/[user_id]', { user_id: data.currentUser.id })}>{data.currentUser.nickname}</a>
-			<a href={resolve('/updates')}>{t(data.locale, 'nav.updates')}</a>
-			<a href={resolve('/settings')}>{t(data.locale, 'nav.settings')}</a>
-			<button onclick={logout}>{t(data.locale, 'nav.logout')}</button>
+			<a data-testid="nav-festivals" href={resolve('/')}>{t(data.locale, 'nav.festivals')}</a>
+			<a data-testid="nav-groups" href={resolve('/group')}>{t(data.locale, 'nav.groups')}</a>
+			<a data-testid="nav-profile" href={resolve('/user/[user_id]', { user_id: data.currentUser.id })}
+				>{data.currentUser.nickname}</a
+			>
+			<a data-testid="nav-updates" href={resolve('/updates')}>{t(data.locale, 'nav.updates')}</a>
+			<a data-testid="nav-settings" href={resolve('/settings')}>{t(data.locale, 'nav.settings')}</a>
+			<button data-testid="nav-logout" onclick={logout}>{t(data.locale, 'nav.logout')}</button>
 		{:else}
-			<a href={resolve('/login')}>{t(data.locale, 'nav.login')}</a>
-			<a href={resolve('/registration')}>{t(data.locale, 'nav.register')}</a>
+			<a data-testid="nav-login" href={resolve('/login')}>{t(data.locale, 'nav.login')}</a>
+			<a data-testid="nav-register" href={resolve('/registration')}>{t(data.locale, 'nav.register')}</a>
 		{/if}
 	</nav>
 </header>
@@ -43,9 +45,9 @@
 
 <footer>
 	<nav>
-		<a href={resolve('/about')}>{t(data.locale, 'footer.about')}</a>
-		<a href={resolve('/impressum')}>{t(data.locale, 'footer.imprint')}</a>
-		<a href={resolve('/datenschutz')}>{t(data.locale, 'footer.privacy')}</a>
+		<a data-testid="footer-about" href={resolve('/about')}>{t(data.locale, 'footer.about')}</a>
+		<a data-testid="footer-imprint" href={resolve('/impressum')}>{t(data.locale, 'footer.imprint')}</a>
+		<a data-testid="footer-privacy" href={resolve('/datenschutz')}>{t(data.locale, 'footer.privacy')}</a>
 	</nav>
 	<LanguageSwitcher locale={data.locale} />
 </footer>

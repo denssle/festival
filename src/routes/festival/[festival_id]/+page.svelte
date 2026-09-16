@@ -191,7 +191,7 @@
 
 <InfoDialog bind:infoDialogData />
 <JoinEventDialog bind:joinDialogData />
-<QuestionDialog bind:questionDialogData />
+<QuestionDialog bind:questionDialogData testId="festival-delete-dialog" />
 <CancelInvitationDialog bind:cancelInvitationDialogData />
 
 <article>
@@ -227,10 +227,10 @@
 	<NotComingVisitorsTable {data} />
 
 	<section>
-		<button onclick={editFestival}>Bearbeiten</button>
-		<button onclick={deleteFestival}>Löschen</button>
-		<button onclick={cancelInvitation}>{cancelFestivalButtonText}</button>
-		<button onclick={joinFestival}>{joinFestivalButtonText}</button>
+		<button data-testid="festival-edit" onclick={editFestival}>Bearbeiten</button>
+		<button data-testid="festival-delete" onclick={deleteFestival}>Löschen</button>
+		<button data-testid="festival-cancel" onclick={cancelInvitation}>{cancelFestivalButtonText}</button>
+		<button data-testid="festival-join" onclick={joinFestival}>{joinFestivalButtonText}</button>
 		<a class="button" href={resolve('/')}>Zurück</a>
 	</section>
 

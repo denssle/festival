@@ -11,6 +11,12 @@ import { BASE_PATH } from './test-utils';
  * Rücksprung auf die Ausgangsseite (hängt an `safeRedirectTarget`).
  */
 test.describe('Sprachumschalter', () => {
+	// Diese Spec prüft das Umschalten selbst und braucht dafür einen bekannten
+	// Ausgangszustand. Sie nagelt die Browser-Sprache deshalb eigenständig auf Deutsch
+	// fest, unabhängig von UI_LOCALE in tests/locale.ts – sonst würde sie mitwandern,
+	// wenn die übrige Suite auf Englisch gefahren wird.
+	test.use({ locale: 'de-DE' });
+
 	const switcher = 'footer form.language-switcher';
 
 	test('steht ohne Anmeldung im Footer', async ({ page }) => {

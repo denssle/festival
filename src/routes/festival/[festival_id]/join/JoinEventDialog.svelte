@@ -5,7 +5,7 @@
 	let { joinDialogData = $bindable() }: { joinDialogData: JoinEventDialogData } = $props();
 </script>
 
-<BaseDialog bind:dialogData={joinDialogData} buttonLabels={{ yes: 'Beitreten', no: 'Zurück' }}>
+<BaseDialog bind:dialogData={joinDialogData} buttonLabels={{ yes: 'Beitreten', no: 'Zurück' }} testId="join-dialog">
 	<h4>Bei dem Event bin ich dabei!</h4>
 
 	<section>

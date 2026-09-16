@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { logout, register, TEST_PASSWORD } from './test-utils';
+import { logout, register, TEST_PASSWORD, uiText } from './test-utils';
 
 test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () => {
 	test.beforeAll(async ({ browser }) => {
@@ -30,8 +30,8 @@ test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () =>
 		await expect(page).toHaveURL('/festival/login');
 
 		// Im Header sollten nun wieder "Anmelden" und "Registrieren" Links zu sehen sein
-		await expect(page.getByRole('link', { name: 'Anmelden' })).toBeVisible();
-		await expect(page.getByRole('link', { name: 'Registrieren', exact: true })).toBeVisible();
+		await expect(page.getByTestId('nav-login')).toBeVisible();
+		await expect(page.getByTestId('nav-register')).toBeVisible();
 
 		// 3. SCHRITT: Login mit dem gerade erstellten User
 		await page.goto('/festival/login');
@@ -41,7 +41,7 @@ test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () =>
 
 		// Verifizieren, dass wir wieder angemeldet sind
 		await expect(page).toHaveURL('/festival/');
-		await expect(page.getByRole('link', { name: testNickname })).toBeVisible();
+		await expect(page.getByTestId('nav-profile')).toBeVisible();
 	});
 
 	test('Registrierung sollte bei ungleichen Passwörtern deaktiviert sein', async ({ page }) => {
@@ -63,7 +63,7 @@ test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () =>
 		const logoutResponse = page.waitForResponse(
 			(resp) => resp.url().includes('/logout') && resp.request().method() === 'POST'
 		);
-		await page.getByRole('button', { name: 'Logout' }).click();
+		await page.getByTestId('nav-logout').click();
 		await logoutResponse;
 		await page.waitForURL(/\/login/);
 
@@ -75,7 +75,7 @@ test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () =>
 
 		// Wir bleiben auf /login und sehen die Fehlermeldung
 		await expect(page).toHaveURL(/\/login/);
-		await expect(page.getByText('Passwort ungültig.')).toBeVisible();
+		await expect(page.getByText(uiText('auth.error.passwordInvalid'))).toBeVisible();
 	});
 
 	test('Registrierung mit bereits vergebenem Nickname zeigt eine Fehlermeldung', async ({ page, browser }) => {
@@ -98,6 +98,6 @@ test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () =>
 
 		// Wir bleiben auf /registration und sehen die Fehlermeldung
 		await expect(page).toHaveURL(/\/registration/);
-		await expect(page.getByText('Ungültiger Nickname.')).toBeVisible();
+		await expect(page.getByText(uiText('error.nicknameInvalid'))).toBeVisible();
 	});
 });

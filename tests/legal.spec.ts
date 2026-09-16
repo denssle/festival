@@ -10,19 +10,19 @@ import { BASE_PATH } from './test-utils';
 test.describe('Rechtliche Seiten', () => {
 	test('sind ohne Anmeldung erreichbar', async ({ page }) => {
 		await page.goto(`${BASE_PATH}/impressum`);
-		await expect(page.getByRole('heading', { name: 'Impressum' })).toBeVisible();
+		await expect(page.getByTestId('imprint-heading')).toBeVisible();
 
 		await page.goto(`${BASE_PATH}/datenschutz`);
-		await expect(page.getByRole('heading', { name: 'Datenschutzerklärung' })).toBeVisible();
+		await expect(page.getByTestId('privacy-heading')).toBeVisible();
 	});
 
 	test('sind aus dem Footer verlinkt', async ({ page }) => {
 		await page.goto(`${BASE_PATH}/login`);
 
-		await page.locator('footer nav a', { hasText: 'Datenschutz' }).click();
+		await page.getByTestId('footer-privacy').click();
 		await page.waitForURL(`**${BASE_PATH}/datenschutz`);
 
-		await page.locator('footer nav a', { hasText: 'Impressum' }).click();
+		await page.getByTestId('footer-imprint').click();
 		await page.waitForURL(`**${BASE_PATH}/impressum`);
 	});
 

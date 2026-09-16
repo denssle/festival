@@ -7,7 +7,7 @@
 </script>
 
 <article>
-	<h2>Gruppe bearbeiten</h2>
+	<h2 data-testid="group-edit-heading">Gruppe bearbeiten</h2>
 	<section>
 		<form method="POST" use:enhance>
 			<p>
@@ -24,7 +24,7 @@
 				<p class="error">{form.message}</p>
 			{/if}
 
-			<button type="submit">Speichern</button>
+			<button type="submit" data-testid="group-save">Speichern</button>
 			<a class="button secondary" href={resolve('/group/[group_id]', { group_id: data.group.id })}>Abbrechen</a>
 		</form>
 	</section>
