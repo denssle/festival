@@ -2,6 +2,7 @@
 	import { tr } from '$lib/i18n/tr';
 	import type { JoinEventDialogData } from '$lib/models/dialogData/JoinEventDialogData';
 	import BaseDialog from '$lib/sharedComponents/BaseDialog.svelte';
+	import RichText from '$lib/sharedComponents/RichText.svelte';
 
 	let { joinDialogData = $bindable() }: { joinDialogData: JoinEventDialogData } = $props();
 </script>
@@ -29,10 +30,11 @@
 		{#if joinDialogData.bringYourOwnFood}
 			<span>{tr('festival.joinDialog.byo')}</span>
 		{:else}
-			<span
-				>{tr('festival.joinDialog.notByoBefore')} <mark>{tr('festival.joinDialog.notByoMarked')}</mark>
-				{tr('festival.joinDialog.notByoAfter')}</span
-			>
+			<span>
+				<RichText text={tr('festival.joinDialog.notByo')}>
+					{#snippet mark(inner: string)}<mark>{inner}</mark>{/snippet}
+				</RichText>
+			</span>
 		{/if}
 	</section>
 
@@ -45,10 +47,11 @@
 		{#if joinDialogData.bringYourOwnBottle}
 			<span>{tr('festival.joinDialog.byo')}</span>
 		{:else}
-			<span
-				>{tr('festival.joinDialog.notByoBefore')} <mark>{tr('festival.joinDialog.notByoMarked')}</mark>
-				{tr('festival.joinDialog.notByoAfter')}</span
-			>
+			<span>
+				<RichText text={tr('festival.joinDialog.notByo')}>
+					{#snippet mark(inner: string)}<mark>{inner}</mark>{/snippet}
+				</RichText>
+			</span>
 		{/if}
 	</section>
 </BaseDialog>

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { BASE_PATH } from './test-utils';
+import { BASE_PATH, register, uniqueName } from './test-utils';
 
 /**
  * Sprachumschalter im Footer.
@@ -108,5 +108,33 @@ test.describe('Sprachumschalter', () => {
 
 		await expect(page.locator('html')).toHaveAttribute('lang', 'en');
 		await expect(page.locator('header nav a', { hasText: 'Sign in' })).toBeVisible();
+	});
+	test('übersetzt Sätze mit eingebetteten Links am Stück', async ({ page }) => {
+		// Die About-Seite nutzt RichText: Link und Satz kommen aus EINEM Schlüssel. Geprüft
+		// wird, dass der Link an seiner Stelle im Satz steht und keine Platzhalter übrig sind.
+		await page.goto(`${BASE_PATH}/about`);
+		await page.locator(`${switcher} button[value="en"]`).click();
+		await page.waitForURL(`**${BASE_PATH}/about`);
+
+		const hosting = page.locator('article p', { has: page.locator('a[href="https://uberspace.de/"]') });
+		await expect(hosting).toHaveText('This site is hosted on uberspace.');
+		await expect(page.locator('article')).not.toContainText('{');
+	});
+
+	test('übersetzt auch die Fehlerseiten', async ({ page }) => {
+		await register(page, uniqueName('I18nFehler'));
+		// register() landet auf der Startseite; /login würde angemeldet dorthin umleiten.
+		await page.locator(`${switcher} button[value="en"]`).click();
+		await page.waitForURL(`**${BASE_PATH}/`);
+
+		// Ein error() aus einem Loader, vorher fest "Gruppe nicht gefunden".
+		const response = await page.goto(`${BASE_PATH}/group/gibt-es-nicht`);
+		expect(response?.status()).toBe(404);
+		await expect(page.getByText('Group not found.', { exact: true })).toBeVisible();
+
+		// Eine unbekannte Route läuft über handleError, vorher SvelteKits festes "Not Found".
+		const unknown = await page.goto(`${BASE_PATH}/gibt-es-nicht`);
+		expect(unknown?.status()).toBe(404);
+		await expect(page.getByText('Not found.', { exact: true })).toBeVisible();
 	});
 });

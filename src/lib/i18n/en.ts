@@ -33,6 +33,8 @@ export const en: Dictionary = {
 	'error.nicknameInvalid': 'Invalid nickname.',
 	'error.missingData': 'Required information is missing.',
 	'error.internal': 'Internal server error.',
+	'error.notFound': 'Not found.',
+	'error.forbidden': "You don't have permission to do that.",
 
 	// Sign in and sign up
 	'auth.error.credentialsMissing': 'Nickname and/or password missing.',
@@ -71,22 +73,25 @@ export const en: Dictionary = {
 	// Groups
 	'group.joined': 'You have joined the group.',
 	'group.left': 'You have left the group.',
+	'group.error.notFound': 'Group not found.',
+
+	// Profile
+	'profile.error.notFound': 'User not found.',
 
 	// Home
 	'home.heading': 'Festivals',
 	'home.welcome': 'Welcome.',
 	'home.newFestival': 'Create a new festival',
-	'home.by': 'by',
+	'home.byAuthor': 'by {author}',
 	'home.start': 'Start:',
 	'home.guestCount': 'Guests so far: {count}',
 	'home.empty': 'There are no festivals yet. Create the first one!',
 
 	// About
 	'about.heading': 'About this site',
-	'about.builtWith': 'This site was built with',
-	'about.stylingFrom': 'The styling comes from',
-	'about.dataStoredIn': 'and the data is stored in a',
-	'about.hostedOn': 'This site is hosted on',
+	'about.credits':
+		'This site was built with {svelte}. The styling comes from {simplecss} and the data is stored in a {mariadb} database.',
+	'about.hosting': 'This site is hosted on {uberspace}.',
 	'about.uberspaceAlt': 'uberspace banner',
 	'about.version': 'Version: {version}',
 
@@ -158,9 +163,7 @@ export const en: Dictionary = {
 	'festival.joinDialog.food': "I'm bringing something to eat:",
 	'festival.joinDialog.drink': "I'm bringing something to drink:",
 	'festival.joinDialog.byo': 'Note: This is a bring-your-own party.',
-	'festival.joinDialog.notByoBefore': 'Note: This is',
-	'festival.joinDialog.notByoMarked': 'not',
-	'festival.joinDialog.notByoAfter': 'a bring-your-own party.',
+	'festival.joinDialog.notByo': 'Note: This is {mark:not} a bring-your-own party.',
 
 	// Festival: decline dialog
 	'festival.declineDialog.text': "Unfortunately I / we can't make it to this event.",

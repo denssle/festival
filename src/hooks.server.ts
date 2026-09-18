@@ -1,11 +1,11 @@
-import { Handle } from '@sveltejs/kit';
+import { Handle, HandleServerError } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 import { UserService } from '$lib/services/user.service';
 import { startDB } from '$lib/db/db';
 import { CurrentUser } from '$lib/models/user/CurrentUser';
 import { base } from '$app/paths';
 import { LANGUAGE_COOKIE_NAME, SESSION_COOKIE_PATH } from '$lib/constants';
-import { type Locale, resolveLocale } from '$lib/i18n';
+import { type Locale, resolveLocale, t } from '$lib/i18n';
 
 await startDB();
 
@@ -97,3 +97,22 @@ const authentifizierung: Handle = async ({ event, resolve }): Promise<Response> 
 };
 
 export const handle: Handle = sequence(clacks, sprache, authentifizierung);
+
+// Unerwartete Fehler und unbekannte Routen. Ohne diesen Hook zeigt SvelteKit fest
+// "Internal Error" bzw. "Not Found" – auf Englisch, unabhängig von der Sprache.
+//
+// Die Sprache wird hier neu bestimmt statt aus `locals` gelesen: Wirft schon ein Hook
+// vor `sprache`, ist `locals.locale` noch nicht gesetzt.
+//
+// Den Fehler selbst loggt SvelteKit nur, solange es keinen eigenen `handleError` gibt –
+// deshalb hier von Hand, 404er ausgenommen (das sind bloß vertippte URLs).
+export const handleError: HandleServerError = ({ error, event, status }) => {
+	if (status !== 404) {
+		console.error(error);
+	}
+	const locale: Locale = resolveLocale(
+		event.cookies.get(LANGUAGE_COOKIE_NAME),
+		event.request.headers.get('accept-language')
+	);
+	return { message: t(locale, status === 404 ? 'error.notFound' : 'error.internal') };
+};

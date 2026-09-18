@@ -11,8 +11,8 @@ import type { Locale } from '../src/lib/i18n';
  *
  * Diese Konstante umzustellen fährt die gesamte Suite in der anderen Sprache. Das ist
  * beabsichtigt: Es ist die Gegenprobe darauf, dass kein Test mehr an Beschriftungen
- * hängt. Solange die Oberfläche noch nicht übersetzt ist (Schritt 4), schlagen dabei
- * genau die Specs fehl, die noch deutschen Markup-Text erwarten.
+ * hängt. Schlägt dabei eine Spec fehl, erwartet sie irgendwo noch einen fest
+ * verdrahteten Text statt `uiText()`.
  */
 export const UI_LOCALE: Locale = 'de';
 

@@ -18,13 +18,13 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const groupModel = await Group.findByPk(group_id);
 
 	if (!groupModel) {
-		throw error(404, 'Gruppe nicht gefunden');
+		throw error(404, t(locals.locale, 'group.error.notFound'));
 	}
 
 	const group = groupModel.dataValues as GroupAttributes;
 
 	if (group.ownerId !== user.id) {
-		throw error(403, 'Nicht autorisiert');
+		throw error(403, t(locals.locale, 'error.forbidden'));
 	}
 
 	return {

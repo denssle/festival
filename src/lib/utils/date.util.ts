@@ -15,7 +15,7 @@ import type { Locale } from '$lib/i18n';
 export const APP_TIME_ZONE = 'Europe/Berlin';
 
 /** BCP-47-Tags für Intl. Englisch als en-GB: 24-Stunden-Uhr, passt zu "Organised" & Co. */
-const INTL_LOCALES: Record<Locale, string> = { de: 'de-DE', en: 'en-GB' };
+export const INTL_LOCALES: Record<Locale, string> = { de: 'de-DE', en: 'en-GB' };
 
 /** `short` für Listen und Kommentare, `long` für die Startzeit auf der Festival-Seite. */
 export type DateTimeStyle = 'short' | 'long';
@@ -113,7 +113,9 @@ export function getDateFromString(date: string, time: string, timeZone: string =
 		return null;
 	}
 	const [year, month, day] = dateMatch.slice(1).map(Number);
-	if (month < 1 || month > 12 || day < 1 || day > 31) {
+	// Den Tag gegen den echten Monat prüfen, nicht nur gegen 31: `Date.UTC` rollt einen
+	// 31.02. sonst stillschweigend auf den 03.03. weiter.
+	if (month < 1 || month > 12 || day < 1 || new Date(Date.UTC(year, month - 1, day)).getUTCDate() !== day) {
 		return null;
 	}
 

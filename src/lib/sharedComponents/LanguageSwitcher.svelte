@@ -30,6 +30,7 @@
 			aria-current={option === locale ? 'true' : undefined}
 			aria-label={tr(`language.${option}`)}
 			disabled={option === locale}
+			lang={option}
 			name="locale"
 			type="submit"
 			value={option}

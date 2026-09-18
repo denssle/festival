@@ -1,6 +1,6 @@
-import { expect, test } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
 import { register, uniqueName, UI_LOCALE } from './test-utils';
-import { formatDateTime } from '../src/lib/utils/date.util';
+import { INTL_LOCALES } from '../src/lib/utils/date.util';
 
 /**
  * Startzeiten über den ganzen Weg: Eingabe -> Speichern (Server) -> Anzeige per SSR und
@@ -17,13 +17,45 @@ import { formatDateTime } from '../src/lib/utils/date.util';
  */
 test.use({ timezoneId: 'America/New_York' });
 
+/**
+ * Was in der Startzeit stehen muss, ohne den kompletten String vorzugeben.
+ *
+ * Den ganzen Text zu vergleichen hieße, Nodes ICU-Daten (Testprozess) gegen die von
+ * Chromium (Client-Rendering) antreten zu lassen. Die trennen Wochentag und Datum je nach
+ * Stand mal mit Komma, mal ohne ("Sunday 20 September" vs. "Sunday, 20 September") – der
+ * Test würde bei einem Update rot, ohne dass sich an der App etwas geändert hat.
+ * Deshalb nur die Bestandteile, und die Zeitzone steht hier ausdrücklich statt über
+ * `formatDateTime`, damit der Sollwert nicht aus derselben Funktion kommt wie der Istwert.
+ */
+function expectedStartParts(instant: Date): string[] {
+	return new Intl.DateTimeFormat(INTL_LOCALES[UI_LOCALE], {
+		weekday: 'long',
+		day: 'numeric',
+		month: 'long',
+		year: 'numeric',
+		timeZone: 'Europe/Berlin'
+	})
+		.formatToParts(instant)
+		.filter((part) => part.type !== 'literal')
+		.map((part) => part.value);
+}
+
+async function expectStart(page: Page, parts: string[]): Promise<void> {
+	const start = page.getByTestId('festival-start');
+	// Die Uhrzeit fest als Literal: Sie ist das, woran die Zeitzone zuerst sichtbar wird.
+	await expect(start).toContainText('00:30');
+	for (const part of parts) {
+		await expect(start).toContainText(part);
+	}
+}
+
 const DETAIL_URL = /\/festival\/festival\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 test('Startzeit kurz nach Mitternacht übersteht Anzeige und Bearbeiten', async ({ page }) => {
 	await register(page, uniqueName('DateUser'));
 	const festivalName: string = uniqueName('Mitternachtsfest');
 	// 00:30 Berliner Sommerzeit = 22:30 UTC am Vortag.
-	const expected: string = formatDateTime(new Date('2026-09-19T22:30:00.000Z'), UI_LOCALE, 'long');
+	const expected: string[] = expectedStartParts(new Date('2026-09-19T22:30:00.000Z'));
 
 	await page.goto('/festival/festival/new', { waitUntil: 'networkidle' });
 	await page.fill('input[name="name"]', festivalName);
@@ -33,12 +65,12 @@ test('Startzeit kurz nach Mitternacht übersteht Anzeige und Bearbeiten', async 
 	const detailUrl: string = new URL(page.url()).pathname;
 
 	// 1. Server-Rendering
-	await expect(page.getByTestId('festival-start')).toContainText(expected);
+	await expectStart(page, expected);
 
 	// 2. Client-Rendering: erst nach der Hydration klicken, sonst wäre es wieder SSR.
 	await page.goto('/festival/', { waitUntil: 'networkidle' });
 	await Promise.all([page.waitForURL(DETAIL_URL), page.getByRole('link', { name: festivalName }).click()]);
-	await expect(page.getByTestId('festival-start')).toContainText(expected);
+	await expectStart(page, expected);
 
 	// 3. Bearbeiten-Formular: Die Werte berechnet nach der Hydration der Browser (New York).
 	await page.goto(`${detailUrl}/edit`, { waitUntil: 'networkidle' });
@@ -47,5 +79,5 @@ test('Startzeit kurz nach Mitternacht übersteht Anzeige und Bearbeiten', async 
 
 	// 4. Unverändert speichern darf nichts verschieben.
 	await Promise.all([page.waitForURL(DETAIL_URL), page.getByTestId('festival-save').click()]);
-	await expect(page.getByTestId('festival-start')).toContainText(expected);
+	await expectStart(page, expected);
 });

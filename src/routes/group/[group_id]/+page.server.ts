@@ -18,7 +18,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const groupModel = await Group.findByPk(group_id);
 
 	if (!groupModel) {
-		throw error(404, 'Gruppe nicht gefunden');
+		throw error(404, t(locals.locale, 'group.error.notFound'));
 	}
 
 	const members = await GroupMember.findAll({

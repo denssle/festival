@@ -30,7 +30,7 @@ export const load: PageServerLoad = async ({ locals, params }): Promise<UserTran
 			};
 		}
 	}
-	error(404, 'Not Found');
+	error(404, t(locals.locale, 'profile.error.notFound'));
 };
 
 export const actions: Actions = {

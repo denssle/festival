@@ -4,6 +4,7 @@
 	import type { PageData } from './$types';
 	import { resolve } from '$app/paths';
 	import { getTotalNumberOfComingGuests } from '$lib/utils/festivalEvent.util';
+	import RichText from '$lib/sharedComponents/RichText.svelte';
 
 	let { data }: { data: PageData } = $props();
 </script>
@@ -20,10 +21,11 @@
 				<legend>
 					<a href={resolve('/festival/[festival_id]', { festival_id: loadedEvent.id })}>{loadedEvent.name}</a>
 					{#if loadedEvent.createdBy}
-						{tr('home.by')}
-						<a href={resolve('/user/[user_id]', { user_id: loadedEvent.createdBy.id })}
-							>{loadedEvent.createdBy.nickname}</a
-						>
+						{@const createdBy = loadedEvent.createdBy}
+						<RichText text={tr('home.byAuthor')}>
+							{#snippet author()}<a href={resolve('/user/[user_id]', { user_id: createdBy.id })}>{createdBy.nickname}</a
+								>{/snippet}
+						</RichText>
 					{/if}
 				</legend>
 				<i>{tr('home.start')} {formatDateTime(loadedEvent.startDate, currentLocale())}</i>

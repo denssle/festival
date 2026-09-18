@@ -100,6 +100,38 @@ export function interpolate(text: string, parameters?: Record<string, string | n
 	});
 }
 
+/** Ein Stück eines Übersetzungstextes: entweder reiner Text oder ein Platz für ein Snippet. */
+export type RichTextPart = { type: 'text'; value: string } | { type: 'slot'; name: string; inner: string };
+
+/**
+ * Zerlegt einen Übersetzungstext in Text und Plätze für Markup (Links, Hervorhebungen).
+ *
+ * `{name}` wird zum leeren Platz `name`, `{name:Text}` zum Platz mit innerem Text – so
+ * bleibt auch das hervorgehobene Wort übersetzbar (`'Das ist {mark:keine} Mitbringparty.'`).
+ * Gedacht für Texte, die schon durch `t()` gelaufen sind: `interpolate` fasst nur
+ * `{name}` mit passendem Parameter an, alles andere kommt hier unverändert an.
+ *
+ * Vorher standen solche Sätze in Fragmenten im Wörterbuch ("Hinweis: Das ist" + "keine" +
+ * "Mitbringparty."). Das legt die deutsche Wortstellung für jede Sprache fest.
+ */
+export function splitRichText(text: string): RichTextPart[] {
+	const parts: RichTextPart[] = [];
+	const pattern = /\{(\w+)(?::([^{}]*))?\}/g;
+	let last = 0;
+
+	for (const match of text.matchAll(pattern)) {
+		if (match.index > last) {
+			parts.push({ type: 'text', value: text.slice(last, match.index) });
+		}
+		parts.push({ type: 'slot', name: match[1], inner: match[2] ?? '' });
+		last = match.index + match[0].length;
+	}
+	if (last < text.length) {
+		parts.push({ type: 'text', value: text.slice(last) });
+	}
+	return parts;
+}
+
 /**
  * Prüft das Rücksprungziel des Sprachumschalters.
  *

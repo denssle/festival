@@ -32,7 +32,7 @@ export const load: PageServerLoad = async ({ locals, params }): Promise<Frontend
 			}
 		}
 	}
-	error(404, 'Not Found');
+	error(404, t(locals.locale, 'festival.error.notFound'));
 };
 
 /**

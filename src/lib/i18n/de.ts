@@ -10,7 +10,10 @@
  * eine vollständige Autovervollständigung und erspart getypte Pfad-Lookups).
  * Platzhalter in geschweiften Klammern: `'Organisiert von {nickname}'`.
  *
- * Stand: Gerüst (Schritt 1). Die restliche Oberfläche folgt in Schritt 4.
+ * Sätze mit Links oder Hervorhebungen stehen am Stück im Wörterbuch, nicht in Fragmenten:
+ * `'Das ist {mark:keine} Mitbringparty.'` rendert `RichText.svelte`, `{mark:keine}` wird
+ * dort zum Snippet `mark` mit dem Text `keine`. Nur so kann eine Übersetzung die
+ * Wortstellung ändern.
  */
 export const de = {
 	// Kopfzeile
@@ -41,6 +44,8 @@ export const de = {
 	'error.nicknameInvalid': 'Ungültiger Nickname.',
 	'error.missingData': 'Es fehlen Angaben.',
 	'error.internal': 'Interner Serverfehler.',
+	'error.notFound': 'Nicht gefunden.',
+	'error.forbidden': 'Dafür fehlt dir die Berechtigung.',
 
 	// Anmeldung und Registrierung
 	'auth.error.credentialsMissing': 'Nickname und/oder Passwort fehlen.',
@@ -80,22 +85,25 @@ export const de = {
 	// Gruppen
 	'group.joined': 'Du bist der Gruppe erfolgreich beigetreten!',
 	'group.left': 'Du hast die Gruppe verlassen.',
+	'group.error.notFound': 'Gruppe nicht gefunden.',
+
+	// Profil
+	'profile.error.notFound': 'Benutzer nicht gefunden.',
 
 	// Startseite
 	'home.heading': 'Festivals',
 	'home.welcome': 'Willkommen hier.',
 	'home.newFestival': 'Neues Fest anlegen',
-	'home.by': 'von',
+	'home.byAuthor': 'von {author}',
 	'home.start': 'Start:',
 	'home.guestCount': 'Bisherige Gäste: {count}',
 	'home.empty': 'Es gibt noch keine Feste. Leg das erste an!',
 
 	// About
 	'about.heading': 'Über diese Seite',
-	'about.builtWith': 'Diese Seite wurde erstellt mit',
-	'about.stylingFrom': 'Das Styling kommt von',
-	'about.dataStoredIn': 'und die Daten werden gespeichert in einer',
-	'about.hostedOn': 'Die Seite ist gehostet auf',
+	'about.credits':
+		'Diese Seite wurde erstellt mit {svelte}. Das Styling kommt von {simplecss} und die Daten werden gespeichert in einer {mariadb}.',
+	'about.hosting': 'Die Seite ist gehostet auf {uberspace}.',
 	'about.uberspaceAlt': 'uberspace-Banner',
 	'about.version': 'Version: {version}',
 
@@ -167,9 +175,7 @@ export const de = {
 	'festival.joinDialog.food': 'Ich bringe etwas zu essen mit:',
 	'festival.joinDialog.drink': 'Ich bringe etwas zu trinken mit:',
 	'festival.joinDialog.byo': 'Hinweis: Das ist eine Mitbringparty.',
-	'festival.joinDialog.notByoBefore': 'Hinweis: Das ist',
-	'festival.joinDialog.notByoMarked': 'keine',
-	'festival.joinDialog.notByoAfter': 'Mitbringparty.',
+	'festival.joinDialog.notByo': 'Hinweis: Das ist {mark:keine} Mitbringparty.',
 
 	// Festival: Absage-Dialog
 	'festival.declineDialog.text': 'Leider bin ich / sind wir bei dem Event nicht dabei.',

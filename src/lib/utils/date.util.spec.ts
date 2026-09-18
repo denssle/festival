@@ -61,6 +61,15 @@ describe('getDateFromString', () => {
 		expect(getDateFromString('2026-09-20', 'abends')).toBeNull();
 	});
 
+	it('sollte Tage ablehnen, die es im Monat nicht gibt, statt weiterzurollen', () => {
+		expect(getDateFromString('2026-02-31', '20:00')).toBeNull();
+		expect(getDateFromString('2026-04-31', '20:00')).toBeNull();
+		expect(getDateFromString('2026-02-29', '20:00')).toBeNull();
+		// Schaltjahr und Monatsletzte bleiben gültig.
+		expect(iso(getDateFromString('2028-02-29', '20:00'))).toBe('2028-02-29T19:00:00.000Z');
+		expect(iso(getDateFromString('2026-12-31', '20:00'))).toBe('2026-12-31T19:00:00.000Z');
+	});
+
 	it('sollte die übergebene Zeitzone benutzen, nicht die des Prozesses', () => {
 		expect(iso(getDateFromString('2026-09-20', '20:00', 'America/New_York'))).toBe('2026-09-21T00:00:00.000Z');
 		expect(iso(getDateFromString('2026-09-20', '20:00', 'Asia/Tokyo'))).toBe('2026-09-20T11:00:00.000Z');

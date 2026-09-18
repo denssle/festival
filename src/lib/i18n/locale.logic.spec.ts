@@ -8,7 +8,8 @@ import {
 	LOCALES,
 	negotiateLocale,
 	resolveLocale,
-	safeRedirectTarget
+	safeRedirectTarget,
+	splitRichText
 } from './locale.logic';
 
 describe('isLocale', () => {
@@ -130,6 +131,33 @@ describe('safeRedirectTarget', () => {
 	});
 });
 
+describe('splitRichText', () => {
+	it('sollte Text ohne Platzhalter unverändert als ein Stück liefern', () => {
+		expect(splitRichText('Nur Text.')).toEqual([{ type: 'text', value: 'Nur Text.' }]);
+	});
+
+	it('sollte leere Plätze und Plätze mit innerem Text erkennen', () => {
+		expect(splitRichText('Das ist {mark:keine} Party auf {host}.')).toEqual([
+			{ type: 'text', value: 'Das ist ' },
+			{ type: 'slot', name: 'mark', inner: 'keine' },
+			{ type: 'text', value: ' Party auf ' },
+			{ type: 'slot', name: 'host', inner: '' },
+			{ type: 'text', value: '.' }
+		]);
+	});
+
+	it('sollte Plätze am Anfang und Ende ohne leere Textstücke liefern', () => {
+		expect(splitRichText('{a}{b:x}')).toEqual([
+			{ type: 'slot', name: 'a', inner: '' },
+			{ type: 'slot', name: 'b', inner: 'x' }
+		]);
+	});
+
+	it('sollte keine leeren Klammern als Platz werten', () => {
+		expect(splitRichText('a {} b')).toEqual([{ type: 'text', value: 'a {} b' }]);
+	});
+});
+
 describe('Wörterbücher', () => {
 	// Diese Prüfung macht TypeScript bereits (en.ts ist auf `Dictionary` typisiert).
 	// Der Test ist die Gegenprobe zur Laufzeit – und schlägt auch dann an, wenn jemand
@@ -148,6 +176,16 @@ describe('Wörterbücher', () => {
 			for (const [key, value] of Object.entries(dictionary)) {
 				expect(value.trim(), `${locale}: ${key} ist leer`).not.toBe('');
 			}
+		}
+	});
+
+	it('sollten in allen Sprachen dieselben Platzhalter verwenden', () => {
+		// Fehlt in en.ts ein {name} oder ein {mark:…}, bliebe der Parameter bzw. das Snippet
+		// dort stumm liegen – das fängt kein Typ.
+		const names = (text: string): string[] =>
+			[...text.matchAll(/\{(\w+)(?::[^{}]*)?\}/g)].map((match) => match[1]).sort();
+		for (const [key, value] of Object.entries(de)) {
+			expect(names(en[key as keyof typeof de]), key).toEqual(names(value));
 		}
 	});
 
