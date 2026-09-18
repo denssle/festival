@@ -12,9 +12,13 @@ import {
  * Zur Aussagekraft dieser Tests: Sie vergleichen gegen feste UTC-Zeitpunkte und rechnen
  * bewusst auch in Zeitzonen, die weder Berlin noch UTC sind. Würde eine Funktion
  * versehentlich die Zeitzone des Prozesses benutzen (getHours, new Date(j, m, t) …), fiele
- * das auf einem Berliner Entwicklungsrechner bei New York/Tokio auf und in der CI, die in
- * UTC läuft, bei Berlin. Die Prozess-Zeitzone im Test umzustellen geht nicht zuverlässig:
- * Node unter Windows ignoriert die Umgebungsvariable TZ.
+ * das auf einem Berliner Entwicklungsrechner bei New York/Tokio auf. Die Prozess-Zeitzone
+ * im Test umzustellen geht nicht zuverlässig: Node unter Windows ignoriert die
+ * Umgebungsvariable TZ.
+ *
+ * ACHTUNG: Die CI (tests.yml) fährt nur Playwright, keine Unit-Tests. Diese Datei läuft
+ * also nur lokal. Den Fall "Server in UTC" deckt stattdessen tests/dates.spec.ts ab, der in
+ * der CI auf einem GitHub-Runner läuft (Voreinstellung dort: UTC).
  */
 const iso = (ms: number | null): string | null => (ms === null ? null : new Date(ms).toISOString());
 
