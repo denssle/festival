@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { tr } from '$lib/i18n/tr';
+	import { currentLocale, tr } from '$lib/i18n/tr';
 	import { resolve } from '$app/paths';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { tick } from 'svelte';
-	import { formateDateTime } from '$lib/utils/date.util';
+	import { formatDateTime } from '$lib/utils/date.util';
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
 	import JoinEventDialog from './join/JoinEventDialog.svelte';
 	import type { JoinEventDialogData } from '$lib/models/dialogData/JoinEventDialogData';
@@ -210,7 +210,9 @@
 				>
 			</p>
 		{/if}
-		<mark>{tr('festival.startDate')} {formateDateTime(data.festival.startDate)}</mark>
+		<mark data-testid="festival-start"
+			>{tr('festival.startDate')} {formatDateTime(data.festival.startDate, currentLocale(), 'long')}</mark
+		>
 
 		<p><u>{tr('festival.description')}</u></p>
 		<p>{data.festival.description}</p>

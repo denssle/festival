@@ -2,7 +2,7 @@
 	import { tr } from '$lib/i18n/tr';
 	import { resolve } from '$app/paths';
 	import { untrack } from 'svelte';
-	import { dateToHHMM, dateToString } from '$lib/utils/date.util';
+	import { toDateInputValue, toTimeInputValue } from '$lib/utils/date.util';
 	import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 
 	let { data }: { data: FrontendFestivalEvent } = $props();
@@ -16,8 +16,8 @@
 		untrack(() => ({
 			name: data?.name ?? '',
 			description: data?.description ?? '',
-			startDate: dateToString(data.startDate),
-			startTime: dateToHHMM(data.startDate),
+			startDate: toDateInputValue(data.startDate),
+			startTime: toTimeInputValue(data.startDate),
 			location: data.location ?? '',
 			bringYourOwnFood: data.bringYourOwnFood,
 			bringYourOwnBottle: data.bringYourOwnBottle

@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { tr } from '$lib/i18n/tr';
+	import { currentLocale, tr } from '$lib/i18n/tr';
+	import { formatDateTime } from '$lib/utils/date.util';
 	let { createdAt, updatedAt }: { createdAt: Date; updatedAt: Date } = $props();
 
 	let createdDate = $derived(new Date(createdAt));
@@ -9,8 +10,8 @@
 
 <i>
 	{tr('comment.written')}
-	{createdDate.toLocaleString()}
+	{formatDateTime(createdDate, currentLocale())}
 	{#if edited}
-		{tr('comment.updated')} {updatedDate.toLocaleString()}
+		{tr('comment.updated')} {formatDateTime(updatedDate, currentLocale())}
 	{/if}
 </i>

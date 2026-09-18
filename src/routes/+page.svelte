@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { tr } from '$lib/i18n/tr';
+	import { currentLocale, tr } from '$lib/i18n/tr';
+	import { formatDateTime } from '$lib/utils/date.util';
 	import type { PageData } from './$types';
 	import { resolve } from '$app/paths';
 	import { getTotalNumberOfComingGuests } from '$lib/utils/festivalEvent.util';
@@ -25,7 +26,7 @@
 						>
 					{/if}
 				</legend>
-				<i>{tr('home.start')} {loadedEvent.startDate?.toLocaleString()}</i>
+				<i>{tr('home.start')} {formatDateTime(loadedEvent.startDate, currentLocale())}</i>
 				<p>
 					<span>{tr('home.guestCount', { count: getTotalNumberOfComingGuests(loadedEvent) })}</span>
 				</p>
