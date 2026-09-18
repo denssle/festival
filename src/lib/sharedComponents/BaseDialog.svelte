@@ -1,10 +1,11 @@
 <script lang="ts">
+	import { tr } from '$lib/i18n/tr';
 	import type { BaseDialogData } from '$lib/models/dialogData/BaseDialogData';
 	import type { Snippet } from 'svelte';
 
 	let {
 		dialogData = $bindable(),
-		buttonLabels = { yes: 'Ja', no: 'Nope' },
+		buttonLabels = { yes: tr('dialog.yes'), no: tr('dialog.no') },
 		testId = 'base-dialog',
 		children
 	}: {

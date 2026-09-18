@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tr } from '$lib/i18n/tr';
 	import { resolve } from '$app/paths';
 	import Spinner from '$lib/sharedComponents/Spinner.svelte';
 	import { goto } from '$app/navigation';
@@ -43,7 +44,7 @@
 	onkeypress={() => onImageClick()}
 >
 	{#if avatar}
-		<img src={avatar} alt="alt avatar" class="avatar" />
+		<img src={avatar} alt={tr('profile.avatar.alt')} data-testid="avatar-image" class="avatar" />
 	{:else}
 		<Spinner />
 	{/if}

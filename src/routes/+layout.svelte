@@ -3,14 +3,14 @@
 	import { resolve } from '$app/paths';
 	import type { CurrentUser } from '$lib/models/user/CurrentUser';
 	import type { Snippet } from 'svelte';
-	import { type Locale, t } from '$lib/i18n';
+	import { tr } from '$lib/i18n/tr';
 	import LanguageSwitcher from '$lib/sharedComponents/LanguageSwitcher.svelte';
 
 	let {
 		data,
 		children
 	}: {
-		data: { currentUser: CurrentUser | undefined; locale: Locale };
+		data: { currentUser: CurrentUser | undefined };
 		children: Snippet;
 	} = $props();
 
@@ -26,17 +26,17 @@
 <header>
 	<nav>
 		{#if data?.currentUser?.isAuthenticated}
-			<a data-testid="nav-festivals" href={resolve('/')}>{t(data.locale, 'nav.festivals')}</a>
-			<a data-testid="nav-groups" href={resolve('/group')}>{t(data.locale, 'nav.groups')}</a>
+			<a data-testid="nav-festivals" href={resolve('/')}>{tr('nav.festivals')}</a>
+			<a data-testid="nav-groups" href={resolve('/group')}>{tr('nav.groups')}</a>
 			<a data-testid="nav-profile" href={resolve('/user/[user_id]', { user_id: data.currentUser.id })}
 				>{data.currentUser.nickname}</a
 			>
-			<a data-testid="nav-updates" href={resolve('/updates')}>{t(data.locale, 'nav.updates')}</a>
-			<a data-testid="nav-settings" href={resolve('/settings')}>{t(data.locale, 'nav.settings')}</a>
-			<button data-testid="nav-logout" onclick={logout}>{t(data.locale, 'nav.logout')}</button>
+			<a data-testid="nav-updates" href={resolve('/updates')}>{tr('nav.updates')}</a>
+			<a data-testid="nav-settings" href={resolve('/settings')}>{tr('nav.settings')}</a>
+			<button data-testid="nav-logout" onclick={logout}>{tr('nav.logout')}</button>
 		{:else}
-			<a data-testid="nav-login" href={resolve('/login')}>{t(data.locale, 'nav.login')}</a>
-			<a data-testid="nav-register" href={resolve('/registration')}>{t(data.locale, 'nav.register')}</a>
+			<a data-testid="nav-login" href={resolve('/login')}>{tr('nav.login')}</a>
+			<a data-testid="nav-register" href={resolve('/registration')}>{tr('nav.register')}</a>
 		{/if}
 	</nav>
 </header>
@@ -45,11 +45,11 @@
 
 <footer>
 	<nav>
-		<a data-testid="footer-about" href={resolve('/about')}>{t(data.locale, 'footer.about')}</a>
-		<a data-testid="footer-imprint" href={resolve('/impressum')}>{t(data.locale, 'footer.imprint')}</a>
-		<a data-testid="footer-privacy" href={resolve('/datenschutz')}>{t(data.locale, 'footer.privacy')}</a>
+		<a data-testid="footer-about" href={resolve('/about')}>{tr('footer.about')}</a>
+		<a data-testid="footer-imprint" href={resolve('/impressum')}>{tr('footer.imprint')}</a>
+		<a data-testid="footer-privacy" href={resolve('/datenschutz')}>{tr('footer.privacy')}</a>
 	</nav>
-	<LanguageSwitcher locale={data.locale} />
+	<LanguageSwitcher />
 </footer>
 
 <style global>

@@ -1,5 +1,5 @@
 import { test, expect, type Response } from '@playwright/test';
-import { register, getUserId } from './test-utils';
+import { register, getUserId, uiText } from './test-utils';
 
 test.describe.serial('Profil Gruppen Anzeige', () => {
 	const timestamp = Date.now();
@@ -26,7 +26,7 @@ test.describe.serial('Profil Gruppen Anzeige', () => {
 		await page.goto(`/festival/user/${userId}`, { waitUntil: 'networkidle' });
 
 		// 4. Prüfen, ob die Gruppe in der neuen Sektion angezeigt wird
-		const groupsSection = page.locator('section:has(h4:text("Gruppen:"))');
+		const groupsSection = page.getByTestId('profile-groups-section');
 		await expect(groupsSection).toBeVisible();
 
 		const groupLink = groupsSection.locator(`a:text("${groupName}")`);
@@ -44,8 +44,8 @@ test.describe.serial('Profil Gruppen Anzeige', () => {
 
 		await page.goto(`/festival/user/${userId}`, { waitUntil: 'networkidle' });
 
-		const groupsSection = page.locator('section:has(h4:text("Gruppen:"))');
+		const groupsSection = page.getByTestId('profile-groups-section');
 		await expect(groupsSection).toBeVisible();
-		await expect(groupsSection).toContainText('Du bist in keiner Gruppe.');
+		await expect(groupsSection).toContainText(uiText('group.mineEmpty'));
 	});
 });

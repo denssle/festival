@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tr } from '$lib/i18n/tr';
 	import { resolve } from '$app/paths';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { tick } from 'svelte';
@@ -23,14 +24,14 @@
 		if (data.yourFestival) {
 			await goto(resolve('/festival/[festival_id]/edit', { festival_id: data.festival.id }));
 		} else {
-			infoDialogData.infoDialogText = 'Das ist nicht dein Event. ';
+			infoDialogData.infoDialogText = tr('festival.notYours');
 			infoDialogData.showDialog = true;
 		}
 	}
 
 	async function deleteFestival(): Promise<void> {
 		if (data.yourFestival) {
-			questionDialogData.questionText = 'Bist du dir sicher?';
+			questionDialogData.questionText = tr('common.areYouSure');
 			questionDialogData.showDialog = true;
 			await tick();
 
@@ -45,7 +46,7 @@
 						if (response.ok) {
 							await goto(resolve('/'));
 						} else {
-							infoDialogData.infoDialogText = 'Löschen fehlgeschlagen.';
+							infoDialogData.infoDialogText = tr('festival.error.deleteFailed');
 							infoDialogData.showDialog = true;
 						}
 					}
@@ -55,7 +56,7 @@
 				dialog.addEventListener('close', onclose);
 			}
 		} else {
-			infoDialogData.infoDialogText = 'Das ist nicht dein Event. ';
+			infoDialogData.infoDialogText = tr('festival.notYours');
 			infoDialogData.showDialog = true;
 		}
 	}
@@ -93,12 +94,14 @@
 						} else {
 							const errorData = await response.json();
 							console.error('Failed to join festival:', errorData);
-							infoDialogData.infoDialogText = 'Fehler beim Zusagen: ' + (errorData.message || 'Unbekannter Fehler');
+							infoDialogData.infoDialogText = tr('festival.error.joinFailed', {
+								message: errorData.message || tr('error.unknown')
+							});
 							infoDialogData.showDialog = true;
 						}
 					} catch (error) {
 						console.error('Fetch error joining festival:', error);
-						infoDialogData.infoDialogText = 'Netzwerkfehler beim Zusagen.';
+						infoDialogData.infoDialogText = tr('festival.error.joinNetwork');
 						infoDialogData.showDialog = true;
 					}
 				}
@@ -129,7 +132,7 @@
 					if (response.ok) {
 						await afterRequest();
 					} else {
-						infoDialogData.infoDialogText = 'Absagen fehlgeschlagen.';
+						infoDialogData.infoDialogText = tr('festival.error.declineFailed');
 						infoDialogData.showDialog = true;
 					}
 				}
@@ -144,9 +147,11 @@
 		await invalidateAll();
 	}
 
-	let joinFestivalButtonText = $derived(data.yourGuestInformation?.coming ? 'Zusage bearbeiten' : 'Zusagen');
+	let joinFestivalButtonText = $derived(
+		data.yourGuestInformation?.coming ? tr('festival.joinEdit') : tr('festival.join')
+	);
 	let cancelFestivalButtonText = $derived(
-		data.yourGuestInformation && !data.yourGuestInformation.coming ? 'Absage bearbeiten' : 'Absagen'
+		data.yourGuestInformation && !data.yourGuestInformation.coming ? tr('festival.declineEdit') : tr('festival.decline')
 	);
 
 	let guestFood = $derived(data.yourGuestInformation?.food ?? '');
@@ -199,26 +204,27 @@
 		<h4><u>{data.festival.name}</u></h4>
 		{#if data.festival.createdBy}
 			<p>
-				Organisiert von <a href={resolve('/user/[user_id]', { user_id: data.festival.createdBy.id })}
+				{tr('festival.organisedBy')}
+				<a href={resolve('/user/[user_id]', { user_id: data.festival.createdBy.id })}
 					>{data.festival.createdBy.nickname}</a
 				>
 			</p>
 		{/if}
-		<mark>Startdatum: {formateDateTime(data.festival.startDate)}</mark>
+		<mark>{tr('festival.startDate')} {formateDateTime(data.festival.startDate)}</mark>
 
-		<p><u>Beschreibung:</u></p>
+		<p><u>{tr('festival.description')}</u></p>
 		<p>{data.festival.description}</p>
 
-		<u>Wo:</u>
+		<u>{tr('festival.where')}</u>
 		<p>{data.festival.location}</p>
 
 		<label>
 			<input checked={data.festival.bringYourOwnFood} disabled name="bringYourOwnFood" type="checkbox" />
-			Gäste sollen etwas zu Essen mitbringen.
+			{tr('festival.bringFood')}
 		</label>
 		<label>
 			<input checked={data.festival.bringYourOwnBottle} disabled name="bringYourOwnBottle" type="checkbox" />
-			Gäste sollen etwas zu trinken mitbringen.
+			{tr('festival.bringDrink')}
 		</label>
 	</section>
 
@@ -227,11 +233,11 @@
 	<NotComingVisitorsTable {data} />
 
 	<section>
-		<button data-testid="festival-edit" onclick={editFestival}>Bearbeiten</button>
-		<button data-testid="festival-delete" onclick={deleteFestival}>Löschen</button>
+		<button data-testid="festival-edit" onclick={editFestival}>{tr('action.edit')}</button>
+		<button data-testid="festival-delete" onclick={deleteFestival}>{tr('action.delete')}</button>
 		<button data-testid="festival-cancel" onclick={cancelInvitation}>{cancelFestivalButtonText}</button>
 		<button data-testid="festival-join" onclick={joinFestival}>{joinFestivalButtonText}</button>
-		<a class="button" href={resolve('/')}>Zurück</a>
+		<a class="button" href={resolve('/')}>{tr('form.back')}</a>
 	</section>
 
 	<FestivalComments whereId={data.festival.id} />

@@ -4,9 +4,11 @@ import { BASE_PATH } from './test-utils';
 /**
  * Sprachumschalter im Footer.
  *
- * Die Suite läuft laut `playwright.config.ts` fest auf `de-DE` – diese Spec ist damit
- * die einzige Stelle, an der die englische Fassung überhaupt zu sehen ist. Geprüft wird
- * neben dem Umschalten selbst zweierlei, das bei einem Refactoring lautlos wegfiele:
+ * Die übrige Suite läuft in der Sprache aus `tests/locale.ts` und prüft über testids,
+ * nicht über Beschriftungen – sie bliebe also grün, auch wenn gar nichts übersetzt
+ * würde. Diese Spec ist die Stelle, die wirklich auf Texte in beiden Sprachen schaut.
+ * Geprüft wird neben dem Umschalten selbst zweierlei, das bei einem Refactoring lautlos
+ * wegfiele:
  * das `lang`-Attribut (hängt am `transformPageChunk` im `sprache`-Hook) und der
  * Rücksprung auf die Ausgangsseite (hängt an `safeRedirectTarget`).
  */
@@ -38,6 +40,9 @@ test.describe('Sprachumschalter', () => {
 
 		await expect(page.locator('header nav a', { hasText: 'Sign in' })).toBeVisible();
 		await expect(page.locator('footer nav a', { hasText: 'Privacy' })).toBeVisible();
+		// Nicht nur das Layout: auch die Seite selbst und ihre Platzhalter (Schritt 4).
+		await expect(page.locator('article h2')).toHaveText('Sign in');
+		await expect(page.locator('input[name="password"]')).toHaveAttribute('placeholder', 'Password');
 		await expect(page.locator('html')).toHaveAttribute('lang', 'en');
 
 		await page.locator(`${switcher} button[value="de"]`).click();

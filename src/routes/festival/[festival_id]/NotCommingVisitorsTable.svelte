@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tr } from '$lib/i18n/tr';
 	import { resolve } from '$app/paths';
 	import { getTotalNumberOfNotComingGuests } from '$lib/utils/festivalEvent.util';
 	import type { FestivalTransferData } from '$lib/models/transferData/FestivalTransferData';
@@ -7,13 +8,13 @@
 </script>
 
 <section data-testid="festival-notcoming-section">
-	<h5 data-testid="festival-notcoming-heading">Absagen:</h5>
+	<h5 data-testid="festival-notcoming-heading">{tr('festival.notComing.heading')}</h5>
 	{#if getTotalNumberOfNotComingGuests(data.festival)}
 		<table style="width: 100%">
 			<thead>
 				<tr>
-					<th>Name</th>
-					<th>Kommentar</th>
+					<th>{tr('table.name')}</th>
+					<th>{tr('festival.notComing.comment')}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -30,6 +31,6 @@
 			</tbody>
 		</table>
 	{:else}
-		<p>Es hat noch niemand abgesagt.</p>
+		<p>{tr('festival.notComing.empty')}</p>
 	{/if}
 </section>

@@ -1,5 +1,5 @@
 import { test, expect, type Page, type BrowserContext } from '@playwright/test';
-import { register, openDialog } from './test-utils';
+import { register, openDialog, uiText } from './test-utils';
 
 test.describe.serial('Festival-Management Lifecycle', () => {
 	const userNickname = `FestivalCreator_${Date.now()}`;
@@ -105,7 +105,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		// Zusagen Button klicken -> Dialog öffnet (robust gegen Hydration-Race)
 		const dialog = page.locator('dialog[open]');
 		await openDialog(page.getByTestId('festival-join'), dialog);
-		await expect(dialog).toContainText('Bei dem Event bin ich dabei!');
+		await expect(dialog).toContainText(uiText('festival.joinDialog.heading'));
 
 		// Felder ausfüllen (Verwende IDs statt Name, da in JoinEventDialog.svelte IDs genutzt werden)
 		await page.fill('#food', 'Pizza');
@@ -164,7 +164,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 
 		const dialog = page.locator('dialog[open]');
 		await openDialog(leaveButton, dialog);
-		await expect(dialog).toContainText('Leider bin ich / sind wir bei dem Event nicht dabei.');
+		await expect(dialog).toContainText(uiText('festival.declineDialog.text'));
 
 		// Kommentar hinzufügen
 		await page.fill('#comment', 'Leider keine Zeit');
@@ -184,7 +184,7 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		if ((await comingSection.locator('table').count()) > 0) {
 			await expect(comingSection.locator('table')).not.toContainText(userNickname);
 		} else {
-			await expect(comingSection).toContainText('Es hat noch niemand zugesagt.');
+			await expect(comingSection).toContainText(uiText('festival.coming.empty'));
 		}
 	});
 

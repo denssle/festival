@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tr } from '$lib/i18n/tr';
 	import type { PageData } from './$types';
 	import uberspaceBanner from '../../images/uberspace_badge_dark.png';
 
@@ -6,22 +7,22 @@
 </script>
 
 <article>
-	<h2>Über diese Seite</h2>
+	<h2>{tr('about.heading')}</h2>
 	<section>
 		<p>
-			Diese Seite wurde erstellt mit <a href="https://kit.svelte.dev/">svelte</a>. Das Styling kommt von
+			{tr('about.builtWith')} <a href="https://kit.svelte.dev/">svelte</a>. {tr('about.stylingFrom')}
 			<a href="https://simplecss.org/">simple css </a>
-			und die Daten werden gespeichert in einer <a href="https://mariadb.com/">Maria DB</a>.
+			{tr('about.dataStoredIn')} <a href="https://mariadb.com/">Maria DB</a>.
 		</p>
 	</section>
 	<section>
-		<img alt="uberspace Banner" class="center" src={uberspaceBanner} />
+		<img alt={tr('about.uberspaceAlt')} class="center" src={uberspaceBanner} />
 		<p class="center-text">
-			Die Seite ist gehostet auf <a href="https://uberspace.de/">uberspace</a>.
+			{tr('about.hostedOn')} <a href="https://uberspace.de/">uberspace</a>.
 		</p>
 	</section>
 	<section>
-		<p>Version: {data.version}</p>
+		<p>{tr('about.version', { version: data.version ?? '' })}</p>
 	</section>
 </article>
 

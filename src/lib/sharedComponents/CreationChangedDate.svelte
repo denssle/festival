@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tr } from '$lib/i18n/tr';
 	let { createdAt, updatedAt }: { createdAt: Date; updatedAt: Date } = $props();
 
 	let createdDate = $derived(new Date(createdAt));
@@ -7,8 +8,9 @@
 </script>
 
 <i>
-	Geschrieben: {createdDate.toLocaleString()}
+	{tr('comment.written')}
+	{createdDate.toLocaleString()}
 	{#if edited}
-		Aktualisiert: {updatedDate.toLocaleString()}
+		{tr('comment.updated')} {updatedDate.toLocaleString()}
 	{/if}
 </i>

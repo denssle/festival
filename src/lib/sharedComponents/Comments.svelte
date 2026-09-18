@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tr } from '$lib/i18n/tr';
 	import { resolve } from '$app/paths';
 	import type { FrontendComment } from '$lib/models/transferData/FrontendComment';
 	import type { QuestionDialogData } from '$lib/models/dialogData/QuestionDialogData';
@@ -116,7 +117,7 @@
 	let questionDialogData: QuestionDialogData = $state({
 		showDialog: false,
 		dialog: undefined,
-		questionText: 'Kommentar löschen. Bist du dir sicher?',
+		questionText: tr('comment.deleteConfirm'),
 		answerYes: false
 	});
 </script>
@@ -124,10 +125,10 @@
 <QuestionDialog bind:questionDialogData testId="comment-delete-dialog" />
 
 <form onsubmit={handleSubmit}>
-	<label for="comment">Kommentar: </label>
+	<label for="comment">{tr('comment.label')} </label>
 	<textarea id="comment" name="comment" bind:value={inputComment}></textarea>
 	<p>
-		<button type="submit" data-testid="comment-submit">Absenden</button>
+		<button type="submit" data-testid="comment-submit">{tr('comment.submit')}</button>
 	</p>
 </form>
 
@@ -146,7 +147,7 @@
 		{#if comment.yourComment}
 			<div>
 				<button data-testid="comment-delete" onclick={() => deleteComment(comment.id)} disabled={notYours}
-					>Löschen</button
+					>{tr('action.delete')}</button
 				>
 				<button
 					data-testid="comment-edit-toggle"
@@ -154,9 +155,9 @@
 					disabled={notYours}
 				>
 					{#if comment.editMode}
-						Abbrechen
+						{tr('form.cancel')}
 					{:else}
-						Bearbeiten
+						{tr('action.edit')}
 					{/if}
 				</button>
 				<button
@@ -164,14 +165,14 @@
 					onclick={() => updateComment(comment)}
 					disabled={notYours || !comment.editMode}
 				>
-					Speichern</button
+					{tr('form.save')}</button
 				>
 			</div>
 		{/if}
 		<CreationChangedDate createdAt={comment.createdAt} updatedAt={comment.updatedAt} />
 	</fieldset>
 {:else}
-	<p>Noch keine Kommentare. Schreib den ersten!</p>
+	<p>{tr('comment.empty')}</p>
 {/each}
 
 <style>

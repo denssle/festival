@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tr } from '$lib/i18n/tr';
 	import { resolve } from '$app/paths';
 	import type { UpdateTransferData } from '$lib/models/updates/UpdateTransferData';
 	import { invalidateAll } from '$app/navigation';
@@ -22,9 +23,9 @@
 </script>
 
 <article>
-	<h2>Updates</h2>
+	<h2>{tr('updates.heading')}</h2>
 	<section>
-		<h4>Eingegangene Freundschaftsanfragen</h4>
+		<h4>{tr('updates.received')}</h4>
 		{#each data.receivedFriendRequests as received (received.id)}
 			<div class="friend-request">
 				<a href={resolve('/user/[user_id]', { user_id: received?.receivedFrom?.id ?? '' })}>
@@ -32,32 +33,32 @@
 				</a>
 				<div>
 					<button data-testid="request-accept" onclick={() => acceptFriendRequest(received?.receivedFrom?.id)}>
-						Annehmen</button
+						{tr('updates.accept')}</button
 					>
 					<button data-testid="request-decline" onclick={() => declineFriendRequest(received?.receivedFrom?.id)}>
-						Ablehnen</button
+						{tr('updates.decline')}</button
 					>
 				</div>
 			</div>
 		{/each}
 		{#if data.receivedFriendRequests.length === 0}
-			<p>Keine Anfragen</p>
+			<p>{tr('updates.none')}</p>
 		{/if}
 	</section>
 	<section>
-		<h4>Ausstehende Freundschaftsanfragen</h4>
+		<h4>{tr('updates.sent')}</h4>
 		{#each data.sentFriendRequests as send (send.id)}
 			<div class="friend-request">
 				<a href={resolve('/user/[user_id]', { user_id: send?.sendTo?.id ?? '' })}>
 					{send?.sendTo?.nickname}
 				</a>
 				<button data-testid="request-cancel" onclick={() => cancelFriendRequest(send?.sendTo?.id)}>
-					Zurückziehen</button
+					{tr('updates.withdraw')}</button
 				>
 			</div>
 		{/each}
 		{#if data.sentFriendRequests.length === 0}
-			<p>Keine Anfragen</p>
+			<p>{tr('updates.none')}</p>
 		{/if}
 	</section>
 </article>

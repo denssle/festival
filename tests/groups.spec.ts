@@ -1,5 +1,5 @@
 import { test, expect, type Response } from '@playwright/test';
-import { register, TEST_PASSWORD, login, logout, uniqueName, openDialog } from './test-utils';
+import { register, TEST_PASSWORD, login, logout, uniqueName, openDialog, uiText } from './test-utils';
 
 test.describe.serial('Gruppen Management', () => {
 	const userNickname = uniqueName('GroupUser');
@@ -52,7 +52,9 @@ test.describe.serial('Gruppen Management', () => {
 		await Promise.all([page.waitForLoadState('networkidle'), page.click('article button[type="submit"]')]);
 
 		// Verifizieren, dass die Suchergebnisse angezeigt werden
-		await expect(page.locator('h4')).toContainText(`Suchergebnisse für "${groupName}"`, { timeout: 15000 });
+		await expect(page.locator('h4')).toContainText(uiText('group.search.results', { term: groupName }), {
+			timeout: 15000
+		});
 
 		// Und den Link zur Gruppe in den Suchergebnissen
 		await expect(page.locator(`a[href*="/group/"]:has-text("${groupName}")`).first()).toBeVisible({ timeout: 15000 });

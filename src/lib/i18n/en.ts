@@ -70,5 +70,205 @@ export const en: Dictionary = {
 
 	// Groups
 	'group.joined': 'You have joined the group.',
-	'group.left': 'You have left the group.'
+	'group.left': 'You have left the group.',
+
+	// Home
+	'home.heading': 'Festivals',
+	'home.welcome': 'Welcome.',
+	'home.newFestival': 'Create a new festival',
+	'home.by': 'by',
+	'home.start': 'Start:',
+	'home.guestCount': 'Guests so far: {count}',
+	'home.empty': 'There are no festivals yet. Create the first one!',
+
+	// About
+	'about.heading': 'About this site',
+	'about.builtWith': 'This site was built with',
+	'about.stylingFrom': 'The styling comes from',
+	'about.dataStoredIn': 'and the data is stored in a',
+	'about.hostedOn': 'This site is hosted on',
+	'about.uberspaceAlt': 'uberspace banner',
+	'about.version': 'Version: {version}',
+
+	// Shared form parts
+	'form.nickname': 'Nickname',
+	'form.password': 'Password',
+	'form.passwordRepeat': 'Repeat password',
+	'form.go': "Let's go!",
+	'form.save': 'Save',
+	'form.cancel': 'Cancel',
+	'form.back': 'Back',
+
+	// Sign in
+	'login.heading': 'Sign in',
+	'login.noAccount': 'No account yet?',
+	'login.registerLink': 'Sign up here.',
+
+	// Sign up
+	'registration.heading': 'Sign up',
+	'registration.haveAccount': 'Already have an account?',
+	'registration.loginLink': 'Sign in here.',
+
+	// Common actions
+	'action.edit': 'Edit',
+	'action.delete': 'Delete',
+	'common.areYouSure': 'Are you sure?',
+	'error.unknown': 'Unknown error',
+	'table.name': 'Name',
+
+	// Festival: form
+	'festival.new.heading': 'Create a new event',
+	'festival.form.name': 'Name of the event',
+	'festival.form.description': 'Short description',
+	'festival.form.location': 'Location',
+	'festival.bringFood': 'Guests should bring something to eat.',
+	'festival.bringDrink': 'Guests should bring something to drink.',
+
+	// Festival: details
+	'festival.organisedBy': 'Organised by',
+	'festival.startDate': 'Start date:',
+	'festival.description': 'Description:',
+	'festival.where': 'Where:',
+	'festival.join': 'Attend',
+	'festival.joinEdit': 'Edit attendance',
+	'festival.decline': 'Decline',
+	'festival.declineEdit': 'Edit absence',
+	'festival.notYours': 'This is not your event.',
+	'festival.error.deleteFailed': 'Deleting failed.',
+	'festival.error.joinFailed': 'Signing up failed: {message}',
+	'festival.error.joinNetwork': 'Network error while signing up.',
+	'festival.error.declineFailed': 'Declining failed.',
+
+	// Festival: guest lists
+	'festival.coming.heading': 'Attending:',
+	'festival.coming.intro': 'Signed up so far:',
+	'festival.coming.food': 'Food',
+	'festival.coming.drink': 'Drinks',
+	'festival.coming.otherGuests': 'Additional guests',
+	'festival.coming.total': 'Total',
+	'festival.coming.empty': 'Nobody has signed up yet.',
+	'festival.notComing.heading': 'Not attending:',
+	'festival.notComing.comment': 'Comment',
+	'festival.notComing.empty': 'Nobody has declined yet.',
+
+	// Festival: attend dialog
+	'festival.joinDialog.confirm': 'Join',
+	'festival.joinDialog.heading': 'Count me in!',
+	'festival.joinDialog.otherGuests': "I'm bringing additional guests (who aren't registered here):",
+	'festival.joinDialog.food': "I'm bringing something to eat:",
+	'festival.joinDialog.drink': "I'm bringing something to drink:",
+	'festival.joinDialog.byo': 'Note: This is a bring-your-own party.',
+	'festival.joinDialog.notByoBefore': 'Note: This is',
+	'festival.joinDialog.notByoMarked': 'not',
+	'festival.joinDialog.notByoAfter': 'a bring-your-own party.',
+
+	// Festival: decline dialog
+	'festival.declineDialog.text': "Unfortunately I / we can't make it to this event.",
+	'festival.declineDialog.comment': 'Comment (optional):',
+
+	// Groups: overview
+	'group.heading': 'Groups',
+	'group.intro': 'Connect with others here.',
+	'group.mine': 'Your groups',
+	'group.mineEmpty': "You're not in any group.",
+	'group.search.heading': 'Find groups',
+	'group.search.placeholder': 'Group name or description...',
+	'group.search.submit': 'Search',
+	'group.search.results': 'Search results for "{term}"',
+	'group.search.empty': 'No groups found.',
+	'group.new.section': 'New group',
+	'group.new.create': 'Create a new group',
+
+	// Groups: details
+	'group.deleteConfirm': 'Are you sure you want to delete this group? This cannot be undone.',
+	'group.delete': 'Delete group',
+	'group.join': 'Join',
+	'group.leave': 'Leave group',
+	'group.members': 'Members',
+	'group.owner': 'Owner',
+	'group.membersEmpty': 'This group has no members.',
+
+	// Groups: form
+	'group.edit.heading': 'Edit group',
+	'group.form.nameLabel': 'Name',
+	'group.form.name': 'Group name',
+	'group.form.descriptionLabel': 'Description',
+	'group.form.description': 'Short description',
+
+	// Profile
+	'profile.heading': 'User',
+	'profile.friends': 'Friends:',
+	'profile.friendsEmpty': "Looks like you don't have any friends here.",
+	'profile.friendsEmptyComfort': "It's surely not your fault...",
+	'profile.festivals': 'Festivals:',
+	'profile.groups': 'Groups:',
+	'profile.groupsEmptyOther': "This user isn't in any group.",
+	'profile.visiting.none': 'Not signed up for anything.',
+	'profile.visiting.intro': 'Signed up for:',
+	'profile.forename': 'First name:',
+	'profile.lastname': 'Last name:',
+	'profile.notProvided': 'Not provided',
+
+	// Profile: form
+	'profile.form.nickname': 'Your nickname:',
+	'profile.form.forename': 'Your first name:',
+	'profile.form.forenamePlaceholder': 'First name',
+	'profile.form.lastname': 'Your last name:',
+	'profile.form.lastnamePlaceholder': 'Last name',
+	'profile.form.email': 'Your email:',
+	'profile.form.emailPlaceholder': 'Email',
+
+	// Profile: picture
+	'profile.avatar.onlyOwn': 'Sorry, you can only change your own profile.',
+	'profile.avatar.tooLarge': 'Image too large.',
+	'profile.avatar.uploaded': 'Image uploaded and saved.',
+	'profile.avatar.failed': 'Image upload failed.',
+	'profile.avatar.upload': 'Upload image',
+
+	// Friendships
+	'friend.add': 'Add friend',
+	'friend.remove': 'Remove friend',
+	'friend.requestSent': 'Friend request sent.',
+	'friend.requestFailed': 'Request failed.',
+	'friend.removed': 'Friendship ended.',
+	'updates.heading': 'Updates',
+	'updates.received': 'Received friend requests',
+	'updates.sent': 'Pending friend requests',
+	'updates.none': 'No requests',
+	'updates.accept': 'Accept',
+	'updates.decline': 'Decline',
+	'updates.withdraw': 'Withdraw',
+
+	// Dialogs
+	'dialog.yes': 'Yes',
+	'dialog.no': 'Nope',
+	'dialog.ok': 'OK',
+
+	// Profile picture
+	'profile.avatar.alt': 'Profile picture',
+
+	// Comments
+	'comment.label': 'Comment:',
+	'comment.submit': 'Send',
+	'comment.deleteConfirm': 'Delete comment. Are you sure?',
+	'comment.empty': 'No comments yet. Write the first one!',
+	'comment.written': 'Written:',
+	'comment.updated': 'Updated:',
+
+	// Settings
+	'settings.heading': 'Settings',
+	'settings.password.section': 'Password',
+	'settings.password.currentLabel': 'Current password:',
+	'settings.password.currentPlaceholder': 'Current password',
+	'settings.password.newLabel': 'New password:',
+	'settings.password.newPlaceholder': 'New password',
+	'settings.password.repeatLabel': 'Repeat new password:',
+	'settings.password.repeatPlaceholder': 'Repeat new password',
+	'settings.account.delete': 'Delete account',
+	'settings.account.explanation':
+		"Deleting your account removes all associated data: your profile and profile picture, the festivals you created including your guests' replies, your groups, your comments, as well as friendships and open requests. Your replies to other festivals are removed too. This cannot be undone.",
+	'settings.account.passwordLabel': 'Your password, to confirm:',
+	'settings.account.confirm':
+		'Delete your account permanently? This also removes your festivals including all replies, your groups, comments and friendships. This cannot be undone.',
+	'settings.account.confirmYes': 'Delete permanently'
 };

@@ -23,7 +23,7 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		const newPassword = 'NewSecurePassword456!';
 		await register(page, testNickname, initialPassword);
 		await page.goto('/festival/settings');
-		await expect(page.locator('h2')).toContainText('Einstellungen');
+		await expect(page.locator('h2')).toContainText(uiText('settings.heading'));
 
 		// Das Passwort-Feld ist in einem <details> verborgen
 		await page.getByTestId('password-section').click();
@@ -135,15 +135,15 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		// Dialog-Erfolg abwarten - Präziser Selektor um Strict Mode Violation zu vermeiden
 		const dialog = page.getByTestId('info-dialog');
 		await dialog.waitFor({ state: 'visible', timeout: 15000 });
-		await expect(dialog).toContainText('Bild erfolgreich hochgeladen');
+		await expect(dialog).toContainText(uiText('profile.avatar.uploaded'));
 		await dialog.getByTestId('info-ok').click();
 
 		// Sicherstellen, dass wir noch auf der User-Profilseite sind (und nicht redirected wurden)
 		await expect(page).toHaveURL(`/festival/user/${userId}`, { timeout: 15000 });
 
 		// Prüfen ob das Bild im Avatar geladen wird
-		// Alt-Text in AvatarImage.svelte ist "alt avatar"
-		const avatarImg = page.locator('img[alt="alt avatar"]');
+		// Bewusst testid statt Alt-Text: Der Alt-Text ist uebersetzt und fuer Screenreader da.
+		const avatarImg = page.getByTestId('avatar-image');
 		await expect(avatarImg).toBeVisible({ timeout: 15000 });
 		const src = await avatarImg.getAttribute('src');
 		// In AvatarImage wird das Bild als Base64 geladen oder via API

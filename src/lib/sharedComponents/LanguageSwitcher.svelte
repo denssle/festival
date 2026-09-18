@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import { page } from '$app/state';
-	import { LOCALES, type Locale, t } from '$lib/i18n';
+	import { LOCALES, type Locale } from '$lib/i18n';
+	import { currentLocale, tr } from '$lib/i18n/tr';
 
-	let { locale }: { locale: Locale } = $props();
+	// Aktive Sprache aus den Layout-Daten (siehe currentLocale) statt als Prop.
+	let locale: Locale = $derived(currentLocale());
 
 	// Zurück auf die Seite, auf der der Umschalter geklickt wurde – inklusive
 	// Query-String, damit z. B. Filter oder Formularmeldungen nicht verlorengehen.
@@ -22,17 +24,17 @@
 -->
 <form action="{base}/language" class="language-switcher" method="POST">
 	<input name="redirectTo" type="hidden" value={redirectTo} />
-	<span aria-hidden="true">{t(locale, 'language.label')}:</span>
+	<span aria-hidden="true">{tr('language.label')}:</span>
 	{#each LOCALES as option (option)}
 		<button
 			aria-current={option === locale ? 'true' : undefined}
-			aria-label={t(locale, `language.${option}`)}
+			aria-label={tr(`language.${option}`)}
 			disabled={option === locale}
 			name="locale"
 			type="submit"
 			value={option}
 		>
-			{t(locale, `language.${option}`)}
+			{tr(`language.${option}`)}
 		</button>
 	{/each}
 </form>

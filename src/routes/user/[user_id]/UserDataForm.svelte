@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tr } from '$lib/i18n/tr';
 	import type { FrontendUser } from '$lib/models/user/FrontendUser';
 
 	let { data, email }: { data: FrontendUser; email: string } = $props();
@@ -6,37 +7,44 @@
 
 <form autocomplete="on" method="POST">
 	<p>
-		<label for="nickname">Dein Nickname: </label>
-		<input id="nickname" name="nickname" placeholder="Nickname" type="text" value={data.nickname} />
+		<label for="nickname">{tr('profile.form.nickname')} </label>
+		<input id="nickname" name="nickname" placeholder={tr('form.nickname')} type="text" value={data.nickname} />
 	</p>
 
 	<div>
-		<label for="forename">Dein Vorname: </label>
+		<label for="forename">{tr('profile.form.forename')} </label>
 		<input
 			autocomplete="given-name"
 			id="forename"
 			name="forename"
-			placeholder="Vorname"
+			placeholder={tr('profile.form.forenamePlaceholder')}
 			type="text"
 			value={data.forename}
 		/>
 
-		<label for="lastname">Dein Nachname: </label>
+		<label for="lastname">{tr('profile.form.lastname')} </label>
 		<input
 			autocomplete="family-name"
 			id="lastname"
 			name="lastname"
-			placeholder="Nachname"
+			placeholder={tr('profile.form.lastnamePlaceholder')}
 			type="text"
 			value={data.lastname}
 		/>
 	</div>
 
 	<p>
-		<label for="email">Deine Email: </label>
-		<input autocomplete="email" id="email" name="email" placeholder="Email" type="email" value={email} />
+		<label for="email">{tr('profile.form.email')} </label>
+		<input
+			autocomplete="email"
+			id="email"
+			name="email"
+			placeholder={tr('profile.form.emailPlaceholder')}
+			type="email"
+			value={email}
+		/>
 	</p>
 	<p>
-		<button type="submit" data-testid="profile-save">Speichern</button>
+		<button type="submit" data-testid="profile-save">{tr('form.save')}</button>
 	</p>
 </form>

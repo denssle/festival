@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tr } from '$lib/i18n/tr';
 	import { resolve } from '$app/paths';
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
@@ -16,7 +17,7 @@
 	let deleteDialogData: QuestionDialogData = $state({
 		showDialog: false,
 		dialog: undefined,
-		questionText: 'Bist du sicher, dass du diese Gruppe löschen möchtest? Dies kann nicht rückgängig gemacht werden.',
+		questionText: tr('group.deleteConfirm'),
 		answerYes: false
 	});
 
@@ -48,22 +49,22 @@
 			<div class="header-actions">
 				{#if currentUser && group.ownerId === currentUser.id}
 					<a href={resolve('/group/[group_id]/edit', { group_id: group.id })} class="button" data-testid="group-edit"
-						>Bearbeiten</a
+						>{tr('action.edit')}</a
 					>
 					<form method="POST" action="?/delete" use:enhance bind:this={deleteForm}>
 						<button type="button" class="button danger" data-testid="group-delete" onclick={askDeleteGroup}
-							>Gruppe löschen</button
+							>{tr('group.delete')}</button
 						>
 					</form>
 				{/if}
 				{#if currentUser && !isMember}
 					<form method="POST" action="?/join" use:enhance>
-						<button type="submit" class="button primary" data-testid="group-join">Beitreten</button>
+						<button type="submit" class="button primary" data-testid="group-join">{tr('group.join')}</button>
 					</form>
 				{/if}
 				{#if currentUser && isMember && group.ownerId !== currentUser.id}
 					<form method="POST" action="?/leave" use:enhance>
-						<button type="submit" class="button danger" data-testid="group-leave">Gruppe verlassen</button>
+						<button type="submit" class="button danger" data-testid="group-leave">{tr('group.leave')}</button>
 					</form>
 				{/if}
 			</div>
@@ -82,20 +83,20 @@
 	</header>
 
 	<section>
-		<h3>Mitglieder</h3>
+		<h3>{tr('group.members')}</h3>
 		{#if members && members.length > 0}
 			<ul>
 				{#each members as member (member.id)}
 					<li>
 						<a href={resolve('/user/[user_id]', { user_id: member.id })}>{member.nickname}</a>
 						{#if member.id === group.ownerId}
-							<span class="badge">Besitzer</span>
+							<span class="badge">{tr('group.owner')}</span>
 						{/if}
 					</li>
 				{/each}
 			</ul>
 		{:else}
-			<p>Keine Mitglieder in dieser Gruppe.</p>
+			<p>{tr('group.membersEmpty')}</p>
 		{/if}
 	</section>
 </article>

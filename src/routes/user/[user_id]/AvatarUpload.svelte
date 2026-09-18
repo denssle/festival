@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tr } from '$lib/i18n/tr';
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
 	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
 	import { loadUserImage } from '$lib/stores/userImage.store';
@@ -13,7 +14,7 @@
 		if (isOwnProfil) {
 			fileInput.click();
 		} else {
-			openDialog('Leider kannst du nur dein eigenes Profil ändern. ');
+			openDialog(tr('profile.avatar.onlyOwn'));
 		}
 	}
 
@@ -27,7 +28,7 @@
 				}
 			};
 		} else {
-			openDialog('Bild zu groß. ');
+			openDialog(tr('profile.avatar.tooLarge'));
 		}
 	}
 
@@ -42,15 +43,15 @@
 				body: imgBase64
 			});
 			if (value.ok) {
-				openDialog('Bild erfolgreich hochgeladen und gespeichert. ');
+				openDialog(tr('profile.avatar.uploaded'));
 				// forceReload: das gerade ersetzte Bild liegt noch frisch im Browser-Cache
 				loadUserImage(userId, true);
 			} else {
-				openDialog('Bildupload gescheitert. ');
+				openDialog(tr('profile.avatar.failed'));
 			}
 		} catch (reason) {
 			console.error('Bildupload-Fehler:', reason);
-			openDialog('Bildupload gescheitert. ');
+			openDialog(tr('profile.avatar.failed'));
 		}
 	}
 
@@ -77,5 +78,5 @@
 		style="display: none"
 		type="file"
 	/>
-	<button onclick={() => onUpload()}>Bild hochladen</button>
+	<button onclick={() => onUpload()}>{tr('profile.avatar.upload')}</button>
 </div>
