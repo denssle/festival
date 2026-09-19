@@ -1,6 +1,6 @@
 {
 	"name": "festival",
-	"version": "0.7.52",
+	"version": "0.7.53",
 	"private": true,
 	"license": "MIT",
 	"scripts": {
