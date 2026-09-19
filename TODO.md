@@ -151,6 +151,17 @@ Sortiert nach **Aufwand** (S → M → L), innerhalb jeder Stufe nach **Priorit�
   1. **Tage:** Der Ersteller wählt eine Reihe von Tagen, jeder Gast antwortet je Tag mit **Ja / Nein / Vielleicht**.
   2. **Uhrzeiten:** Pro Tag optional zusätzlich die Nachfrage nach einer Uhrzeit. Alternativ eine Umfrage mit nur **einem** Tag und dafür mehreren Uhrzeiten zur Wahl. Je Uhrzeit antworten Gäste mit **passt / passt nicht / vielleicht**.
 
-  **Vor dem Bauen zu klären:** Wie endet eine Abstimmung – übernimmt der Ersteller einen Termin als `startDate` des Festivals, und ist die Umfrage danach geschlossen? Sehen Gäste die Antworten der anderen (wie bei den Zu- und Absagen) oder nur die Summe je Termin? Und wer darf abstimmen – hängt an **Sichtbarkeit** weiter oben.
+  **Entschieden (2026-09-19):**
+  - **Ende:** Die Abstimmung endet, wenn der Ersteller sie schließt oder eine optionale Deadline abläuft. Für die Deadline braucht es keinen Zeitplaner: Die Abstimmung gilt als geschlossen, sobald sie geschlossen _oder_ die Deadline vorbei ist, und der Server prüft das bei jeder Stimme. Die Deadline ist eine Uhrzeit, also ebenfalls in `APP_TIME_ZONE`.
+  - **Transparenz:** Gäste sehen die Antworten der anderen, wie bei den Zu- und Absagen.
+  - **Wer abstimmen darf:** vorerst jeder angemeldete Nutzer. Soll später einschränkbar werden (nur Freunde, nur Mitglieder einer Gruppe) – hängt an **Sichtbarkeit** weiter oben. Deshalb den Kreis von Anfang an als Feld an der Abstimmung speichern (etwa `audience`, zunächst nur „angemeldet“). Dann ist das Nachrüsten eine neue Option statt einer Umdeutung bestehender Abstimmungen, und **Terminabstimmung ohne Anmeldung** (eigener Punkt unten) wird ein weiterer Wert desselben Feldes.
+
+  **Noch offen:** Übernimmt der Ersteller den gewählten Termin als `startDate` des Festivals – automatisch, per Knopf, oder gar nicht?
 
   **Anknüpfungspunkte im Bestand:** Neue Tabellen für Terminoptionen und Antworten, also Quadrat-Regel samt Migration (Prod hat inzwischen echte Daten). Die dreiwertige Antwort deckt sich mit **Teilnehmer-Status „Vielleicht“** unter [M] – ein gemeinsamer Antworttyp für beides liegt nahe. Uhrzeiten über `date.util.ts` (`APP_TIME_ZONE`, `wallClockToInstant`) statt eigener Datumslogik. Neue Texte in beide Wörterbücher; ein fehlender englischer Schlüssel ist ein Compile-Fehler. _(Festivals)_
+
+- [ ] 🟢 **Terminabstimmung ohne Anmeldung:** Der Ersteller kann eine Abstimmung für Gäste ohne Konto freigeben; wer den Link hat, kann dann abstimmen. Setzt **Terminabstimmung** voraus und ist dort ein weiterer Wert des Teilnehmerkreises. _(Idee vom 2026-09-19.)_ Was daran hängt:
+  - **Zugang:** `hooks.server.ts` lässt ohne Session nur `noAuthURLs` durch. Die freigegebene Abstimmung braucht einen eigenen öffentlichen Weg, der genau diese Abstimmung zeigt – nicht das Festival drumherum, und nicht die Abstimmungen, die nicht freigegeben sind.
+  - **Identität:** Ohne Konto braucht es einen Namen und einen Weg, die eigene Antwort später zu ändern (etwa ein zufälliges Token im Cookie oder im persönlichen Link), ohne dass jemand unter fremdem Namen abstimmen oder fremde Antworten ändern kann.
+  - **Missbrauch:** Ein öffentlicher Link lädt zu Spam ein. Ein Rate-Limit nach dem Vorbild des Logins (`rate-limit.logic.ts`) liegt nahe.
+  - **Datenschutz:** Hier landen Daten von Personen ohne Konto. Die Datenschutzerklärung muss das nennen (was, wozu, wie lange), und die Löschung kann nicht an `UserService.deleteAccount` hängen – sie braucht ein eigenes Löschkonzept, etwa zusammen mit der Abstimmung oder dem Festival. _(Festivals)_
