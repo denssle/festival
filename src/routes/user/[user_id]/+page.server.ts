@@ -7,9 +7,10 @@ import { StandardResponse } from '$lib/models/transferData/StandardResponse';
 import type { UserFormData } from '$lib/models/user/UserFormData';
 import { CurrentUser } from '$lib/models/user/CurrentUser';
 import type { UserTransferData } from '$lib/models/user/UserTransferData';
-import { ChangeResult } from '$lib/models/updates/ChangeResult';
+import { ChangeResult, getMessageForChangeResult } from '$lib/models/updates/ChangeResult';
 import { FriendshipService } from '$lib/services/friendship.service';
 import { GroupService } from '$lib/services/group.service';
+import { t } from '$lib/i18n';
 
 export const load: PageServerLoad = async ({ locals, params }): Promise<UserTransferData> => {
 	const userId: string = params.user_id;
@@ -29,7 +30,7 @@ export const load: PageServerLoad = async ({ locals, params }): Promise<UserTran
 			};
 		}
 	}
-	error(404, 'Not Found');
+	error(404, t(locals.locale, 'profile.error.notFound'));
 };
 
 export const actions: Actions = {
@@ -43,23 +44,23 @@ export const actions: Actions = {
 			if (nicknameChanged) {
 				const invalidNickname: boolean = await UserService.nickNameInvalid(formData.nickname);
 				if (invalidNickname) {
-					return { success: false, message: 'Nickname invalid!' };
+					return { success: false, message: t(locals.locale, 'error.nicknameInvalid') };
 				}
 			}
 			// E-Mail darf nicht bereits von einem anderen Nutzer belegt sein
 			// (die eigene, unveränderte E-Mail bleibt erlaubt).
 			if (await UserService.emailTakenByOtherUser(formData.email, oldUser.id)) {
-				return { success: false, message: 'Email already in use!' };
+				return { success: false, message: t(locals.locale, 'profile.error.emailInUse') };
 			}
 			const result: ChangeResult = await UserService.updateUser(oldUser.id, formData);
 			if (result === 'Success') {
 				// Kein Cookie-Update mehr nötig: Der Auth-Hook lädt den Nickname
 				// bei jedem Request frisch aus der DB.
-				return { success: true, message: 'Updated user' };
+				return { success: true, message: t(locals.locale, 'profile.updated') };
 			} else {
-				return { success: false, message: result };
+				return { success: false, message: getMessageForChangeResult(locals.locale, result) };
 			}
 		}
-		return { success: false, message: 'Update failed!' };
+		return { success: false, message: t(locals.locale, 'profile.error.updateFailed') };
 	}
 };

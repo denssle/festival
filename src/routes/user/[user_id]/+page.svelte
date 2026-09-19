@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tr } from '$lib/i18n/tr';
 	import { resolve } from '$app/paths';
 	import AvatarImage from '$lib/sharedComponents/AvatarImage.svelte';
 	import AvatarUpload from './AvatarUpload.svelte';
@@ -14,7 +15,7 @@
 </script>
 
 <article>
-	<h2>Benutzer <strong>{data.user.nickname}</strong></h2>
+	<h2>{tr('profile.heading')} <strong>{data.user.nickname}</strong></h2>
 	<section style="display: flex">
 		<AvatarImage userId={data.user.id} />
 		<div>
@@ -35,23 +36,23 @@
 	</section>
 
 	<section>
-		<h4>Freunde:</h4>
+		<h4>{tr('profile.friends')}</h4>
 		{#each data.friendList.filter((f) => f !== undefined) as friend (friend.id)}
 			<FriendListEntry user={friend} />
 		{/each}
 		{#if data.friendList.length === 0}
-			<p>Es sieht so aus, als hättest du keine Freunde hier.</p>
-			<p>Das liegt bestimmt nicht an dir...</p>
+			<p>{tr('profile.friendsEmpty')}</p>
+			<p>{tr('profile.friendsEmptyComfort')}</p>
 		{/if}
 	</section>
 
 	<section>
-		<h4>Festivals:</h4>
+		<h4 data-testid="profile-festivals-heading">{tr('profile.festivals')}</h4>
 		<VisitingFestivals userId={data.user.id} />
 	</section>
 
-	<section>
-		<h4>Gruppen:</h4>
+	<section data-testid="profile-groups-section">
+		<h4>{tr('profile.groups')}</h4>
 		{#if data.groupList && data.groupList.length > 0}
 			<ul>
 				{#each data.groupList as group (group.id)}
@@ -59,7 +60,7 @@
 				{/each}
 			</ul>
 		{:else}
-			<p>{data.isOwnProfil ? 'Du bist in keiner Gruppe.' : 'Dieser Benutzer ist in keiner Gruppe.'}</p>
+			<p>{data.isOwnProfil ? tr('group.mineEmpty') : tr('profile.groupsEmptyOther')}</p>
 		{/if}
 	</section>
 

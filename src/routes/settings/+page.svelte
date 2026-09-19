@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tr } from '$lib/i18n/tr';
 	import { tick } from 'svelte';
 	import type { ActionData } from './$types';
 	import { MIN_PASSWORD_LENGTH } from '$lib/constants';
@@ -34,9 +35,7 @@
 	async function confirmDeletion(event: SubmitEvent): Promise<void> {
 		event.preventDefault();
 
-		questionDialogData.questionText =
-			'Konto endgültig löschen? Damit verschwinden auch deine Festivals samt Zusagen, ' +
-			'deine Gruppen, Kommentare und Freundschaften. Das lässt sich nicht rückgängig machen.';
+		questionDialogData.questionText = tr('settings.account.confirm');
 		questionDialogData.showDialog = true;
 		await tick();
 
@@ -58,31 +57,35 @@
 	}
 </script>
 
-<QuestionDialog bind:questionDialogData buttonLabels={{ yes: 'Endgültig löschen', no: 'Abbrechen' }} />
+<QuestionDialog
+	bind:questionDialogData
+	buttonLabels={{ yes: tr('settings.account.confirmYes'), no: tr('form.cancel') }}
+	testId="account-delete-dialog"
+/>
 
 <article>
-	<h2>Einstellungen</h2>
+	<h2>{tr('settings.heading')}</h2>
 	<form autocomplete="on" method="POST" action="?/changePassword">
 		<section>
 			<details>
-				<summary>Passwort</summary>
+				<summary data-testid="password-section">{tr('settings.password.section')}</summary>
 				<p>
-					<label for="currentPassword">Aktuelles Passwort: </label>
+					<label for="currentPassword">{tr('settings.password.currentLabel')} </label>
 					<input
 						id="currentPassword"
 						name="currentPassword"
-						placeholder="Aktuelles Passwort"
+						placeholder={tr('settings.password.currentPlaceholder')}
 						type="password"
 						autocomplete="current-password"
 						required
 					/>
 				</p>
 				<p>
-					<label for="password">Neues Passwort: </label>
+					<label for="password">{tr('settings.password.newLabel')} </label>
 					<input
 						id="password"
 						name="password"
-						placeholder="Neues Passwort"
+						placeholder={tr('settings.password.newPlaceholder')}
 						type="password"
 						autocomplete="new-password"
 						minlength={MIN_PASSWORD_LENGTH}
@@ -90,11 +93,11 @@
 					/>
 				</p>
 				<p>
-					<label for="passwordRepeat">Neues Passwort wiederholen: </label>
+					<label for="passwordRepeat">{tr('settings.password.repeatLabel')} </label>
 					<input
 						id="passwordRepeat"
 						name="passwordRepeat"
-						placeholder="Neues Passwort wiederholen"
+						placeholder={tr('settings.password.repeatPlaceholder')}
 						type="password"
 						autocomplete="new-password"
 						minlength={MIN_PASSWORD_LENGTH}
@@ -102,7 +105,7 @@
 					/>
 				</p>
 				<p>
-					<button type="submit">Speichern</button>
+					<button type="submit" data-testid="password-save">{tr('form.save')}</button>
 				</p>
 			</details>
 
@@ -115,26 +118,23 @@
 	<form bind:this={deleteForm} method="POST" action="?/deleteAccount" onsubmit={confirmDeletion}>
 		<section>
 			<details>
-				<summary>Konto löschen</summary>
+				<summary data-testid="account-section">{tr('settings.account.delete')}</summary>
 				<p>
-					Beim Löschen des Kontos werden alle zugehörigen Daten entfernt: Profil und Profilbild, die von dir angelegten
-					Festivals samt Zu- und Absagen deiner Gäste, deine Gruppen, deine Kommentare sowie Freundschaften und offene
-					Anfragen. Was du in fremden Festivals zugesagt hast, verschwindet ebenfalls. Der Vorgang lässt sich nicht
-					rückgängig machen.
+					{tr('settings.account.explanation')}
 				</p>
 				<p>
-					<label for="deletePassword">Zur Bestätigung dein Passwort: </label>
+					<label for="deletePassword">{tr('settings.account.passwordLabel')} </label>
 					<input
 						id="deletePassword"
 						name="deletePassword"
-						placeholder="Passwort"
+						placeholder={tr('form.password')}
 						type="password"
 						autocomplete="current-password"
 						required
 					/>
 				</p>
 				<p>
-					<button type="submit">Konto löschen</button>
+					<button type="submit" data-testid="account-delete">{tr('settings.account.delete')}</button>
 				</p>
 			</details>
 			{#if accountMessage}

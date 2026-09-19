@@ -3,6 +3,8 @@
 	import { resolve } from '$app/paths';
 	import type { CurrentUser } from '$lib/models/user/CurrentUser';
 	import type { Snippet } from 'svelte';
+	import { tr } from '$lib/i18n/tr';
+	import LanguageSwitcher from '$lib/sharedComponents/LanguageSwitcher.svelte';
 
 	let {
 		data,
@@ -24,15 +26,17 @@
 <header>
 	<nav>
 		{#if data?.currentUser?.isAuthenticated}
-			<a href={resolve('/')}>Festivals</a>
-			<a href={resolve('/group')}>Gruppen</a>
-			<a href={resolve('/user/[user_id]', { user_id: data.currentUser.id })}>{data.currentUser.nickname}</a>
-			<a href={resolve('/updates')}>Updates</a>
-			<a href={resolve('/settings')}>Einstellungen</a>
-			<button onclick={logout}>Logout</button>
+			<a data-testid="nav-festivals" href={resolve('/')}>{tr('nav.festivals')}</a>
+			<a data-testid="nav-groups" href={resolve('/group')}>{tr('nav.groups')}</a>
+			<a data-testid="nav-profile" href={resolve('/user/[user_id]', { user_id: data.currentUser.id })}
+				>{data.currentUser.nickname}</a
+			>
+			<a data-testid="nav-updates" href={resolve('/updates')}>{tr('nav.updates')}</a>
+			<a data-testid="nav-settings" href={resolve('/settings')}>{tr('nav.settings')}</a>
+			<button data-testid="nav-logout" onclick={logout}>{tr('nav.logout')}</button>
 		{:else}
-			<a href={resolve('/login')}>Anmelden</a>
-			<a href={resolve('/registration')}>Registrieren</a>
+			<a data-testid="nav-login" href={resolve('/login')}>{tr('nav.login')}</a>
+			<a data-testid="nav-register" href={resolve('/registration')}>{tr('nav.register')}</a>
 		{/if}
 	</nav>
 </header>
@@ -41,10 +45,11 @@
 
 <footer>
 	<nav>
-		<a href={resolve('/about')}>About</a>
-		<a href={resolve('/impressum')}>Impressum</a>
-		<a href={resolve('/datenschutz')}>Datenschutz</a>
+		<a data-testid="footer-about" href={resolve('/about')}>{tr('footer.about')}</a>
+		<a data-testid="footer-imprint" href={resolve('/impressum')}>{tr('footer.imprint')}</a>
+		<a data-testid="footer-privacy" href={resolve('/datenschutz')}>{tr('footer.privacy')}</a>
 	</nav>
+	<LanguageSwitcher />
 </footer>
 
 <style global>

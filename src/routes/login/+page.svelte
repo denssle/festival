@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tr } from '$lib/i18n/tr';
 	import { resolve } from '$app/paths';
 	import type { ActionData } from './$types';
 
@@ -7,7 +8,7 @@
 </script>
 
 <article>
-	<h2>Anmeldung</h2>
+	<h2>{tr('login.heading')}</h2>
 
 	<form method="POST">
 		<section>
@@ -16,7 +17,7 @@
 					bind:value={formData.nickname}
 					minlength="3"
 					name="nickname"
-					placeholder="Nickname"
+					placeholder={tr('form.nickname')}
 					required
 					type="text"
 				/>
@@ -27,14 +28,14 @@
 					bind:value={formData.password}
 					minlength="3"
 					name="password"
-					placeholder="Passwort"
+					placeholder={tr('form.password')}
 					required
 					type="password"
 				/>
 			</p>
 
 			<p>
-				<button disabled={!formData.nickname || !formData.password} type="submit">Los gehts!</button>
+				<button disabled={!formData.nickname || !formData.password} type="submit">{tr('form.go')}</button>
 				{#if form?.success === false}
 					<span style="color: var(--error)">{form.message}</span>
 				{/if}
@@ -43,7 +44,7 @@
 
 		<section>
 			<p>
-				Noch nicht angemeldet? Dann <a href={resolve('/registration')}>hier registrieren.</a>
+				{tr('login.noAccount')} <a href={resolve('/registration')}>{tr('login.registerLink')}</a>
 			</p>
 		</section>
 	</form>

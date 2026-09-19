@@ -1,43 +1,57 @@
 <script lang="ts">
+	import { tr } from '$lib/i18n/tr';
 	import type { JoinEventDialogData } from '$lib/models/dialogData/JoinEventDialogData';
 	import BaseDialog from '$lib/sharedComponents/BaseDialog.svelte';
+	import RichText from '$lib/sharedComponents/RichText.svelte';
 
 	let { joinDialogData = $bindable() }: { joinDialogData: JoinEventDialogData } = $props();
 </script>
 
-<BaseDialog bind:dialogData={joinDialogData} buttonLabels={{ yes: 'Beitreten', no: 'Zurück' }}>
-	<h4>Bei dem Event bin ich dabei!</h4>
+<BaseDialog
+	bind:dialogData={joinDialogData}
+	buttonLabels={{ yes: tr('festival.joinDialog.confirm'), no: tr('form.back') }}
+	testId="join-dialog"
+>
+	<h4>{tr('festival.joinDialog.heading')}</h4>
 
 	<section>
 		<label>
-			Ich bringe weitere Gäste mit (die hier nicht angemeldet sind):
+			{tr('festival.joinDialog.otherGuests')}
 			<input bind:value={joinDialogData.numberOfOtherGuests} id="otherGuests" type="number" />
 		</label>
 	</section>
 
 	<section>
 		<label>
-			Ich bringe etwas zu essen mit:
+			{tr('festival.joinDialog.food')}
 			<input bind:value={joinDialogData.food} id="food" type="text" />
 		</label>
 
 		{#if joinDialogData.bringYourOwnFood}
-			<span>Hinweis: Das ist eine Mitbringparty.</span>
+			<span>{tr('festival.joinDialog.byo')}</span>
 		{:else}
-			<span>Hinweis: Das ist <mark>keine</mark> Mitbringparty.</span>
+			<span>
+				<RichText text={tr('festival.joinDialog.notByo')}>
+					{#snippet mark(inner: string)}<mark>{inner}</mark>{/snippet}
+				</RichText>
+			</span>
 		{/if}
 	</section>
 
 	<section>
 		<label>
-			Ich bringe etwas zu trinken mit:
+			{tr('festival.joinDialog.drink')}
 			<input bind:value={joinDialogData.drink} id="drink" type="text" />
 		</label>
 
 		{#if joinDialogData.bringYourOwnBottle}
-			<span>Hinweis: Das ist eine Mitbringparty.</span>
+			<span>{tr('festival.joinDialog.byo')}</span>
 		{:else}
-			<span>Hinweis: Das ist <mark>keine</mark> Mitbringparty.</span>
+			<span>
+				<RichText text={tr('festival.joinDialog.notByo')}>
+					{#snippet mark(inner: string)}<mark>{inner}</mark>{/snippet}
+				</RichText>
+			</span>
 		{/if}
 	</section>
 </BaseDialog>

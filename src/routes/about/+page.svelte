@@ -1,27 +1,33 @@
 <script lang="ts">
+	import { tr } from '$lib/i18n/tr';
 	import type { PageData } from './$types';
+	import RichText from '$lib/sharedComponents/RichText.svelte';
 	import uberspaceBanner from '../../images/uberspace_badge_dark.png';
 
 	let { data }: { data: PageData } = $props();
 </script>
 
 <article>
-	<h2>Über diese Seite</h2>
+	<h2>{tr('about.heading')}</h2>
 	<section>
 		<p>
-			Diese Seite wurde erstellt mit <a href="https://kit.svelte.dev/">svelte</a>. Das Styling kommt von
-			<a href="https://simplecss.org/">simple css </a>
-			und die Daten werden gespeichert in einer <a href="https://mariadb.com/">Maria DB</a>.
+			<RichText text={tr('about.credits')}>
+				{#snippet svelte()}<a href="https://kit.svelte.dev/">svelte</a>{/snippet}
+				{#snippet simplecss()}<a href="https://simplecss.org/">simple css</a>{/snippet}
+				{#snippet mariadb()}<a href="https://mariadb.com/">Maria DB</a>{/snippet}
+			</RichText>
 		</p>
 	</section>
 	<section>
-		<img alt="uberspace Banner" class="center" src={uberspaceBanner} />
+		<img alt={tr('about.uberspaceAlt')} class="center" src={uberspaceBanner} />
 		<p class="center-text">
-			Die Seite ist gehostet auf <a href="https://uberspace.de/">uberspace</a>.
+			<RichText text={tr('about.hosting')}>
+				{#snippet uberspace()}<a href="https://uberspace.de/">uberspace</a>{/snippet}
+			</RichText>
 		</p>
 	</section>
 	<section>
-		<p>Version: {data.version}</p>
+		<p>{tr('about.version', { version: data.version ?? '' })}</p>
 	</section>
 </article>
 

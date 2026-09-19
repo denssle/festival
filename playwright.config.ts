@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import { BROWSER_LOCALE } from './tests/locale';
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -26,6 +27,14 @@ export default defineConfig({
 	use: {
 		/* Base URL to use in actions like `await page.goto('/')`. */
 		baseURL: 'http://localhost:5173',
+
+		/* Sprache der Oberfläche festnageln. Die App wertet `Accept-Language` aus (siehe
+		 * `sprache`-Hook in `hooks.server.ts`); Playwrights Chromium schickt von Haus aus
+		 * `en-US` und bekäme damit die englische Fassung. Ohne diese Zeile hinge das
+		 * Ergebnis der Suite an der Browser-Voreinstellung.
+		 * Der Wert kommt aus tests/locale.ts, damit er nicht von den Texterwartungen in
+		 * `uiText()` abweichen kann. */
+		locale: BROWSER_LOCALE,
 
 		/* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
 		trace: 'on-first-retry'

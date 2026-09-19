@@ -7,6 +7,7 @@ import { BackendUser } from '$lib/models/user/BackendUser';
 import { NickPassData } from '$lib/models/transferData/NickPassData';
 import { MIN_PASSWORD_LENGTH } from '$lib/constants';
 import { resolve } from '$app/paths';
+import { t } from '$lib/i18n';
 
 /**
  * load – GET /registration
@@ -48,20 +49,23 @@ export const actions: Actions = {
 		const formData: NickPassData | undefined = await UserService.readNickPass(request.formData());
 		if (formData) {
 			if (formData.password.length < MIN_PASSWORD_LENGTH) {
-				return { success: false, message: `Password must be at least ${MIN_PASSWORD_LENGTH} characters long` };
+				return {
+					success: false,
+					message: t(locals.locale, 'auth.error.passwordTooShort', { min: MIN_PASSWORD_LENGTH })
+				};
 			}
 			if (await UserService.nickNameInvalid(formData.nickname)) {
-				return { success: false, message: 'Invalid Nickname' };
+				return { success: false, message: t(locals.locale, 'error.nicknameInvalid') };
 			} else {
 				const user: BackendUser | null = await UserService.register(formData.nickname, formData.password);
 				if (user) {
 					await UserService.createSession(cookies, locals, user);
 					redirect(302, resolve('/'));
 				} else {
-					return { success: false, message: 'User creation failed' };
+					return { success: false, message: t(locals.locale, 'auth.error.userCreationFailed') };
 				}
 			}
 		}
-		return { success: false, message: 'Password and / or Nickname missing' };
+		return { success: false, message: t(locals.locale, 'auth.error.credentialsMissing') };
 	}
 };

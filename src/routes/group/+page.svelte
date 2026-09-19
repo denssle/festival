@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tr } from '$lib/i18n/tr';
 	import { resolve } from '$app/paths';
 	import type { PageData } from './$types';
 
@@ -6,11 +7,11 @@
 </script>
 
 <article>
-	<h2>Gruppen</h2>
-	<p>Hier kannst du dich vernetzen.</p>
+	<h2>{tr('group.heading')}</h2>
+	<p>{tr('group.intro')}</p>
 
 	<section>
-		<h3>Deine Gruppen</h3>
+		<h3>{tr('group.mine')}</h3>
 		{#if data.groups && data.groups.length > 0}
 			<ul>
 				{#each data.groups as group (group.id)}
@@ -18,19 +19,19 @@
 				{/each}
 			</ul>
 		{:else}
-			<p>Du bist in keiner Gruppe.</p>
+			<p data-testid="my-groups-empty">{tr('group.mineEmpty')}</p>
 		{/if}
 	</section>
 
 	<section class="search-section">
-		<h3>Gruppen suchen</h3>
+		<h3>{tr('group.search.heading')}</h3>
 		<form method="GET">
-			<input type="text" name="q" placeholder="Gruppenname oder Beschreibung..." value={data.searchTerm || ''} />
-			<button type="submit">Suchen</button>
+			<input type="text" name="q" placeholder={tr('group.search.placeholder')} value={data.searchTerm || ''} />
+			<button type="submit">{tr('group.search.submit')}</button>
 		</form>
 
 		{#if data.searchTerm}
-			<h4>Suchergebnisse für "{data.searchTerm}"</h4>
+			<h4>{tr('group.search.results', { term: data.searchTerm })}</h4>
 			{#if data.searchResults && data.searchResults.length > 0}
 				<ul>
 					{#each data.searchResults as group (group.id)}
@@ -43,15 +44,15 @@
 					{/each}
 				</ul>
 			{:else}
-				<p>Keine Gruppen gefunden.</p>
+				<p data-testid="group-search-empty">{tr('group.search.empty')}</p>
 			{/if}
 		{/if}
 	</section>
 
 	<section>
-		<h3>Neue Gruppe</h3>
+		<h3>{tr('group.new.section')}</h3>
 		<div class="actions">
-			<a class="button" href={resolve('/group/new')}>Neue Gruppe anlegen</a>
+			<a class="button" href={resolve('/group/new')}>{tr('group.new.create')}</a>
 		</div>
 	</section>
 </article>

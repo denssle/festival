@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tr } from '$lib/i18n/tr';
 	import { resolve } from '$app/paths';
 	import { MIN_PASSWORD_LENGTH } from '$lib/constants';
 	import type { LoginRegisterFormData } from '$lib/models/transferData/LoginRegisterFormData';
@@ -9,7 +10,7 @@
 </script>
 
 <article>
-	<h2>Registration</h2>
+	<h2>{tr('registration.heading')}</h2>
 
 	<form method="POST">
 		<section>
@@ -18,7 +19,7 @@
 					bind:value={formData.nickname}
 					minlength="3"
 					name="nickname"
-					placeholder="Nickname"
+					placeholder={tr('form.nickname')}
 					required
 					type="text"
 				/>
@@ -29,7 +30,7 @@
 					bind:value={formData.password}
 					minlength={MIN_PASSWORD_LENGTH}
 					name="password"
-					placeholder="Passwort"
+					placeholder={tr('form.password')}
 					required
 					type="password"
 				/>
@@ -38,7 +39,7 @@
 					bind:value={formData.password2}
 					minlength={MIN_PASSWORD_LENGTH}
 					name="password2"
-					placeholder="Passwort Wiederholung"
+					placeholder={tr('form.passwordRepeat')}
 					required
 					type="password"
 				/>
@@ -49,7 +50,7 @@
 					disabled={formData.password !== formData.password2 || !formData.nickname || !formData.password}
 					type="submit"
 				>
-					Los gehts!
+					{tr('form.go')}
 				</button>
 				{#if form?.success === false}
 					<span style="color: var(--error)">{form.message}</span>
@@ -59,7 +60,7 @@
 
 		<section>
 			<p>
-				Bereits ein Konto? <a href={resolve('/login')}>Hier geht es zur Anmeldung.</a>
+				{tr('registration.haveAccount')} <a href={resolve('/login')}>{tr('registration.loginLink')}</a>
 			</p>
 		</section>
 	</form>

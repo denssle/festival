@@ -1,6 +1,7 @@
 import { type Actions, fail, redirect } from '@sveltejs/kit';
 import { GroupService } from '$lib/services/group.service';
 import { resolve } from '$app/paths';
+import { t } from '$lib/i18n';
 
 export const actions: Actions = {
 	default: async ({ locals, request }) => {
@@ -12,7 +13,7 @@ export const actions: Actions = {
 		const values: FormData = await request.formData();
 		const name: FormDataEntryValue | null = values.get('name');
 		if (!name) {
-			return fail(400, { message: 'Name is required' });
+			return fail(400, { message: t(locals.locale, 'error.nameRequired') });
 		}
 
 		const description = values.get('description')?.toString() ?? '';

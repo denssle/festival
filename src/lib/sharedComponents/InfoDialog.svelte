@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tr } from '$lib/i18n/tr';
 	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
 
 	let { infoDialogData = $bindable() }: { infoDialogData: InfoDialogData } = $props();
@@ -11,6 +12,7 @@
 </script>
 
 <dialog
+	data-testid="info-dialog"
 	bind:this={infoDialogData.dialog}
 	onclose={() => {
 		infoDialogData.showDialog = false;
@@ -18,5 +20,7 @@
 	}}
 >
 	<p>{infoDialogData.infoDialogText}</p>
-	<button onclick={() => infoDialogData.dialog?.close()} style="float: right">Okay</button>
+	<button data-testid="info-ok" onclick={() => infoDialogData.dialog?.close()} style="float: right"
+		>{tr('dialog.ok')}</button
+	>
 </dialog>

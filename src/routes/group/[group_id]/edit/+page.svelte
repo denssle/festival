@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tr } from '$lib/i18n/tr';
 	import { resolve } from '$app/paths';
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
@@ -7,16 +8,20 @@
 </script>
 
 <article>
-	<h2>Gruppe bearbeiten</h2>
+	<h2 data-testid="group-edit-heading">{tr('group.edit.heading')}</h2>
 	<section>
 		<form method="POST" use:enhance>
 			<p>
-				<label for="name">Name</label>
-				<input id="name" name="name" placeholder="Name der Gruppe" value={data.group.name} required />
+				<label for="name">{tr('group.form.nameLabel')}</label>
+				<input id="name" name="name" placeholder={tr('group.form.name')} value={data.group.name} required />
 			</p>
 			<p>
-				<label for="description">Beschreibung</label>
-				<textarea id="description" name="description" placeholder="Kurze Beschreibung" value={data.group.description}
+				<label for="description">{tr('group.form.descriptionLabel')}</label>
+				<textarea
+					id="description"
+					name="description"
+					placeholder={tr('group.form.description')}
+					value={data.group.description}
 				></textarea>
 			</p>
 
@@ -24,8 +29,10 @@
 				<p class="error">{form.message}</p>
 			{/if}
 
-			<button type="submit">Speichern</button>
-			<a class="button secondary" href={resolve('/group/[group_id]', { group_id: data.group.id })}>Abbrechen</a>
+			<button type="submit" data-testid="group-save">{tr('form.save')}</button>
+			<a class="button secondary" href={resolve('/group/[group_id]', { group_id: data.group.id })}
+				>{tr('form.cancel')}</a
+			>
 		</form>
 	</section>
 </article>

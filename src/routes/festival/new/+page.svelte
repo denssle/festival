@@ -1,14 +1,15 @@
 <script lang="ts">
+	import { tr } from '$lib/i18n/tr';
 	import { resolve } from '$app/paths';
 </script>
 
 <article>
-	<h2>Neue Veranstaltung anlegen</h2>
+	<h2>{tr('festival.new.heading')}</h2>
 	<section>
 		<form method="POST">
 			<p>
-				<input name="name" placeholder="Name der Veranstaltung" required />
-				<textarea name="description" placeholder="Kurze Beschreibung"></textarea>
+				<input name="name" placeholder={tr('festival.form.name')} required />
+				<textarea name="description" placeholder={tr('festival.form.description')}></textarea>
 			</p>
 
 			<p>
@@ -17,22 +18,22 @@
 			</p>
 
 			<p>
-				<textarea name="location" placeholder="Ort"></textarea>
+				<textarea name="location" placeholder={tr('festival.form.location')}></textarea>
 			</p>
 
 			<p>
 				<label>
 					<input name="bringYourOwnFood" type="checkbox" />
-					Gäste sollen etwas zu Essen mitbringen.
+					{tr('festival.bringFood')}
 				</label>
 				<label>
 					<input name="bringYourOwnBottle" type="checkbox" />
-					Gäste sollen etwas zu trinken mitbringen.
+					{tr('festival.bringDrink')}
 				</label>
 			</p>
 
-			<button type="submit">Speichern</button>
-			<a class="button" href={resolve('/')}>Zurück</a>
+			<button type="submit" data-testid="festival-save">{tr('form.save')}</button>
+			<a class="button" href={resolve('/')}>{tr('form.back')}</a>
 		</form>
 	</section>
 </article>

@@ -43,7 +43,7 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 		await expect(textareaElement).toBeVisible();
 		await textareaElement.fill(commentText);
 
-		await clickForResponse(pageA, pageA.locator('button:has-text("Absenden")'), '/comments', 'POST');
+		await clickForResponse(pageA, pageA.getByTestId('comment-submit'), '/comments', 'POST');
 
 		// Verifizieren, dass der Kommentar erscheint
 		const commentLocator = pageA.locator('fieldset').filter({ hasText: commentText });
@@ -58,12 +58,12 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 		const commentLocator = pageA.locator('fieldset').filter({ hasText: commentText });
 		await expect(commentLocator).toBeVisible({ timeout: 10000 });
 
-		const bearbeitenLocator = commentLocator.locator('button:has-text("Bearbeiten")');
+		const bearbeitenLocator = commentLocator.getByTestId('comment-edit-toggle');
 		await expect(bearbeitenLocator).toBeVisible({ timeout: 10000 });
 		await bearbeitenLocator.click();
 
 		const textareaElement = pageA.locator('textarea[name="updateComment"]');
-		const saveButton = pageA.locator('button:has-text("Speichern")');
+		const saveButton = pageA.getByTestId('comment-save');
 		await expect(saveButton).toBeVisible();
 		await expect(saveButton).not.toBeDisabled();
 		await expect(textareaElement).toBeVisible();
@@ -76,7 +76,7 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 		await expect(pageA.locator('fieldset', { hasText: commentText })).not.toBeVisible();
 
 		// Prüfen, dass der Edit-Mode beendet wurde (Speichern-Button weg)
-		await expect(pageA.locator('button:has-text("Speichern")')).toBeDisabled();
+		await expect(pageA.getByTestId('comment-save')).toBeDisabled();
 	});
 
 	test('User B sollte den bearbeiteten Kommentar sehen', async () => {
@@ -94,12 +94,12 @@ test.describe.serial('Kommentar-Lifecycle', () => {
 		);
 
 		// Löschen-Button öffnet Bestätigungsdialog (robust gegen Hydration-Race)
-		const dialog = pageA.locator('dialog').filter({ hasText: 'Kommentar löschen' });
-		await openDialog(updatedCommentLocator.locator('button:has-text("Löschen")'), dialog);
+		const dialog = pageA.getByTestId('comment-delete-dialog');
+		await openDialog(updatedCommentLocator.getByTestId('comment-delete'), dialog);
 		const reloadResponse = pageA.waitForResponse(
 			(r: Response) => r.url().includes('/comments') && r.request().method() === 'GET'
 		);
-		await dialog.locator('button:has-text("Ja")').click();
+		await dialog.getByTestId('dialog-yes').click();
 		await deleteResponse;
 		await reloadResponse;
 

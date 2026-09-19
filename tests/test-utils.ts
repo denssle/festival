@@ -1,4 +1,20 @@
 import { expect, type Locator, type Page } from '@playwright/test';
+import { t, type TranslationKey } from '../src/lib/i18n';
+import { UI_LOCALE } from './locale';
+
+export { UI_LOCALE };
+
+/**
+ * Erwarteter Oberflaechentext zu einem Uebersetzungsschluessel.
+ *
+ * Statt den deutschen Satz in die Spec zu kopieren: Eine Umformulierung im Woerterbuch
+ * bricht dann keinen Test, ein FALSCHER Schluessel dagegen schon - der Text stimmt dann
+ * nicht mehr mit dem ueberein, was die Seite anzeigt. Tippfehler im Schluessel faengt
+ * TypeScript ab.
+ */
+export function uiText(key: TranslationKey, parameters?: Record<string, string | number>): string {
+	return t(UI_LOCALE, key, parameters);
+}
 
 export const TEST_PASSWORD = 'TestPassword123!';
 
@@ -76,7 +92,7 @@ export async function register(page: Page, nickname: string, password = TEST_PAS
 	await page.fill('input[name="password2"]', password);
 	await page.waitForTimeout(500);
 
-	const submitButton = page.locator('button[type="submit"]');
+	const submitButton = page.locator('article button[type="submit"]');
 	await expect(submitButton).toBeEnabled();
 
 	await submitButton.click();
@@ -112,7 +128,7 @@ export async function getUserId(page: Page): Promise<string> {
  * wiederholt, bis die Login-Seite erreicht ist.
  */
 export async function logout(page: Page): Promise<void> {
-	const logoutButton = page.getByRole('button', { name: 'Logout' });
+	const logoutButton = page.getByTestId('nav-logout');
 	await expect(logoutButton).toBeVisible({ timeout: 10000 });
 	await expect(async () => {
 		if (!page.url().includes('/login')) {
@@ -133,7 +149,7 @@ export async function login(page: Page, nickname: string, password = TEST_PASSWO
 	await page.goto('/festival/login');
 	await page.fill('input[name="nickname"]', nickname);
 	await page.fill('input[name="password"]', password);
-	const submitButton = page.locator('button[type="submit"]');
+	const submitButton = page.locator('article button[type="submit"]');
 	await Promise.all([page.waitForURL('/festival/', { timeout: 15000 }), submitButton.click()]);
 
 	// Sicherstellen, dass der Login erfolgreich war (Redirect zur Home-Seite)

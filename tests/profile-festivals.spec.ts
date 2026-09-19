@@ -33,19 +33,19 @@ test.describe.serial('Profile Festivals Display', () => {
 		await page.fill('input[name="startDate"]', '2026-09-15');
 		await page.fill('input[name="startTime"]', '18:00');
 
-		await Promise.all([page.waitForURL(/\/festival\/[a-z0-9-]+$/), page.click('button:has-text("Speichern")')]);
+		await Promise.all([page.waitForURL(/\/festival\/[a-z0-9-]+$/), page.getByTestId('festival-save').click()]);
 		await page.waitForLoadState('networkidle');
 
 		// 2. Beitreten (Zusagen)
-		const zusagenButton = page.getByRole('button', { name: 'Zusagen' });
+		const zusagenButton = page.getByTestId('festival-join');
 		await expect(zusagenButton).toBeVisible({ timeout: 10000 });
 		await zusagenButton.click();
 
-		const dialog = page.locator('dialog:has-text("Bei dem Event bin ich dabei!")');
+		const dialog = page.getByTestId('join-dialog');
 		await dialog.waitFor({ state: 'visible', timeout: 10000 });
 
 		await dialog.locator('#food').fill('Pasta');
-		await dialog.locator('button:has-text("Beitreten")').click();
+		await dialog.getByTestId('dialog-yes').click();
 		await expect(dialog).not.toBeVisible({ timeout: 10000 });
 	});
 
@@ -58,7 +58,7 @@ test.describe.serial('Profile Festivals Display', () => {
 		await festivalsResponse;
 
 		// Sektion "Festivals" finden
-		const festivalsSection = page.locator('section').filter({ has: page.locator('h4', { hasText: 'Festivals:' }) });
+		const festivalsSection = page.locator('section').filter({ has: page.getByTestId('profile-festivals-heading') });
 		await expect(festivalsSection).toBeVisible();
 
 		// Liste der angemeldeten Festivals prüfen

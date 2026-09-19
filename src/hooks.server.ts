@@ -1,16 +1,19 @@
-import { Handle } from '@sveltejs/kit';
+import { Handle, HandleServerError } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 import { UserService } from '$lib/services/user.service';
 import { startDB } from '$lib/db/db';
 import { CurrentUser } from '$lib/models/user/CurrentUser';
 import { base } from '$app/paths';
-import { SESSION_COOKIE_PATH } from '$lib/constants';
+import { LANGUAGE_COOKIE_NAME, SESSION_COOKIE_PATH } from '$lib/constants';
+import { type Locale, resolveLocale, t } from '$lib/i18n';
 
 await startDB();
 
 // Impressum und Datenschutzerklärung müssen ohne Anmeldung erreichbar sein – gerade
 // vor der Registrierung, wo die Einwilligung in die Datenverarbeitung fällt.
-const noAuthURLs: string[] = ['/login', '/registration', '/about', '/impressum', '/datenschutz'];
+// `/language` gehört dazu, sonst könnte man die Sprache auf der Login-Seite nicht
+// umstellen – also genau dort nicht, wo die Oberfläche einen zum ersten Mal empfängt.
+const noAuthURLs: string[] = ['/login', '/registration', '/about', '/impressum', '/datenschutz', '/language'];
 
 // "A man is not dead while his name is still spoken." - Terry Pratchett (gest. 2015).
 // In der Scheibenwelt haelt der Signalcode GNU einen Namen in den Klackertuermen im
@@ -25,6 +28,27 @@ const clacks: Handle = async ({ event, resolve }): Promise<Response> => {
 	const response: Response = await resolve(event);
 	response.headers.set('X-Clacks-Overhead', 'GNU Terry Pratchett');
 	return response;
+};
+
+// Legt die Sprache für den Request fest und traegt sie ins <html lang="…"> ein.
+//
+// Steht VOR der Anmeldepruefung, damit auch die Login-Seite und die Fehlerseiten eine
+// Sprache haben. `transformPageChunk` ueberlebt das: `sequence()` sammelt die Option
+// ueber alle Hooks ein, der innere `resolve(event)` in `authentifizierung` braucht sie
+// deshalb nicht zu wiederholen.
+//
+// Der Platzhalter heisst `%lang%` und nicht `%sveltekit.lang%` – SvelteKit ersetzt nur
+// seine eigenen `%sveltekit.*%`-Platzhalter, alles andere ist Sache dieses Hooks.
+const sprache: Handle = async ({ event, resolve }): Promise<Response> => {
+	const locale: Locale = resolveLocale(
+		event.cookies.get(LANGUAGE_COOKIE_NAME),
+		event.request.headers.get('accept-language')
+	);
+	event.locals.locale = locale;
+
+	return resolve(event, {
+		transformPageChunk: ({ html }: { html: string }): string => html.replace('%lang%', locale)
+	});
 };
 
 const authentifizierung: Handle = async ({ event, resolve }): Promise<Response> => {
@@ -72,4 +96,23 @@ const authentifizierung: Handle = async ({ event, resolve }): Promise<Response> 
 	}
 };
 
-export const handle: Handle = sequence(clacks, authentifizierung);
+export const handle: Handle = sequence(clacks, sprache, authentifizierung);
+
+// Unerwartete Fehler und unbekannte Routen. Ohne diesen Hook zeigt SvelteKit fest
+// "Internal Error" bzw. "Not Found" – auf Englisch, unabhängig von der Sprache.
+//
+// Die Sprache wird hier neu bestimmt statt aus `locals` gelesen: Wirft schon ein Hook
+// vor `sprache`, ist `locals.locale` noch nicht gesetzt.
+//
+// Den Fehler selbst loggt SvelteKit nur, solange es keinen eigenen `handleError` gibt –
+// deshalb hier von Hand, 404er ausgenommen (das sind bloß vertippte URLs).
+export const handleError: HandleServerError = ({ error, event, status }) => {
+	if (status !== 404) {
+		console.error(error);
+	}
+	const locale: Locale = resolveLocale(
+		event.cookies.get(LANGUAGE_COOKIE_NAME),
+		event.request.headers.get('accept-language')
+	);
+	return { message: t(locale, status === 404 ? 'error.notFound' : 'error.internal') };
+};

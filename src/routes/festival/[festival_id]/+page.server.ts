@@ -1,5 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
+import { t } from '$lib/i18n';
 import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 import { FestivalEventService } from '$lib/services/festival-event.service';
 import type { FestivalTransferData } from '$lib/models/transferData/FestivalTransferData';
@@ -19,5 +20,5 @@ export const load: PageServerLoad = async ({ locals, params }): Promise<Festival
 			};
 		}
 	}
-	error(404, 'Not Found');
+	error(404, t(locals.locale, 'festival.error.notFound'));
 };

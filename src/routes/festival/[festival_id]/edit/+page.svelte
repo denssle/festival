@@ -1,7 +1,8 @@
 <script lang="ts">
+	import { tr } from '$lib/i18n/tr';
 	import { resolve } from '$app/paths';
 	import { untrack } from 'svelte';
-	import { dateToHHMM, dateToString } from '$lib/utils/date.util';
+	import { toDateInputValue, toTimeInputValue } from '$lib/utils/date.util';
 	import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 
 	let { data }: { data: FrontendFestivalEvent } = $props();
@@ -15,8 +16,8 @@
 		untrack(() => ({
 			name: data?.name ?? '',
 			description: data?.description ?? '',
-			startDate: dateToString(data.startDate),
-			startTime: dateToHHMM(data.startDate),
+			startDate: toDateInputValue(data.startDate),
+			startTime: toTimeInputValue(data.startDate),
 			location: data.location ?? '',
 			bringYourOwnFood: data.bringYourOwnFood,
 			bringYourOwnBottle: data.bringYourOwnBottle
@@ -27,10 +28,11 @@
 <article>
 	<form method="POST">
 		<p>
-			<input name="name" placeholder="Name der Veranstaltung" required bind:value={formData.name} />
+			<input name="name" placeholder={tr('festival.form.name')} required bind:value={formData.name} />
 		</p>
 		<p>
-			<textarea name="description" placeholder="Kurze Beschreibung" bind:value={formData.description}></textarea>
+			<textarea name="description" placeholder={tr('festival.form.description')} bind:value={formData.description}
+			></textarea>
 		</p>
 
 		<p>
@@ -39,21 +41,21 @@
 		</p>
 
 		<p>
-			<textarea name="location" placeholder="Ort" bind:value={formData.location}></textarea>
+			<textarea name="location" placeholder={tr('festival.form.location')} bind:value={formData.location}></textarea>
 		</p>
 
 		<p>
 			<label>
 				<input type="checkbox" name="bringYourOwnFood" bind:checked={formData.bringYourOwnFood} />
-				Gäste sollen etwas zu Essen mitbringen.
+				{tr('festival.bringFood')}
 			</label>
 			<label>
 				<input type="checkbox" name="bringYourOwnBottle" bind:checked={formData.bringYourOwnBottle} />
-				Gäste sollen etwas zu trinken mitbringen.
+				{tr('festival.bringDrink')}
 			</label>
 		</p>
 
-		<button type="submit">Speichern</button>
-		<a class="button" href={resolve('/festival/[festival_id]', { festival_id: data.id })}>Zurück</a>
+		<button type="submit" data-testid="festival-save">{tr('form.save')}</button>
+		<a class="button" href={resolve('/festival/[festival_id]', { festival_id: data.id })}>{tr('form.back')}</a>
 	</form>
 </article>

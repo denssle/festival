@@ -6,13 +6,19 @@
 	// "Endgültig löschen"/"Abbrechen" deutlicher als das voreingestellte "Ja"/"Nope".
 	let {
 		questionDialogData = $bindable(),
-		buttonLabels
+		buttonLabels,
+		testId
 	}: {
 		questionDialogData: QuestionDialogData;
 		buttonLabels?: { yes: string; no: string };
+		testId?: string;
 	} = $props();
 </script>
 
-<BaseDialog bind:dialogData={questionDialogData} {...buttonLabels ? { buttonLabels } : {}}>
+<BaseDialog
+	bind:dialogData={questionDialogData}
+	{...buttonLabels ? { buttonLabels } : {}}
+	{...testId ? { testId } : {}}
+>
 	<p>{questionDialogData.questionText}</p>
 </BaseDialog>

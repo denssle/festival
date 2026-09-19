@@ -8,6 +8,8 @@ import { convertToBackendUser, type UserAttributes } from '$lib/db/attributes/us
 import { UserService } from '$lib/services/user.service';
 import { GroupService } from '$lib/services/group.service';
 import { resolve } from '$app/paths';
+import { t } from '$lib/i18n';
+import { getMessageForChangeResult } from '$lib/models/updates/ChangeResult';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const { group_id } = params;
@@ -16,7 +18,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const groupModel = await Group.findByPk(group_id);
 
 	if (!groupModel) {
-		throw error(404, 'Gruppe nicht gefunden');
+		throw error(404, t(locals.locale, 'group.error.notFound'));
 	}
 
 	const members = await GroupMember.findAll({
@@ -46,15 +48,15 @@ export const actions: Actions = {
 		const user = locals.currentUser ?? null;
 
 		if (!user) {
-			return fail(401, { success: false, message: 'Nicht angemeldet' });
+			return fail(401, { success: false, message: t(locals.locale, 'error.notAuthenticated') });
 		}
 
 		const result = await GroupService.joinGroup(user.id, group_id);
 
 		if (result === 'Success') {
-			return { success: true, message: 'Du bist der Gruppe erfolgreich beigetreten!' };
+			return { success: true, message: t(locals.locale, 'group.joined') };
 		} else {
-			return fail(400, { success: false, message: result });
+			return fail(400, { success: false, message: getMessageForChangeResult(locals.locale, result) });
 		}
 	},
 	delete: async ({ params, locals }) => {
@@ -62,7 +64,7 @@ export const actions: Actions = {
 		const user = locals.currentUser ?? null;
 
 		if (!user) {
-			return fail(401, { success: false, message: 'Nicht angemeldet' });
+			return fail(401, { success: false, message: t(locals.locale, 'error.notAuthenticated') });
 		}
 
 		const result = await GroupService.deleteGroup(user.id, group_id);
@@ -70,7 +72,7 @@ export const actions: Actions = {
 		if (result === 'Success') {
 			throw redirect(303, resolve('/group'));
 		} else {
-			return fail(400, { success: false, message: result });
+			return fail(400, { success: false, message: getMessageForChangeResult(locals.locale, result) });
 		}
 	},
 	leave: async ({ params, locals }) => {
@@ -78,15 +80,15 @@ export const actions: Actions = {
 		const user = locals.currentUser ?? null;
 
 		if (!user) {
-			return fail(401, { success: false, message: 'Nicht angemeldet' });
+			return fail(401, { success: false, message: t(locals.locale, 'error.notAuthenticated') });
 		}
 
 		const result = await GroupService.leaveGroup(user.id, group_id);
 
 		if (result === 'Success') {
-			return { success: true, message: 'Du hast die Gruppe verlassen.' };
+			return { success: true, message: t(locals.locale, 'group.left') };
 		} else {
-			return fail(400, { success: false, message: result });
+			return fail(400, { success: false, message: getMessageForChangeResult(locals.locale, result) });
 		}
 	}
 };

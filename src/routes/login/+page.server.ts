@@ -8,6 +8,7 @@ import { NickPassData } from '$lib/models/transferData/NickPassData';
 import { loginRateLimiter } from '$lib/services/login-rate-limit';
 import { loginRateLimitKey } from '$lib/services/rate-limit.logic';
 import { resolve } from '$app/paths';
+import { t } from '$lib/i18n';
 
 /**
  * load – GET /login
@@ -45,7 +46,7 @@ export const actions: Actions = {
 		if (formData) {
 			const rateLimitKey: string = loginRateLimitKey(getClientAddress(), formData.nickname);
 			if (loginRateLimiter.isBlocked(rateLimitKey)) {
-				return { success: false, message: 'Too many failed login attempts. Please try again later.' };
+				return { success: false, message: t(locals.locale, 'auth.error.rateLimited') };
 			}
 			const user: BackendUser | null = await UserService.loginWithCredentials(formData.nickname, formData.password);
 			if (user) {
@@ -54,9 +55,9 @@ export const actions: Actions = {
 				redirect(302, resolve('/'));
 			} else {
 				loginRateLimiter.recordFailure(rateLimitKey);
-				return { success: false, message: 'Password invalid' };
+				return { success: false, message: t(locals.locale, 'auth.error.passwordInvalid') };
 			}
 		}
-		return { success: false, message: 'Password and / or Nickname missing' };
+		return { success: false, message: t(locals.locale, 'auth.error.credentialsMissing') };
 	}
 };

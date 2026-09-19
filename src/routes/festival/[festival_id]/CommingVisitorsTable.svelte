@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tr } from '$lib/i18n/tr';
 	import { resolve } from '$app/paths';
 	import { getTotalNumberOfComingGuests } from '$lib/utils/festivalEvent.util.js';
 	import type { FestivalTransferData } from '$lib/models/transferData/FestivalTransferData';
@@ -6,17 +7,17 @@
 	let { data }: { data: FestivalTransferData } = $props();
 </script>
 
-<section>
-	<h5>Zusagen:</h5>
+<section data-testid="festival-coming-section">
+	<h5 data-testid="festival-coming-heading">{tr('festival.coming.heading')}</h5>
 	{#if getTotalNumberOfComingGuests(data.festival)}
-		<p>Bisher haben sich angemeldet:</p>
+		<p>{tr('festival.coming.intro')}</p>
 		<table style="width: 100%">
 			<thead>
 				<tr>
-					<th>Name</th>
-					<th>Essen</th>
-					<th>Trinken</th>
-					<th>Weitere Gäste</th>
+					<th>{tr('table.name')}</th>
+					<th>{tr('festival.coming.food')}</th>
+					<th>{tr('festival.coming.drink')}</th>
+					<th>{tr('festival.coming.otherGuests')}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -39,7 +40,7 @@
 			</tbody>
 			<tfoot>
 				<tr>
-					<td>Summe</td>
+					<td>{tr('festival.coming.total')}</td>
 					<td></td>
 					<td></td>
 					<td>{getTotalNumberOfComingGuests(data.festival)}</td>
@@ -47,6 +48,6 @@
 			</tfoot>
 		</table>
 	{:else}
-		<p>Es hat noch niemand zugesagt.</p>
+		<p>{tr('festival.coming.empty')}</p>
 	{/if}
 </section>
