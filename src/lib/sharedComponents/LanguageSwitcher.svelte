@@ -44,7 +44,7 @@
 	.language-switcher {
 		display: flex;
 		align-items: center;
-		justify-content: center;
+		justify-content: flex-start;
 		gap: 0.5rem;
 		margin-top: 0.5rem;
 	}
