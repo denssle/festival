@@ -31,6 +31,32 @@ jobs:
           path: playwright-report/
           retention-days: 30
 
+  # Unit- und Integrationstests (Vitest, `*.spec.ts` unter src/): Geschaeftslogik,
+  # Validierung, Kontoloeschung, und der Drift-Test migrations.spec.ts, der die
+  # Quadrat-Regel aus CLAUDE.md absichert. Bis hierher liefen sie nur lokal - ein
+  # vergessener Lauf vor dem Push fiel niemandem auf. Eigener Job statt Schritt im
+  # Playwright-Job: laeuft parallel, braucht keine Browser, und ein Fehlschlag ist im
+  # PR sofort als "Unit-Tests" erkennbar. Wie der Smoke-Test haengt er am
+  # Gesamtergebnis dieses Workflows und blockiert damit auch den Deploy.
+  #
+  # Der Workflow-Name oben bleibt "Run Playwright Tests", obwohl er inzwischen mehr
+  # tut: deploy.yml lauscht per workflow_run auf genau diesen Namen.
+  unit:
+    name: Unit-Tests (Vitest)
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22.20.0
+      - name: Install dependencies
+        run: npm ci
+      # --run: kein Watch-Modus. Vitest erkennt CI=true zwar selbst, verlassen sollte
+      # man sich darauf nicht - ein haengender Watcher liefe bis zum Timeout.
+      - name: Run unit tests
+        run: npm run test:unit -- --run
+
   # Die Playwright-Suite laeuft ueber PLAYWRIGHT=true gegen In-Memory-SQLite und fasst
   # damit weder `node build` noch den MariaDB-Zweig von startDB() an. Dieser Job startet
   # das gebaute Artefakt gegen eine echte MariaDB - genau so, wie der Supervisor es auf
