@@ -23,7 +23,8 @@
 # Konfiguration ueber Umgebungsvariablen (Defaults in Klammern):
 #   UBERSPACE_USER    (enzlor)
 #   UBERSPACE_HOST    (enzlor.uber.space)
-#   UBERSPACE_SSH_KEY (erster Treffer von ~/sync/Sonstiges/Schlüssel/ssh-keys/*uberspace)
+#   UBERSPACE_SSH_KEY (~/.ssh/uberspace, sonst erster Treffer von
+#                      ~/Sync/Sonstiges/Schlüssel/ssh-keys/*uberspace)
 #   APP_DIR           ($HOME/festival-app, auf dem HOST ausgewertet)
 
 set -euo pipefail
@@ -35,8 +36,16 @@ REMOTE_APP_DIR="${APP_DIR:-festival-app}"
 if [ -n "${UBERSPACE_SSH_KEY:-}" ]; then
 	KEY="$UBERSPACE_SSH_KEY"
 else
-	# Der Dateiname enthaelt verirrte Escape-Zeichen, deshalb per Glob ansprechen.
-	KEY=$(ls "$HOME"/sync/Sonstiges/Schlüssel/ssh-keys/*uberspace 2>/dev/null | grep -v '\.pub$' | head -1 || true)
+	# Zuerst die lokale Kopie: Unter Linux kommt der Schluessel per Syncthing mit 0644
+	# an, und SSH lehnt ihn dann ab ("UNPROTECTED PRIVATE KEY FILE"). Unter Windows
+	# prueft SSH keine Rechte, dort genuegt der Sync-Ordner.
+	# ~/Sync gross: Unter Windows ist die Schreibweise egal, unter Linux nicht.
+	# Glob, weil der Dateiname bis 2026-09 verirrte Escape-Zeichen enthielt.
+	if [ -f "$HOME/.ssh/uberspace" ]; then
+		KEY="$HOME/.ssh/uberspace"
+	else
+		KEY=$(ls "$HOME"/Sync/Sonstiges/Schlüssel/ssh-keys/*uberspace 2>/dev/null | grep -v '\.pub$' | head -1 || true)
+	fi
 fi
 
 if [ -z "$KEY" ] || [ ! -f "$KEY" ]; then
