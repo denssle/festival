@@ -8,6 +8,7 @@ import { NickPassData } from '$lib/models/transferData/NickPassData';
 import { MIN_PASSWORD_LENGTH } from '$lib/constants';
 import { resolve } from '$app/paths';
 import { t } from '$lib/i18n';
+import { findTooLongField, USER_TEXT_LIMITS } from '$lib/services/text-length.logic';
 
 /**
  * load – GET /registration
@@ -53,6 +54,10 @@ export const actions: Actions = {
 					success: false,
 					message: t(locals.locale, 'auth.error.passwordTooShort', { min: MIN_PASSWORD_LENGTH })
 				};
+			}
+			const tooLong = findTooLongField({ nickname: formData.nickname }, USER_TEXT_LIMITS);
+			if (tooLong) {
+				return { success: false, message: t(locals.locale, 'error.inputTooLong', { max: tooLong.max }) };
 			}
 			if (await UserService.nickNameInvalid(formData.nickname)) {
 				return { success: false, message: t(locals.locale, 'error.nicknameInvalid') };

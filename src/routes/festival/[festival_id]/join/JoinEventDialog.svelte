@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { tr } from '$lib/i18n/tr';
+	import { MAX_SHORT_TEXT_LENGTH } from '$lib/services/text-length.logic';
 	import type { JoinEventDialogData } from '$lib/models/dialogData/JoinEventDialogData';
 	import BaseDialog from '$lib/sharedComponents/BaseDialog.svelte';
 	import RichText from '$lib/sharedComponents/RichText.svelte';
@@ -24,7 +25,7 @@
 	<section>
 		<label>
 			{tr('festival.joinDialog.food')}
-			<input bind:value={joinDialogData.food} id="food" type="text" />
+			<input bind:value={joinDialogData.food} id="food" maxlength={MAX_SHORT_TEXT_LENGTH} type="text" />
 		</label>
 
 		{#if joinDialogData.bringYourOwnFood}
@@ -41,7 +42,7 @@
 	<section>
 		<label>
 			{tr('festival.joinDialog.drink')}
-			<input bind:value={joinDialogData.drink} id="drink" type="text" />
+			<input bind:value={joinDialogData.drink} id="drink" maxlength={MAX_SHORT_TEXT_LENGTH} type="text" />
 		</label>
 
 		{#if joinDialogData.bringYourOwnBottle}

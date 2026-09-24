@@ -16,7 +16,7 @@ export const FestivalEvent: ModelStatic<Model<FestivalEventAttributes, FestivalE
 				type: DataTypes.STRING,
 				allowNull: false
 			},
-			description: { type: DataTypes.STRING },
+			description: { type: DataTypes.TEXT },
 			location: { type: DataTypes.STRING },
 			bringYourOwnBottle: { type: DataTypes.BOOLEAN },
 			bringYourOwnFood: { type: DataTypes.BOOLEAN },

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { tr } from '$lib/i18n/tr';
+	import { MAX_LONG_TEXT_LENGTH, MAX_SHORT_TEXT_LENGTH } from '$lib/services/text-length.logic';
 	import { resolve } from '$app/paths';
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
@@ -13,13 +14,21 @@
 		<form method="POST" use:enhance>
 			<p>
 				<label for="name">{tr('group.form.nameLabel')}</label>
-				<input id="name" name="name" placeholder={tr('group.form.name')} value={data.group.name} required />
+				<input
+					id="name"
+					name="name"
+					maxlength={MAX_SHORT_TEXT_LENGTH}
+					placeholder={tr('group.form.name')}
+					value={data.group.name}
+					required
+				/>
 			</p>
 			<p>
 				<label for="description">{tr('group.form.descriptionLabel')}</label>
 				<textarea
 					id="description"
 					name="description"
+					maxlength={MAX_LONG_TEXT_LENGTH}
 					placeholder={tr('group.form.description')}
 					value={data.group.description}
 				></textarea>

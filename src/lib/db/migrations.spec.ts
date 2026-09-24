@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { QueryInterface, Sequelize } from 'sequelize';
+import { QueryInterface, QueryTypes, Sequelize } from 'sequelize';
 import { startDB } from '$lib/db/db';
 import { sequelize } from '$lib/db/sequelize';
 import { createMigrator } from '$lib/db/migrations';
@@ -69,6 +69,27 @@ describe('Migrationen erzeugen dasselbe Schema wie die Modelle', () => {
 		return [...new Set(sets)].sort();
 	}
 
+	interface ForeignKeyRow {
+		from: string;
+		table: string;
+		to: string;
+		on_delete: string;
+		on_update: string;
+	}
+
+	/**
+	 * Fremdschlüssel samt ON DELETE/ON UPDATE, sortiert. Liest SQLites PRAGMA direkt:
+	 * Diese Details verschwinden bei einem Tabellen-Neuaufbau am leichtesten (so geschehen
+	 * mit Sequelizes `changeColumn` beim Entwurf von Migration 0002), und ohne ON DELETE
+	 * CASCADE bleiben beim Löschen Waisen zurück.
+	 */
+	async function foreignKeys(db: Sequelize, table: string): Promise<string[]> {
+		const rows = await db.query<ForeignKeyRow>(`PRAGMA foreign_key_list(\`${table}\`)`, { type: QueryTypes.SELECT });
+		return rows
+			.map((fk) => `${fk.from} → ${fk.table}.${fk.to} ON DELETE ${fk.on_delete} ON UPDATE ${fk.on_update}`)
+			.sort();
+	}
+
 	it('legt dieselben Tabellen an', async () => {
 		expect(await tableNames(migrated.getQueryInterface())).toEqual(await tableNames(sequelize.getQueryInterface()));
 	});
@@ -85,6 +106,14 @@ describe('Migrationen erzeugen dasselbe Schema wie die Modelle', () => {
 		for (const table of await tableNames(sequelize.getQueryInterface())) {
 			const fromModels = await uniqueFieldSets(sequelize.getQueryInterface(), table);
 			const fromMigrations = await uniqueFieldSets(migrated.getQueryInterface(), table);
+			expect(fromMigrations, `Tabelle ${table}`).toEqual(fromModels);
+		}
+	});
+
+	it('legt pro Tabelle dieselben Fremdschlüssel (inkl. ON DELETE) an', async () => {
+		for (const table of await tableNames(sequelize.getQueryInterface())) {
+			const fromModels = await foreignKeys(sequelize, table);
+			const fromMigrations = await foreignKeys(migrated, table);
 			expect(fromMigrations, `Tabelle ${table}`).toEqual(fromModels);
 		}
 	});

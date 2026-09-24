@@ -32,6 +32,7 @@ export const en: Dictionary = {
 	'error.nameRequired': 'A name is required.',
 	'error.nicknameInvalid': 'Invalid nickname.',
 	'error.missingData': 'Required information is missing.',
+	'error.inputTooLong': 'An input is too long (at most {max} characters).',
 	'error.internal': 'Internal server error.',
 	'error.notFound': 'Not found.',
 	'error.forbidden': "You don't have permission to do that.",

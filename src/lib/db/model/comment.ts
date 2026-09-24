@@ -9,7 +9,7 @@ export const Comment: ModelStatic<Model<CommentAttributes, CommentCreationAttrib
 		id: { type: DataTypes.STRING, primaryKey: true, allowNull: false },
 		writtenBy: { type: DataTypes.STRING, allowNull: false },
 		writtenTo: { type: DataTypes.STRING, allowNull: false },
-		comment: { type: DataTypes.STRING }
+		comment: { type: DataTypes.TEXT }
 	},
 	{
 		timestamps: true,

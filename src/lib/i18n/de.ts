@@ -43,6 +43,7 @@ export const de = {
 	'error.nameRequired': 'Name ist erforderlich.',
 	'error.nicknameInvalid': 'Ungültiger Nickname.',
 	'error.missingData': 'Es fehlen Angaben.',
+	'error.inputTooLong': 'Eine Eingabe ist zu lang (höchstens {max} Zeichen).',
 	'error.internal': 'Interner Serverfehler.',
 	'error.notFound': 'Nicht gefunden.',
 	'error.forbidden': 'Dafür fehlt dir die Berechtigung.',

@@ -11,6 +11,7 @@ import { ChangeResult, getMessageForChangeResult } from '$lib/models/updates/Cha
 import { FriendshipService } from '$lib/services/friendship.service';
 import { GroupService } from '$lib/services/group.service';
 import { t } from '$lib/i18n';
+import { findTooLongField, USER_TEXT_LIMITS } from '$lib/services/text-length.logic';
 
 export const load: PageServerLoad = async ({ locals, params }): Promise<UserTransferData> => {
 	const userId: string = params.user_id;
@@ -38,6 +39,10 @@ export const actions: Actions = {
 		const oldUser: CurrentUser | undefined = locals.currentUser;
 		if (oldUser) {
 			const formData: UserFormData = await UserService.readFormDataFrontEndUser(request.formData());
+			const tooLong = findTooLongField(formData, USER_TEXT_LIMITS);
+			if (tooLong) {
+				return { success: false, message: t(locals.locale, 'error.inputTooLong', { max: tooLong.max }) };
+			}
 			// oldUser.nickname stammt aus der DB (Auth-Hook), nicht aus dem Cookie –
 			// die Eindeutigkeitsprüfung ist damit nicht client-seitig umgehbar.
 			const nicknameChanged: boolean = oldUser.nickname !== formData.nickname;

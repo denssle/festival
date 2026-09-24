@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { tr } from '$lib/i18n/tr';
+	import { MAX_LONG_TEXT_LENGTH } from '$lib/services/text-length.logic';
 	import { resolve } from '$app/paths';
 	import type { FrontendComment } from '$lib/models/transferData/FrontendComment';
 	import type { QuestionDialogData } from '$lib/models/dialogData/QuestionDialogData';
@@ -126,7 +127,7 @@
 
 <form onsubmit={handleSubmit}>
 	<label for="comment">{tr('comment.label')} </label>
-	<textarea id="comment" name="comment" bind:value={inputComment}></textarea>
+	<textarea id="comment" name="comment" maxlength={MAX_LONG_TEXT_LENGTH} bind:value={inputComment}></textarea>
 	<p>
 		<button type="submit" data-testid="comment-submit">{tr('comment.submit')}</button>
 	</p>
@@ -140,7 +141,7 @@
 			<a href={resolve('/user/[user_id]', { user_id: comment.writtenBy?.id ?? '' })}>{comment.writtenBy?.nickname}</a>
 		</legend>
 		{#if comment.editMode}
-			<textarea name="updateComment" bind:value={comment.comment}></textarea>
+			<textarea name="updateComment" maxlength={MAX_LONG_TEXT_LENGTH} bind:value={comment.comment}></textarea>
 		{:else}
 			<p class="notice">{comment.comment}</p>
 		{/if}

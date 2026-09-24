@@ -3,6 +3,7 @@ import type { RequestHandler } from '@sveltejs/kit';
 import type { BaseGuestInformation } from '$lib/models/guestInformation/BaseGuestInformation';
 import { GuestInformationService } from '$lib/services/guest-information.service';
 import { t } from '$lib/i18n';
+import { findTooLongField, GUEST_TEXT_LIMITS } from '$lib/services/text-length.logic';
 
 /**
  * POST /festival/:festival_id/join
@@ -17,6 +18,7 @@ import { t } from '$lib/i18n';
  *          401 wenn nicht eingeloggt,
  *          404 wenn Festival nicht gefunden,
  *          400 bei fehlenden Daten,
+ *          422 bei zu langen Angaben,
  *          500 bei internem Fehler
  */
 export const POST: RequestHandler = async ({ locals, params, request }): Promise<Response> => {
@@ -32,6 +34,23 @@ export const POST: RequestHandler = async ({ locals, params, request }): Promise
 		}
 
 		if (params.festival_id && baseGuestInformation) {
+			const tooLong = findTooLongField(
+				{
+					food: baseGuestInformation.food,
+					drink: baseGuestInformation.drink,
+					comment: baseGuestInformation.comment
+				},
+				GUEST_TEXT_LIMITS
+			);
+			if (tooLong) {
+				return new Response(
+					JSON.stringify({
+						success: false,
+						message: t(locals.locale, 'error.inputTooLong', { max: tooLong.max })
+					}),
+					{ status: 422 }
+				);
+			}
 			const festival = await FestivalEventService.getFrontEndFestival(params.festival_id);
 			if (!festival) {
 				return new Response(JSON.stringify({ success: false, message: t(locals.locale, 'festival.error.notFound') }), {

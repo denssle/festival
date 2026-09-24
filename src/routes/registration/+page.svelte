@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { tr } from '$lib/i18n/tr';
+	import { MAX_SHORT_TEXT_LENGTH } from '$lib/services/text-length.logic';
 	import { resolve } from '$app/paths';
 	import { MIN_PASSWORD_LENGTH } from '$lib/constants';
 	import type { LoginRegisterFormData } from '$lib/models/transferData/LoginRegisterFormData';
@@ -17,6 +18,7 @@
 			<p>
 				<input
 					bind:value={formData.nickname}
+					maxlength={MAX_SHORT_TEXT_LENGTH}
 					minlength="3"
 					name="nickname"
 					placeholder={tr('form.nickname')}

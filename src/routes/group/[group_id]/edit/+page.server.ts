@@ -5,6 +5,7 @@ import type { GroupAttributes } from '$lib/db/attributes/group.attributes';
 import { GroupService } from '$lib/services/group.service';
 import { resolve } from '$app/paths';
 import { t } from '$lib/i18n';
+import { GROUP_TEXT_LIMITS, findTooLongField } from '$lib/services/text-length.logic';
 import { getMessageForChangeResult } from '$lib/models/updates/ChangeResult';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
@@ -47,6 +48,11 @@ export const actions: Actions = {
 
 		if (!name) {
 			return fail(400, { message: t(locals.locale, 'error.nameRequired') });
+		}
+
+		const tooLong = findTooLongField({ name, description }, GROUP_TEXT_LIMITS);
+		if (tooLong) {
+			return fail(422, { message: t(locals.locale, 'error.inputTooLong', { max: tooLong.max }) });
 		}
 
 		const result = await GroupService.updateGroup(user.id, group_id, name, description);

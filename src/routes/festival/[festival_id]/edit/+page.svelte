@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { tr } from '$lib/i18n/tr';
+	import { MAX_LONG_TEXT_LENGTH, MAX_SHORT_TEXT_LENGTH } from '$lib/services/text-length.logic';
 	import { resolve } from '$app/paths';
+	import type { ActionData } from './$types';
 	import { untrack } from 'svelte';
 	import { toDateInputValue, toTimeInputValue } from '$lib/utils/date.util';
 	import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 
-	let { data }: { data: FrontendFestivalEvent } = $props();
+	let { data, form }: { data: FrontendFestivalEvent; form: ActionData } = $props();
 
 	// Formular einmalig aus data vorbefüllen (gilt für SSR und Client). Bewusst KEIN $effect,
 	// der formData nachträglich aus data setzt: Der Effect liefe erst nach der Hydration und
@@ -28,10 +30,20 @@
 <article>
 	<form method="POST">
 		<p>
-			<input name="name" placeholder={tr('festival.form.name')} required bind:value={formData.name} />
+			<input
+				name="name"
+				maxlength={MAX_SHORT_TEXT_LENGTH}
+				placeholder={tr('festival.form.name')}
+				required
+				bind:value={formData.name}
+			/>
 		</p>
 		<p>
-			<textarea name="description" placeholder={tr('festival.form.description')} bind:value={formData.description}
+			<textarea
+				name="description"
+				maxlength={MAX_LONG_TEXT_LENGTH}
+				placeholder={tr('festival.form.description')}
+				bind:value={formData.description}
 			></textarea>
 		</p>
 
@@ -41,7 +53,12 @@
 		</p>
 
 		<p>
-			<textarea name="location" placeholder={tr('festival.form.location')} bind:value={formData.location}></textarea>
+			<textarea
+				name="location"
+				maxlength={MAX_SHORT_TEXT_LENGTH}
+				placeholder={tr('festival.form.location')}
+				bind:value={formData.location}
+			></textarea>
 		</p>
 
 		<p>
@@ -55,7 +72,17 @@
 			</label>
 		</p>
 
+		{#if form?.message}
+			<p class="error">{form.message}</p>
+		{/if}
+
 		<button type="submit" data-testid="festival-save">{tr('form.save')}</button>
 		<a class="button" href={resolve('/festival/[festival_id]', { festival_id: data.id })}>{tr('form.back')}</a>
 	</form>
 </article>
+
+<style>
+	.error {
+		color: red;
+	}
+</style>

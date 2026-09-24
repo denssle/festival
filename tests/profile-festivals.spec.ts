@@ -45,7 +45,11 @@ test.describe.serial('Profile Festivals Display', () => {
 		await dialog.waitFor({ state: 'visible', timeout: 10000 });
 
 		await dialog.locator('#food').fill('Pasta');
+		// Auf den Join-Request warten: Sonst navigiert der nächste Test schon zum Profil,
+		// während der Request noch läuft – unter Suite-Last bricht die Navigation ihn ab.
+		const joinResponse = page.waitForResponse((r) => r.url().includes('/join') && r.request().method() === 'POST');
 		await dialog.getByTestId('dialog-yes').click();
+		expect((await joinResponse).ok()).toBe(true);
 		await expect(dialog).not.toBeVisible({ timeout: 10000 });
 	});
 

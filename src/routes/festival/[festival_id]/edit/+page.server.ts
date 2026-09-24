@@ -7,6 +7,7 @@ import { CurrentUser } from '$lib/models/user/CurrentUser';
 import { ChangeResult, getHTTPCodeForChangeResult, getMessageForChangeResult } from '$lib/models/updates/ChangeResult';
 import { resolve } from '$app/paths';
 import { t } from '$lib/i18n';
+import { FESTIVAL_TEXT_LIMITS, findTooLongField } from '$lib/services/text-length.logic';
 
 /**
  * load – GET /festival/:festival_id/edit
@@ -69,6 +70,11 @@ export const actions: Actions = {
 		const startTime = values.get('startTime')?.toString() ?? '';
 		const bringYourOwnBottle = values.get('bringYourOwnBottle') === 'on';
 		const bringYourOwnFood = values.get('bringYourOwnFood') === 'on';
+
+		const tooLong = findTooLongField({ name, description, location }, FESTIVAL_TEXT_LIMITS);
+		if (tooLong) {
+			return fail(422, { message: t(locals.locale, 'error.inputTooLong', { max: tooLong.max }) });
+		}
 
 		const result: ChangeResult = await FestivalEventService.updateFestival(
 			user,
