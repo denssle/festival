@@ -139,11 +139,14 @@ export const en: Dictionary = {
 	'festival.joinEdit': 'Edit attendance',
 	'festival.decline': 'Decline',
 	'festival.declineEdit': 'Edit absence',
+	'festival.maybe': 'Maybe',
+	'festival.maybeEdit': 'Edit maybe',
 	'festival.notYours': 'This is not your event.',
 	'festival.error.deleteFailed': 'Deleting failed.',
 	'festival.error.joinFailed': 'Signing up failed: {message}',
 	'festival.error.joinNetwork': 'Network error while signing up.',
 	'festival.error.declineFailed': 'Declining failed.',
+	'festival.error.maybeFailed': 'Your “maybe” could not be saved.',
 
 	// Festival: guest lists
 	'festival.coming.heading': 'Attending:',
@@ -156,6 +159,8 @@ export const en: Dictionary = {
 	'festival.notComing.heading': 'Not attending:',
 	'festival.notComing.comment': 'Comment',
 	'festival.notComing.empty': 'Nobody has declined yet.',
+	'festival.maybe.heading': 'Maybe:',
+	'festival.maybe.empty': 'Nobody has answered “maybe” yet.',
 
 	// Festival: attend dialog
 	'festival.joinDialog.confirm': 'Join',
@@ -169,6 +174,7 @@ export const en: Dictionary = {
 	// Festival: decline dialog
 	'festival.declineDialog.text': "Unfortunately I / we can't make it to this event.",
 	'festival.declineDialog.comment': 'Comment (optional):',
+	'festival.maybeDialog.text': 'I’m / we’re not sure yet whether we can make it.',
 
 	// Groups: overview
 	'group.heading': 'Groups',

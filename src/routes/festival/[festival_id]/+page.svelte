@@ -14,7 +14,8 @@
 	import type { CancelInvitationDialogData } from '$lib/models/dialogData/CancelInvitationDialogData';
 	import CancelInvitationDialog from './cancel-invitation/CancelInvitationDialog.svelte';
 	import ComingVisitorsTable from './CommingVisitorsTable.svelte';
-	import NotComingVisitorsTable from './NotCommingVisitorsTable.svelte';
+	import CommentAnswerTable from './CommentAnswerTable.svelte';
+	import type { CommentAnswer } from '$lib/models/Answer';
 	import type { FestivalTransferData } from '$lib/models/transferData/FestivalTransferData';
 	import FestivalComments from '$lib/sharedComponents/Comments.svelte';
 
@@ -81,7 +82,7 @@
 						food: joinDialogData.food,
 						drink: joinDialogData.drink,
 						numberOfOtherGuests: joinDialogData.numberOfOtherGuests,
-						coming: true,
+						answer: 'yes',
 						comment: ''
 					};
 					try {
@@ -112,9 +113,22 @@
 		}
 	}
 
-	async function cancelInvitation(): Promise<void> {
+	/** Endpunkt und Fehlertext je Antwort mit Kommentar. */
+	const COMMENT_ANSWER_REQUESTS = {
+		no: {
+			url: () => resolve('/festival/[festival_id]/cancel-invitation', { festival_id: data.festival.id }),
+			failed: 'festival.error.declineFailed'
+		},
+		maybe: {
+			url: () => resolve('/festival/[festival_id]/maybe', { festival_id: data.festival.id }),
+			failed: 'festival.error.maybeFailed'
+		}
+	} as const;
+
+	async function answerWithComment(answer: CommentAnswer): Promise<void> {
 		// Kommentar einmalig beim Öffnen aus den aktuellen Gastdaten vorbefüllen.
 		cancelInvitationDialogData.comment = guestComment;
+		cancelInvitationDialogData.answer = answer;
 		cancelInvitationDialogData.showDialog = true;
 		await tick();
 		const dialog = cancelInvitationDialogData.dialog;
@@ -122,17 +136,14 @@
 			dialog.showModal();
 			const onclose = async () => {
 				if (cancelInvitationDialogData.answerYes) {
-					const response = await fetch(
-						resolve('/festival/[festival_id]/cancel-invitation', { festival_id: data.festival.id }),
-						{
-							method: 'POST',
-							body: JSON.stringify({ comment: cancelInvitationDialogData.comment })
-						}
-					);
+					const response = await fetch(COMMENT_ANSWER_REQUESTS[answer].url(), {
+						method: 'POST',
+						body: JSON.stringify({ comment: cancelInvitationDialogData.comment })
+					});
 					if (response.ok) {
 						await afterRequest();
 					} else {
-						infoDialogData.infoDialogText = tr('festival.error.declineFailed');
+						infoDialogData.infoDialogText = tr(COMMENT_ANSWER_REQUESTS[answer].failed);
 						infoDialogData.showDialog = true;
 					}
 				}
@@ -147,12 +158,10 @@
 		await invalidateAll();
 	}
 
-	let joinFestivalButtonText = $derived(
-		data.yourGuestInformation?.coming ? tr('festival.joinEdit') : tr('festival.join')
-	);
-	let cancelFestivalButtonText = $derived(
-		data.yourGuestInformation && !data.yourGuestInformation.coming ? tr('festival.declineEdit') : tr('festival.decline')
-	);
+	let yourAnswer = $derived(data.yourGuestInformation?.answer);
+	let joinFestivalButtonText = $derived(yourAnswer === 'yes' ? tr('festival.joinEdit') : tr('festival.join'));
+	let maybeFestivalButtonText = $derived(yourAnswer === 'maybe' ? tr('festival.maybeEdit') : tr('festival.maybe'));
+	let cancelFestivalButtonText = $derived(yourAnswer === 'no' ? tr('festival.declineEdit') : tr('festival.decline'));
 
 	let guestFood = $derived(data.yourGuestInformation?.food ?? '');
 	let guestDrink = $derived(data.yourGuestInformation?.drink ?? '');
@@ -165,6 +174,7 @@
 		showDialog: false,
 		dialog: undefined,
 		comment: '',
+		answer: 'no',
 		answerYes: false
 	});
 	let infoDialogData: InfoDialogData = $state({
@@ -181,7 +191,7 @@
 		drink: '',
 		numberOfOtherGuests: 0,
 		dialog: undefined,
-		coming: true,
+		answer: 'yes',
 		comment: '',
 		answerYes: false
 	});
@@ -232,12 +242,15 @@
 
 	<ComingVisitorsTable {data} />
 
-	<NotComingVisitorsTable {data} />
+	<CommentAnswerTable {data} answer="maybe" />
+
+	<CommentAnswerTable {data} answer="no" />
 
 	<section>
 		<button data-testid="festival-edit" onclick={editFestival}>{tr('action.edit')}</button>
 		<button data-testid="festival-delete" onclick={deleteFestival}>{tr('action.delete')}</button>
-		<button data-testid="festival-cancel" onclick={cancelInvitation}>{cancelFestivalButtonText}</button>
+		<button data-testid="festival-cancel" onclick={() => answerWithComment('no')}>{cancelFestivalButtonText}</button>
+		<button data-testid="festival-maybe" onclick={() => answerWithComment('maybe')}>{maybeFestivalButtonText}</button>
 		<button data-testid="festival-join" onclick={joinFestival}>{joinFestivalButtonText}</button>
 		<a class="button" href={resolve('/')}>{tr('form.back')}</a>
 	</section>

@@ -1,7 +1,9 @@
+import type { Answer } from '$lib/models/Answer';
+
 export interface BaseGuestInformation {
 	food: string;
 	drink: string;
 	numberOfOtherGuests: number;
-	coming: boolean;
+	answer: Answer;
 	comment: string;
 }

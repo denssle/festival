@@ -5,6 +5,7 @@ import {
 } from '$lib/db/attributes/guestInformation.attributes';
 
 import { sequelize } from '$lib/db/sequelize';
+import { ANSWERS } from '$lib/models/Answer';
 
 export const GuestInformation: ModelStatic<Model<GuestInformationAttributes, GuestInformationCreationAttributes>> =
 	sequelize.define(
@@ -18,7 +19,14 @@ export const GuestInformation: ModelStatic<Model<GuestInformationAttributes, Gue
 			food: { type: DataTypes.STRING },
 			drink: { type: DataTypes.STRING },
 			numberOfOtherGuests: { type: DataTypes.INTEGER },
-			coming: { type: DataTypes.BOOLEAN },
+			// Dabei / vielleicht / nicht dabei (seit Migration 0004, vorher BOOLEAN `coming`).
+			// In MariaDB zusätzlich per CHECK auf die drei Werte beschränkt.
+			answer: {
+				type: DataTypes.STRING,
+				allowNull: false,
+				defaultValue: 'no',
+				validate: { isIn: [[...ANSWERS]] }
+			},
 			comment: { type: DataTypes.TEXT },
 			FestivalEventId: { type: DataTypes.STRING, allowNull: false },
 			UserId: { type: DataTypes.STRING, allowNull: false }

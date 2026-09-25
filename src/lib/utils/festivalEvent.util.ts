@@ -1,21 +1,21 @@
 import type { FrontendFestivalEvent } from '$lib/models/festivalEvent/FrontendFestivalEvent';
 import type { FrontendGuestInformation } from '$lib/models/guestInformation/FrontendGuestInformation';
+import type { Answer } from '$lib/models/Answer';
 
+/** Alle Gäste eines Festivals mit der gegebenen Antwort. */
+export function getGuestsWithAnswer(festival: FrontendFestivalEvent, answer: Answer): FrontendGuestInformation[] {
+	return (festival.frontendGuestInformation ?? []).filter((value) => value.answer === answer);
+}
+
+/**
+ * Erwartete Personenzahl: alle Zusagen samt mitgebrachter Gäste. Ein „Vielleicht“ zählt
+ * bewusst nicht mit (2026-09-25) – geplant wird mit denen, die sicher kommen.
+ */
 export function getTotalNumberOfComingGuests(festival: FrontendFestivalEvent): number {
-	if (!festival.frontendGuestInformation) {
-		return 0;
-	}
-	const filtered: FrontendGuestInformation[] = festival.frontendGuestInformation.filter((value) => value.coming);
-	let result: number = filtered.length;
-	for (const information of filtered) {
+	const coming = getGuestsWithAnswer(festival, 'yes');
+	let result: number = coming.length;
+	for (const information of coming) {
 		result += information.numberOfOtherGuests;
 	}
 	return result;
-}
-
-export function getTotalNumberOfNotComingGuests(festival: FrontendFestivalEvent): number {
-	if (!festival.frontendGuestInformation) {
-		return 0;
-	}
-	return festival.frontendGuestInformation.filter((value) => !value.coming).length;
 }

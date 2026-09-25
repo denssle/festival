@@ -151,11 +151,14 @@ export const de = {
 	'festival.joinEdit': 'Zusage bearbeiten',
 	'festival.decline': 'Absagen',
 	'festival.declineEdit': 'Absage bearbeiten',
+	'festival.maybe': 'Vielleicht',
+	'festival.maybeEdit': 'Vielleicht bearbeiten',
 	'festival.notYours': 'Das ist nicht dein Event.',
 	'festival.error.deleteFailed': 'Löschen fehlgeschlagen.',
 	'festival.error.joinFailed': 'Fehler beim Zusagen: {message}',
 	'festival.error.joinNetwork': 'Netzwerkfehler beim Zusagen.',
 	'festival.error.declineFailed': 'Absagen fehlgeschlagen.',
+	'festival.error.maybeFailed': 'Die Antwort „Vielleicht“ konnte nicht gespeichert werden.',
 
 	// Festival: Gästelisten
 	'festival.coming.heading': 'Zusagen:',
@@ -168,6 +171,8 @@ export const de = {
 	'festival.notComing.heading': 'Absagen:',
 	'festival.notComing.comment': 'Kommentar',
 	'festival.notComing.empty': 'Es hat noch niemand abgesagt.',
+	'festival.maybe.heading': 'Vielleicht:',
+	'festival.maybe.empty': 'Es hat noch niemand mit „Vielleicht“ geantwortet.',
 
 	// Festival: Zusage-Dialog
 	'festival.joinDialog.confirm': 'Beitreten',
@@ -181,6 +186,7 @@ export const de = {
 	// Festival: Absage-Dialog
 	'festival.declineDialog.text': 'Leider bin ich / sind wir bei dem Event nicht dabei.',
 	'festival.declineDialog.comment': 'Kommentar (optional):',
+	'festival.maybeDialog.text': 'Ich weiß noch nicht sicher, ob ich / wir dabei sind.',
 
 	// Gruppen: Übersicht
 	'group.heading': 'Gruppen',

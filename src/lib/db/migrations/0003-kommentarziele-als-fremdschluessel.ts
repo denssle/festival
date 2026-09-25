@@ -16,10 +16,11 @@ import { DataTypes, QueryInterface, QueryTypes } from 'sequelize';
  * Details verlieren (siehe Migration 0002). Unkritisch, weil keine andere Tabelle auf
  * `comments` verweist: DROP TABLE löst keine Kaskade aus.
  *
- * Kosmetisch: In MariaDB behalten die FKs die automatisch vergebenen Namen der
- * Zwischentabelle (`comments_0003_neu_ibfk_*`). Umgekehrt (alte Tabelle umbenennen, neue
- * gleich unter `comments` anlegen) ginge es nicht – Constraint-Namen gelten dort
- * datenbankweit, `comments_ibfk_1` wäre doppelt vergeben.
+ * Reihenfolge: erst die neue Tabelle anlegen, dann die alte löschen und umbenennen.
+ * Umgekehrt (alte umbenennen, neue gleich unter `comments` anlegen) ginge es in MariaDB
+ * nicht – Constraint-Namen gelten dort datenbankweit, `comments_ibfk_1` wäre doppelt
+ * vergeben. Beim RENAME TABLE zieht MariaDB die automatisch vergebenen FK-Namen mit um:
+ * In Produktion heißen sie danach wieder `comments_ibfk_*` (nachgesehen nach dem Deploy).
  */
 
 const NEW_TABLE = 'comments_0003_neu';

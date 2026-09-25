@@ -2,13 +2,14 @@ import { BackendGuestInformation } from '$lib/models/guestInformation/BackendGue
 import { FrontendGuestInformation } from '$lib/models/guestInformation/FrontendGuestInformation';
 import { UserService } from '$lib/services/user.service';
 import type { Optional } from 'sequelize';
+import type { Answer } from '$lib/models/Answer';
 
 export type GuestInformationAttributes = {
 	id: string;
 	food: string;
 	drink: string;
 	numberOfOtherGuests: number;
-	coming: boolean;
+	answer: Answer;
 	comment: string;
 	createdAt: Date;
 	updatedAt: Date;
@@ -19,14 +20,14 @@ export type GuestInformationAttributes = {
 /** Attribute beim Anlegen: Pflicht sind nur `id`, `FestivalEventId` und `UserId`. */
 export type GuestInformationCreationAttributes = Optional<
 	GuestInformationAttributes,
-	'createdAt' | 'updatedAt' | 'food' | 'drink' | 'numberOfOtherGuests' | 'coming' | 'comment'
+	'createdAt' | 'updatedAt' | 'food' | 'drink' | 'numberOfOtherGuests' | 'answer' | 'comment'
 >;
 
 export async function mapToFrontendGuestInformation(
 	dataValues: GuestInformationAttributes
 ): Promise<FrontendGuestInformation> {
 	return {
-		coming: dataValues.coming,
+		answer: dataValues.answer,
 		numberOfOtherGuests: dataValues.numberOfOtherGuests,
 		drink: dataValues.drink,
 		comment: dataValues.comment,
@@ -43,6 +44,6 @@ export function mapToBackendGuestInformation(dataValues: GuestInformationAttribu
 		comment: dataValues.comment,
 		drink: dataValues.drink,
 		numberOfOtherGuests: dataValues.numberOfOtherGuests,
-		coming: dataValues.coming
+		answer: dataValues.answer
 	};
 }

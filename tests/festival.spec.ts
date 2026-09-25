@@ -234,6 +234,30 @@ test.describe.serial('Festival-Management Lifecycle', () => {
 		await expect(notComingTable).not.toContainText(userNickname);
 	});
 
+	test('sollte mit Vielleicht antworten können', async () => {
+		await page.goto(`/festival/festival/${festivalId}`);
+
+		const maybeButton = page.getByTestId('festival-maybe');
+		await expect(maybeButton).toHaveText(uiText('festival.maybe'));
+
+		const dialog = page.locator('dialog[open]');
+		await openDialog(maybeButton, dialog);
+		await expect(dialog).toContainText(uiText('festival.maybeDialog.text'));
+
+		await page.fill('#comment', 'Wenn ich früher Feierabend habe');
+		await dialog.getByTestId('dialog-yes').click();
+		await expect(dialog).not.toBeVisible();
+
+		// In der Tabelle "Vielleicht" – und in keiner der beiden anderen
+		const maybeTable = page.getByTestId('festival-maybe-section').locator('table');
+		await expect(maybeTable).toContainText(userNickname);
+		await expect(maybeTable).toContainText('Wenn ich früher Feierabend habe');
+		await expect(page.getByTestId('festival-coming-section')).not.toContainText(userNickname);
+		await expect(page.getByTestId('festival-notcoming-section')).not.toContainText(userNickname);
+
+		await expect(page.getByTestId('festival-maybe')).toHaveText(uiText('festival.maybeEdit'));
+	});
+
 	test('sollte das Festival löschen können', async () => {
 		await page.goto(`/festival/festival/${festivalId}`);
 

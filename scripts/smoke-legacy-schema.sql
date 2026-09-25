@@ -143,7 +143,7 @@ CREATE TABLE `users` (
 
 SET FOREIGN_KEY_CHECKS = 1;
 
--- Ausgedachte Altdaten im alten Format: writtenTo zeigt auf ein Festival, auf ein
+-- Ausgedachte Altdaten (Testdaten duerfen wachsen, das Schema oben nicht). Kommentare: writtenTo zeigt auf ein Festival, auf ein
 -- Profil und ins Leere (Waise aus der Zeit ohne FK). Migration 0003 muss die ersten
 -- beiden der richtigen Spalte zuordnen und die Waise verwerfen.
 INSERT INTO `users` (`id`, `password`, `nickname`, `createdAt`, `updatedAt`) VALUES
@@ -155,3 +155,9 @@ INSERT INTO `comments` (`id`, `writtenBy`, `writtenTo`, `comment`, `createdAt`, 
   ('legacy-c-festival', 'legacy-guest', 'legacy-festival', 'ans Festival', NOW(), NOW()),
   ('legacy-c-profil', 'legacy-guest', 'legacy-owner', 'ans Profil', NOW(), NOW()),
   ('legacy-c-waise', 'legacy-guest', 'gibt-es-nicht', 'ins Leere', NOW(), NOW());
+
+-- Zu- und Absage im alten Format (coming als Boolean). Migration 0004 macht daraus
+-- answer = 'yes' bzw. 'no'.
+INSERT INTO `guestInformations` (`id`, `coming`, `numberOfOtherGuests`, `FestivalEventId`, `UserId`, `createdAt`, `updatedAt`) VALUES
+  ('legacy-g-zusage', 1, 0, 'legacy-festival', 'legacy-guest', NOW(), NOW()),
+  ('legacy-g-absage', 0, 0, 'legacy-festival', 'legacy-owner', NOW(), NOW());

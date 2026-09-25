@@ -81,10 +81,10 @@ drop_all_tables() {
 	fi
 }
 
-# Kommentarziele als echte FKs (Migration 0003) - in MariaDB selbst nachgesehen, weil
-# genau hier ein stiller Unterschied zu SQLite droht: Ein FK, der nicht angelegt wird,
-# faellt erst auf, wenn beim Loeschen Waisen liegen bleiben.
-assert_comment_schema() {
+# Constraints der Migrationen 0003/0004 - in MariaDB selbst nachgesehen, weil genau hier
+# ein stiller Unterschied zu SQLite droht: SQLite bekommt die CHECKs gar nicht, und ein
+# FK, der nicht angelegt wird, faellt erst auf, wenn beim Loeschen Waisen liegen bleiben.
+assert_schema_constraints() {
 	local cascades check
 	cascades=$(mysql_value "SELECT COUNT(*) FROM information_schema.REFERENTIAL_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'comments' AND DELETE_RULE = 'CASCADE'")
 	if [[ "$cascades" != "3" ]]; then
@@ -93,6 +93,10 @@ assert_comment_schema() {
 	check=$(mysql_value "SELECT COUNT(*) FROM information_schema.CHECK_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = DATABASE() AND CONSTRAINT_NAME = 'comments_genau_ein_ziel'")
 	if [[ "$check" != "1" ]]; then
 		fail "comments: CHECK-Constraint comments_genau_ein_ziel fehlt"
+	fi
+	check=$(mysql_value "SELECT COUNT(*) FROM information_schema.CHECK_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = DATABASE() AND CONSTRAINT_NAME = 'guest_informations_answer_gueltig'")
+	if [[ "$check" != "1" ]]; then
+		fail "guestInformations: CHECK-Constraint guest_informations_answer_gueltig fehlt"
 	fi
 }
 
@@ -232,7 +236,7 @@ assert_health_field "pendingMigrations" '0'
 if ! grep -q "SequelizeMeta" smoke-server.log; then
 	fail "Migrationslauf nicht im Log - lief die App wirklich ueber den MariaDB-Zweig?"
 fi
-assert_comment_schema
+assert_schema_constraints
 
 echo "==> Szenario 2: Bestands-DB aus der sync()-Zeit (Baseline-Schema, kein Protokoll)"
 stop_server
@@ -253,13 +257,20 @@ assert_health_field "pendingMigrations" '0'
 if ! grep -q "ohne Migrationsprotokoll erkannt" smoke-server.log; then
 	fail "Baseline wurde nicht gestempelt - stampBaselineIfLegacySchema() hat nicht gegriffen"
 fi
-assert_comment_schema
+assert_schema_constraints
 
 # Migration 0003: writtenTo der richtigen Spalte zugeordnet, die Waise verworfen.
 migrated=$(mysql_value "SELECT id, IFNULL(FestivalEventId, '-'), IFNULL(ProfileUserId, '-') FROM comments ORDER BY id")
 expected=$'legacy-c-festival\tlegacy-festival\t-\nlegacy-c-profil\t-\tlegacy-owner'
 if [[ "$migrated" != "$expected" ]]; then
 	fail "Kommentare nach Migration 0003 falsch zugeordnet. Erwartet:\n${expected}\nWar:\n${migrated}"
+fi
+
+# Migration 0004: coming (Boolean) -> answer.
+migrated=$(mysql_value "SELECT id, answer FROM guestInformations ORDER BY id")
+expected=$'legacy-g-absage\tno\nlegacy-g-zusage\tyes'
+if [[ "$migrated" != "$expected" ]]; then
+	fail "Zu-/Absagen nach Migration 0004 falsch uebernommen. Erwartet:\n${expected}\nWar:\n${migrated}"
 fi
 
 echo "==> Szenario 3: Ablaeufe gegen Build + MariaDB"
@@ -295,6 +306,16 @@ expect_status 200 "$status" "Kommentar mit 1000 Zeichen"
 echo "  Kommentar an ein nicht existierendes Festival"
 status=$(http -F "comment=Hallo" "${APP_URL}/festival/00000000-0000-0000-0000-000000000000/comments")
 expect_status 422 "$status" "Kommentar an nicht existierendes Festival"
+
+# Migration 0004: Der CHECK auf answer muss 'maybe' durchlassen.
+echo "  Antwort \"vielleicht\""
+status=$(http -H "Content-Type: application/json" -d '{"comment":"wenn es klappt"}' \
+	"${APP_URL}/festival/${festival_id}/maybe")
+expect_status 200 "$status" "Antwort vielleicht"
+answer=$(mysql_value "SELECT answer FROM guestInformations WHERE FestivalEventId = '${festival_id}'")
+if [[ "$answer" != "maybe" ]]; then
+	fail "Antwort vielleicht nicht gespeichert (war: ${answer})"
+fi
 
 echo "  Zu langer Festivalname"
 status=$(http -d "name=$(repeat_char n 256)" "${APP_URL}/festival/new")

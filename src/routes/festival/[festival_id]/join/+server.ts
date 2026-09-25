@@ -24,7 +24,7 @@ import { findTooLongField, GUEST_TEXT_LIMITS } from '$lib/services/text-length.l
 export const POST: RequestHandler = async ({ locals, params, request }): Promise<Response> => {
 	try {
 		const baseGuestInformation: BaseGuestInformation = await request.json();
-		baseGuestInformation.coming = true;
+		baseGuestInformation.answer = 'yes';
 		const user = locals.currentUser ?? null;
 
 		if (!user) {

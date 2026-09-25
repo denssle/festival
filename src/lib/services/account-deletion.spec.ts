@@ -61,7 +61,7 @@ describe('Kontolöschung', () => {
 			id: crypto.randomUUID(),
 			UserId: userId,
 			FestivalEventId: foreignFestival,
-			coming: true,
+			answer: 'yes',
 			numberOfOtherGuests: 0
 		});
 		const groupId = crypto.randomUUID();

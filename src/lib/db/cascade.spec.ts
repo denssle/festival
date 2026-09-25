@@ -55,7 +55,7 @@ describe('Beziehungen & Kaskadenlöschungen', () => {
 			id: crypto.randomUUID(),
 			UserId: userId,
 			FestivalEventId: festivalId,
-			coming: true,
+			answer: 'yes',
 			numberOfOtherGuests: 0
 		});
 		const groupId = crypto.randomUUID();
@@ -90,7 +90,7 @@ describe('Beziehungen & Kaskadenlöschungen', () => {
 			id: crypto.randomUUID(),
 			UserId: guestId,
 			FestivalEventId: festivalId,
-			coming: true,
+			answer: 'yes',
 			numberOfOtherGuests: 0
 		});
 		await CommentService.saveComment(guestId, { festivalId }, 'Bin dabei');

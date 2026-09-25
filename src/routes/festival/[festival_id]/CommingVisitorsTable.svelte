@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { tr } from '$lib/i18n/tr';
 	import { resolve } from '$app/paths';
-	import { getTotalNumberOfComingGuests } from '$lib/utils/festivalEvent.util.js';
+	import { getGuestsWithAnswer, getTotalNumberOfComingGuests } from '$lib/utils/festivalEvent.util';
 	import type { FestivalTransferData } from '$lib/models/transferData/FestivalTransferData';
 
 	let { data }: { data: FestivalTransferData } = $props();
@@ -21,7 +21,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each data.festival.frontendGuestInformation.filter((value) => value.coming) as guest (guest.user?.id)}
+				{#each getGuestsWithAnswer(data.festival, 'yes') as guest (guest.user?.id)}
 					<tr>
 						<td>
 							<a href={resolve('/user/[user_id]', { user_id: guest.user?.id ?? '' })}>{guest.user?.nickname}</a>

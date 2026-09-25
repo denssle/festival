@@ -6,14 +6,16 @@
 
 	let { cancelInvitationDialogData = $bindable() }: { cancelInvitationDialogData: CancelInvitationDialogData } =
 		$props();
+
+	let isMaybe = $derived(cancelInvitationDialogData.answer === 'maybe');
 </script>
 
 <BaseDialog
 	bind:dialogData={cancelInvitationDialogData}
-	buttonLabels={{ yes: tr('festival.decline'), no: tr('form.back') }}
-	testId="cancel-dialog"
+	buttonLabels={{ yes: isMaybe ? tr('festival.maybe') : tr('festival.decline'), no: tr('form.back') }}
+	testId={isMaybe ? 'maybe-dialog' : 'cancel-dialog'}
 >
-	<p>{tr('festival.declineDialog.text')}</p>
+	<p>{isMaybe ? tr('festival.maybeDialog.text') : tr('festival.declineDialog.text')}</p>
 
 	<section>
 		<label for="comment">{tr('festival.declineDialog.comment')}</label>

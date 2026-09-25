@@ -5,6 +5,7 @@ import type { BackendGuestInformation } from '$lib/models/guestInformation/Backe
 import type { FrontendGuestInformation } from '$lib/models/guestInformation/FrontendGuestInformation';
 import { UserService } from '$lib/services/user.service';
 import { GuestInformation } from '$lib/db/model/guestInformation';
+import type { CommentAnswer } from '$lib/models/Answer';
 
 export class GuestInformationService {
 	static async joinFestival(
@@ -16,7 +17,7 @@ export class GuestInformationService {
 			const find = await this.getGuestInformationModel(user.id, festivalId);
 			if (find) {
 				await find.update({
-					coming: true,
+					answer: 'yes',
 					comment: eventData.comment ?? '',
 					food: eventData.food ?? '',
 					drink: eventData.drink ?? '',
@@ -27,7 +28,7 @@ export class GuestInformationService {
 					id: crypto.randomUUID(),
 					UserId: user.id,
 					FestivalEventId: festivalId,
-					coming: true,
+					answer: 'yes',
 					comment: eventData.comment ?? '',
 					food: eventData.food ?? '',
 					drink: eventData.drink ?? '',
@@ -39,12 +40,22 @@ export class GuestInformationService {
 		}
 	}
 
-	static async cancelInvitation(user: CurrentUser | null, festivalId: string, comment: string): Promise<void> {
+	/**
+	 * Antwort mit Kommentar statt Mitbring-Angaben: „nicht dabei“ oder „vielleicht“.
+	 * Essen, Trinken und Begleitung einer früheren Zusage bleiben stehen – sagt der Gast
+	 * wieder zu, sind sie im Dialog vorbefüllt; angezeigt werden sie nur bei einer Zusage.
+	 */
+	static async answerWithComment(
+		user: CurrentUser | null,
+		festivalId: string,
+		answer: CommentAnswer,
+		comment: string
+	): Promise<void> {
 		if (user && festivalId) {
 			const guestInfoModel = await this.getGuestInformationModel(user.id, festivalId);
 			if (guestInfoModel) {
 				await guestInfoModel.update({
-					coming: false,
+					answer: answer,
 					comment: comment ?? ''
 				});
 			} else {
@@ -52,13 +63,13 @@ export class GuestInformationService {
 					id: crypto.randomUUID(),
 					FestivalEventId: festivalId,
 					UserId: user.id,
-					coming: false,
+					answer: answer,
 					comment: comment ?? '',
 					numberOfOtherGuests: 0
 				});
 			}
 		} else {
-			throw new Error('User or FestivalId missing for leaving');
+			throw new Error('User or FestivalId missing for answering');
 		}
 	}
 
@@ -72,7 +83,7 @@ export class GuestInformationService {
 				if (userById) {
 					return {
 						user: userById,
-						coming: information.coming,
+						answer: information.answer,
 						numberOfOtherGuests: information.numberOfOtherGuests,
 						drink: information.drink,
 						comment: information.comment,
@@ -98,7 +109,8 @@ export class GuestInformationService {
 		const infos = await GuestInformation.findAll({
 			where: {
 				UserId: userId,
-				coming: true
+				// Nur Zusagen: „Festivals, zu denen ich gehe“ – ein Vielleicht zählt nicht (2026-09-25).
+				answer: 'yes'
 			}
 		});
 		return infos.map((value) => mapToBackendGuestInformation(value.dataValues));
