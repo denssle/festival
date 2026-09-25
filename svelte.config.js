@@ -22,8 +22,19 @@ const config = {
 			// --remove-prefix), weshalb `event.url.pathname` ihn ebenfalls enthaelt.
 			base: '/festival'
 		},
+		// CSRF-Schutz: Formular-POSTs (auch text/plain und multipart) nur von der eigenen
+		// Adresse. Bis v0.7.63 stand hier `['*']` – das schaltet die Pruefung komplett ab
+		// (eingefuehrt 2024 als "disable csrf for testing"). Die Session haelt zusaetzlich
+		// `sameSite: 'strict'` ab.
+		//
+		// Die oeffentlichen Adressen stehen ausdruecklich hier, statt sich auf die
+		// Erkennung hinter dem Proxy zu verlassen: adapter-node nimmt als eigenen Origin
+		// `https://` + Host-Header an, und ob nginx den Host durchreicht, ist Sache des
+		// Uberspace. So funktionieren Formulare in Produktion unabhaengig davon.
+		// Achtung: Die Pruefung laeuft NUR im Build, nicht unter `vite dev` - Playwright
+		// sieht sie nie, abgesichert ist sie im Smoke-Test (scripts/smoke-test.sh).
 		csrf: {
-			trustedOrigins: ['*']
+			trustedOrigins: ['https://enzlor.uber.space', 'https://festival.enzlor.uber.space']
 		}
 	}
 };

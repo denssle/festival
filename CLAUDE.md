@@ -56,6 +56,7 @@
   - E2E-Tests führen den Präfix mit (`BASE_PATH` in `tests/test-utils.ts`); `playwright.config.ts` zeigt mit `webServer.url` auf `http://localhost:5173/festival`.
 - **Host-Konfiguration (einmalig):** `uberspace web backend set /festival --http --port 5173` (ohne `--remove-prefix`, die App erwartet den Präfix). Die Wurzel wird mit `uberspace web backend set / --apache` freigegeben. Prüfen mit `uberspace web backend list`.
 
+- **CSRF (seit v0.7.64):** `csrf.trustedOrigins` in `svelte.config.js` nennt die öffentlichen Adressen ausdrücklich. **Neue öffentliche Domain → dort eintragen**, sonst scheitern alle Formulare mit 403 (`Cross-site POST form submissions are forbidden`). SvelteKit prüft nur im Build, nie unter `vite dev` – Playwright merkt davon nichts, der Smoke-Test schon. Den Build lokal im Browser über `http://localhost` zu bedienen scheitert deshalb an Formularen; zum Ausprobieren `vite dev` nehmen.
 - **Form-Actions:** Das `StandardResponse`-Modell für die Rückgabe von Daten aus Server-Actions verwenden.
 - **Checkbox-Handling:** In Server-Actions müssen Checkboxen gegen den String `'on'` geprüft werden (`formData.get('name') === 'on'`), da sie bei Nicht-Selektion `null` zurückgeben, was bei einer einfachen `Boolean()`-Konvertierung zu Fehlern führen kann.
 - **Access Control:** Immer `locals.currentUser` in `+page.server.ts` oder Actions prüfen. In Services `isChangeAllowed` zur Validierung nutzen.

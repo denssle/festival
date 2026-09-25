@@ -179,15 +179,18 @@ assert_health_field() {
 
 APP_URL="http://localhost:5173/festival"
 
+# Origin, den ein Browser in Produktion schickt. Er steht in csrf.trustedOrigins
+# (svelte.config.js) - ohne passenden Origin lehnt der Build Formular-POSTs mit 403 ab.
+PROD_ORIGIN="https://enzlor.uber.space"
+
 # HTTP-Request mit Session-Cookie; gibt nur den Statuscode aus, der Body landet in
-# smoke-response.txt. Der Origin-Header entspricht der App-Adresse, damit die Aufrufe
-# auch bei eingeschalteter CSRF-Pruefung von SvelteKit durchgehen. `Accept: text/html`
+# smoke-response.txt. Origin wie im Browser in Produktion (siehe PROD_ORIGIN). `Accept: text/html`
 # wie bei einem echten Formular-Submit: Ohne ihn (curl schickt */*) haelt SvelteKit den
 # Aufruf fuer einen use:enhance-Fetch und antwortet auf Form-Actions mit JSON und 200
 # statt mit dem echten Redirect bzw. Fehlerstatus.
 http() {
 	curl -s -o smoke-response.txt -w '%{http_code}' -b "$cookie_jar" -c "$cookie_jar" \
-		-H "Origin: http://localhost:5173" -H "Accept: text/html" "$@"
+		-H "Origin: ${PROD_ORIGIN}" -H "Accept: text/html" "$@"
 }
 
 expect_status() {
@@ -285,6 +288,13 @@ expect_status 302 "$status" "Registrierung"
 if ! grep -q "session" "$cookie_jar"; then
 	fail "Registrierung hat kein Session-Cookie gesetzt"
 fi
+
+# CSRF (seit v0.7.64): Formular von fremder Seite muss abgewiesen werden. Laeuft nur hier -
+# SvelteKit prueft den Origin nur im Build, Playwright (vite dev) sieht davon nichts.
+echo "  CSRF: Formular von fremder Seite"
+status=$(curl -s -o smoke-response.txt -w '%{http_code}' -b "$cookie_jar" \
+	-H "Origin: https://boese.example" -H "Accept: text/html" -d "name=CSRF" "${APP_URL}/festival/new")
+expect_status 403 "$status" "Formular-POST mit fremdem Origin"
 
 echo "  Festival anlegen"
 status=$(http -D smoke-headers.txt -d "name=Smoke-Festival" -d "description=$(repeat_char d 1000)" \
