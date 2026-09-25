@@ -81,19 +81,31 @@ export const uniqueName = (prefix: string) => `${prefix}_${Date.now()}_${Math.ra
 
 /**
  * Registriert einen neuen Benutzer.
+ *
+ * Der Registrieren-Button ist gesperrt, solange die an `formData` gebundenen Felder leer
+ * sind. Unter Suite-Last blieb er gelegentlich gesperrt, obwohl alle Felder gefüllt worden
+ * waren: Die Werte waren danach wieder weg. Vor der Hydration Getipptes übernimmt Svelte 5
+ * selbst (`bind_value` vergleicht `defaultValue` mit `value`) – die Ursache liegt also
+ * danach, etwa in einem Neu-Rendern. Wie bei {@link openDialog} wird deshalb nicht einmal
+ * gefüllt und gehofft, sondern nachgefüllt, bis der Button tatsächlich freigegeben ist.
+ * Das feste `waitForTimeout(500)` von vorher entfällt damit.
+ *
  * @param page Die Playwright-Page.
  * @param nickname Der gewünschte Nickname.
  * @param password Das Passwort (optional, nutzt Standard falls nicht angegeben).
  */
 export async function register(page: Page, nickname: string, password = TEST_PASSWORD) {
 	await page.goto('/festival/registration');
-	await page.fill('input[name="nickname"]', nickname);
-	await page.fill('input[name="password"]', password);
-	await page.fill('input[name="password2"]', password);
-	await page.waitForTimeout(500);
 
 	const submitButton = page.locator('article button[type="submit"]');
-	await expect(submitButton).toBeEnabled();
+	await expect(async () => {
+		if (await submitButton.isDisabled()) {
+			await page.fill('input[name="nickname"]', nickname);
+			await page.fill('input[name="password"]', password);
+			await page.fill('input[name="password2"]', password);
+		}
+		await expect(submitButton).toBeEnabled({ timeout: 2000 });
+	}).toPass({ timeout: 25000 });
 
 	await submitButton.click();
 
