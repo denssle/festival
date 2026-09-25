@@ -73,14 +73,18 @@ async function rebuildWithTargetColumns(queryInterface: QueryInterface): Promise
 	// Reste eines abgebrochenen Laufs wegräumen.
 	await queryInterface.dropTable(NEW_TABLE);
 
-	await queryInterface.createTable(NEW_TABLE, {
-		id: { type: DataTypes.STRING, primaryKey: true, allowNull: false },
-		writtenBy: cascadeFk('users', false),
-		FestivalEventId: targetFk('festivalEvents'),
-		ProfileUserId: targetFk('users'),
-		comment: { type: DataTypes.TEXT },
-		...timestamps
-	});
+	await queryInterface.createTable(
+		NEW_TABLE,
+		{
+			id: { type: DataTypes.STRING, primaryKey: true, allowNull: false },
+			writtenBy: cascadeFk('users', false),
+			FestivalEventId: targetFk('festivalEvents'),
+			ProfileUserId: targetFk('users'),
+			comment: { type: DataTypes.TEXT },
+			...timestamps
+		},
+		await collationOfExistingTable(queryInterface)
+	);
 
 	// Ziel-ID der richtigen Tabelle zuordnen. Kommentare, deren Ziel es nicht mehr gibt,
 	// sind Waisen aus der Zeit ohne FK – sie hatten nie eine sichtbare Seite und fallen weg.
@@ -109,6 +113,29 @@ async function rebuildWithTargetColumns(queryInterface: QueryInterface): Promise
 
 	await queryInterface.dropTable('comments');
 	await queryInterface.renameTable(NEW_TABLE, 'comments');
+}
+
+/**
+ * Zeichensatz und Sortierung der bestehenden `comments`-Tabelle. In MariaDB müssen
+ * FK-Spalten exakt dieselbe Sortierung haben wie die Spalte, auf die sie zeigen – sonst
+ * "Foreign key constraint is incorrectly formed" (errno 150). Ohne Angabe bekäme die neue
+ * Tabelle den Standard des Servers; der stimmt auf dem Uberspace zufällig mit den
+ * Bestandstabellen überein (utf8mb4_unicode_ci), auf MariaDB 11 aber nicht mehr
+ * (utf8mb4_uca1400_ai_ci). Gefunden vom Smoke-Test mit dem Baseline-Schema aus Prod.
+ */
+async function collationOfExistingTable(
+	queryInterface: QueryInterface
+): Promise<{ charset?: string; collate?: string }> {
+	const sequelize = queryInterface.sequelize;
+	if (sequelize.getDialect() === 'sqlite') {
+		return {};
+	}
+	const [row] = await sequelize.query<{ collation: string }>(
+		'SELECT TABLE_COLLATION AS collation FROM information_schema.TABLES ' +
+			"WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'comments'",
+		{ type: QueryTypes.SELECT }
+	);
+	return { charset: row.collation.split('_')[0], collate: row.collation };
 }
 
 /**

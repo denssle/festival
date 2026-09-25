@@ -68,7 +68,9 @@ jobs:
     runs-on: ubuntu-latest
     services:
       mariadb:
-        image: mariadb:11
+        # Dieselbe Hauptversion wie auf dem Uberspace (10.11.9, per `SELECT @@version`
+        # nachgesehen). MariaDB 11 weicht u. a. bei der Standard-Sortierung ab.
+        image: mariadb:10.11
         env:
           MARIADB_ROOT_PASSWORD: root
           # Der effektive DB-Name ist MARIA_DB_USER + '_' + MARIA_DB_NAME (sequelize.ts)

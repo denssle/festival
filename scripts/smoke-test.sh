@@ -215,6 +215,11 @@ EOF
 # hereinfallen (im CI immer frisch, lokal nicht zwingend).
 : > smoke-server.log
 
+# Sortierung wie auf dem Uberspace (dort Server- und DB-Standard, per SELECT
+# @@collation_database nachgesehen). Neue Tabellen erben sie, ohne dass die Migrationen
+# sie nennen - so entsteht hier dasselbe Schema wie in Produktion.
+mysql_exec "ALTER DATABASE \`${FULL_DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
 echo "==> Szenario 1: frische Datenbank, Schema kommt aus den Migrationen"
 start_server
 wait_for_health
