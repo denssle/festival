@@ -40,16 +40,44 @@ function cascadeFk(table: string, allowNull: boolean) {
 	};
 }
 
+/**
+ * FK für die beiden Zielspalten: ON UPDATE NO ACTION statt CASCADE. MariaDB verbietet
+ * CHECK-Constraints auf Spalten, die ein FK per Kaskade ÄNDERN kann (Fehler 1901,
+ * "Function or expression … cannot be used in the CHECK clause"), weil die Kaskade den
+ * CHECK umginge. ON DELETE CASCADE ist erlaubt – die Zeile verschwindet ja ganz.
+ * Unbedenklich: Die IDs sind UUIDs und werden nie geändert. Nachgestellt auf MariaDB
+ * 10.11 (wie auf dem Uberspace), gefunden vom Smoke-Test.
+ */
+function targetFk(table: string) {
+	return { ...cascadeFk(table, true), onUpdate: 'NO ACTION' };
+}
+
+/**
+ * Wiederholbar gebaut: DDL ist in MariaDB nicht transaktional. Scheitert ein Lauf nach dem
+ * Umbenennen (etwa am CHECK), steht die neue Tabelle schon, die Migration aber nicht im
+ * Protokoll – und ein zweiter Lauf, der blind `writtenTo` liest, käme nie wieder durch.
+ */
 export async function up(queryInterface: QueryInterface): Promise<void> {
 	const sequelize = queryInterface.sequelize;
-	// Reste eines abgebrochenen Laufs wegräumen (DDL ist in MariaDB nicht transaktional).
+	const columns = await queryInterface.describeTable('comments');
+	if ('writtenTo' in columns) {
+		await rebuildWithTargetColumns(queryInterface);
+	}
+	if (sequelize.getDialect() !== 'sqlite') {
+		await addExactlyOneTargetCheck(queryInterface);
+	}
+}
+
+async function rebuildWithTargetColumns(queryInterface: QueryInterface): Promise<void> {
+	const sequelize = queryInterface.sequelize;
+	// Reste eines abgebrochenen Laufs wegräumen.
 	await queryInterface.dropTable(NEW_TABLE);
 
 	await queryInterface.createTable(NEW_TABLE, {
 		id: { type: DataTypes.STRING, primaryKey: true, allowNull: false },
 		writtenBy: cascadeFk('users', false),
-		FestivalEventId: cascadeFk('festivalEvents', true),
-		ProfileUserId: cascadeFk('users', true),
+		FestivalEventId: targetFk('festivalEvents'),
+		ProfileUserId: targetFk('users'),
 		comment: { type: DataTypes.TEXT },
 		...timestamps
 	});
@@ -81,10 +109,20 @@ export async function up(queryInterface: QueryInterface): Promise<void> {
 
 	await queryInterface.dropTable('comments');
 	await queryInterface.renameTable(NEW_TABLE, 'comments');
+}
 
-	// Genau ein Ziel. SQLite kann einen CHECK nicht nachträglich anhängen; dort (und für
-	// den sync()-Pfad in Dev/Tests) greift der Modell-Validator `exactlyOneTarget`.
-	if (sequelize.getDialect() !== 'sqlite') {
+/**
+ * Genau ein Ziel. SQLite kann einen CHECK nicht nachträglich anhängen; dort (und für den
+ * sync()-Pfad in Dev/Tests) greift der Modell-Validator `exactlyOneTarget`.
+ */
+async function addExactlyOneTargetCheck(queryInterface: QueryInterface): Promise<void> {
+	const sequelize = queryInterface.sequelize;
+	const [existing] = await sequelize.query<{ n: number }>(
+		'SELECT COUNT(*) AS n FROM information_schema.CHECK_CONSTRAINTS ' +
+			"WHERE CONSTRAINT_SCHEMA = DATABASE() AND CONSTRAINT_NAME = 'comments_genau_ein_ziel'",
+		{ type: QueryTypes.SELECT }
+	);
+	if (Number(existing.n) === 0) {
 		await sequelize.query(
 			'ALTER TABLE `comments` ADD CONSTRAINT `comments_genau_ein_ziel` ' +
 				'CHECK ((`FestivalEventId` IS NULL) <> (`ProfileUserId` IS NULL))'

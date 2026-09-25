@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { QueryTypes, Sequelize } from 'sequelize';
 import { createMigrator } from '$lib/db/migrations';
+import { up as migration0003Up } from '$lib/db/migrations/0003-kommentarziele-als-fremdschluessel';
 
 /**
  * Datenübernahme von Migration 0003: Aus der polymorphen Spalte `writtenTo` wird je nach
@@ -85,6 +86,13 @@ describe('Migration 0003: Kommentarziele als Fremdschlüssel', () => {
 			{ id: ids.festivalComment, FestivalEventId: ids.festival, ProfileUserId: null, comment: 'a-festival' },
 			{ id: ids.profileComment, FestivalEventId: null, ProfileUserId: ids.owner, comment: 'b-profil' }
 		]);
+	});
+
+	// DDL ist in MariaDB nicht transaktional: Scheitert ein Lauf nach dem Umbau, läuft die
+	// Migration beim nächsten Start erneut – über die schon umgebaute Tabelle.
+	it('übersteht einen zweiten Lauf über die schon umgebaute Tabelle', async () => {
+		await migration0003Up(db.getQueryInterface());
+		expect(await comments()).toHaveLength(2);
 	});
 
 	it('räumt Kommentare jetzt per Kaskade mit dem Ziel ab', async () => {

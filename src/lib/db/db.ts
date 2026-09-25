@@ -84,11 +84,22 @@ Comment.belongsTo(User, { foreignKey: 'writtenBy', as: 'Author' });
 
 // Kommentarziele: genau eines ist gesetzt. Die Kaskade räumt Kommentare an gelöschten
 // Festivals und Profilen ab – auch wenn ein Festival selbst nur per Kaskade (Kontolöschung)
-// verschwindet und damit an jedem Service-Code vorbei.
-FestivalEvent.hasMany(Comment, { foreignKey: 'FestivalEventId', onDelete: 'CASCADE', as: 'FestivalComments' });
+// verschwindet und damit an jedem Service-Code vorbei. ON UPDATE NO ACTION statt CASCADE:
+// Sonst verbietet MariaDB den CHECK "genau ein Ziel" (siehe Migration 0003).
+FestivalEvent.hasMany(Comment, {
+	foreignKey: 'FestivalEventId',
+	onDelete: 'CASCADE',
+	onUpdate: 'NO ACTION',
+	as: 'FestivalComments'
+});
 Comment.belongsTo(FestivalEvent, { foreignKey: 'FestivalEventId', as: 'FestivalEvent' });
 
-User.hasMany(Comment, { foreignKey: 'ProfileUserId', onDelete: 'CASCADE', as: 'ProfileComments' });
+User.hasMany(Comment, {
+	foreignKey: 'ProfileUserId',
+	onDelete: 'CASCADE',
+	onUpdate: 'NO ACTION',
+	as: 'ProfileComments'
+});
 Comment.belongsTo(User, { foreignKey: 'ProfileUserId', as: 'ProfileUser' });
 
 let dbStarted = false;
