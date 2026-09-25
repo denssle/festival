@@ -3,26 +3,52 @@ import { FrontendComment } from '$lib/models/transferData/FrontendComment';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
 import { Comment } from '$lib/db/model/comment';
 import { User } from '$lib/db/model/user';
-import { Op, Transaction } from 'sequelize';
+import { ForeignKeyConstraintError, Op } from 'sequelize';
 import { FrontendUser } from '$lib/models/user/FrontendUser';
 import { UserService } from '$lib/services/user.service';
 import { convertToBackendUser, UserAttributes } from '$lib/db/attributes/user.attributes';
 
+/**
+ * Worauf ein Kommentar geschrieben wird: ein Festival oder ein Nutzerprofil.
+ * Die Route entscheidet das (`/festival/:festival_id/comments` bzw. `/user/:user_id/comments`).
+ */
+export type CommentTarget = { festivalId: string } | { profileUserId: string };
+
+/** Die Spalte, in der das jeweilige Ziel steht. */
+function targetColumns(target: CommentTarget): Pick<CommentAttributes, 'FestivalEventId' | 'ProfileUserId'> {
+	return 'festivalId' in target
+		? { FestivalEventId: target.festivalId, ProfileUserId: null }
+		: { FestivalEventId: null, ProfileUserId: target.profileUserId };
+}
+
 export class CommentService {
-	static async saveComment(who: string, where: string, comment: string) {
-		return await Comment.create({
-			id: crypto.randomUUID(),
-			writtenBy: who,
-			writtenTo: where,
-			comment: comment
-		});
+	/**
+	 * Speichert einen Kommentar. Existiert das Ziel nicht, lehnt der FK ab – vor
+	 * Migration 0003 ließen sich Kommentare an beliebige IDs schreiben.
+	 *
+	 * @returns 'Success', oder 'Data Missing', wenn es Ziel oder Autor nicht gibt
+	 */
+	static async saveComment(who: string, target: CommentTarget, comment: string): Promise<ChangeResult> {
+		try {
+			await Comment.create({
+				id: crypto.randomUUID(),
+				writtenBy: who,
+				...targetColumns(target),
+				comment: comment
+			});
+			return 'Success';
+		} catch (error) {
+			if (error instanceof ForeignKeyConstraintError) {
+				return 'Data Missing';
+			}
+			throw error;
+		}
 	}
 
-	static async getComments(writtenTo: string, userID: string): Promise<FrontendComment[]> {
+	static async getComments(target: CommentTarget, userID: string): Promise<FrontendComment[]> {
+		const targetId = 'festivalId' in target ? target.festivalId : target.profileUserId;
 		const findAll = await Comment.findAll({
-			where: {
-				writtenTo: writtenTo
-			},
+			where: targetColumns(target),
 			order: [['createdAt', 'DESC']]
 		});
 		const comments = findAll.map((value) => value.get({ plain: true }));
@@ -42,34 +68,11 @@ export class CommentService {
 			comment: value.comment,
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
-			writtenTo: value.writtenTo,
+			writtenTo: targetId,
 			writtenBy: userMap.get(value.writtenBy) ?? null,
 			yourComment: value.writtenBy === userID,
 			editMode: false
 		}));
-	}
-
-	/**
-	 * Löscht alle Kommentare, die an ein Ziel (Festival oder Profil) geschrieben wurden.
-	 * `writtenTo` ist polymorph (Festival- ODER User-ID) und kann daher keinen FK mit
-	 * ON DELETE CASCADE haben – die Kommentare müssen beim Löschen des Ziels explizit
-	 * mitentfernt werden, sonst bleiben sie als Waisen in der DB zurück.
-	 *
-	 * Nimmt auch eine Liste von Zielen entgegen (ein Query statt N), was die
-	 * Kontolöschung braucht: dort sind das Profil UND alle Festivals des Nutzers
-	 * aufzuräumen. Der optionale `transaction`-Parameter bindet das Löschen in die
-	 * umgebende Transaktion ein (siehe UserService.deleteAccount).
-	 */
-	static async deleteCommentsWrittenTo(writtenTo: string | string[], transaction?: Transaction): Promise<number> {
-		if (Array.isArray(writtenTo) && writtenTo.length === 0) {
-			return 0;
-		}
-		return await Comment.destroy({
-			where: {
-				writtenTo: writtenTo
-			},
-			transaction: transaction
-		});
 	}
 
 	static async deleteComment(userId: string, commentId: string): Promise<ChangeResult> {

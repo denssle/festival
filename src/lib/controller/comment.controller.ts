@@ -1,19 +1,25 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import { CurrentUser } from '$lib/models/user/CurrentUser';
-import { CommentService } from '$lib/services/comment.service';
+import { CommentService, type CommentTarget } from '$lib/services/comment.service';
 import { FrontendComment } from '$lib/models/transferData/FrontendComment';
 import { ChangeResult, getHTTPCodeForChangeResult } from '$lib/models/updates/ChangeResult';
 import { COMMENT_TEXT_LIMITS, findTooLongField } from '$lib/services/text-length.logic';
 import { t } from '$lib/i18n';
 
 /**
- * Extrahiert die relevante ID (festival_id oder user_id) aus dem URL-Pfad.
+ * Bestimmt das Kommentarziel aus dem URL-Pfad: Festival (`festival_id`) oder
+ * Nutzerprofil (`user_id`).
  *
  * @param request - RequestEvent mit params
- * @returns festival_id oder user_id als String, oder undefined
+ * @returns Das Ziel, oder undefined, wenn der Pfad keins enthält
  */
-function getIdFromPath(request: RequestEvent) {
-	return request.params.festival_id?.toString() ?? request.params.user_id?.toString();
+function getTargetFromPath(request: RequestEvent): CommentTarget | undefined {
+	const festivalId = request.params.festival_id?.toString();
+	if (festivalId) {
+		return { festivalId };
+	}
+	const userId = request.params.user_id?.toString();
+	return userId ? { profileUserId: userId } : undefined;
 }
 
 /**
@@ -35,24 +41,28 @@ function tooLongResponse(request: RequestEvent, comment: unknown): Response | nu
  *
  * Erwartet FormData mit Feld "comment" (string).
  *
- * @returns 200 bei Erfolg, 401 ohne Session, 400 bei fehlenden Daten, 422 bei zu langem Text
+ * @returns 200 bei Erfolg, 401 ohne Session, 400 bei fehlenden Daten,
+ *          422 bei zu langem Text oder nicht existierendem Ziel
  */
 export async function POSTComment(request: RequestEvent): Promise<Response> {
 	const data: FormData = await request.request.formData();
 	const comment: string | undefined = data.get('comment')?.toString();
-	const pathId: string | undefined = getIdFromPath(request);
+	const target: CommentTarget | undefined = getTargetFromPath(request);
 	const user: CurrentUser | undefined = request.locals.currentUser;
 
 	if (!user) {
 		return new Response('Unauthorized', { status: 401 });
 	}
-	if (comment && pathId) {
+	if (comment && target) {
 		const tooLong = tooLongResponse(request, comment);
 		if (tooLong) {
 			return tooLong;
 		}
-		await CommentService.saveComment(user.id, pathId, comment);
-		const comments = await CommentService.getComments(pathId, user.id);
+		const result: ChangeResult = await CommentService.saveComment(user.id, target, comment);
+		if (result !== 'Success') {
+			return new Response(JSON.stringify(result), { status: getHTTPCodeForChangeResult(result) });
+		}
+		const comments = await CommentService.getComments(target, user.id);
 		return new Response(JSON.stringify(comments), { status: 200 });
 	}
 	return new Response('Bad Request', { status: 400 });
@@ -65,13 +75,13 @@ export async function POSTComment(request: RequestEvent): Promise<Response> {
  * @returns 200 mit JSON-Array von FrontendComment, 401 ohne Session, 400 bei fehlender ID
  */
 export async function GETComments(request: RequestEvent): Promise<Response> {
-	const pathId: string | undefined = getIdFromPath(request);
+	const target: CommentTarget | undefined = getTargetFromPath(request);
 	const user: CurrentUser | undefined = request.locals.currentUser;
 	if (!user) {
 		return new Response('Unauthorized', { status: 401 });
 	}
-	if (pathId) {
-		const comments: FrontendComment[] = await CommentService.getComments(pathId, user.id);
+	if (target) {
+		const comments: FrontendComment[] = await CommentService.getComments(target, user.id);
 		return new Response(JSON.stringify(comments), { status: 200 });
 	}
 	return new Response('Bad Request', { status: 400 });
@@ -112,18 +122,18 @@ export async function DELETEComment(request: RequestEvent): Promise<Response> {
 export async function PUTComment(request: RequestEvent): Promise<Response> {
 	const comment = (await request.request.json()) as FrontendComment;
 	const user: CurrentUser | undefined = request.locals.currentUser;
-	const pathId: string | undefined = getIdFromPath(request);
+	const target: CommentTarget | undefined = getTargetFromPath(request);
 	if (!user) {
 		return new Response('Unauthorized', { status: 401 });
 	}
-	if (comment && pathId) {
+	if (comment && target) {
 		const tooLong = tooLongResponse(request, comment.comment);
 		if (tooLong) {
 			return tooLong;
 		}
 		const result: ChangeResult = await CommentService.updateComment(user.id, comment.id, comment.comment);
 		if (result === 'Success') {
-			const comments = await CommentService.getComments(pathId, user.id);
+			const comments = await CommentService.getComments(target, user.id);
 			return new Response(JSON.stringify(comments), { status: 200 });
 		}
 		return new Response(JSON.stringify(result), { status: getHTTPCodeForChangeResult(result) });

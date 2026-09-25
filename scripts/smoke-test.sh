@@ -10,6 +10,7 @@
 #   1. .env wurde von `node build` nicht geladen  -> Szenario 1 (Start ueberhaupt)
 #   2. Credential-Guard brach den Build ab        -> `npm run build` in der Pipeline
 #   3. Baseline lief gegen bestehendes Schema     -> Szenario 2 (Bestands-DB)
+#                                                    (Schema: scripts/smoke-legacy-schema.sql)
 #
 # Szenario 3 prueft danach echte Ablaeufe gegen Build + MariaDB - Verhalten, das weder
 # `vite dev` noch SQLite zeigen: das Upload-Limit von adapter-node (BODY_SIZE_LIMIT, im
@@ -63,6 +64,36 @@ fail() {
 
 mysql_exec() {
 	mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASSWORD" "$FULL_DB_NAME" -e "$1"
+}
+
+# Einzelwert/Tabelle ohne Kopfzeile, fuer Vergleiche im Skript.
+mysql_value() {
+	mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASSWORD" "$FULL_DB_NAME" -N -e "$1"
+}
+
+# Leert die Datenbank (alle Tabellen). DROP DATABASE ginge schneller, darf der
+# App-Benutzer aber nicht zwingend.
+drop_all_tables() {
+	local tables
+	tables=$(mysql_value "SELECT GROUP_CONCAT(CONCAT('\`', TABLE_NAME, '\`')) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE()")
+	if [[ -n "$tables" && "$tables" != "NULL" ]]; then
+		mysql_exec "SET FOREIGN_KEY_CHECKS = 0; DROP TABLE ${tables}; SET FOREIGN_KEY_CHECKS = 1;"
+	fi
+}
+
+# Kommentarziele als echte FKs (Migration 0003) - in MariaDB selbst nachgesehen, weil
+# genau hier ein stiller Unterschied zu SQLite droht: Ein FK, der nicht angelegt wird,
+# faellt erst auf, wenn beim Loeschen Waisen liegen bleiben.
+assert_comment_schema() {
+	local cascades check
+	cascades=$(mysql_value "SELECT COUNT(*) FROM information_schema.REFERENTIAL_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'comments' AND DELETE_RULE = 'CASCADE'")
+	if [[ "$cascades" != "3" ]]; then
+		fail "comments: erwartet 3 FKs mit ON DELETE CASCADE (writtenBy, FestivalEventId, ProfileUserId), gefunden: ${cascades}"
+	fi
+	check=$(mysql_value "SELECT COUNT(*) FROM information_schema.CHECK_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = DATABASE() AND CONSTRAINT_NAME = 'comments_genau_ein_ziel'")
+	if [[ "$check" != "1" ]]; then
+		fail "comments: CHECK-Constraint comments_genau_ein_ziel fehlt"
+	fi
 }
 
 start_server() {
@@ -196,12 +227,18 @@ assert_health_field "pendingMigrations" '0'
 if ! grep -q "SequelizeMeta" smoke-server.log; then
 	fail "Migrationslauf nicht im Log - lief die App wirklich ueber den MariaDB-Zweig?"
 fi
+assert_comment_schema
 
-echo "==> Szenario 2: Bestands-DB aus der sync()-Zeit (Schema da, kein Protokoll)"
+echo "==> Szenario 2: Bestands-DB aus der sync()-Zeit (Baseline-Schema, kein Protokoll)"
 stop_server
-# Genau der Produktionszustand: Tabellen und Unique-Indizes stehen, SequelizeMeta
-# fehlt. Ohne Baseline-Stempel bricht der Start hier mit "Duplicate key name" ab.
-mysql_exec "DROP TABLE SequelizeMeta;"
+# Genau der Produktionszustand vor v0.7.24: Tabellen und Unique-Indizes stehen,
+# SequelizeMeta fehlt. Ohne Baseline-Stempel bricht der Start hier mit "Duplicate key
+# name" ab. Das Schema kommt aus einer eingefrorenen Datei, nicht aus Szenario 1 - dessen
+# Schema ist schon auf dem neuesten Stand, und alle Migrationen nach der Baseline liefen
+# sonst ein zweites Mal darueber (Migration 0003 liest eine Spalte, die es dann nicht
+# mehr gibt). Dazu Altdaten, damit die Datenuebernahme gegen echte MariaDB laeuft.
+drop_all_tables
+mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASSWORD" "$FULL_DB_NAME" < scripts/smoke-legacy-schema.sql
 
 start_server
 wait_for_health
@@ -210,6 +247,14 @@ assert_health_field "pendingMigrations" '0'
 
 if ! grep -q "ohne Migrationsprotokoll erkannt" smoke-server.log; then
 	fail "Baseline wurde nicht gestempelt - stampBaselineIfLegacySchema() hat nicht gegriffen"
+fi
+assert_comment_schema
+
+# Migration 0003: writtenTo der richtigen Spalte zugeordnet, die Waise verworfen.
+migrated=$(mysql_value "SELECT id, IFNULL(FestivalEventId, '-'), IFNULL(ProfileUserId, '-') FROM comments ORDER BY id")
+expected=$'legacy-c-festival\tlegacy-festival\t-\nlegacy-c-profil\t-\tlegacy-owner'
+if [[ "$migrated" != "$expected" ]]; then
+	fail "Kommentare nach Migration 0003 falsch zugeordnet. Erwartet:\n${expected}\nWar:\n${migrated}"
 fi
 
 echo "==> Szenario 3: Ablaeufe gegen Build + MariaDB"
@@ -241,12 +286,17 @@ echo "  Kommentar mit 1000 Zeichen"
 status=$(http -F "comment=$(repeat_char c 1000)" "${APP_URL}/festival/${festival_id}/comments")
 expect_status 200 "$status" "Kommentar mit 1000 Zeichen"
 
+# Migration 0003: Der FK lehnt Kommentare an Ziele ab, die es nicht gibt.
+echo "  Kommentar an ein nicht existierendes Festival"
+status=$(http -F "comment=Hallo" "${APP_URL}/festival/00000000-0000-0000-0000-000000000000/comments")
+expect_status 422 "$status" "Kommentar an nicht existierendes Festival"
+
 echo "  Zu langer Festivalname"
 status=$(http -d "name=$(repeat_char n 256)" "${APP_URL}/festival/new")
 expect_status 422 "$status" "Festivalname mit 256 Zeichen"
 
 stored=$(mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASSWORD" "$FULL_DB_NAME" -N -e \
-	"SELECT CHAR_LENGTH(c.comment), CHAR_LENGTH(f.description) FROM comments c JOIN festivalEvents f ON f.id = c.writtenTo WHERE f.id = '${festival_id}'")
+	"SELECT CHAR_LENGTH(c.comment), CHAR_LENGTH(f.description) FROM comments c JOIN festivalEvents f ON f.id = c.FestivalEventId WHERE f.id = '${festival_id}'")
 if [[ "$stored" != $'1000\t1000' ]]; then
 	fail "Texte nicht vollstaendig gespeichert (erwartet 1000/1000, war: ${stored})"
 fi

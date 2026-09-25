@@ -63,7 +63,7 @@ describe('Beziehungen & Kaskadenlöschungen', () => {
 		await GroupMember.create({ id: crypto.randomUUID(), GroupId: groupId, UserId: userId });
 		await FriendRequest.create({ id: crypto.randomUUID(), senderId: userId, receiverId: otherId });
 		await Friendship.create({ id: crypto.randomUUID(), friend1Id: otherId, friend2Id: userId });
-		await CommentService.saveComment(userId, otherId, 'Hallo');
+		await CommentService.saveComment(userId, { profileUserId: otherId }, 'Hallo');
 
 		await User.destroy({ where: { id: userId } });
 
@@ -93,8 +93,8 @@ describe('Beziehungen & Kaskadenlöschungen', () => {
 			coming: true,
 			numberOfOtherGuests: 0
 		});
-		await CommentService.saveComment(guestId, festivalId, 'Bin dabei');
-		await CommentService.saveComment(guestId, otherFestivalId, 'Anderes Festival');
+		await CommentService.saveComment(guestId, { festivalId }, 'Bin dabei');
+		await CommentService.saveComment(guestId, { festivalId: otherFestivalId }, 'Anderes Festival');
 
 		const owner: CurrentUser = { isAuthenticated: true, id: ownerId, nickname: 'fowner', email: '' };
 		const result = await FestivalEventService.deleteFestival(owner, festivalId);
@@ -103,7 +103,30 @@ describe('Beziehungen & Kaskadenlöschungen', () => {
 		expect(await GuestInformation.count()).toBe(0);
 		// Kommentare des gelöschten Festivals sind weg, die des anderen bleiben
 		expect(await Comment.count()).toBe(1);
-		expect(await Comment.count({ where: { writtenTo: otherFestivalId } })).toBe(1);
+		expect(await Comment.count({ where: { FestivalEventId: otherFestivalId } })).toBe(1);
+	});
+
+	// Vor Migration 0003 (polymorphes writtenTo ohne FK) ließ sich das anlegen.
+	it('lehnt Kommentare an nicht existierende Ziele ab', async () => {
+		const authorId = await createUser('author' + Date.now());
+
+		expect(await CommentService.saveComment(authorId, { festivalId: crypto.randomUUID() }, 'x')).toBe('Data Missing');
+		expect(await CommentService.saveComment(authorId, { profileUserId: crypto.randomUUID() }, 'x')).toBe(
+			'Data Missing'
+		);
+		expect(await Comment.count()).toBe(0);
+	});
+
+	it('verlangt genau ein Kommentarziel', async () => {
+		const authorId = await createUser('author' + Date.now());
+		const festivalId = await createFestival(authorId);
+		const base = { writtenBy: authorId, comment: 'x' };
+
+		await expect(Comment.create({ id: crypto.randomUUID(), ...base })).rejects.toThrow(/genau ein Ziel/);
+		await expect(
+			Comment.create({ id: crypto.randomUUID(), ...base, FestivalEventId: festivalId, ProfileUserId: authorId })
+		).rejects.toThrow(/genau ein Ziel/);
+		expect(await Comment.count()).toBe(0);
 	});
 
 	it('löscht beim Entfernen einer Gruppe deren Mitgliedschaften', async () => {

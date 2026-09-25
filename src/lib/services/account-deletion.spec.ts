@@ -25,9 +25,12 @@ async function createFestival(ownerId: string): Promise<string> {
 	return id;
 }
 
-async function createComment(writtenBy: string, writtenTo: string): Promise<string> {
+async function createComment(
+	writtenBy: string,
+	target: { FestivalEventId: string } | { ProfileUserId: string }
+): Promise<string> {
 	const id = crypto.randomUUID();
-	await Comment.create({ id, writtenBy, writtenTo, comment: 'text' });
+	await Comment.create({ id, writtenBy, ...target, comment: 'text' });
 	return id;
 }
 
@@ -84,15 +87,15 @@ describe('Kontolöschung', () => {
 		expect(await FestivalEvent.count({ where: { id: foreignFestival } })).toBe(1);
 	});
 
-	it('löscht Kommentare auf dem Profil des Nutzers (writtenTo, kein FK)', async () => {
+	it('löscht Kommentare auf dem Profil des Nutzers', async () => {
 		const userId = await createUser('profileTarget' + Date.now());
 		const otherId = await createUser('commenter' + Date.now());
 
-		await createComment(otherId, userId);
+		await createComment(otherId, { ProfileUserId: userId });
 
 		expect(await UserService.deleteAccount(userId)).toBe('Success');
 
-		expect(await Comment.count({ where: { writtenTo: userId } })).toBe(0);
+		expect(await Comment.count({ where: { ProfileUserId: userId } })).toBe(0);
 	});
 
 	it('löscht Kommentare an den Festivals des Nutzers', async () => {
@@ -100,13 +103,14 @@ describe('Kontolöschung', () => {
 		const otherId = await createUser('guest' + Date.now());
 		const festivalId = await createFestival(userId);
 
-		// Kommentar eines DRITTEN am Festival: hängt weder über writtenBy noch über
-		// einen FK am gelöschten Nutzer und bliebe ohne die explizite Aufräumung übrig.
-		await createComment(otherId, festivalId);
+		// Kommentar eines DRITTEN am Festival: hängt nicht über writtenBy am Nutzer, sondern
+		// zweistufig über das Festival, das selbst nur per Kaskade verschwindet. Bis v0.7.59
+		// blieb er ohne explizite Aufräumung übrig.
+		await createComment(otherId, { FestivalEventId: festivalId });
 
 		expect(await UserService.deleteAccount(userId)).toBe('Success');
 
-		expect(await Comment.count({ where: { writtenTo: festivalId } })).toBe(0);
+		expect(await Comment.count({ where: { FestivalEventId: festivalId } })).toBe(0);
 	});
 
 	it('löscht die vom Nutzer verfassten Kommentare, lässt fremde stehen', async () => {
@@ -114,8 +118,8 @@ describe('Kontolöschung', () => {
 		const otherId = await createUser('bystander' + Date.now());
 		const foreignFestival = await createFestival(otherId);
 
-		await createComment(userId, foreignFestival);
-		const foreignComment = await createComment(otherId, foreignFestival);
+		await createComment(userId, { FestivalEventId: foreignFestival });
+		const foreignComment = await createComment(otherId, { FestivalEventId: foreignFestival });
 
 		expect(await UserService.deleteAccount(userId)).toBe('Success');
 

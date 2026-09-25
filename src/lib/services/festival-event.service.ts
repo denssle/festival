@@ -18,7 +18,6 @@ import { GuestInformation } from '$lib/db/model/guestInformation';
 import { FestivalEvent } from '$lib/db/model/festivalEvent';
 import { User } from '$lib/db/model/user';
 import { isChangeAllowed } from './festival-event.logic';
-import { CommentService } from '$lib/services/comment.service';
 
 export class FestivalEventService {
 	static async getAllFestivals(): Promise<FrontendFestivalEvent[]> {
@@ -127,9 +126,7 @@ export class FestivalEventService {
 		if (user && festivalModel) {
 			const ownerId = festivalModel.dataValues.UserId;
 			if (festivalModel && isChangeAllowed(user.id, ownerId)) {
-				// Gäste hängen per FK-Cascade am Event; Kommentare nicht (writtenTo ist polymorph,
-				// Festival- oder User-ID) und müssen deshalb explizit mitgelöscht werden.
-				await CommentService.deleteCommentsWrittenTo(festivalId);
+				// Gäste und Kommentare hängen per FK-Kaskade am Festival (Kommentare seit Migration 0003).
 				await festivalModel.destroy();
 				return 'Success';
 			} else {

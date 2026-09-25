@@ -82,6 +82,15 @@ GroupMember.belongsTo(User, { foreignKey: 'UserId', as: 'User' });
 User.hasMany(Comment, { foreignKey: 'writtenBy', onDelete: 'CASCADE', as: 'Comments' });
 Comment.belongsTo(User, { foreignKey: 'writtenBy', as: 'Author' });
 
+// Kommentarziele: genau eines ist gesetzt. Die Kaskade räumt Kommentare an gelöschten
+// Festivals und Profilen ab – auch wenn ein Festival selbst nur per Kaskade (Kontolöschung)
+// verschwindet und damit an jedem Service-Code vorbei.
+FestivalEvent.hasMany(Comment, { foreignKey: 'FestivalEventId', onDelete: 'CASCADE', as: 'FestivalComments' });
+Comment.belongsTo(FestivalEvent, { foreignKey: 'FestivalEventId', as: 'FestivalEvent' });
+
+User.hasMany(Comment, { foreignKey: 'ProfileUserId', onDelete: 'CASCADE', as: 'ProfileComments' });
+Comment.belongsTo(User, { foreignKey: 'ProfileUserId', as: 'ProfileUser' });
+
 let dbStarted = false;
 
 export async function startDB(): Promise<void> {
