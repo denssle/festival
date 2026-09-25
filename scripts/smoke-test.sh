@@ -11,6 +11,11 @@
 #   2. Credential-Guard brach den Build ab        -> `npm run build` in der Pipeline
 #   3. Baseline lief gegen bestehendes Schema     -> Szenario 2 (Bestands-DB)
 #
+# Szenario 3 prueft danach echte Ablaeufe gegen Build + MariaDB - Verhalten, das weder
+# `vite dev` noch SQLite zeigen: das Upload-Limit von adapter-node (BODY_SIZE_LIMIT, im
+# Dev-Server gibt es keins) und die Spaltengrenzen von MariaDB (VARCHAR(255) vs. TEXT,
+# SQLite erzwingt keine Laengen).
+#
 # Voraussetzungen: erreichbare MariaDB, gebautes build/, `mysql`-Client im PATH.
 # Lokal z. B. mit:
 #   docker run -d --rm -p 3306:3306 -e MARIADB_ROOT_PASSWORD=root \
@@ -32,11 +37,14 @@ HEALTH_URL="http://localhost:5173/festival/api/health"
 
 server_pid=""
 env_backup=""
+cookie_jar=""
+avatar_file=""
 
 cleanup() {
 	# Nur beenden, nicht auf den Port warten: cleanup laeuft im EXIT-Trap, ein
 	# fail() von dort waere wenig hilfreich und wuerde den echten Fehler verdecken.
 	kill_server
+	rm -f "$cookie_jar" "$avatar_file"
 	# Eine lokal vorhandene .env unbedingt zurueckspielen - der Test schreibt eine
 	# eigene und wuerde die Entwicklungs-Konfiguration sonst zerstoeren.
 	if [[ -n "$env_backup" && -f "$env_backup" ]]; then
@@ -134,6 +142,31 @@ assert_health_field() {
 	fi
 }
 
+APP_URL="http://localhost:5173/festival"
+
+# HTTP-Request mit Session-Cookie; gibt nur den Statuscode aus, der Body landet in
+# smoke-response.txt. Der Origin-Header entspricht der App-Adresse, damit die Aufrufe
+# auch bei eingeschalteter CSRF-Pruefung von SvelteKit durchgehen. `Accept: text/html`
+# wie bei einem echten Formular-Submit: Ohne ihn (curl schickt */*) haelt SvelteKit den
+# Aufruf fuer einen use:enhance-Fetch und antwortet auf Form-Actions mit JSON und 200
+# statt mit dem echten Redirect bzw. Fehlerstatus.
+http() {
+	curl -s -o smoke-response.txt -w '%{http_code}' -b "$cookie_jar" -c "$cookie_jar" \
+		-H "Origin: http://localhost:5173" -H "Accept: text/html" "$@"
+}
+
+expect_status() {
+	local expected="$1" actual="$2" what="$3"
+	if [[ "$actual" != "$expected" ]]; then
+		fail "${what}: HTTP ${actual} statt ${expected}. Antwort: $(head -c 300 smoke-response.txt 2>/dev/null)"
+	fi
+}
+
+# Zeichenkette aus n gleichen Zeichen (ohne GNU-Eigenheiten).
+repeat_char() {
+	head -c "$2" /dev/zero | tr '\0' "$1"
+}
+
 if [[ -f .env ]]; then
 	env_backup="$(mktemp)"
 	cp .env "$env_backup"
@@ -179,4 +212,59 @@ if ! grep -q "ohne Migrationsprotokoll erkannt" smoke-server.log; then
 	fail "Baseline wurde nicht gestempelt - stampBaselineIfLegacySchema() hat nicht gegriffen"
 fi
 
-echo "==> Beide Szenarien bestanden."
+echo "==> Szenario 3: Ablaeufe gegen Build + MariaDB"
+cookie_jar="$(mktemp)"
+nickname="smoke_$(date +%s)"
+
+echo "  Registrierung"
+status=$(http -d "nickname=${nickname}" -d "password=SmokeTest123!" -d "password2=SmokeTest123!" \
+	"${APP_URL}/registration")
+expect_status 302 "$status" "Registrierung"
+# curl sendet Secure-Cookies seit 7.79 auch an http://localhost - sonst waere die Session hier weg.
+if ! grep -q "session" "$cookie_jar"; then
+	fail "Registrierung hat kein Session-Cookie gesetzt"
+fi
+
+echo "  Festival anlegen"
+status=$(http -D smoke-headers.txt -d "name=Smoke-Festival" -d "description=$(repeat_char d 1000)" \
+	"${APP_URL}/festival/new")
+expect_status 302 "$status" "Festival anlegen"
+festival_id=$(grep -i '^location:' smoke-headers.txt | grep -oE '[0-9a-f]{8}-[0-9a-f-]{27}' || true)
+if [[ -z "$festival_id" ]]; then
+	fail "Keine Festival-ID im Redirect: $(grep -i '^location:' smoke-headers.txt)"
+fi
+
+# Die VARCHAR-Falle (v0.7.55): Freitext ueber 255 Zeichen muss in MariaDB passen
+# (TEXT-Spalte), ein zu langer Kurztext muss als 422 abgelehnt werden - nicht als 500
+# ("Data too long"), wie vor der Laengenpruefung.
+echo "  Kommentar mit 1000 Zeichen"
+status=$(http -F "comment=$(repeat_char c 1000)" "${APP_URL}/festival/${festival_id}/comments")
+expect_status 200 "$status" "Kommentar mit 1000 Zeichen"
+
+echo "  Zu langer Festivalname"
+status=$(http -d "name=$(repeat_char n 256)" "${APP_URL}/festival/new")
+expect_status 422 "$status" "Festivalname mit 256 Zeichen"
+
+stored=$(mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASSWORD" "$FULL_DB_NAME" -N -e \
+	"SELECT CHAR_LENGTH(c.comment), CHAR_LENGTH(f.description) FROM comments c JOIN festivalEvents f ON f.id = c.writtenTo WHERE f.id = '${festival_id}'")
+if [[ "$stored" != $'1000\t1000' ]]; then
+	fail "Texte nicht vollstaendig gespeichert (erwartet 1000/1000, war: ${stored})"
+fi
+
+# BODY_SIZE_LIMIT: adapter-node lehnt ohne die Variable alles ueber 512 KB ab, im
+# Dev-Server gibt es gar kein Limit. Ein Avatar an der 1-MiB-Grenze ist als Base64-Data-URI
+# rund 1,4 MB gross - genau der Fall, der in Produktion sonst erst beim Nutzer auffiele.
+echo "  Avatar-Upload an der 1-MiB-Grenze (~1,4 MB Request)"
+avatar_file="$(mktemp)"
+# 1.398.100 Base64-Zeichen = 1.048.575 Bytes, knapp unter MAX_IMAGE_BYTES (image.logic.ts)
+{ printf 'data:image/png;base64,'; repeat_char A 1398100; } > "$avatar_file"
+status=$(http -H "Content-Type: text/plain" --data-binary "@${avatar_file}" "${APP_URL}/user-image")
+expect_status 200 "$status" "Avatar-Upload (~1,4 MB)"
+
+status=$(http "${APP_URL}/user-image")
+expect_status 200 "$status" "Avatar abrufen"
+if ! cmp -s smoke-response.txt "$avatar_file"; then
+	fail "Abgerufener Avatar weicht vom hochgeladenen ab ($(wc -c < smoke-response.txt) statt $(wc -c < "$avatar_file") Bytes)"
+fi
+
+echo "==> Alle drei Szenarien bestanden."

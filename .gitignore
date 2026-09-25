@@ -136,3 +136,5 @@ dist
 
 # Smoke-Test-Artefakte (scripts/smoke-test.sh)
 smoke-health.json
+smoke-response.txt
+smoke-headers.txt

@@ -14,7 +14,7 @@ import { createMigrator } from '$lib/db/migrations';
  * zugehörige Migration ab (oder umgekehrt), schlägt dieser Test fehl.
  *
  * Grenze: Der Vergleich läuft dialektfrei auf SQLite. MariaDB-spezifisches
- * Verhalten deckt erst der geplante CI-Job mit MariaDB-Container ab (siehe TODO).
+ * Verhalten deckt der Smoke-Test in der CI ab (`scripts/smoke-test.sh`, echte MariaDB).
  */
 describe('Migrationen erzeugen dasselbe Schema wie die Modelle', () => {
 	let migrated: Sequelize;
