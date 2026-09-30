@@ -75,6 +75,47 @@ test.describe.serial('Profile Festivals Authorization', () => {
 		expect(status).toBe(403);
 	});
 
+	test('User 2 sollte den Kommentar von User 1 NICHT bearbeiten oder löschen können', async () => {
+		const commentsUrl = `/festival/festival/${festivalId}/comments`;
+		const commentText = uniqueName('Kommentar');
+
+		// User 1 kommentiert sein eigenes Festival
+		const comments = await user1Page.evaluate(
+			async ({ url, text }: { url: string; text: string }) => {
+				const body = new FormData();
+				body.append('comment', text);
+				const resp = await fetch(url, { method: 'POST', body });
+				return (await resp.json()) as { id: string; comment: string }[];
+			},
+			{ url: commentsUrl, text: commentText }
+		);
+		const commentId = comments.find((c) => c.comment === commentText)?.id;
+		expect(commentId).toBeTruthy();
+
+		// User 2 versucht zu bearbeiten und zu löschen
+		await user2Page.goto('/festival/');
+		const statuses = await user2Page.evaluate(
+			async ({ url, id }: { url: string; id: string }) => {
+				const put = await fetch(url, {
+					method: 'PUT',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ id, comment: 'gekapert' })
+				});
+				const del = await fetch(url, { method: 'DELETE', body: id });
+				return { put: put.status, del: del.status };
+			},
+			{ url: commentsUrl, id: commentId! }
+		);
+		expect(statuses).toEqual({ put: 403, del: 403 });
+
+		// Der Kommentar steht unverändert da
+		const after = await user1Page.evaluate(async (url: string) => {
+			const resp = await fetch(url);
+			return (await resp.json()) as { id: string; comment: string }[];
+		}, commentsUrl);
+		expect(after.find((c) => c.id === commentId)?.comment).toBe(commentText);
+	});
+
 	test('User 1 und User 2 werden Freunde', async () => {
 		// User 2 sucht User 1 und schickt Anfrage
 		await user2Page.goto(`/festival/user/${user1Id}`);
