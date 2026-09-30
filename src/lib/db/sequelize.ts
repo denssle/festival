@@ -43,7 +43,12 @@ const options: Options = isTestOrLocal
 			username: MARIA_DB_USER,
 			password: MARIA_DB_PASSWORD,
 			database: MARIA_DB_USER + '_' + MARIA_DB_NAME,
-			define: {}
+			define: {},
+			// Sequelize loggt sonst jede Abfrage samt Werten ins Server-Log – darunter bei jedem
+			// Request das Session-Token im Klartext (`WHERE token = '…'`). Wer das Log liest,
+			// könnte damit fremde Sitzungen übernehmen. Die Migrationsmeldungen von umzug
+			// (migrations.ts) bleiben davon unberührt.
+			logging: false
 		};
 
 export const sequelize: Sequelize = new Sequelize(options);

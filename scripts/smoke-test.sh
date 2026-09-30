@@ -236,7 +236,10 @@ assert_health_field "status" '"ok"'
 assert_health_field "dialect" '"mariadb"'
 assert_health_field "pendingMigrations" '0'
 
-if ! grep -q "SequelizeMeta" smoke-server.log; then
+# umzug meldet jede ausgefuehrte Migration im Log; ausgefuehrt wird nur im MariaDB-Zweig.
+# (Frueher stand hier die Suche nach "SequelizeMeta" in den SQL-Ausgaben von Sequelize - die
+# sind seit v0.7.72 abgeschaltet, weil sie Session-Tokens im Klartext enthielten.)
+if ! grep -q "0001-initial-schema" smoke-server.log; then
 	fail "Migrationslauf nicht im Log - lief die App wirklich ueber den MariaDB-Zweig?"
 fi
 assert_schema_constraints

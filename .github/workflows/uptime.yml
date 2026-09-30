@@ -1,0 +1,48 @@
+# Verfügbarkeits-Check: Fragt alle 15 Minuten /api/health in Produktion ab.
+#
+# Warum: Zwischen zwei Deploys hat bisher niemand gemerkt, wenn die App steht – am
+# 2026-08-11 lag sie rund eine Stunde, bevor es jemandem auffiel. Schlägt dieser Lauf fehl,
+# schickt GitHub eine Mail an den, der den Zeitplan zuletzt geändert hat (Einstellung
+# "Actions" unter github.com/settings/notifications, standardmäßig an).
+#
+# /api/health prüft die DB-Verbindung (SELECT 1) und antwortet sonst mit 503. Verlangt wird
+# ausdrücklich Status 200 UND "status":"ok" im Body – `curl --fail` allein reicht nicht, es
+# wertet Umleitungen als Erfolg, und alles außer den freigegebenen Pfaden leitet ohne Session
+# auf /login um (genau so war der Deploy-Check bis v0.7.25 blind, siehe CLAUDE.md §6).
+# Drei Versuche mit Pause, damit ein einzelner Aussetzer (Neustart beim Deploy, Netz) keinen
+# Alarm auslöst.
+#
+# Grenzen: GitHub startet Zeitpläne teils mit Verspätung, und in einem Repo ohne Aktivität
+# werden sie nach 60 Tagen abgeschaltet (GitHub meldet das vorher per Mail). Der Lauf kostet
+# nichts, solange das Repo öffentlich ist.
+name: Uptime-Check
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  health:
+    name: /api/health in Produktion
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Health-Endpunkt abfragen
+        run: |
+          url='https://enzlor.uber.space/festival/api/health'
+          for attempt in 1 2 3; do
+            rm -f body.json
+            code=$(curl --silent --show-error --max-time 20 --output body.json --write-out '%{http_code}' "$url" || true)
+            if [ "$code" = "200" ] && grep -q '"status":"ok"' body.json; then
+              cat body.json
+              echo
+              exit 0
+            fi
+            echo "Versuch ${attempt} fehlgeschlagen (HTTP ${code:-keine Antwort}): $(head -c 200 body.json 2>/dev/null)"
+            [ "$attempt" -lt 3 ] && sleep 30
+          done
+          echo "::error::${url} antwortet nicht mit 200 – Produktion prüfen (supervisorctl status festival)"
+          exit 1
