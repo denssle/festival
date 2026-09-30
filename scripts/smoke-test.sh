@@ -312,10 +312,17 @@ echo "  Kommentar mit 1000 Zeichen"
 status=$(http -F "comment=$(repeat_char c 1000)" "${APP_URL}/festival/${festival_id}/comments")
 expect_status 200 "$status" "Kommentar mit 1000 Zeichen"
 
-# Migration 0003: Der FK lehnt Kommentare an Ziele ab, die es nicht gibt.
+# Migration 0003: Der FK lehnt Kommentare an Ziele ab, die es nicht gibt. Seit v0.7.66
+# kommt ein Festival-Kommentar gar nicht mehr bis zum FK – die Sichtbarkeitsprüfung
+# antwortet vorher mit 404. Den FK prüft deshalb ein Profil-Kommentar, der keine solche
+# Vorprüfung hat.
 echo "  Kommentar an ein nicht existierendes Festival"
 status=$(http -F "comment=Hallo" "${APP_URL}/festival/00000000-0000-0000-0000-000000000000/comments")
-expect_status 422 "$status" "Kommentar an nicht existierendes Festival"
+expect_status 404 "$status" "Kommentar an nicht existierendes Festival"
+
+echo "  Kommentar an ein nicht existierendes Profil"
+status=$(http -F "comment=Hallo" "${APP_URL}/user/00000000-0000-0000-0000-000000000000/comments")
+expect_status 422 "$status" "Kommentar an nicht existierendes Profil"
 
 # Migration 0004: Der CHECK auf answer muss 'maybe' durchlassen.
 echo "  Antwort \"vielleicht\""
