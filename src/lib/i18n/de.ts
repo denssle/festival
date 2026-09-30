@@ -318,5 +318,28 @@ export const de = {
 	'verifyEmail.rateLimited':
 		'Du hast gerade schon mehrere Links angefordert. Bitte versuch es in einer Stunde noch einmal.',
 	'verifyEmail.failed': 'Der Link konnte gerade nicht verschickt werden. Bitte versuch es später noch einmal.',
-	'verifyEmail.toStart': 'Zur Startseite'
+	'verifyEmail.toStart': 'Zur Startseite',
+
+	// Passwort vergessen / zurücksetzen
+	'mail.reset.subject': 'Dein Link zum Zurücksetzen des Passworts',
+	'mail.reset.body':
+		'Hallo {nickname},\n\njemand – hoffentlich du – möchte das Passwort deines Kontos in der Festival-App zurücksetzen. Mit diesem Link legst du ein neues fest:\n\n{link}\n\nDer Link ist eine Stunde gültig und funktioniert nur einmal. Wenn du das nicht angefordert hast, ignoriere diese Mail einfach – dein Passwort bleibt, wie es ist.',
+	'login.forgotPassword': 'Passwort vergessen?',
+	'forgotPassword.heading': 'Passwort vergessen',
+	'forgotPassword.explanation':
+		'Gib deinen Nickname oder deine E-Mail-Adresse ein. Ist in deinem Profil eine bestätigte E-Mail-Adresse hinterlegt, schicken wir dir einen Link, mit dem du ein neues Passwort festlegst.',
+	'forgotPassword.identifier': 'Nickname oder E-Mail-Adresse',
+	'forgotPassword.submit': 'Link anfordern',
+	'forgotPassword.sent':
+		'Wenn es dazu ein Konto mit bestätigter E-Mail-Adresse gibt, ist jetzt ein Link unterwegs. Er ist eine Stunde gültig – schau auch im Spam-Ordner nach.',
+	'forgotPassword.rateLimited': 'Zu viele Anfragen. Bitte versuch es später noch einmal.',
+	'resetPassword.heading': 'Neues Passwort festlegen',
+	'resetPassword.newLabel': 'Neues Passwort:',
+	'resetPassword.repeatLabel': 'Neues Passwort wiederholen:',
+	'resetPassword.submit': 'Passwort speichern',
+	'resetPassword.invalid': 'Dieser Link ist ungültig, schon benutzt oder abgelaufen.',
+	'resetPassword.requestNew': 'Neuen Link anfordern',
+	'resetPassword.success':
+		'Dein Passwort ist geändert. Du wurdest überall abgemeldet und kannst dich jetzt mit dem neuen Passwort anmelden.',
+	'resetPassword.toLogin': 'Zur Anmeldung'
 } as const;

@@ -302,5 +302,28 @@ export const en: Dictionary = {
 	'verifyEmail.noEmail': 'There is no email address in your profile.',
 	'verifyEmail.rateLimited': 'You just requested several links. Please try again in an hour.',
 	'verifyEmail.failed': 'The link could not be sent right now. Please try again later.',
-	'verifyEmail.toStart': 'To the start page'
+	'verifyEmail.toStart': 'To the start page',
+
+	// Forgot / reset password
+	'mail.reset.subject': 'Your link to reset your password',
+	'mail.reset.body':
+		'Hi {nickname},\n\nsomeone – hopefully you – wants to reset the password of your festival app account. Use this link to choose a new one:\n\n{link}\n\nThe link is valid for one hour and works only once. If you did not request this, just ignore this email – your password stays as it is.',
+	'login.forgotPassword': 'Forgot your password?',
+	'forgotPassword.heading': 'Forgot password',
+	'forgotPassword.explanation':
+		'Enter your nickname or email address. If your profile has a confirmed email address, we will send you a link to choose a new password.',
+	'forgotPassword.identifier': 'Nickname or email address',
+	'forgotPassword.submit': 'Request link',
+	'forgotPassword.sent':
+		'If there is an account with a confirmed email address for this, a link is on its way. It is valid for one hour – check your spam folder too.',
+	'forgotPassword.rateLimited': 'Too many requests. Please try again later.',
+	'resetPassword.heading': 'Choose a new password',
+	'resetPassword.newLabel': 'New password:',
+	'resetPassword.repeatLabel': 'Repeat new password:',
+	'resetPassword.submit': 'Save password',
+	'resetPassword.invalid': 'This link is invalid, already used or expired.',
+	'resetPassword.requestNew': 'Request a new link',
+	'resetPassword.success':
+		'Your password has been changed. You have been logged out everywhere and can now log in with the new password.',
+	'resetPassword.toLogin': 'To login'
 };

@@ -342,6 +342,21 @@ status=$(curl -s -o smoke-response.txt -w '%{http_code}' -H 'Accept: text/html' 
 	"${APP_URL}/verify-email?token=gibt-es-nicht")
 expect_status 200 "$status" "Bestaetigungslink mit unbekanntem Token"
 
+# Passwort vergessen: Der Server hat hier keine Mail-Konfiguration (Modus 'disabled').
+# Mit bestaetigter Adresse sucht die Anfrage das Konto per Nickname ODER E-Mail in MariaDB
+# und antwortet trotzdem normal - verschickt wird nichts, das Log meldet es.
+mysql_exec "UPDATE users SET email = '${nickname}@example.com', emailVerifiedAt = NOW() WHERE nickname = '${nickname}'"
+echo "  Passwort vergessen (ohne Anmeldung, ohne Mail-Konfiguration)"
+# Ohne Session-Cookie, aber mit Origin: Sonst lehnt die CSRF-Pruefung des Builds den POST ab.
+status=$(curl -s -o smoke-response.txt -w '%{http_code}' -H "Origin: ${PROD_ORIGIN}" -H 'Accept: text/html' \
+	-d "identifier=${nickname}" "${APP_URL}/forgot-password")
+expect_status 200 "$status" "Passwort vergessen"
+
+echo "  Reset-Link mit unbekanntem Token (ohne Anmeldung)"
+status=$(curl -s -o smoke-response.txt -w '%{http_code}' -H 'Accept: text/html' \
+	"${APP_URL}/reset-password?token=gibt-es-nicht")
+expect_status 200 "$status" "Reset-Link mit unbekanntem Token"
+
 echo "  Zu langer Festivalname"
 status=$(http -d "name=$(repeat_char n 256)" "${APP_URL}/festival/new")
 expect_status 422 "$status" "Festivalname mit 256 Zeichen"

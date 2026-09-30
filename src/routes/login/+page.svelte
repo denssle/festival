@@ -46,6 +46,9 @@
 			<p>
 				{tr('login.noAccount')} <a href={resolve('/registration')}>{tr('login.registerLink')}</a>
 			</p>
+			<p>
+				<a href={resolve('/forgot-password')} data-testid="login-forgot-password">{tr('login.forgotPassword')}</a>
+			</p>
 		</section>
 	</form>
 </article>

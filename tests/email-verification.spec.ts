@@ -1,39 +1,5 @@
 import { test, expect, type Page, type BrowserContext } from '@playwright/test';
-import { register, getUserId, uniqueName, uiText } from './test-utils';
-
-interface OutgoingMail {
-	to: string;
-	subject: string;
-	text: string;
-}
-
-/** Der jüngste Link zu `path` aus einer Mail an `to` (Postausgang, nur im Testmodus). */
-async function linkFromMail(page: Page, to: string, path: string): Promise<string> {
-	let link = '';
-	await expect(async () => {
-		const response = await page.request.get('/festival/api/test/mails');
-		expect(response.status()).toBe(200);
-		const mails = (await response.json()) as OutgoingMail[];
-		const mail = mails.filter((m) => m.to === to).at(-1);
-		const match = mail?.text.match(new RegExp(`https?://\\S+${path}\\?token=[A-Za-z0-9_-]+`));
-		expect(match).toBeTruthy();
-		link = match![0];
-	}).toPass({ timeout: 10000 });
-	return link;
-}
-
-async function saveEmail(page: Page, userId: string, email: string): Promise<void> {
-	await page.goto(`/festival/user/${userId}`);
-	await page.waitForLoadState('networkidle');
-	// Vor der Hydration Eingetipptes setzt Svelte auf den Ausgangswert zurück – nachfüllen,
-	// bis der Wert steht (wie register() in test-utils.ts).
-	const input = page.locator('input[name="email"]');
-	await expect(async () => {
-		await input.fill(email);
-		await expect(input).toHaveValue(email, { timeout: 500 });
-	}).toPass({ timeout: 10000 });
-	await Promise.all([page.waitForURL(`**/user/${userId}`), page.getByTestId('profile-save').click()]);
-}
+import { register, getUserId, uniqueName, uiText, linkFromMail, saveEmail } from './test-utils';
 
 test.describe.serial('E-Mail-Adresse bestätigen', () => {
 	const nickname = uniqueName('Mailer');

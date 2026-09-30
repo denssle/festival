@@ -20,7 +20,12 @@ const noAuthURLs: string[] = [
 	'/impressum',
 	'/datenschutz',
 	'/language',
-	'/verify-email'
+	'/verify-email',
+	'/forgot-password',
+	'/reset-password',
+	// Postausgang für E2E-Tests, die abgemeldet einen Reset-Link abholen. Antwortet außerhalb
+	// von PLAYWRIGHT=true immer mit 403, gibt also ohne Anmeldung nichts preis.
+	'/api/test/mails'
 ];
 
 // "A man is not dead while his name is still spoken." - Terry Pratchett (gest. 2015).
