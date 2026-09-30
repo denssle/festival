@@ -5,7 +5,7 @@ import { UserService } from '$lib/services/user.service';
 import { StandardResponse } from '$lib/models/transferData/StandardResponse';
 import { ChangeResult, getMessageForChangeResult } from '$lib/models/updates/ChangeResult';
 import { MIN_PASSWORD_LENGTH } from '$lib/constants';
-import { validatePasswordChange } from '$lib/services/user.logic';
+import { MAX_PASSWORD_BYTES, validatePasswordChange } from '$lib/services/user.logic';
 import { ACCOUNT_SCOPE, PASSWORD_SCOPE } from '$lib/models/transferData/StandardResponse';
 import { t, type TranslationKey } from '$lib/i18n';
 
@@ -40,12 +40,13 @@ export const actions: Actions = {
 			currentPassword,
 			password,
 			passwordRepeat,
+			user.nickname,
 			MIN_PASSWORD_LENGTH
 		);
 		if (validationError) {
 			return {
 				success: false,
-				message: t(locals.locale, validationError, { min: MIN_PASSWORD_LENGTH }),
+				message: t(locals.locale, validationError, { min: MIN_PASSWORD_LENGTH, max: MAX_PASSWORD_BYTES }),
 				scope: PASSWORD_SCOPE
 			};
 		}

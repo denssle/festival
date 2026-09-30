@@ -42,6 +42,11 @@ export const en: Dictionary = {
 	'auth.error.passwordInvalid': 'Invalid password.',
 	'auth.error.rateLimited': 'Too many failed attempts. Please try again later.',
 	'auth.error.passwordTooShort': 'The password must be at least {min} characters long.',
+	'auth.error.passwordTooLong':
+		'The password may be at most {max} bytes long – fewer characters if it contains umlauts or emoji.',
+	'auth.error.passwordEqualsNickname': 'The password must not be your nickname.',
+	'auth.error.passwordTooCommon':
+		'This password is very common and among the first ones attackers try. Please choose another.',
 	'auth.error.userCreationFailed': 'The account could not be created.',
 	'auth.error.currentPasswordRequired': 'Please enter your current password.',
 	'auth.error.newPasswordRequired': 'Please enter the new password and its repetition.',

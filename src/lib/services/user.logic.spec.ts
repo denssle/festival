@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { isSessionTokenExpired, readTextField, validatePasswordChange } from './user.logic';
+import {
+	isSessionTokenExpired,
+	MAX_PASSWORD_BYTES,
+	readTextField,
+	validateNewPassword,
+	validatePasswordChange
+} from './user.logic';
 
 describe('readTextField', () => {
 	it('sollte den Wert eines vorhandenen Feldes liefern', () => {
@@ -68,37 +74,81 @@ describe('isSessionTokenExpired', () => {
 
 describe('validatePasswordChange', () => {
 	const minLength = 8;
+	const nickname = 'Partylöwe';
 
 	it('sollte null liefern bei gültigen Eingaben', () => {
-		expect(validatePasswordChange('oldPass123', 'newPass456', 'newPass456', minLength)).toBeNull();
+		expect(validatePasswordChange('oldPass123', 'newPass456', 'newPass456', nickname, minLength)).toBeNull();
 	});
 
 	it('sollte das aktuelle Passwort verlangen', () => {
-		expect(validatePasswordChange(undefined, 'newPass456', 'newPass456', minLength)).toBe(
+		expect(validatePasswordChange(undefined, 'newPass456', 'newPass456', nickname, minLength)).toBe(
 			'auth.error.currentPasswordRequired'
 		);
-		expect(validatePasswordChange('', 'newPass456', 'newPass456', minLength)).toBe(
+		expect(validatePasswordChange('', 'newPass456', 'newPass456', nickname, minLength)).toBe(
 			'auth.error.currentPasswordRequired'
 		);
 	});
 
 	it('sollte neues Passwort und Wiederholung verlangen', () => {
-		expect(validatePasswordChange('oldPass123', undefined, 'newPass456', minLength)).toBe(
+		expect(validatePasswordChange('oldPass123', undefined, 'newPass456', nickname, minLength)).toBe(
 			'auth.error.newPasswordRequired'
 		);
-		expect(validatePasswordChange('oldPass123', 'newPass456', undefined, minLength)).toBe(
+		expect(validatePasswordChange('oldPass123', 'newPass456', undefined, nickname, minLength)).toBe(
 			'auth.error.newPasswordRequired'
 		);
-		expect(validatePasswordChange('oldPass123', '', '', minLength)).toBe('auth.error.newPasswordRequired');
+		expect(validatePasswordChange('oldPass123', '', '', nickname, minLength)).toBe('auth.error.newPasswordRequired');
 	});
 
 	it('sollte die Mindestlänge des neuen Passworts prüfen', () => {
-		expect(validatePasswordChange('oldPass123', 'short', 'short', minLength)).toBe('auth.error.passwordTooShort');
+		expect(validatePasswordChange('oldPass123', 'short', 'short', nickname, minLength)).toBe(
+			'auth.error.passwordTooShort'
+		);
+	});
+
+	it('sollte die Passwortregeln auch bei der Änderung anwenden', () => {
+		expect(validatePasswordChange('oldPass123', 'password123', 'password123', nickname, minLength)).toBe(
+			'auth.error.passwordTooCommon'
+		);
 	});
 
 	it('sollte nicht übereinstimmende Passwörter ablehnen', () => {
-		expect(validatePasswordChange('oldPass123', 'newPass456', 'newPass457', minLength)).toBe(
+		expect(validatePasswordChange('oldPass123', 'newPass456', 'newPass457', nickname, minLength)).toBe(
 			'auth.error.passwordsDoNotMatch'
 		);
+	});
+});
+
+describe('validateNewPassword', () => {
+	const minLength = 8;
+	const nickname = 'Partylöwe';
+
+	it('lässt ein langes, unauffälliges Passwort ohne Sonderzeichen durch', () => {
+		expect(validateNewPassword('grüne gurken im mondschein', nickname, minLength)).toBeNull();
+	});
+
+	it('lehnt zu kurze Passwörter ab', () => {
+		expect(validateNewPassword('kurz12', nickname, minLength)).toBe('auth.error.passwordTooShort');
+	});
+
+	it('lässt genau 72 Bytes durch und lehnt das 73. ab', () => {
+		expect(validateNewPassword('a'.repeat(MAX_PASSWORD_BYTES), nickname, minLength)).toBeNull();
+		expect(validateNewPassword('a'.repeat(MAX_PASSWORD_BYTES + 1), nickname, minLength)).toBe(
+			'auth.error.passwordTooLong'
+		);
+	});
+
+	it('zählt Bytes statt Zeichen – Umlaute belegen zwei', () => {
+		// 37 × „ä“ = 37 Zeichen, aber 74 Bytes in UTF-8
+		expect(validateNewPassword('ä'.repeat(37), nickname, minLength)).toBe('auth.error.passwordTooLong');
+	});
+
+	it('lehnt den eigenen Nickname ab, unabhängig von Groß-/Kleinschreibung', () => {
+		expect(validateNewPassword('partylöwe', nickname, minLength)).toBe('auth.error.passwordEqualsNickname');
+		expect(validateNewPassword(' PARTYLÖWE ', nickname, minLength)).toBe('auth.error.passwordEqualsNickname');
+	});
+
+	it('lehnt verbreitete Passwörter ab, unabhängig von Groß-/Kleinschreibung', () => {
+		expect(validateNewPassword('12345678', nickname, minLength)).toBe('auth.error.passwordTooCommon');
+		expect(validateNewPassword('Passwort123', nickname, minLength)).toBe('auth.error.passwordTooCommon');
 	});
 });

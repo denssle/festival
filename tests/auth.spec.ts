@@ -100,4 +100,20 @@ test.describe('Authentifizierung: Registrierung, Anmeldung und Abmeldung', () =>
 		await expect(page).toHaveURL(/\/registration/);
 		await expect(page.getByText(uiText('error.nicknameInvalid'))).toBeVisible();
 	});
+
+	test('Registrierung mit einem verbreiteten Passwort zeigt eine Fehlermeldung', async ({ page }) => {
+		const nickname = `CommonPw_${Date.now()}`;
+
+		await page.goto('/festival/registration');
+		await page.fill('input[name="nickname"]', nickname);
+		await page.fill('input[name="password"]', 'Passwort123');
+		await page.fill('input[name="password2"]', 'Passwort123');
+		const submitButton = page.locator('article button[type="submit"]');
+		await expect(submitButton).toBeEnabled();
+		await submitButton.click();
+
+		// Kein Konto angelegt: Wir bleiben auf /registration und sehen den Grund
+		await expect(page).toHaveURL(/\/registration/);
+		await expect(page.getByText(uiText('auth.error.passwordTooCommon'))).toBeVisible();
+	});
 });

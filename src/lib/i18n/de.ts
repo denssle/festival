@@ -53,6 +53,11 @@ export const de = {
 	'auth.error.passwordInvalid': 'Passwort ungültig.',
 	'auth.error.rateLimited': 'Zu viele Fehlversuche. Bitte später erneut versuchen.',
 	'auth.error.passwordTooShort': 'Das Passwort muss mindestens {min} Zeichen lang sein.',
+	'auth.error.passwordTooLong':
+		'Das Passwort darf höchstens {max} Bytes lang sein – mit Umlauten oder Emojis sind das weniger Zeichen.',
+	'auth.error.passwordEqualsNickname': 'Das Passwort darf nicht dein Nickname sein.',
+	'auth.error.passwordTooCommon':
+		'Dieses Passwort ist sehr verbreitet und wird bei Angriffen als Erstes probiert. Bitte nimm ein anderes.',
 	'auth.error.userCreationFailed': 'Der Benutzer konnte nicht angelegt werden.',
 	'auth.error.currentPasswordRequired': 'Bitte das aktuelle Passwort angeben.',
 	'auth.error.newPasswordRequired': 'Bitte das neue Passwort und die Wiederholung angeben.',

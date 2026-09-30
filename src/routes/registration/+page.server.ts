@@ -9,6 +9,7 @@ import { MIN_PASSWORD_LENGTH } from '$lib/constants';
 import { resolve } from '$app/paths';
 import { t } from '$lib/i18n';
 import { findTooLongField, USER_TEXT_LIMITS } from '$lib/services/text-length.logic';
+import { MAX_PASSWORD_BYTES, validateNewPassword } from '$lib/services/user.logic';
 
 /**
  * load – GET /registration
@@ -49,10 +50,11 @@ export const actions: Actions = {
 	}): Promise<StandardResponse> => {
 		const formData: NickPassData | undefined = await UserService.readNickPass(request.formData());
 		if (formData) {
-			if (formData.password.length < MIN_PASSWORD_LENGTH) {
+			const passwordError = validateNewPassword(formData.password, formData.nickname, MIN_PASSWORD_LENGTH);
+			if (passwordError) {
 				return {
 					success: false,
-					message: t(locals.locale, 'auth.error.passwordTooShort', { min: MIN_PASSWORD_LENGTH })
+					message: t(locals.locale, passwordError, { min: MIN_PASSWORD_LENGTH, max: MAX_PASSWORD_BYTES })
 				};
 			}
 			const tooLong = findTooLongField({ nickname: formData.nickname }, USER_TEXT_LIMITS);
