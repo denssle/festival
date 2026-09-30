@@ -5,6 +5,7 @@ import { FrontendComment } from '$lib/models/transferData/FrontendComment';
 import { ChangeResult, getHTTPCodeForChangeResult } from '$lib/models/updates/ChangeResult';
 import { COMMENT_TEXT_LIMITS, findTooLongField } from '$lib/services/text-length.logic';
 import { t } from '$lib/i18n';
+import { FestivalEventService } from '$lib/services/festival-event.service';
 
 /**
  * Bestimmt das Kommentarziel aus dem URL-Pfad: Festival (`festival_id`) oder
@@ -20,6 +21,18 @@ function getTargetFromPath(request: RequestEvent): CommentTarget | undefined {
 	}
 	const userId = request.params.user_id?.toString();
 	return userId ? { profileUserId: userId } : undefined;
+}
+
+/**
+ * 404-Antwort, wenn das Ziel ein Festival ist, das der Nutzer nicht sehen darf (siehe
+ * `canSeeFestival`), oder null. Wie auf der Festivalseite selbst sieht ein verborgenes
+ * Festival aus wie ein nicht vorhandenes.
+ */
+async function hiddenFestivalResponse(userId: string, target: CommentTarget): Promise<Response | null> {
+	if ('festivalId' in target && !(await FestivalEventService.isVisibleTo(userId, target.festivalId))) {
+		return new Response('Not Found', { status: 404 });
+	}
+	return null;
 }
 
 /**
@@ -42,6 +55,7 @@ function tooLongResponse(request: RequestEvent, comment: unknown): Response | nu
  * Erwartet FormData mit Feld "comment" (string).
  *
  * @returns 200 bei Erfolg, 401 ohne Session, 400 bei fehlenden Daten,
+ *          404 bei einem Festival, das der Nutzer nicht sehen darf,
  *          422 bei zu langem Text oder nicht existierendem Ziel
  */
 export async function POSTComment(request: RequestEvent): Promise<Response> {
@@ -58,6 +72,10 @@ export async function POSTComment(request: RequestEvent): Promise<Response> {
 		if (tooLong) {
 			return tooLong;
 		}
+		const hidden = await hiddenFestivalResponse(user.id, target);
+		if (hidden) {
+			return hidden;
+		}
 		const result: ChangeResult = await CommentService.saveComment(user.id, target, comment);
 		if (result !== 'Success') {
 			return new Response(JSON.stringify(result), { status: getHTTPCodeForChangeResult(result) });
@@ -72,7 +90,8 @@ export async function POSTComment(request: RequestEvent): Promise<Response> {
  * Gibt alle Kommentare für ein Festival oder Nutzerprofil zurück.
  * Wird von GET /festival/:id/comments und GET /user/:id/comments verwendet.
  *
- * @returns 200 mit JSON-Array von FrontendComment, 401 ohne Session, 400 bei fehlender ID
+ * @returns 200 mit JSON-Array von FrontendComment, 401 ohne Session, 400 bei fehlender ID,
+ *          404 bei einem Festival, das der Nutzer nicht sehen darf
  */
 export async function GETComments(request: RequestEvent): Promise<Response> {
 	const target: CommentTarget | undefined = getTargetFromPath(request);
@@ -81,6 +100,10 @@ export async function GETComments(request: RequestEvent): Promise<Response> {
 		return new Response('Unauthorized', { status: 401 });
 	}
 	if (target) {
+		const hidden = await hiddenFestivalResponse(user.id, target);
+		if (hidden) {
+			return hidden;
+		}
 		const comments: FrontendComment[] = await CommentService.getComments(target, user.id);
 		return new Response(JSON.stringify(comments), { status: 200 });
 	}
@@ -117,7 +140,7 @@ export async function DELETEComment(request: RequestEvent): Promise<Response> {
  * Body: FrontendComment als JSON.
  *
  * @returns HTTP-Code entsprechend ChangeResult, 401 ohne Session, 400 bei fehlenden Daten,
- *          422 bei zu langem Text
+ *          404 bei einem Festival, das der Nutzer nicht sehen darf, 422 bei zu langem Text
  */
 export async function PUTComment(request: RequestEvent): Promise<Response> {
 	const comment = (await request.request.json()) as FrontendComment;
@@ -130,6 +153,10 @@ export async function PUTComment(request: RequestEvent): Promise<Response> {
 		const tooLong = tooLongResponse(request, comment.comment);
 		if (tooLong) {
 			return tooLong;
+		}
+		const hidden = await hiddenFestivalResponse(user.id, target);
+		if (hidden) {
+			return hidden;
 		}
 		const result: ChangeResult = await CommentService.updateComment(user.id, comment.id, comment.comment);
 		if (result === 'Success') {

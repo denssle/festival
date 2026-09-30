@@ -13,7 +13,7 @@ import { t } from '$lib/i18n';
  * Body: JSON mit optionalem Kommentar `{ comment?: string }`.
  *
  * @returns 200 bei Erfolg, 401 wenn nicht eingeloggt, 400 bei fehlender festival_id,
- *          404 wenn das Festival nicht existiert, 422 bei zu langem Kommentar
+ *          404 wenn das Festival nicht existiert oder für den Nutzer nicht sichtbar ist, 422 bei zu langem Kommentar
  */
 export function answerWithCommentHandler(answer: CommentAnswer): RequestHandler {
 	return async ({ locals, params, request }) => {
@@ -29,8 +29,7 @@ export function answerWithCommentHandler(answer: CommentAnswer): RequestHandler 
 		}
 
 		if (params.festival_id) {
-			const festival = await FestivalEventService.getFrontEndFestival(params.festival_id);
-			if (!festival) {
+			if (!(await FestivalEventService.isVisibleTo(currentUser.id, params.festival_id))) {
 				return new Response('Festival not found', { status: 404 });
 			}
 			await GuestInformationService.answerWithComment(currentUser, params.festival_id, answer, comment);

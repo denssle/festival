@@ -8,7 +8,7 @@ import {
 	mapToBackendFestivalEvent,
 	mapToFrontendFestivalEvent
 } from '$lib/db/attributes/festivalEvent.attributes';
-import { Model } from 'sequelize';
+import { Model, Op } from 'sequelize';
 import { CurrentUser } from '$lib/models/user/CurrentUser';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
 import { GuestInformationService } from '$lib/services/guest-information.service';
@@ -17,11 +17,30 @@ import { VisitingFestival } from '$lib/models/user/VisitingFestival';
 import { GuestInformation } from '$lib/db/model/guestInformation';
 import { FestivalEvent } from '$lib/db/model/festivalEvent';
 import { User } from '$lib/db/model/user';
-import { isChangeAllowed } from './festival-event.logic';
+import { canSeeFestival, isChangeAllowed } from './festival-event.logic';
+import { FriendshipService } from './friendship.service';
 
 export class FestivalEventService {
-	static async getAllFestivals(): Promise<FrontendFestivalEvent[]> {
+	/**
+	 * Alle Festivals, die `userId` sehen darf. Dieselbe Regel wie `canSeeFestival`, nur als
+	 * WHERE formuliert, damit nicht jedes Festival einzeln geprüft werden muss: eigene Festivals
+	 * und die von Freunden, dazu alle, auf die der Nutzer schon geantwortet hat.
+	 */
+	static async getAllFestivals(userId: string): Promise<FrontendFestivalEvent[]> {
+		const [friends, answers] = await Promise.all([
+			FriendshipService.getFriends(userId),
+			GuestInformation.findAll({ where: { UserId: userId }, attributes: ['FestivalEventId'] })
+		]);
+		const ownerIds: string[] = [
+			userId,
+			...friends.map((value) => (value.friend1Id === userId ? value.friend2Id : value.friend1Id))
+		];
+		const answeredFestivalIds: string[] = answers.map((value) => value.dataValues.FestivalEventId);
+
 		const allFestivals = await FestivalEvent.findAll({
+			where: {
+				[Op.or]: [{ UserId: { [Op.in]: ownerIds } }, { id: { [Op.in]: answeredFestivalIds } }]
+			},
 			include: [
 				{ model: GuestInformation, as: 'EventGuests' },
 				// Ersteller mitladen, damit mapToFrontendFestivalEvent keinen
@@ -35,6 +54,24 @@ export class FestivalEventService {
 				return mapToFrontendFestivalEvent(value.dataValues);
 			})
 		);
+	}
+
+	/**
+	 * Darf `userId` das Festival sehen (und damit zu-/absagen und kommentieren)?
+	 * Regel siehe `canSeeFestival`. Für ein nicht existierendes Festival `false` –
+	 * Aufrufer antworten in beiden Fällen mit 404, damit fremde Festival-IDs nichts verraten.
+	 */
+	static async isVisibleTo(userId: string, festivalId: string): Promise<boolean> {
+		const festival = await FestivalEvent.findByPk(festivalId, { attributes: ['UserId'] });
+		if (!festival) {
+			return false;
+		}
+		const ownerId: string = festival.dataValues.UserId;
+		const [isFriend, answerCount] = await Promise.all([
+			FriendshipService.areFriends(userId, ownerId),
+			GuestInformation.count({ where: { UserId: userId, FestivalEventId: festivalId } })
+		]);
+		return canSeeFestival(userId, ownerId, isFriend, answerCount > 0);
 	}
 
 	private static async getFestivalModel(id: string) {
@@ -158,13 +195,23 @@ export class FestivalEventService {
 		};
 	}
 
-	static async getFestivalYouVisit(userId: string): Promise<VisitingFestival[]> {
+	/**
+	 * Festivals, denen `userId` zugesagt hat – aus Sicht von `viewerId`. Auf dem Profil eines
+	 * Freundes erscheinen nur die Festivals, die der Betrachter selbst sehen darf; sonst stünden
+	 * dort Namen von Festivals fremder Leute, deren Link ohnehin ins 404 führt.
+	 */
+	static async getFestivalYouVisit(userId: string, viewerId: string): Promise<VisitingFestival[]> {
 		const activeInfos: BackendGuestInformation[] = await GuestInformationService.getAllActiveGuestInformation(userId);
 
 		// IDs sammeln, um Duplikate zu vermeiden
 		const uniqueFestivalIds = [...new Set(activeInfos.map((info) => info.FestivalEventId))];
+		const visible: boolean[] =
+			viewerId === userId
+				? uniqueFestivalIds.map(() => true)
+				: await Promise.all(uniqueFestivalIds.map((id) => this.isVisibleTo(viewerId, id)));
+		const festivalIds: string[] = uniqueFestivalIds.filter((_, i) => visible[i]);
 
-		const loading: Promise<BackendFestivalEvent | null>[] = uniqueFestivalIds.map((id) => this.getFestival(id));
+		const loading: Promise<BackendFestivalEvent | null>[] = festivalIds.map((id) => this.getFestival(id));
 		const result: VisitingFestival[] = [];
 		for (const fest of await Promise.all(loading)) {
 			if (fest !== null) {

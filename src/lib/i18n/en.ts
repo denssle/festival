@@ -86,7 +86,7 @@ export const en: Dictionary = {
 	'home.byAuthor': 'by {author}',
 	'home.start': 'Start:',
 	'home.guestCount': 'Guests so far: {count}',
-	'home.empty': 'There are no festivals yet. Create the first one!',
+	'home.empty': 'Your festivals and those of your friends show up here. Create one or add some friends!',
 
 	// About
 	'about.heading': 'About this site',

@@ -60,7 +60,7 @@ test.describe.serial('Profile Festivals Authorization', () => {
 		]);
 	});
 
-	test('User 2 sollte die Festivals von User 1 NICHT sehen können (nicht befreundet)', async () => {
+	test('User 2 sollte die Profilliste "geht zu" von User 1 NICHT abrufen können (nicht befreundet)', async () => {
 		// Direkt den API-Endpunkt aufrufen
 		const response = await user2Page.request.get(`/festival/user/${user1Id}/visiting-festivals`);
 		expect(response.status()).toBe(403);
@@ -75,45 +75,32 @@ test.describe.serial('Profile Festivals Authorization', () => {
 		expect(status).toBe(403);
 	});
 
-	test('User 2 sollte den Kommentar von User 1 NICHT bearbeiten oder löschen können', async () => {
-		const commentsUrl = `/festival/festival/${festivalId}/comments`;
-		const commentText = uniqueName('Kommentar');
-
-		// User 1 kommentiert sein eigenes Festival
-		const comments = await user1Page.evaluate(
-			async ({ url, text }: { url: string; text: string }) => {
-				const body = new FormData();
-				body.append('comment', text);
-				const resp = await fetch(url, { method: 'POST', body });
-				return (await resp.json()) as { id: string; comment: string }[];
-			},
-			{ url: commentsUrl, text: commentText }
-		);
-		const commentId = comments.find((c) => c.comment === commentText)?.id;
-		expect(commentId).toBeTruthy();
-
-		// User 2 versucht zu bearbeiten und zu löschen
+	test('User 2 sollte das Festival von User 1 NICHT sehen können (nicht befreundet)', async () => {
+		// Nicht auf der Startseite
 		await user2Page.goto('/festival/');
-		const statuses = await user2Page.evaluate(
-			async ({ url, id }: { url: string; id: string }) => {
-				const put = await fetch(url, {
-					method: 'PUT',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ id, comment: 'gekapert' })
-				});
-				const del = await fetch(url, { method: 'DELETE', body: id });
-				return { put: put.status, del: del.status };
-			},
-			{ url: commentsUrl, id: commentId! }
-		);
-		expect(statuses).toEqual({ put: 403, del: 403 });
+		await user2Page.waitForLoadState('networkidle');
+		await expect(user2Page.getByText(festivalName)).toHaveCount(0);
 
-		// Der Kommentar steht unverändert da
-		const after = await user1Page.evaluate(async (url: string) => {
-			const resp = await fetch(url);
-			return (await resp.json()) as { id: string; comment: string }[];
-		}, commentsUrl);
-		expect(after.find((c) => c.id === commentId)?.comment).toBe(commentText);
+		// Detailseite per direktem Link: 404 wie bei einem nicht vorhandenen Festival
+		const page = await user2Page.goto(`/festival/festival/${festivalId}`);
+		expect(page?.status()).toBe(404);
+
+		// Auch die Endpunkte darunter verraten nichts und nehmen nichts an
+		const statuses = await user2Page.evaluate(async (id: string) => {
+			const comments = await fetch(`/festival/festival/${id}/comments`);
+			const join = await fetch(`/festival/festival/${id}/join`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({})
+			});
+			const maybe = await fetch(`/festival/festival/${id}/maybe`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({})
+			});
+			return { comments: comments.status, join: join.status, maybe: maybe.status };
+		}, festivalId);
+		expect(statuses).toEqual({ comments: 404, join: 404, maybe: 404 });
 	});
 
 	test('User 1 und User 2 werden Freunde', async () => {
@@ -152,12 +139,63 @@ test.describe.serial('Profile Festivals Authorization', () => {
 		await user1Page.waitForTimeout(1000);
 	});
 
-	test('User 2 sollte die Festivals von User 1 sehen können (jetzt befreundet)', async () => {
+	test('User 2 sollte die Profilliste "geht zu" von User 1 abrufen können (jetzt befreundet)', async () => {
 		await user2Page.waitForLoadState('networkidle');
 		const response = await user2Page.request.get(`/festival/user/${user1Id}/visiting-festivals`);
 		expect(response.status()).toBe(200);
 		const json = await response.json();
 		expect(json.length).toBeGreaterThan(0);
 		expect(json[0].festivalName).toBe(festivalName);
+	});
+	test('User 2 sollte das Festival von User 1 sehen können (jetzt befreundet)', async () => {
+		await user2Page.goto('/festival/');
+		await user2Page.waitForLoadState('networkidle');
+		await expect(user2Page.getByText(festivalName)).toBeVisible();
+
+		const page = await user2Page.goto(`/festival/festival/${festivalId}`);
+		expect(page?.status()).toBe(200);
+	});
+
+	test('User 2 sollte den Kommentar von User 1 NICHT bearbeiten oder löschen können (jetzt befreundet)', async () => {
+		// Erst als Freund sieht User 2 das Festival überhaupt – vorher gäbe es 404 und die
+		// Autor-Prüfung käme gar nicht zum Zug.
+		const commentsUrl = `/festival/festival/${festivalId}/comments`;
+		const commentText = uniqueName('Kommentar');
+
+		// User 1 kommentiert sein eigenes Festival
+		const comments = await user1Page.evaluate(
+			async ({ url, text }: { url: string; text: string }) => {
+				const body = new FormData();
+				body.append('comment', text);
+				const resp = await fetch(url, { method: 'POST', body });
+				return (await resp.json()) as { id: string; comment: string }[];
+			},
+			{ url: commentsUrl, text: commentText }
+		);
+		const commentId = comments.find((c) => c.comment === commentText)?.id;
+		expect(commentId).toBeTruthy();
+
+		// User 2 versucht zu bearbeiten und zu löschen
+		await user2Page.goto('/festival/');
+		const statuses = await user2Page.evaluate(
+			async ({ url, id }: { url: string; id: string }) => {
+				const put = await fetch(url, {
+					method: 'PUT',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ id, comment: 'gekapert' })
+				});
+				const del = await fetch(url, { method: 'DELETE', body: id });
+				return { put: put.status, del: del.status };
+			},
+			{ url: commentsUrl, id: commentId! }
+		);
+		expect(statuses).toEqual({ put: 403, del: 403 });
+
+		// Der Kommentar steht unverändert da
+		const after = await user1Page.evaluate(async (url: string) => {
+			const resp = await fetch(url);
+			return (await resp.json()) as { id: string; comment: string }[];
+		}, commentsUrl);
+		expect(after.find((c) => c.id === commentId)?.comment).toBe(commentText);
 	});
 });

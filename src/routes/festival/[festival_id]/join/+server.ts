@@ -16,7 +16,7 @@ import { findTooLongField, GUEST_TEXT_LIMITS } from '$lib/services/text-length.l
  * @param request - Body enthält BaseGuestInformation als JSON (z. B. Essensvorlieben)
  * @returns 200 mit { success: true } bei Erfolg,
  *          401 wenn nicht eingeloggt,
- *          404 wenn Festival nicht gefunden,
+ *          404 wenn Festival nicht gefunden oder für den Nutzer nicht sichtbar,
  *          400 bei fehlenden Daten,
  *          422 bei zu langen Angaben,
  *          500 bei internem Fehler
@@ -51,8 +51,7 @@ export const POST: RequestHandler = async ({ locals, params, request }): Promise
 					{ status: 422 }
 				);
 			}
-			const festival = await FestivalEventService.getFrontEndFestival(params.festival_id);
-			if (!festival) {
+			if (!(await FestivalEventService.isVisibleTo(user.id, params.festival_id))) {
 				return new Response(JSON.stringify({ success: false, message: t(locals.locale, 'festival.error.notFound') }), {
 					status: 404
 				});

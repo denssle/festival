@@ -30,7 +30,7 @@ export const GET: RequestHandler = async ({ params, locals }): Promise<Response>
 		const isFriend = await FriendshipService.areFriends(user.id, pathId);
 
 		if (isOwn || isFriend) {
-			const visitingFestivals: VisitingFestival[] = await FestivalEventService.getFestivalYouVisit(pathId);
+			const visitingFestivals: VisitingFestival[] = await FestivalEventService.getFestivalYouVisit(pathId, user.id);
 			return new Response(JSON.stringify(visitingFestivals), { status: 200 });
 		} else {
 			throw error(403, 'Forbidden');

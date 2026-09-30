@@ -8,10 +8,11 @@ import { CurrentUser } from '$lib/models/user/CurrentUser';
 
 export const load: PageServerLoad = async ({ locals, params }): Promise<FestivalTransferData> => {
 	const festival_id: string = params.festival_id;
-	if (festival_id) {
+	const user: CurrentUser | undefined = locals.currentUser;
+	// Nicht sichtbar und nicht vorhanden sehen gleich aus, damit fremde IDs nichts verraten.
+	if (festival_id && user && (await FestivalEventService.isVisibleTo(user.id, festival_id))) {
 		const festival: FrontendFestivalEvent | null = await FestivalEventService.getFrontEndFestival(festival_id);
-		const user: CurrentUser | undefined = locals.currentUser;
-		if (festival && user) {
+		if (festival) {
 			const guestInformation = festival.frontendGuestInformation.find((value) => value.user?.id === user.id);
 			return {
 				festival: festival,

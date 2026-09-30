@@ -98,7 +98,7 @@ export const de = {
 	'home.byAuthor': 'von {author}',
 	'home.start': 'Start:',
 	'home.guestCount': 'Bisherige Gäste: {count}',
-	'home.empty': 'Es gibt noch keine Feste. Leg das erste an!',
+	'home.empty': 'Hier erscheinen deine Feste und die deiner Freunde. Leg eins an oder füge Freunde hinzu!',
 
 	// About
 	'about.heading': 'Über diese Seite',
