@@ -23,7 +23,8 @@
 		<ul>
 			<li>
 				<strong>Kontodaten:</strong> Nickname (Pflichtangabe, dient der Anmeldung) sowie – jeweils freiwillig – Vorname, Nachname
-				und E-Mail-Adresse. Das Passwort wird ausschließlich als bcrypt-Hash gespeichert, nie im Klartext.
+				und E-Mail-Adresse, bei einer E-Mail-Adresse zusätzlich, ob und wann sie bestätigt wurde. Das Passwort wird ausschließlich
+				als bcrypt-Hash gespeichert, nie im Klartext.
 			</li>
 			<li>
 				<strong>Profilbild:</strong> ein optional hochgeladenes Bild, gespeichert in der Datenbank.
@@ -45,6 +46,10 @@
 			<li>
 				<strong>Sitzungsdaten:</strong> ein zufälliger Sitzungstoken, der die Anmeldung aufrechterhält.
 			</li>
+			<li>
+				<strong>Einmal-Links:</strong> für Links zur Bestätigung der E-Mail-Adresse und zum Zurücksetzen des Passworts ein
+				Prüfwert (Hash) des Links, sein Zweck, die betroffene Adresse und der Ablaufzeitpunkt – nicht der Link selbst.
+			</li>
 		</ul>
 		<p>
 			Zu allen genannten Datensätzen werden technisch bedingt Erstellungs- und Änderungszeitpunkt gespeichert. Eine
@@ -63,14 +68,21 @@
 			Abs. 1 lit. a DSGVO (Einwilligung) und können jederzeit in den
 			<a href={resolve('/settings')}>Einstellungen</a> geändert oder entfernt werden.
 		</p>
+		<p>
+			Eine hinterlegte E-Mail-Adresse wird ausschließlich genutzt, um einen Link zu ihrer Bestätigung zu schicken und –
+			nur an bestätigte Adressen und nur auf Anforderung – einen Link zum Zurücksetzen des Passworts. Werbung,
+			Newsletter oder sonstige Benachrichtigungen werden nicht verschickt.
+		</p>
 	</section>
 
 	<section>
 		<h3>Sichtbarkeit für andere Nutzende</h3>
 		<p>
 			Diese Anwendung ist ein geschlossener Bereich: Ohne Anmeldung sind keine Inhalte zugänglich. Angemeldete Nutzende
-			können jedoch Profile, Festivals, Zu- und Absagen sowie Kommentare anderer sehen. Angaben, die nicht geteilt
-			werden sollen, sollten deshalb nicht hinterlegt werden – insbesondere die freiwilligen Profilfelder.
+			können die Profile anderer samt der Kommentare darauf sehen. Ein Festival mit seinen Zu- und Absagen und
+			Kommentaren sehen nur, wer es angelegt hat, dessen Freunde und alle, die darauf schon geantwortet haben. Angaben,
+			die nicht geteilt werden sollen, sollten deshalb nicht hinterlegt werden – insbesondere die freiwilligen
+			Profilfelder. Die E-Mail-Adresse ist für andere nicht sichtbar.
 		</p>
 	</section>
 
@@ -93,7 +105,9 @@
 		<p>
 			Zum Schutz vor dem automatisierten Durchprobieren von Passwörtern wird bei fehlgeschlagenen Anmeldeversuchen die
 			IP-Adresse zusammen mit dem verwendeten Nickname für 15 Minuten im Arbeitsspeicher des Servers vorgehalten. Diese
-			Angaben werden nicht in der Datenbank gespeichert und verfallen automatisch.
+			Angaben werden nicht in der Datenbank gespeichert und verfallen automatisch. Ebenso wird die Zahl der für ein
+			Konto angeforderten E-Mails eine Stunde lang im Arbeitsspeicher gezählt, damit sich darüber kein fremdes Postfach
+			zuschütten lässt.
 		</p>
 	</section>
 
@@ -102,7 +116,8 @@
 		<p>
 			Die Anwendung wird bei der uberspace.de GmbH (Sonnenberger Straße 16, 65193 Wiesbaden) betrieben. Der Hoster
 			verarbeitet die Daten ausschließlich weisungsgebunden als Auftragsverarbeiter nach Art. 28 DSGVO. Die Server
-			stehen in Deutschland; eine Übermittlung in Drittländer findet nicht statt.
+			stehen in Deutschland; eine Übermittlung in Drittländer findet nicht statt. Auch die E-Mails der Anwendung werden
+			über den Mailserver des Hosters verschickt.
 		</p>
 	</section>
 
@@ -114,7 +129,9 @@
 			mitgelöscht: Profil und Profilbild, die eigenen Festivals samt der Zu- und Absagen aller Gäste, die eigenen Gruppen,
 			sämtliche Kommentare – die selbst geschriebenen ebenso wie die, die andere auf dem eigenen Profil und an den eigenen
 			Festivals hinterlassen haben –, Freundschaften, offene Freundschaftsanfragen sowie die Zusagen zu fremden Festivals.
-			Sitzungstoken verfallen spätestens nach 30 Tagen. Zur Löschdauer der Server-Protokolle gelten die Fristen des Hosters.
+			Sitzungstoken verfallen spätestens nach 30 Tagen. Einmal-Links werden mit dem Einlösen gelöscht und gelten höchstens
+			24 Stunden (Bestätigung) bzw. eine Stunde (Passwort); abgelaufene Einträge werden bei der nächsten Ausgabe eines Links
+			entfernt. Zur Löschdauer der Server-Protokolle gelten die Fristen des Hosters.
 		</p>
 	</section>
 

@@ -13,7 +13,8 @@ export const User: ModelStatic<Model<UserAttributes, UserCreationAttributes>> = 
 		nickname: { type: DataTypes.STRING, allowNull: false, unique: true },
 		forename: { type: DataTypes.STRING },
 		lastname: { type: DataTypes.STRING },
-		email: { type: DataTypes.STRING }
+		email: { type: DataTypes.STRING },
+		emailVerifiedAt: { type: DataTypes.DATE }
 	},
 	{
 		timestamps: true,

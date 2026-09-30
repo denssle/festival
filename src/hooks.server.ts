@@ -13,7 +13,15 @@ await startDB();
 // vor der Registrierung, wo die Einwilligung in die Datenverarbeitung fällt.
 // `/language` gehört dazu, sonst könnte man die Sprache auf der Login-Seite nicht
 // umstellen – also genau dort nicht, wo die Oberfläche einen zum ersten Mal empfängt.
-const noAuthURLs: string[] = ['/login', '/registration', '/about', '/impressum', '/datenschutz', '/language'];
+const noAuthURLs: string[] = [
+	'/login',
+	'/registration',
+	'/about',
+	'/impressum',
+	'/datenschutz',
+	'/language',
+	'/verify-email'
+];
 
 // "A man is not dead while his name is still spoken." - Terry Pratchett (gest. 2015).
 // In der Scheibenwelt haelt der Signalcode GNU einen Namen in den Klackertuermen im

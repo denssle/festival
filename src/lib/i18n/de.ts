@@ -298,5 +298,25 @@ export const de = {
 	'settings.account.passwordLabel': 'Zur Bestätigung dein Passwort:',
 	'settings.account.confirm':
 		'Konto endgültig löschen? Damit verschwinden auch deine Festivals samt Zusagen, deine Gruppen, Kommentare und Freundschaften. Das lässt sich nicht rückgängig machen.',
-	'settings.account.confirmYes': 'Endgültig löschen'
+	'settings.account.confirmYes': 'Endgültig löschen',
+
+	// Adressbestätigung (Mail und Seite /verify-email)
+	'mail.verify.subject': 'Bitte bestätige deine E-Mail-Adresse',
+	'mail.verify.body':
+		'Hallo {nickname},\n\nbitte bestätige deine E-Mail-Adresse für die Festival-App mit diesem Link:\n\n{link}\n\nDer Link ist {hours} Stunden gültig. Erst mit einer bestätigten Adresse kannst du ein vergessenes Passwort zurücksetzen.\n\nWenn du das nicht angefordert hast, kannst du diese Mail einfach ignorieren.',
+	'profile.email.verified': 'Bestätigt.',
+	'profile.email.unverified':
+		'Noch nicht bestätigt. Ohne Bestätigung kannst du ein vergessenes Passwort nicht zurücksetzen.',
+	'profile.email.sendLink': 'Bestätigungslink schicken',
+	'profile.updatedVerificationSent': 'Profil aktualisiert. Wir haben dir einen Bestätigungslink an {email} geschickt.',
+	'verifyEmail.heading': 'E-Mail-Adresse bestätigen',
+	'verifyEmail.success': 'Danke! Deine E-Mail-Adresse ist bestätigt.',
+	'verifyEmail.invalid':
+		'Dieser Link ist ungültig, schon benutzt oder abgelaufen. In deinem Profil kannst du einen neuen anfordern.',
+	'verifyEmail.sent': 'Wir haben dir einen Bestätigungslink an {email} geschickt. Er ist {hours} Stunden gültig.',
+	'verifyEmail.noEmail': 'In deinem Profil ist keine E-Mail-Adresse hinterlegt.',
+	'verifyEmail.rateLimited':
+		'Du hast gerade schon mehrere Links angefordert. Bitte versuch es in einer Stunde noch einmal.',
+	'verifyEmail.failed': 'Der Link konnte gerade nicht verschickt werden. Bitte versuch es später noch einmal.',
+	'verifyEmail.toStart': 'Zur Startseite'
 } as const;

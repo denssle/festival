@@ -2,8 +2,9 @@
 	import { tr } from '$lib/i18n/tr';
 	import { MAX_SHORT_TEXT_LENGTH } from '$lib/services/text-length.logic';
 	import type { FrontendUser } from '$lib/models/user/FrontendUser';
+	import { resolve } from '$app/paths';
 
-	let { data, email }: { data: FrontendUser; email: string } = $props();
+	let { data, email, emailVerified }: { data: FrontendUser; email: string; emailVerified: boolean } = $props();
 </script>
 
 <form autocomplete="on" method="POST">
@@ -54,8 +55,20 @@
 			type="email"
 			value={email}
 		/>
+		{#if email}
+			<small data-testid="email-status">
+				{emailVerified ? tr('profile.email.verified') : tr('profile.email.unverified')}
+			</small>
+		{/if}
 	</p>
 	<p>
 		<button type="submit" data-testid="profile-save">{tr('form.save')}</button>
 	</p>
 </form>
+
+{#if email && !emailVerified}
+	<!-- Eigenes Formular: Die Profilseite nutzt die Default-Action, daneben sind in SvelteKit keine benannten erlaubt. -->
+	<form method="POST" action="{resolve('/verify-email')}?/send">
+		<button type="submit" class="secondary" data-testid="email-send-link">{tr('profile.email.sendLink')}</button>
+	</form>
+{/if}

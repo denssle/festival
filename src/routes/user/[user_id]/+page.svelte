@@ -10,8 +10,9 @@
 	import FestivalComments from '$lib/sharedComponents/Comments.svelte';
 	import UserDataReadOnly from './UserDataReadOnly.svelte';
 	import VisitingFestivals from './VisitingFestivals.svelte';
+	import type { StandardResponse } from '$lib/models/transferData/StandardResponse';
 
-	let { data }: { data: UserTransferData } = $props();
+	let { data, form }: { data: UserTransferData; form: StandardResponse | null } = $props();
 </script>
 
 <article>
@@ -29,7 +30,12 @@
 
 	<section>
 		{#if data.isOwnProfil}
-			<UserDataForm data={data.user} email={data.email ?? ''} />
+			{#if form?.success}
+				<p class="message success" data-testid="profile-message">{form.message}</p>
+			{:else if form?.message}
+				<p class="message error" data-testid="profile-message">{form.message}</p>
+			{/if}
+			<UserDataForm data={data.user} email={data.email ?? ''} emailVerified={data.emailVerified ?? false} />
 		{:else}
 			<UserDataReadOnly user={data.user} />
 		{/if}
@@ -66,3 +72,13 @@
 
 	<FestivalComments whereId={data.user.id} />
 </article>
+
+<style>
+	.message.success {
+		color: var(--accent);
+	}
+
+	.message.error {
+		color: var(--error);
+	}
+</style>

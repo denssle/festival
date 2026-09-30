@@ -5,6 +5,8 @@ export interface UserTransferData {
 	user: FrontendUser;
 	/** Nur beim eigenen Profil gesetzt – FrontendUser enthält bewusst keine E-Mail. */
 	email?: string;
+	/** Nur im eigenen Profil: ist `email` bestätigt? */
+	emailVerified?: boolean;
 	isOwnProfil: boolean;
 	yourFriend: boolean;
 	friendList: FrontendUser[];

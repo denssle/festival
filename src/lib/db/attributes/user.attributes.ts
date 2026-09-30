@@ -8,6 +8,8 @@ export type UserAttributes = {
 	forename: string;
 	lastname: string;
 	email: string;
+	/** Wann `email` bestätigt wurde; null = unbestätigt. Nur bestätigte Adressen bekommen Reset-Links. */
+	emailVerifiedAt: Date | null;
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -19,7 +21,7 @@ export type UserAttributes = {
  */
 export type UserCreationAttributes = Optional<
 	UserAttributes,
-	'createdAt' | 'updatedAt' | 'forename' | 'lastname' | 'email'
+	'createdAt' | 'updatedAt' | 'forename' | 'lastname' | 'email' | 'emailVerifiedAt'
 >;
 
 export function convertToBackendUser(dataValues: UserAttributes): BackendUser {

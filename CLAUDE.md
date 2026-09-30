@@ -119,6 +119,24 @@ Die App liest Zugangsdaten aus einer `.env`-Datei (via `$env/dynamic/private`). 
 | `MARIA_DB_PASSWORD` | MariaDB-Passwort.                                                                                                     |
 | `MARIA_DB_NAME`     | Suffix des DB-Namens (siehe oben). **Siehe SQLite-Falle unten.**                                                      |
 
+### Mailversand (seit v0.7.69, optional)
+
+Für Bestätigungs- und Reset-Mails. Fehlt eine davon, läuft die App trotzdem, verschickt aber nichts; jeder Versuch landet als `Mailversand nicht konfiguriert` im Log (`supervisorctl tail -100 festival`).
+
+| Variable        | Zweck                                                                                                     |
+| --------------- | --------------------------------------------------------------------------------------------------------- |
+| `SMTP_HOST`     | SMTP-Server, auf dem Uberspace der eigene Host (`monoceres.uberspace.de`).                                |
+| `SMTP_PORT`     | Optional, Standard `587` (STARTTLS, wird erzwungen); `465` = TLS von Anfang an. Port 25 sperrt Uberspace. |
+| `SMTP_USER`     | Postfach-Adresse, z. B. `festival@enzlor.uber.space`.                                                     |
+| `SMTP_PASSWORD` | Passwort des Postfachs.                                                                                   |
+| `MAIL_FROM`     | Absender, z. B. `Festival <festival@enzlor.uber.space>`.                                                  |
+| `APP_ORIGIN`    | Öffentliche Adresse ohne Base-Pfad: `https://enzlor.uber.space`.                                          |
+
+- **Postfach anlegen (einmalig, auf dem Host):** `uberspace mail user add festival` (fragt nach dem Passwort), dann die Variablen in `~/festival-app/.env` eintragen und `supervisorctl restart festival`. Über ein echtes Postfach signiert Uberspace die Mails per DKIM. Versandlimit laut Uberspace-Changelog 200 Mails pro Stunde (ein anderer Eintrag nennt 60) – für diese App weit mehr als genug.
+- **`APP_ORIGIN` statt Request-URL:** Die Links in Mails dürfen nicht aus `url.origin` gebaut werden. Die kommt aus dem Host-Header, und den bestimmt der Absender – ein Reset für ein fremdes Konto mit untergeschobener Domain schickte dem Opfer sonst einen Link auf den Server des Angreifers („Password Reset Poisoning“). `MailService.linkOrigin()` kapselt das.
+- **Drei Modi (`MailService.mode()`):** `smtp` (alles konfiguriert), `outbox` (Dev/Tests: Mails landen im Speicher und im Log, abrufbar über `GET /api/test/mails` nur mit `PLAYWRIGHT=true`), `disabled` (Prod ohne Konfiguration). Der Smoke-Test läuft bewusst im Modus `disabled`.
+- **Einmal-Links** (`mailTokens`, Migration 0005): In der DB steht nur der SHA-256-Hash des Tokens. Ein neuer Link entwertet alle offenen desselben Zwecks. Reset-Links gehen **nur an bestätigte Adressen** (`users.emailVerifiedAt`); eine geänderte Adresse verliert die Bestätigung (`UserService.updateUser`). Höchstens drei Mails pro Konto und Stunde (prozess-lokaler Limiter in `account-mail.service.ts`).
+
 ### ⚠️ SQLite-Falle (kritisch für Produktion)
 
 In `src/lib/db/sequelize.ts` schaltet die App auf eine **flüchtige In-Memory-SQLite-DB** um, sobald **eine** dieser Bedingungen zutrifft: `MARIA_DB_NAME == 'dev'`, `NODE_ENV === 'test'`, `VITEST === 'true'` oder `PLAYWRIGHT === 'true'`. Das ist für lokale Entwicklung/Tests gewollt (kein MariaDB nötig), aber:

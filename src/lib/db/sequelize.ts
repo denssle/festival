@@ -2,7 +2,8 @@ import { type Options, Sequelize } from 'sequelize';
 import { env } from '$env/dynamic/private';
 const { MARIA_DB_NAME, MARIA_DB_PASSWORD, MARIA_DB_USER } = env;
 
-const isTestOrLocal =
+/** Dev-Server oder Tests: In-Memory-SQLite statt MariaDB, Mails landen im Postausgang statt beim SMTP-Server. */
+export const isTestOrLocal =
 	MARIA_DB_NAME == 'dev' ||
 	process.env.NODE_ENV === 'test' ||
 	process.env.VITEST === 'true' ||

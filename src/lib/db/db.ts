@@ -10,6 +10,7 @@ import { FriendRequest } from '$lib/db/model/friendRequest';
 import { GroupMember } from '$lib/db/model/groupMember';
 import { Friendship } from '$lib/db/model/friendship';
 import { Comment } from '$lib/db/model/comment';
+import { MailToken } from '$lib/db/model/mailToken';
 
 FestivalEvent.hasMany(GuestInformation, { as: 'EventGuests', foreignKey: 'FestivalEventId', onDelete: 'CASCADE' });
 GuestInformation.belongsTo(FestivalEvent, { foreignKey: 'FestivalEventId', as: 'FestivalEvent' });
@@ -54,6 +55,9 @@ FriendRequest.belongsTo(User, {
 // TODO multiple sessions?
 User.hasOne(SessionToken, { foreignKey: 'UserId', onDelete: 'CASCADE', as: 'Session' });
 SessionToken.belongsTo(User, { foreignKey: 'UserId', as: 'User' });
+
+User.hasMany(MailToken, { foreignKey: 'UserId', onDelete: 'CASCADE', as: 'MailTokens' });
+MailToken.belongsTo(User, { foreignKey: 'UserId', as: 'User' });
 
 User.hasMany(Group, { as: 'ownedGroups', foreignKey: 'ownerId', onDelete: 'CASCADE' });
 Group.belongsTo(User, { as: 'owner', foreignKey: 'ownerId' });

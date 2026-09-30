@@ -12,6 +12,7 @@ import { FriendshipService } from '$lib/services/friendship.service';
 import { GroupService } from '$lib/services/group.service';
 import { t } from '$lib/i18n';
 import { findTooLongField, USER_TEXT_LIMITS } from '$lib/services/text-length.logic';
+import { AccountMailService } from '$lib/services/account-mail.service';
 
 export const load: PageServerLoad = async ({ locals, params }): Promise<UserTransferData> => {
 	const userId: string = params.user_id;
@@ -23,7 +24,12 @@ export const load: PageServerLoad = async ({ locals, params }): Promise<UserTran
 			return {
 				user: loaded,
 				// E-Mail ist privat und wird nur im eigenen Profil ausgeliefert
-				...(isOwnProfil ? { email: await UserService.getEmailById(userId) } : {}),
+				...(isOwnProfil
+					? {
+							email: await UserService.getEmailById(userId),
+							emailVerified: await UserService.isEmailVerified(userId)
+						}
+					: {}),
 				isOwnProfil,
 				yourFriend: await FriendshipService.areFriends(userId, user.id),
 				friendList: await FriendshipService.getFriendList(userId),
@@ -35,7 +41,7 @@ export const load: PageServerLoad = async ({ locals, params }): Promise<UserTran
 };
 
 export const actions: Actions = {
-	default: async ({ locals, request }): Promise<StandardResponse> => {
+	default: async ({ locals, request, url }): Promise<StandardResponse> => {
 		const oldUser: CurrentUser | undefined = locals.currentUser;
 		if (oldUser) {
 			const formData: UserFormData = await UserService.readFormDataFrontEndUser(request.formData());
@@ -57,10 +63,21 @@ export const actions: Actions = {
 			if (await UserService.emailTakenByOtherUser(formData.email, oldUser.id)) {
 				return { success: false, message: t(locals.locale, 'profile.error.emailInUse') };
 			}
+			const previousEmail: string = (await UserService.getEmailById(oldUser.id)).trim();
 			const result: ChangeResult = await UserService.updateUser(oldUser.id, formData);
 			if (result === 'Success') {
 				// Kein Cookie-Update mehr nötig: Der Auth-Hook lädt den Nickname
 				// bei jedem Request frisch aus der DB.
+				const newEmail: string = formData.email.trim();
+				if (newEmail && newEmail !== previousEmail) {
+					const sent = await AccountMailService.sendEmailVerification(oldUser.id, url.origin, locals.locale);
+					if (sent === 'sent') {
+						return {
+							success: true,
+							message: t(locals.locale, 'profile.updatedVerificationSent', { email: newEmail })
+						};
+					}
+				}
 				return { success: true, message: t(locals.locale, 'profile.updated') };
 			} else {
 				return { success: false, message: getMessageForChangeResult(locals.locale, result) };

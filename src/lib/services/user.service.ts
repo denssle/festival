@@ -212,6 +212,12 @@ export class UserService {
 		return user?.email ?? '';
 	}
 
+	/** Ist die hinterlegte Adresse bestätigt? Ohne Adresse: false. */
+	static async isEmailVerified(userId: string): Promise<boolean> {
+		const user = await User.findByPk(userId, { attributes: ['email', 'emailVerifiedAt'] });
+		return Boolean(user?.dataValues.email?.trim() && user.dataValues.emailVerifiedAt);
+	}
+
 	/**
 	 * Liest die Profilfelder aus dem Formular. Fehlende Felder ergeben einen leeren
 	 * String – ein früheres `String(values.get(...))` machte daraus den Text "null",
@@ -287,11 +293,15 @@ export class UserService {
 		const model: Model<UserAttributes, UserCreationAttributes> | null = await User.findByPk(userId);
 		if (model) {
 			if (this.isChangeAllowed(userId, model.dataValues)) {
+				// Neue Adresse = unbestätigt. Sonst ginge ein Reset-Link an eine Adresse, die
+				// nie jemand bestätigt hat (siehe Migration 0005).
+				const emailChanged: boolean = (model.dataValues.email ?? '').trim() !== formData.email.trim();
 				model.set({
 					email: formData.email,
 					lastname: formData.lastname,
 					forename: formData.forename,
-					nickname: formData.nickname
+					nickname: formData.nickname,
+					...(emailChanged ? { emailVerifiedAt: null } : {})
 				});
 				try {
 					await model.save();

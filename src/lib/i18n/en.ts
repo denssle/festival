@@ -285,5 +285,22 @@ export const en: Dictionary = {
 	'settings.account.passwordLabel': 'Your password, to confirm:',
 	'settings.account.confirm':
 		'Delete your account permanently? This also removes your festivals including all replies, your groups, comments and friendships. This cannot be undone.',
-	'settings.account.confirmYes': 'Delete permanently'
+	'settings.account.confirmYes': 'Delete permanently',
+
+	// Email confirmation (mail and /verify-email page)
+	'mail.verify.subject': 'Please confirm your email address',
+	'mail.verify.body':
+		'Hi {nickname},\n\nplease confirm your email address for the festival app with this link:\n\n{link}\n\nThe link is valid for {hours} hours. Only a confirmed address lets you reset a forgotten password.\n\nIf you did not request this, you can simply ignore this email.',
+	'profile.email.verified': 'Confirmed.',
+	'profile.email.unverified': 'Not confirmed yet. Without confirmation you cannot reset a forgotten password.',
+	'profile.email.sendLink': 'Send confirmation link',
+	'profile.updatedVerificationSent': 'Profile updated. We sent a confirmation link to {email}.',
+	'verifyEmail.heading': 'Confirm email address',
+	'verifyEmail.success': 'Thanks! Your email address is confirmed.',
+	'verifyEmail.invalid': 'This link is invalid, already used or expired. You can request a new one in your profile.',
+	'verifyEmail.sent': 'We sent a confirmation link to {email}. It is valid for {hours} hours.',
+	'verifyEmail.noEmail': 'There is no email address in your profile.',
+	'verifyEmail.rateLimited': 'You just requested several links. Please try again in an hour.',
+	'verifyEmail.failed': 'The link could not be sent right now. Please try again later.',
+	'verifyEmail.toStart': 'To the start page'
 };

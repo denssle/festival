@@ -334,6 +334,14 @@ if [[ "$answer" != "maybe" ]]; then
 	fail "Antwort vielleicht nicht gespeichert (war: ${answer})"
 fi
 
+# Migration 0005: /verify-email fragt die Tabelle mailTokens ab – ohne Anmeldung (der
+# Link wird oft auf einem anderen Geraet geoeffnet). Ein unbekanntes Token ergibt 200 mit
+# Hinweis, kein 500 wegen fehlender Tabelle oder Spalte.
+echo "  Bestaetigungslink mit unbekanntem Token (ohne Anmeldung)"
+status=$(curl -s -o smoke-response.txt -w '%{http_code}' -H 'Accept: text/html' \
+	"${APP_URL}/verify-email?token=gibt-es-nicht")
+expect_status 200 "$status" "Bestaetigungslink mit unbekanntem Token"
+
 echo "  Zu langer Festivalname"
 status=$(http -d "name=$(repeat_char n 256)" "${APP_URL}/festival/new")
 expect_status 422 "$status" "Festivalname mit 256 Zeichen"
