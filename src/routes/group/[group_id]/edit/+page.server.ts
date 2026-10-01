@@ -6,7 +6,7 @@ import { GroupService } from '$lib/services/group.service';
 import { resolve } from '$app/paths';
 import { t } from '$lib/i18n';
 import { GROUP_TEXT_LIMITS, findTooLongField } from '$lib/services/text-length.logic';
-import { getMessageForChangeResult } from '$lib/models/updates/ChangeResult';
+import { getMessageForChangeResult, getHTTPCodeForChangeResult } from '$lib/models/updates/ChangeResult';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const { group_id } = params;
@@ -39,7 +39,7 @@ export const actions: Actions = {
 		const user = locals.currentUser ?? null;
 
 		if (!user) {
-			return fail(401, { message: t(locals.locale, 'error.notAuthenticated') });
+			return fail(401, { success: false, message: t(locals.locale, 'error.notAuthenticated') });
 		}
 
 		const data = await request.formData();
@@ -47,12 +47,12 @@ export const actions: Actions = {
 		const description = data.get('description') as string;
 
 		if (!name) {
-			return fail(400, { message: t(locals.locale, 'error.nameRequired') });
+			return fail(400, { success: false, message: t(locals.locale, 'error.nameRequired') });
 		}
 
 		const tooLong = findTooLongField({ name, description }, GROUP_TEXT_LIMITS);
 		if (tooLong) {
-			return fail(422, { message: t(locals.locale, 'error.inputTooLong', { max: tooLong.max }) });
+			return fail(422, { success: false, message: t(locals.locale, 'error.inputTooLong', { max: tooLong.max }) });
 		}
 
 		const result = await GroupService.updateGroup(user.id, group_id, name, description);
@@ -60,7 +60,10 @@ export const actions: Actions = {
 		if (result === 'Success') {
 			throw redirect(303, resolve('/group/[group_id]', { group_id }));
 		} else {
-			return fail(400, { message: getMessageForChangeResult(locals.locale, result) });
+			return fail(getHTTPCodeForChangeResult(result), {
+				success: false,
+				message: getMessageForChangeResult(locals.locale, result)
+			});
 		}
 	}
 };

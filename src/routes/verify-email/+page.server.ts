@@ -1,11 +1,11 @@
 import type { Actions, PageServerLoad } from './$types';
-import { redirect } from '@sveltejs/kit';
+import { redirect, fail } from '@sveltejs/kit';
 import { resolve } from '$app/paths';
 import { t } from '$lib/i18n';
 import { AccountMailService } from '$lib/services/account-mail.service';
 import { UserService } from '$lib/services/user.service';
 import { VERIFY_TOKEN_TTL_MS } from '$lib/services/mail-token.logic';
-import type { StandardResponse } from '$lib/models/transferData/StandardResponse';
+import type { StandardActionResult } from '$lib/models/transferData/StandardResponse';
 
 /**
  * load – GET /verify-email?token=…
@@ -34,7 +34,7 @@ export const actions: Actions = {
 	 * Schickt (erneut) einen Bestätigungslink an die Adresse des angemeldeten Nutzers.
 	 * Aufgerufen vom Knopf im eigenen Profil.
 	 */
-	send: async ({ locals, url }): Promise<StandardResponse> => {
+	send: async ({ locals, url }): Promise<StandardActionResult> => {
 		const user = locals.currentUser;
 		if (!user) {
 			redirect(303, resolve('/login'));
@@ -50,11 +50,11 @@ export const actions: Actions = {
 					})
 				};
 			case 'noEmail':
-				return { success: false, message: t(locals.locale, 'verifyEmail.noEmail') };
+				return fail(422, { success: false, message: t(locals.locale, 'verifyEmail.noEmail') });
 			case 'rateLimited':
-				return { success: false, message: t(locals.locale, 'verifyEmail.rateLimited') };
+				return fail(429, { success: false, message: t(locals.locale, 'verifyEmail.rateLimited') });
 			case 'failed':
-				return { success: false, message: t(locals.locale, 'verifyEmail.failed') };
+				return fail(503, { success: false, message: t(locals.locale, 'verifyEmail.failed') });
 		}
 	}
 };

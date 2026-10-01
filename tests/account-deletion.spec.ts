@@ -72,7 +72,7 @@ test.describe('Kontolöschung', () => {
 		await dialog.waitFor({ state: 'visible' });
 		await dialog.getByTestId('dialog-yes').click();
 
-		await expect(page.locator('span', { hasText: uiText('settings.password.currentIncorrect') })).toBeVisible({
+		await expect(page.getByTestId('account-message')).toHaveText(uiText('settings.password.currentIncorrect'), {
 			timeout: 15000
 		});
 

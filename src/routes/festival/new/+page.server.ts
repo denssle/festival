@@ -29,7 +29,7 @@ export const actions: Actions = {
 		const values: FormData = await request.formData();
 		const name: FormDataEntryValue | null = values.get('name');
 		if (!name) {
-			return fail(400, { message: t(locals.locale, 'error.nameRequired') });
+			return fail(400, { success: false, message: t(locals.locale, 'error.nameRequired') });
 		}
 
 		const description = values.get('description')?.toString() ?? '';
@@ -41,7 +41,7 @@ export const actions: Actions = {
 
 		const tooLong = findTooLongField({ name, description, location }, FESTIVAL_TEXT_LIMITS);
 		if (tooLong) {
-			return fail(422, { message: t(locals.locale, 'error.inputTooLong', { max: tooLong.max }) });
+			return fail(422, { success: false, message: t(locals.locale, 'error.inputTooLong', { max: tooLong.max }) });
 		}
 
 		const newFestival: FrontendFestivalEvent | null = await FestivalEventService.createFestival(
@@ -56,6 +56,6 @@ export const actions: Actions = {
 		if (newFestival && newFestival.id) {
 			redirect(302, resolve('/festival/[festival_id]', { festival_id: newFestival.id }));
 		}
-		return fail(500, { message: t(locals.locale, 'festival.error.creationFailed') });
+		return fail(500, { success: false, message: t(locals.locale, 'festival.error.creationFailed') });
 	}
 };

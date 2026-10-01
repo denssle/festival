@@ -1,9 +1,10 @@
+import { fail } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { t } from '$lib/i18n';
 import { AccountMailService } from '$lib/services/account-mail.service';
 import { LoginRateLimiter } from '$lib/services/rate-limit.logic';
 import { readTextField } from '$lib/services/user.logic';
-import type { StandardResponse } from '$lib/models/transferData/StandardResponse';
+import type { StandardActionResult } from '$lib/models/transferData/StandardResponse';
 
 /**
  * Höchstens zehn Anfragen pro IP und Stunde. Der Limiter pro Konto im Service schützt das
@@ -21,10 +22,10 @@ export const actions: Actions = {
 	 * `AccountMailService.requestPasswordReset`). Der Versand läuft ohne `await`, damit auch
 	 * die Antwortzeit nichts verrät.
 	 */
-	default: async ({ request, locals, url, getClientAddress }): Promise<StandardResponse> => {
+	default: async ({ request, locals, url, getClientAddress }): Promise<StandardActionResult> => {
 		const ip: string = getClientAddress();
 		if (requestLimiter.isBlocked(ip)) {
-			return { success: false, message: t(locals.locale, 'forgotPassword.rateLimited') };
+			return fail(429, { success: false, message: t(locals.locale, 'forgotPassword.rateLimited') });
 		}
 		requestLimiter.recordFailure(ip);
 

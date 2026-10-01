@@ -50,9 +50,10 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 			await summary.click();
 		}
 
-		// Erfolgsmeldung prüfen - sie ist in einem span innerhalb des p-tags
-		const successMessage = page.locator('span', { hasText: uiText('settings.password.changed') });
-		await expect(successMessage).toBeVisible({ timeout: 15000 });
+		// Erfolgsmeldung prüfen – als Erfolg, nicht nur als Text (FormMessage, v0.7.74)
+		const successMessage = page.getByTestId('password-message');
+		await expect(successMessage).toHaveText(uiText('settings.password.changed'), { timeout: 15000 });
+		await expect(successMessage).toHaveClass(/success/);
 
 		// Logout über den Button im Header (retry-fest gegen Hydration-Race)
 		await logout(page);
@@ -76,7 +77,10 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		await page.locator('input[name="password"]').fill('NewSecurePassword456!');
 		await page.locator('input[name="passwordRepeat"]').fill('NewSecurePassword456!');
 
-		const responsePromise = page.waitForResponse((r: Response) => r.url().includes('/settings') && r.status() === 200);
+		// Seit v0.7.74 antwortet ein falsches Passwort mit 403 statt 200 – auf den POST warten, nicht auf den Status.
+		const responsePromise = page.waitForResponse(
+			(r: Response) => r.url().includes('/settings') && r.request().method() === 'POST'
+		);
 		await passwordForm(page).locator('button[type="submit"]').click();
 		await responsePromise;
 		await page.waitForLoadState('networkidle');
@@ -85,9 +89,9 @@ test.describe('Benutzereinstellungen und Profilbild', () => {
 		if (!(await details.evaluate((node) => (node as HTMLDetailsElement).open))) {
 			await page.getByTestId('password-section').click();
 		}
-		await expect(page.locator('span', { hasText: uiText('settings.password.currentIncorrect') })).toBeVisible({
-			timeout: 15000
-		});
+		const errorMessage = page.getByTestId('password-message');
+		await expect(errorMessage).toHaveText(uiText('settings.password.currentIncorrect'), { timeout: 15000 });
+		await expect(errorMessage).toHaveClass(/error/);
 
 		// Login mit dem ALTEN Passwort muss weiterhin funktionieren
 		await logout(page);

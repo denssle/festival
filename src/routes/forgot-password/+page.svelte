@@ -1,4 +1,5 @@
 <script lang="ts">
+	import FormMessage from '$lib/sharedComponents/FormMessage.svelte';
 	import { tr } from '$lib/i18n/tr';
 	import type { StandardResponse } from '$lib/models/transferData/StandardResponse';
 
@@ -9,9 +10,7 @@
 	<h2>{tr('forgotPassword.heading')}</h2>
 	<p>{tr('forgotPassword.explanation')}</p>
 
-	{#if form?.message}
-		<p class={form.success ? 'success' : 'error'} data-testid="forgot-password-message">{form.message}</p>
-	{/if}
+	<FormMessage message={form?.message} success={form?.success} testId="forgot-password-message" />
 
 	{#if !form?.success}
 		<form method="POST">
@@ -31,13 +30,3 @@
 		</form>
 	{/if}
 </article>
-
-<style>
-	.success {
-		color: var(--accent);
-	}
-
-	.error {
-		color: var(--error);
-	}
-</style>

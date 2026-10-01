@@ -1,9 +1,10 @@
+import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { t } from '$lib/i18n';
 import { MIN_PASSWORD_LENGTH } from '$lib/constants';
 import { AccountMailService } from '$lib/services/account-mail.service';
 import { MAX_PASSWORD_BYTES, readTextField } from '$lib/services/user.logic';
-import type { StandardResponse } from '$lib/models/transferData/StandardResponse';
+import type { StandardActionResult } from '$lib/models/transferData/StandardResponse';
 
 /**
  * load – GET /reset-password?token=…
@@ -22,17 +23,17 @@ export const actions: Actions = {
 	 *
 	 * Formularfelder: token (versteckt), password, passwordRepeat
 	 */
-	default: async ({ request, locals }): Promise<StandardResponse> => {
+	default: async ({ request, locals }): Promise<StandardActionResult> => {
 		const data: FormData = await request.formData();
 		const token: string = readTextField(data, 'token');
 		const password: string = readTextField(data, 'password');
 		const passwordRepeat: string = readTextField(data, 'passwordRepeat');
 
 		if (!password || !passwordRepeat) {
-			return { success: false, message: t(locals.locale, 'auth.error.newPasswordRequired') };
+			return fail(400, { success: false, message: t(locals.locale, 'auth.error.newPasswordRequired') });
 		}
 		if (password !== passwordRepeat) {
-			return { success: false, message: t(locals.locale, 'auth.error.passwordsDoNotMatch') };
+			return fail(422, { success: false, message: t(locals.locale, 'auth.error.passwordsDoNotMatch') });
 		}
 		const result = await AccountMailService.resetPassword(token, password);
 		if (result.ok) {
@@ -41,11 +42,11 @@ export const actions: Actions = {
 			return { success: true, message: t(locals.locale, 'resetPassword.success') };
 		}
 		if (result.error === 'invalidToken') {
-			return { success: false, message: t(locals.locale, 'resetPassword.invalid') };
+			return fail(400, { success: false, message: t(locals.locale, 'resetPassword.invalid') });
 		}
-		return {
+		return fail(422, {
 			success: false,
 			message: t(locals.locale, result.error, { min: MIN_PASSWORD_LENGTH, max: MAX_PASSWORD_BYTES })
-		};
+		});
 	}
 };

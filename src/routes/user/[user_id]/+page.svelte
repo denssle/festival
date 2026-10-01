@@ -1,4 +1,5 @@
 <script lang="ts">
+	import FormMessage from '$lib/sharedComponents/FormMessage.svelte';
 	import { tr } from '$lib/i18n/tr';
 	import { resolve } from '$app/paths';
 	import AvatarImage from '$lib/sharedComponents/AvatarImage.svelte';
@@ -30,11 +31,7 @@
 
 	<section>
 		{#if data.isOwnProfil}
-			{#if form?.success}
-				<p class="message success" data-testid="profile-message">{form.message}</p>
-			{:else if form?.message}
-				<p class="message error" data-testid="profile-message">{form.message}</p>
-			{/if}
+			<FormMessage message={form?.message} success={form?.success} testId="profile-message" />
 			<UserDataForm data={data.user} email={data.email ?? ''} emailVerified={data.emailVerified ?? false} />
 		{:else}
 			<UserDataReadOnly user={data.user} />
@@ -72,13 +69,3 @@
 
 	<FestivalComments whereId={data.user.id} />
 </article>
-
-<style>
-	.message.success {
-		color: var(--accent);
-	}
-
-	.message.error {
-		color: var(--error);
-	}
-</style>

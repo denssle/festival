@@ -1,13 +1,14 @@
+import { fail } from '@sveltejs/kit';
 import type { Actions } from '@sveltejs/kit';
 import { error } from '@sveltejs/kit';
 import type { FrontendUser } from '$lib/models/user/FrontendUser';
 import { UserService } from '$lib/services/user.service';
 import type { PageServerLoad } from './$types';
-import { StandardResponse } from '$lib/models/transferData/StandardResponse';
+import { type StandardActionResult } from '$lib/models/transferData/StandardResponse';
 import type { UserFormData } from '$lib/models/user/UserFormData';
 import { CurrentUser } from '$lib/models/user/CurrentUser';
 import type { UserTransferData } from '$lib/models/user/UserTransferData';
-import { ChangeResult, getMessageForChangeResult } from '$lib/models/updates/ChangeResult';
+import { ChangeResult, getMessageForChangeResult, getHTTPCodeForChangeResult } from '$lib/models/updates/ChangeResult';
 import { FriendshipService } from '$lib/services/friendship.service';
 import { GroupService } from '$lib/services/group.service';
 import { t } from '$lib/i18n';
@@ -41,13 +42,13 @@ export const load: PageServerLoad = async ({ locals, params }): Promise<UserTran
 };
 
 export const actions: Actions = {
-	default: async ({ locals, request, url }): Promise<StandardResponse> => {
+	default: async ({ locals, request, url }): Promise<StandardActionResult> => {
 		const oldUser: CurrentUser | undefined = locals.currentUser;
 		if (oldUser) {
 			const formData: UserFormData = await UserService.readFormDataFrontEndUser(request.formData());
 			const tooLong = findTooLongField(formData, USER_TEXT_LIMITS);
 			if (tooLong) {
-				return { success: false, message: t(locals.locale, 'error.inputTooLong', { max: tooLong.max }) };
+				return fail(422, { success: false, message: t(locals.locale, 'error.inputTooLong', { max: tooLong.max }) });
 			}
 			// oldUser.nickname stammt aus der DB (Auth-Hook), nicht aus dem Cookie –
 			// die Eindeutigkeitsprüfung ist damit nicht client-seitig umgehbar.
@@ -55,13 +56,13 @@ export const actions: Actions = {
 			if (nicknameChanged) {
 				const invalidNickname: boolean = await UserService.nickNameInvalid(formData.nickname);
 				if (invalidNickname) {
-					return { success: false, message: t(locals.locale, 'error.nicknameInvalid') };
+					return fail(422, { success: false, message: t(locals.locale, 'error.nicknameInvalid') });
 				}
 			}
 			// E-Mail darf nicht bereits von einem anderen Nutzer belegt sein
 			// (die eigene, unveränderte E-Mail bleibt erlaubt).
 			if (await UserService.emailTakenByOtherUser(formData.email, oldUser.id)) {
-				return { success: false, message: t(locals.locale, 'profile.error.emailInUse') };
+				return fail(409, { success: false, message: t(locals.locale, 'profile.error.emailInUse') });
 			}
 			const previousEmail: string = (await UserService.getEmailById(oldUser.id)).trim();
 			const result: ChangeResult = await UserService.updateUser(oldUser.id, formData);
@@ -80,9 +81,12 @@ export const actions: Actions = {
 				}
 				return { success: true, message: t(locals.locale, 'profile.updated') };
 			} else {
-				return { success: false, message: getMessageForChangeResult(locals.locale, result) };
+				return fail(getHTTPCodeForChangeResult(result), {
+					success: false,
+					message: getMessageForChangeResult(locals.locale, result)
+				});
 			}
 		}
-		return { success: false, message: t(locals.locale, 'profile.error.updateFailed') };
+		return fail(401, { success: false, message: t(locals.locale, 'profile.error.updateFailed') });
 	}
 };

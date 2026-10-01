@@ -9,7 +9,7 @@ import { UserService } from '$lib/services/user.service';
 import { GroupService } from '$lib/services/group.service';
 import { resolve } from '$app/paths';
 import { t } from '$lib/i18n';
-import { getMessageForChangeResult } from '$lib/models/updates/ChangeResult';
+import { getMessageForChangeResult, getHTTPCodeForChangeResult } from '$lib/models/updates/ChangeResult';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const { group_id } = params;
@@ -56,7 +56,10 @@ export const actions: Actions = {
 		if (result === 'Success') {
 			return { success: true, message: t(locals.locale, 'group.joined') };
 		} else {
-			return fail(400, { success: false, message: getMessageForChangeResult(locals.locale, result) });
+			return fail(getHTTPCodeForChangeResult(result), {
+				success: false,
+				message: getMessageForChangeResult(locals.locale, result)
+			});
 		}
 	},
 	delete: async ({ params, locals }) => {
@@ -72,7 +75,10 @@ export const actions: Actions = {
 		if (result === 'Success') {
 			throw redirect(303, resolve('/group'));
 		} else {
-			return fail(400, { success: false, message: getMessageForChangeResult(locals.locale, result) });
+			return fail(getHTTPCodeForChangeResult(result), {
+				success: false,
+				message: getMessageForChangeResult(locals.locale, result)
+			});
 		}
 	},
 	leave: async ({ params, locals }) => {
@@ -88,7 +94,10 @@ export const actions: Actions = {
 		if (result === 'Success') {
 			return { success: true, message: t(locals.locale, 'group.left') };
 		} else {
-			return fail(400, { success: false, message: getMessageForChangeResult(locals.locale, result) });
+			return fail(getHTTPCodeForChangeResult(result), {
+				success: false,
+				message: getMessageForChangeResult(locals.locale, result)
+			});
 		}
 	}
 };

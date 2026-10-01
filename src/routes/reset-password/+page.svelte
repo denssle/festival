@@ -1,4 +1,5 @@
 <script lang="ts">
+	import FormMessage from '$lib/sharedComponents/FormMessage.svelte';
 	import { tr } from '$lib/i18n/tr';
 	import { resolve } from '$app/paths';
 	import { MIN_PASSWORD_LENGTH } from '$lib/constants';
@@ -11,9 +12,7 @@
 <article>
 	<h2>{tr('resetPassword.heading')}</h2>
 
-	{#if form?.message}
-		<p class={form.success ? 'success' : 'error'} data-testid="reset-password-message">{form.message}</p>
-	{/if}
+	<FormMessage message={form?.message} success={form?.success} testId="reset-password-message" />
 
 	{#if form?.success}
 		<p><a href={resolve('/login')} data-testid="reset-password-login">{tr('resetPassword.toLogin')}</a></p>
@@ -48,18 +47,8 @@
 		</form>
 	{:else}
 		{#if !form?.message}
-			<p class="error" data-testid="reset-password-message">{tr('resetPassword.invalid')}</p>
+			<FormMessage message={tr('resetPassword.invalid')} testId="reset-password-message" />
 		{/if}
 		<p><a href={resolve('/forgot-password')}>{tr('resetPassword.requestNew')}</a></p>
 	{/if}
 </article>
-
-<style>
-	.success {
-		color: var(--accent);
-	}
-
-	.error {
-		color: var(--error);
-	}
-</style>

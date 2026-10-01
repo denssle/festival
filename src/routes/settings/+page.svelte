@@ -1,4 +1,5 @@
 <script lang="ts">
+	import FormMessage from '$lib/sharedComponents/FormMessage.svelte';
 	import { tr } from '$lib/i18n/tr';
 	import { tick } from 'svelte';
 	import type { ActionData } from './$types';
@@ -109,9 +110,7 @@
 				</p>
 			</details>
 
-			{#if passwordMessage}
-				<p><span>{passwordMessage}</span></p>
-			{/if}
+			<FormMessage message={passwordMessage} success={form?.success} testId="password-message" />
 		</section>
 	</form>
 
@@ -137,9 +136,7 @@
 					<button type="submit" data-testid="account-delete">{tr('settings.account.delete')}</button>
 				</p>
 			</details>
-			{#if accountMessage}
-				<p><span>{accountMessage}</span></p>
-			{/if}
+			<FormMessage message={accountMessage} success={form?.success} testId="account-message" />
 		</section>
 	</form>
 </article>

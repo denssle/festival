@@ -1,4 +1,5 @@
 <script lang="ts">
+	import FormMessage from '$lib/sharedComponents/FormMessage.svelte';
 	import { tr } from '$lib/i18n/tr';
 	import { resolve } from '$app/paths';
 	import type { PageData, ActionData } from './$types';
@@ -73,13 +74,7 @@
 			<p class="description">{group.description}</p>
 		{/if}
 
-		{#if form?.success}
-			<p class="message success">
-				{form.message}
-			</p>
-		{:else if form?.message}
-			<p class="message error">{form.message}</p>
-		{/if}
+		<FormMessage message={form?.message} success={form?.success} />
 	</header>
 
 	<section>
@@ -116,24 +111,6 @@
 	.description {
 		font-style: italic;
 		color: #555;
-	}
-
-	.message {
-		padding: 0.5rem;
-		border-radius: 4px;
-		margin-top: 1rem;
-	}
-
-	.message.success {
-		background-color: #d4edda;
-		color: var(--dark-green);
-		border: 1px solid var(--darkest-green);
-	}
-
-	.message.error {
-		background-color: #f8d7da;
-		color: var(--red);
-		border: 1px solid #f5c6cb;
 	}
 
 	.badge {

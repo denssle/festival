@@ -1,4 +1,5 @@
 <script lang="ts">
+	import FormMessage from '$lib/sharedComponents/FormMessage.svelte';
 	import { tr } from '$lib/i18n/tr';
 	import { MAX_SHORT_TEXT_LENGTH } from '$lib/services/text-length.logic';
 	import { resolve } from '$app/paths';
@@ -54,10 +55,8 @@
 				>
 					{tr('form.go')}
 				</button>
-				{#if form?.success === false}
-					<span style="color: var(--error)">{form.message}</span>
-				{/if}
 			</p>
+			<FormMessage message={form?.message} success={form?.success} />
 		</section>
 
 		<section>

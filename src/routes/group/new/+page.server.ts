@@ -14,13 +14,13 @@ export const actions: Actions = {
 		const values: FormData = await request.formData();
 		const name: FormDataEntryValue | null = values.get('name');
 		if (!name) {
-			return fail(400, { message: t(locals.locale, 'error.nameRequired') });
+			return fail(400, { success: false, message: t(locals.locale, 'error.nameRequired') });
 		}
 
 		const description = values.get('description')?.toString() ?? '';
 		const tooLong = findTooLongField({ name, description }, GROUP_TEXT_LIMITS);
 		if (tooLong) {
-			return fail(422, { message: t(locals.locale, 'error.inputTooLong', { max: tooLong.max }) });
+			return fail(422, { success: false, message: t(locals.locale, 'error.inputTooLong', { max: tooLong.max }) });
 		}
 		const groupId = await GroupService.createGroup(user.id, String(name), description);
 		redirect(302, resolve('/group/[group_id]', { group_id: groupId }));

@@ -1,8 +1,9 @@
+import { fail } from '@sveltejs/kit';
 import type { Actions, Cookies } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { UserService } from '$lib/services/user.service';
-import { StandardResponse } from '$lib/models/transferData/StandardResponse';
+import { StandardResponse, type StandardActionResult } from '$lib/models/transferData/StandardResponse';
 import { BackendUser } from '$lib/models/user/BackendUser';
 import { NickPassData } from '$lib/models/transferData/NickPassData';
 import { MIN_PASSWORD_LENGTH } from '$lib/constants';
@@ -47,32 +48,32 @@ export const actions: Actions = {
 		cookies: Cookies;
 		request: Request;
 		locals: App.Locals;
-	}): Promise<StandardResponse> => {
+	}): Promise<StandardActionResult> => {
 		const formData: NickPassData | undefined = await UserService.readNickPass(request.formData());
 		if (formData) {
 			const passwordError = validateNewPassword(formData.password, formData.nickname, MIN_PASSWORD_LENGTH);
 			if (passwordError) {
-				return {
+				return fail(422, {
 					success: false,
 					message: t(locals.locale, passwordError, { min: MIN_PASSWORD_LENGTH, max: MAX_PASSWORD_BYTES })
-				};
+				});
 			}
 			const tooLong = findTooLongField({ nickname: formData.nickname }, USER_TEXT_LIMITS);
 			if (tooLong) {
-				return { success: false, message: t(locals.locale, 'error.inputTooLong', { max: tooLong.max }) };
+				return fail(422, { success: false, message: t(locals.locale, 'error.inputTooLong', { max: tooLong.max }) });
 			}
 			if (await UserService.nickNameInvalid(formData.nickname)) {
-				return { success: false, message: t(locals.locale, 'error.nicknameInvalid') };
+				return fail(422, { success: false, message: t(locals.locale, 'error.nicknameInvalid') });
 			} else {
 				const user: BackendUser | null = await UserService.register(formData.nickname, formData.password);
 				if (user) {
 					await UserService.createSession(cookies, locals, user);
 					redirect(302, resolve('/'));
 				} else {
-					return { success: false, message: t(locals.locale, 'auth.error.userCreationFailed') };
+					return fail(500, { success: false, message: t(locals.locale, 'auth.error.userCreationFailed') });
 				}
 			}
 		}
-		return { success: false, message: t(locals.locale, 'auth.error.credentialsMissing') };
+		return fail(400, { success: false, message: t(locals.locale, 'auth.error.credentialsMissing') });
 	}
 };

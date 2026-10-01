@@ -1,4 +1,5 @@
 <script lang="ts">
+	import FormMessage from '$lib/sharedComponents/FormMessage.svelte';
 	import { tr } from '$lib/i18n/tr';
 	import { MAX_LONG_TEXT_LENGTH, MAX_SHORT_TEXT_LENGTH } from '$lib/services/text-length.logic';
 	import { resolve } from '$app/paths';
@@ -17,18 +18,10 @@
 				></textarea>
 			</p>
 
-			{#if form?.message}
-				<p class="error">{form.message}</p>
-			{/if}
+			<FormMessage message={form?.message} success={form?.success} />
 
 			<button type="submit" data-testid="group-save">{tr('form.save')}</button>
 			<a class="button" href={resolve('/group')}>{tr('form.back')}</a>
 		</form>
 	</section>
 </article>
-
-<style>
-	.error {
-		color: red;
-	}
-</style>

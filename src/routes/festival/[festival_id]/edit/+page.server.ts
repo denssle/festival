@@ -61,7 +61,7 @@ export const actions: Actions = {
 		}
 
 		if (!festivalId || !name) {
-			return fail(400, { message: t(locals.locale, 'festival.error.missingIdOrName') });
+			return fail(400, { success: false, message: t(locals.locale, 'festival.error.missingIdOrName') });
 		}
 
 		const description = values.get('description')?.toString() ?? '';
@@ -73,7 +73,7 @@ export const actions: Actions = {
 
 		const tooLong = findTooLongField({ name, description, location }, FESTIVAL_TEXT_LIMITS);
 		if (tooLong) {
-			return fail(422, { message: t(locals.locale, 'error.inputTooLong', { max: tooLong.max }) });
+			return fail(422, { success: false, message: t(locals.locale, 'error.inputTooLong', { max: tooLong.max }) });
 		}
 
 		const result: ChangeResult = await FestivalEventService.updateFestival(
@@ -89,6 +89,9 @@ export const actions: Actions = {
 		if (result === 'Success') {
 			redirect(302, resolve('/festival/[festival_id]', { festival_id: festivalId }));
 		}
-		return fail(getHTTPCodeForChangeResult(result), { message: getMessageForChangeResult(locals.locale, result) });
+		return fail(getHTTPCodeForChangeResult(result), {
+			success: false,
+			message: getMessageForChangeResult(locals.locale, result)
+		});
 	}
 };

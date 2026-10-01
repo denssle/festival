@@ -1,9 +1,10 @@
+import { fail } from '@sveltejs/kit';
 import type { Actions } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { UserService } from '$lib/services/user.service';
 import type { BackendUser } from '$lib/models/user/BackendUser';
-import { StandardResponse } from '$lib/models/transferData/StandardResponse';
+import { StandardResponse, type StandardActionResult } from '$lib/models/transferData/StandardResponse';
 import { NickPassData } from '$lib/models/transferData/NickPassData';
 import { loginRateLimiter } from '$lib/services/login-rate-limit';
 import { loginRateLimitKey } from '$lib/services/rate-limit.logic';
@@ -41,12 +42,12 @@ export const load: PageServerLoad = async ({ locals }): Promise<StandardResponse
  *          oder aktiver Sperre
  */
 export const actions: Actions = {
-	default: async ({ cookies, request, locals, getClientAddress }): Promise<StandardResponse> => {
+	default: async ({ cookies, request, locals, getClientAddress }): Promise<StandardActionResult> => {
 		const formData: NickPassData | undefined = await UserService.readNickPass(request.formData());
 		if (formData) {
 			const rateLimitKey: string = loginRateLimitKey(getClientAddress(), formData.nickname);
 			if (loginRateLimiter.isBlocked(rateLimitKey)) {
-				return { success: false, message: t(locals.locale, 'auth.error.rateLimited') };
+				return fail(429, { success: false, message: t(locals.locale, 'auth.error.rateLimited') });
 			}
 			const user: BackendUser | null = await UserService.loginWithCredentials(formData.nickname, formData.password);
 			if (user) {
@@ -55,9 +56,9 @@ export const actions: Actions = {
 				redirect(302, resolve('/'));
 			} else {
 				loginRateLimiter.recordFailure(rateLimitKey);
-				return { success: false, message: t(locals.locale, 'auth.error.passwordInvalid') };
+				return fail(401, { success: false, message: t(locals.locale, 'auth.error.passwordInvalid') });
 			}
 		}
-		return { success: false, message: t(locals.locale, 'auth.error.credentialsMissing') };
+		return fail(400, { success: false, message: t(locals.locale, 'auth.error.credentialsMissing') });
 	}
 };

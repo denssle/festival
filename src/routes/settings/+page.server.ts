@@ -1,12 +1,11 @@
-import { type Actions, redirect } from '@sveltejs/kit';
+import { type Actions, redirect, fail } from '@sveltejs/kit';
 import { resolve } from '$app/paths';
 import { CurrentUser } from '$lib/models/user/CurrentUser';
 import { UserService } from '$lib/services/user.service';
-import { StandardResponse } from '$lib/models/transferData/StandardResponse';
-import { ChangeResult, getMessageForChangeResult } from '$lib/models/updates/ChangeResult';
+import { ChangeResult, getMessageForChangeResult, getHTTPCodeForChangeResult } from '$lib/models/updates/ChangeResult';
 import { MIN_PASSWORD_LENGTH } from '$lib/constants';
 import { MAX_PASSWORD_BYTES, validatePasswordChange } from '$lib/services/user.logic';
-import { ACCOUNT_SCOPE, PASSWORD_SCOPE } from '$lib/models/transferData/StandardResponse';
+import { ACCOUNT_SCOPE, PASSWORD_SCOPE, type StandardActionResult } from '$lib/models/transferData/StandardResponse';
 import { t, type TranslationKey } from '$lib/i18n';
 
 export const actions: Actions = {
@@ -26,10 +25,14 @@ export const actions: Actions = {
 	 *          { success: false, message } bei Fehler oder ungültigen Eingaben.
 	 *          `message` ist bereits in der Sprache des Nutzers (siehe `locals.locale`).
 	 */
-	changePassword: async ({ cookies, request, locals }): Promise<StandardResponse> => {
+	changePassword: async ({ cookies, request, locals }): Promise<StandardActionResult> => {
 		const user: CurrentUser | undefined = locals.currentUser;
 		if (!user) {
-			return { success: false, message: t(locals.locale, 'settings.password.changeFailed'), scope: PASSWORD_SCOPE };
+			return fail(401, {
+				success: false,
+				message: t(locals.locale, 'settings.password.changeFailed'),
+				scope: PASSWORD_SCOPE
+			});
 		}
 		const data: FormData = await request.formData();
 		const currentPassword: string | undefined = data.get('currentPassword')?.toString();
@@ -44,15 +47,19 @@ export const actions: Actions = {
 			MIN_PASSWORD_LENGTH
 		);
 		if (validationError) {
-			return {
+			return fail(422, {
 				success: false,
 				message: t(locals.locale, validationError, { min: MIN_PASSWORD_LENGTH, max: MAX_PASSWORD_BYTES }),
 				scope: PASSWORD_SCOPE
-			};
+			});
 		}
 
 		if (!(await UserService.loginWithCredentials(user.nickname, currentPassword!))) {
-			return { success: false, message: t(locals.locale, 'settings.password.currentIncorrect'), scope: PASSWORD_SCOPE };
+			return fail(403, {
+				success: false,
+				message: t(locals.locale, 'settings.password.currentIncorrect'),
+				scope: PASSWORD_SCOPE
+			});
 		}
 
 		const result: ChangeResult = await UserService.updatePassword(user.id, password!);
@@ -61,7 +68,11 @@ export const actions: Actions = {
 			await UserService.createSession(cookies, locals, user);
 			return { success: true, message: t(locals.locale, 'settings.password.changed'), scope: PASSWORD_SCOPE };
 		}
-		return { success: false, message: getMessageForChangeResult(locals.locale, result), scope: PASSWORD_SCOPE };
+		return fail(getHTTPCodeForChangeResult(result), {
+			success: false,
+			message: getMessageForChangeResult(locals.locale, result),
+			scope: PASSWORD_SCOPE
+		});
 	},
 
 	/**
@@ -78,24 +89,40 @@ export const actions: Actions = {
 	 * @returns Redirect auf /login bei Erfolg (die Session existiert danach nicht mehr),
 	 *          { success: false, message } bei falschem Passwort oder Fehler
 	 */
-	deleteAccount: async ({ cookies, request, locals }): Promise<StandardResponse> => {
+	deleteAccount: async ({ cookies, request, locals }): Promise<StandardActionResult> => {
 		const user: CurrentUser | undefined = locals.currentUser;
 		if (!user) {
-			return { success: false, message: t(locals.locale, 'settings.account.deletionFailed'), scope: ACCOUNT_SCOPE };
+			return fail(401, {
+				success: false,
+				message: t(locals.locale, 'settings.account.deletionFailed'),
+				scope: ACCOUNT_SCOPE
+			});
 		}
 		const data: FormData = await request.formData();
 		const password: string | undefined = data.get('deletePassword')?.toString();
 
 		if (!password) {
-			return { success: false, message: t(locals.locale, 'settings.account.passwordRequired'), scope: ACCOUNT_SCOPE };
+			return fail(400, {
+				success: false,
+				message: t(locals.locale, 'settings.account.passwordRequired'),
+				scope: ACCOUNT_SCOPE
+			});
 		}
 		if (!(await UserService.loginWithCredentials(user.nickname, password))) {
-			return { success: false, message: t(locals.locale, 'settings.password.currentIncorrect'), scope: ACCOUNT_SCOPE };
+			return fail(403, {
+				success: false,
+				message: t(locals.locale, 'settings.password.currentIncorrect'),
+				scope: ACCOUNT_SCOPE
+			});
 		}
 
 		const result: ChangeResult = await UserService.deleteAccount(user.id);
 		if (result !== 'Success') {
-			return { success: false, message: getMessageForChangeResult(locals.locale, result), scope: ACCOUNT_SCOPE };
+			return fail(getHTTPCodeForChangeResult(result), {
+				success: false,
+				message: getMessageForChangeResult(locals.locale, result),
+				scope: ACCOUNT_SCOPE
+			});
 		}
 
 		// Der Session-Token ist mit dem Nutzer bereits kaskadiert gelöscht; logout()
