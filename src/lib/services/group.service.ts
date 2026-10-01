@@ -2,7 +2,7 @@ import { Group } from '$lib/db/model/group';
 import { GroupMember } from '$lib/db/model/groupMember';
 import { GroupAttributes } from '$lib/db/attributes/group.attributes';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
-import { Op, UniqueConstraintError } from 'sequelize';
+import { ForeignKeyConstraintError, Op, UniqueConstraintError } from 'sequelize';
 import { sequelize } from '$lib/db/sequelize';
 
 export class GroupService {
@@ -119,6 +119,10 @@ export class GroupService {
 			// Paralleler Request war schneller – der Unique-Index (GroupId, UserId) greift
 			if (error instanceof UniqueConstraintError) {
 				return 'Already in Group';
+			}
+			// Gruppe (oder Nutzer) gibt es nicht – vorher als 'Failure' (500) gemeldet.
+			if (error instanceof ForeignKeyConstraintError) {
+				return 'Data Missing';
 			}
 			console.error('Fehler beim Beitreten der Gruppe:', error);
 			return 'Failure';
