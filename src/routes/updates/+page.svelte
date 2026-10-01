@@ -3,24 +3,35 @@
 	import { resolve } from '$app/paths';
 	import type { UpdateTransferData } from '$lib/models/updates/UpdateTransferData';
 	import { invalidateAll } from '$app/navigation';
+	import { request } from '$lib/utils/request';
+	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
+	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
 
 	let { data }: { data: UpdateTransferData } = $props();
 
-	async function acceptFriendRequest(id: string | undefined) {
-		await fetch(resolve('/updates/accept-friend'), { method: 'POST', body: id });
+	/** Gemeinsamer Ablauf der drei Knöpfe: Anfrage schicken, bei Fehler melden, Liste neu laden. */
+	async function answerFriendRequest(url: string, id: string | undefined) {
+		const result = await request(url, { method: 'POST', body: id });
+		if (!result.ok) {
+			infoDialogData.infoDialogText = result.message;
+			infoDialogData.showDialog = true;
+		}
 		await invalidateAll();
 	}
 
-	async function declineFriendRequest(id: string | undefined) {
-		await fetch(resolve('/updates/decline-friend'), { method: 'POST', body: id });
-		await invalidateAll();
-	}
+	const acceptFriendRequest = (id: string | undefined) => answerFriendRequest(resolve('/updates/accept-friend'), id);
+	const declineFriendRequest = (id: string | undefined) => answerFriendRequest(resolve('/updates/decline-friend'), id);
+	const cancelFriendRequest = (id: string | undefined) => answerFriendRequest(resolve('/updates/cancel-request'), id);
 
-	async function cancelFriendRequest(id: string | undefined) {
-		await fetch(resolve('/updates/cancel-request'), { method: 'POST', body: id });
-		await invalidateAll();
-	}
+	let infoDialogData: InfoDialogData = $state({
+		showDialog: false,
+		infoDialogText: '',
+		dialog: undefined,
+		answerYes: false
+	});
 </script>
+
+<InfoDialog bind:infoDialogData />
 
 <article>
 	<h2>{tr('updates.heading')}</h2>

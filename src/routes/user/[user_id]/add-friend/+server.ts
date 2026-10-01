@@ -1,4 +1,5 @@
 import type { RequestHandler } from './$types';
+import { errorResponse } from '$lib/controller/error-response';
 import { CurrentUser } from '$lib/models/user/CurrentUser';
 import { FriendshipService } from '$lib/services/friendship.service';
 
@@ -15,11 +16,11 @@ export const POST: RequestHandler = async ({ locals, params }): Promise<Response
 	const user: CurrentUser | undefined = locals.currentUser;
 	const params_id: string | undefined = params.user_id;
 	if (!user) {
-		return new Response('Unauthorized', { status: 401 });
+		return errorResponse(locals.locale, 401, 'error.notAuthenticated');
 	}
 	if (params_id) {
 		await FriendshipService.createFriendRequest(user.id, params_id);
 		return new Response(null, { status: 200 });
 	}
-	return new Response('Bad Request', { status: 400 });
+	return errorResponse(locals.locale, 400, 'error.missingData');
 };

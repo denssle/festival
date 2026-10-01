@@ -47,6 +47,9 @@ export const de = {
 	'error.internal': 'Interner Serverfehler.',
 	'error.notFound': 'Nicht gefunden.',
 	'error.forbidden': 'Dafür fehlt dir die Berechtigung.',
+	'error.network': 'Keine Verbindung zum Server. Bist du online?',
+	'error.tooLarge': 'Das ist zu groß.',
+	'error.tooManyRequests': 'Zu viele Anfragen. Bitte versuch es gleich noch einmal.',
 
 	// Anmeldung und Registrierung
 	'auth.error.credentialsMissing': 'Nickname und/oder Passwort fehlen.',
@@ -161,7 +164,6 @@ export const de = {
 	'festival.notYours': 'Das ist nicht dein Event.',
 	'festival.error.deleteFailed': 'Löschen fehlgeschlagen.',
 	'festival.error.joinFailed': 'Fehler beim Zusagen: {message}',
-	'festival.error.joinNetwork': 'Netzwerkfehler beim Zusagen.',
 	'festival.error.declineFailed': 'Absagen fehlgeschlagen.',
 	'festival.error.maybeFailed': 'Die Antwort „Vielleicht“ konnte nicht gespeichert werden.',
 
@@ -233,6 +235,7 @@ export const de = {
 	'profile.groupsEmptyOther': 'Dieser Benutzer ist in keiner Gruppe.',
 	'profile.visiting.none': 'Zu nichts angemeldet.',
 	'profile.visiting.intro': 'Angemeldet bei:',
+	'profile.visiting.onlyFriends': 'Wo jemand zugesagt hat, sehen nur Freunde.',
 	'profile.forename': 'Vorname:',
 	'profile.lastname': 'Nachname:',
 	'profile.notProvided': 'Nicht hinterlegt',
@@ -251,13 +254,16 @@ export const de = {
 	'profile.avatar.tooLarge': 'Bild zu groß.',
 	'profile.avatar.uploaded': 'Bild erfolgreich hochgeladen und gespeichert.',
 	'profile.avatar.failed': 'Bildupload gescheitert.',
+	'profile.avatar.error.malformed': 'Das ist kein lesbares Bild.',
+	'profile.avatar.error.empty': 'Das Bild ist leer.',
+	'profile.avatar.error.type': 'Bildtyp {mime} wird nicht unterstützt. Erlaubt sind PNG und JPG.',
+	'profile.avatar.error.size': 'Das Bild ist zu groß (höchstens 1 MB).',
 	'profile.avatar.upload': 'Bild hochladen',
 
 	// Freundschaften
 	'friend.add': 'Anfreunden',
 	'friend.remove': 'Freund entfernen',
 	'friend.requestSent': 'Freundschaftsanfrage wurde geschickt.',
-	'friend.requestFailed': 'Fehler bei Anfrage.',
 	'friend.removed': 'Freundschaft gekündigt.',
 	'updates.heading': 'Updates',
 	'updates.received': 'Eingegangene Freundschaftsanfragen',

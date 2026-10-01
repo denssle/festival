@@ -1,10 +1,10 @@
 import type { RequestEvent } from '@sveltejs/kit';
+import { changeResultResponse, errorResponse } from '$lib/controller/error-response';
 import { CurrentUser } from '$lib/models/user/CurrentUser';
 import { CommentService, type CommentTarget } from '$lib/services/comment.service';
 import { FrontendComment } from '$lib/models/transferData/FrontendComment';
-import { ChangeResult, getHTTPCodeForChangeResult } from '$lib/models/updates/ChangeResult';
+import { ChangeResult } from '$lib/models/updates/ChangeResult';
 import { COMMENT_TEXT_LIMITS, findTooLongField } from '$lib/services/text-length.logic';
-import { t } from '$lib/i18n';
 import { FestivalEventService } from '$lib/services/festival-event.service';
 
 /**
@@ -28,9 +28,13 @@ function getTargetFromPath(request: RequestEvent): CommentTarget | undefined {
  * `canSeeFestival`), oder null. Wie auf der Festivalseite selbst sieht ein verborgenes
  * Festival aus wie ein nicht vorhandenes.
  */
-async function hiddenFestivalResponse(userId: string, target: CommentTarget): Promise<Response | null> {
+async function hiddenFestivalResponse(
+	request: RequestEvent,
+	userId: string,
+	target: CommentTarget
+): Promise<Response | null> {
 	if ('festivalId' in target && !(await FestivalEventService.isVisibleTo(userId, target.festivalId))) {
-		return new Response('Not Found', { status: 404 });
+		return errorResponse(request.locals.locale, 404, 'festival.error.notFound');
 	}
 	return null;
 }
@@ -43,7 +47,7 @@ async function hiddenFestivalResponse(userId: string, target: CommentTarget): Pr
 function tooLongResponse(request: RequestEvent, comment: unknown): Response | null {
 	const tooLong = findTooLongField({ comment }, COMMENT_TEXT_LIMITS);
 	if (tooLong) {
-		return new Response(t(request.locals.locale, 'error.inputTooLong', { max: tooLong.max }), { status: 422 });
+		return errorResponse(request.locals.locale, 422, 'error.inputTooLong', { max: tooLong.max });
 	}
 	return null;
 }
@@ -65,25 +69,25 @@ export async function POSTComment(request: RequestEvent): Promise<Response> {
 	const user: CurrentUser | undefined = request.locals.currentUser;
 
 	if (!user) {
-		return new Response('Unauthorized', { status: 401 });
+		return errorResponse(request.locals.locale, 401, 'error.notAuthenticated');
 	}
 	if (comment && target) {
 		const tooLong = tooLongResponse(request, comment);
 		if (tooLong) {
 			return tooLong;
 		}
-		const hidden = await hiddenFestivalResponse(user.id, target);
+		const hidden = await hiddenFestivalResponse(request, user.id, target);
 		if (hidden) {
 			return hidden;
 		}
 		const result: ChangeResult = await CommentService.saveComment(user.id, target, comment);
 		if (result !== 'Success') {
-			return new Response(JSON.stringify(result), { status: getHTTPCodeForChangeResult(result) });
+			return changeResultResponse(request.locals.locale, result);
 		}
 		const comments = await CommentService.getComments(target, user.id);
 		return new Response(JSON.stringify(comments), { status: 200 });
 	}
-	return new Response('Bad Request', { status: 400 });
+	return errorResponse(request.locals.locale, 400, 'error.missingData');
 }
 
 /**
@@ -97,17 +101,17 @@ export async function GETComments(request: RequestEvent): Promise<Response> {
 	const target: CommentTarget | undefined = getTargetFromPath(request);
 	const user: CurrentUser | undefined = request.locals.currentUser;
 	if (!user) {
-		return new Response('Unauthorized', { status: 401 });
+		return errorResponse(request.locals.locale, 401, 'error.notAuthenticated');
 	}
 	if (target) {
-		const hidden = await hiddenFestivalResponse(user.id, target);
+		const hidden = await hiddenFestivalResponse(request, user.id, target);
 		if (hidden) {
 			return hidden;
 		}
 		const comments: FrontendComment[] = await CommentService.getComments(target, user.id);
 		return new Response(JSON.stringify(comments), { status: 200 });
 	}
-	return new Response('Bad Request', { status: 400 });
+	return errorResponse(request.locals.locale, 400, 'error.missingData');
 }
 
 /**
@@ -123,13 +127,13 @@ export async function DELETEComment(request: RequestEvent): Promise<Response> {
 	const commentId: string = await request.request.text();
 	const user: CurrentUser | undefined = request.locals.currentUser;
 	if (!user) {
-		return new Response('Unauthorized', { status: 401 });
+		return errorResponse(request.locals.locale, 401, 'error.notAuthenticated');
 	}
 	if (commentId) {
 		const result: ChangeResult = await CommentService.deleteComment(user.id, commentId);
-		return new Response(JSON.stringify(result), { status: getHTTPCodeForChangeResult(result) });
+		return changeResultResponse(request.locals.locale, result);
 	}
-	return new Response('Bad Request', { status: 400 });
+	return errorResponse(request.locals.locale, 400, 'error.missingData');
 }
 
 /**
@@ -147,14 +151,14 @@ export async function PUTComment(request: RequestEvent): Promise<Response> {
 	const user: CurrentUser | undefined = request.locals.currentUser;
 	const target: CommentTarget | undefined = getTargetFromPath(request);
 	if (!user) {
-		return new Response('Unauthorized', { status: 401 });
+		return errorResponse(request.locals.locale, 401, 'error.notAuthenticated');
 	}
 	if (comment && target) {
 		const tooLong = tooLongResponse(request, comment.comment);
 		if (tooLong) {
 			return tooLong;
 		}
-		const hidden = await hiddenFestivalResponse(user.id, target);
+		const hidden = await hiddenFestivalResponse(request, user.id, target);
 		if (hidden) {
 			return hidden;
 		}
@@ -163,7 +167,7 @@ export async function PUTComment(request: RequestEvent): Promise<Response> {
 			const comments = await CommentService.getComments(target, user.id);
 			return new Response(JSON.stringify(comments), { status: 200 });
 		}
-		return new Response(JSON.stringify(result), { status: getHTTPCodeForChangeResult(result) });
+		return changeResultResponse(request.locals.locale, result);
 	}
-	return new Response('Bad Request', { status: 400 });
+	return errorResponse(request.locals.locale, 400, 'error.missingData');
 }

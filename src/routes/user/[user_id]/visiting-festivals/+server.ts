@@ -1,4 +1,4 @@
-import { error } from '@sveltejs/kit';
+import { errorResponse } from '$lib/controller/error-response';
 import type { RequestHandler } from './$types';
 import { FestivalEventService } from '$lib/services/festival-event.service';
 import { VisitingFestival } from '$lib/models/user/VisitingFestival';
@@ -21,7 +21,7 @@ export const GET: RequestHandler = async ({ params, locals }): Promise<Response>
 	const user = locals.currentUser;
 
 	if (!user) {
-		throw error(401, 'Unauthorized');
+		return errorResponse(locals.locale, 401, 'error.notAuthenticated');
 	}
 
 	if (pathId) {
@@ -33,8 +33,8 @@ export const GET: RequestHandler = async ({ params, locals }): Promise<Response>
 			const visitingFestivals: VisitingFestival[] = await FestivalEventService.getFestivalYouVisit(pathId, user.id);
 			return new Response(JSON.stringify(visitingFestivals), { status: 200 });
 		} else {
-			throw error(403, 'Forbidden');
+			return errorResponse(locals.locale, 403, 'profile.visiting.onlyFriends');
 		}
 	}
-	return new Response(null, { status: 400 });
+	return errorResponse(locals.locale, 400, 'error.missingData');
 };

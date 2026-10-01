@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { request } from '$lib/utils/request';
 	import { tr } from '$lib/i18n/tr';
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
 	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
@@ -33,25 +34,20 @@
 	}
 
 	async function uploadFunction(imgBase64: string): Promise<void> {
-		try {
-			const value: Response = await fetch(resolve('/user-image'), {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Accept: 'application/json'
-				},
-				body: imgBase64
-			});
-			if (value.ok) {
-				openDialog(tr('profile.avatar.uploaded'));
-				// forceReload: das gerade ersetzte Bild liegt noch frisch im Browser-Cache
-				loadUserImage(userId, true);
-			} else {
-				openDialog(tr('profile.avatar.failed'));
-			}
-		} catch (reason) {
-			console.error('Bildupload-Fehler:', reason);
-			openDialog(tr('profile.avatar.failed'));
+		const result = await request(resolve('/user-image'), {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Accept: 'application/json'
+			},
+			body: imgBase64
+		});
+		if (result.ok) {
+			openDialog(tr('profile.avatar.uploaded'));
+			// forceReload: das gerade ersetzte Bild liegt noch frisch im Browser-Cache
+			loadUserImage(userId, true);
+		} else {
+			openDialog(tr('profile.avatar.failed') + ' ' + result.message);
 		}
 	}
 

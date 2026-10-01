@@ -1,6 +1,7 @@
 import { FestivalEventService } from '$lib/services/festival-event.service';
 import type { RequestHandler } from '@sveltejs/kit';
 import { ChangeResult } from '$lib/models/updates/ChangeResult';
+import { changeResultResponse, errorResponse } from '$lib/controller/error-response';
 
 /**
  * DELETE /festival/:festival_id
@@ -20,9 +21,8 @@ export const DELETE: RequestHandler = async ({ locals, params }): Promise<Respon
 		);
 		if (result === 'Success') {
 			return new Response(null, { status: 200 });
-		} else if (result === 'Not authorized') {
-			return new Response(null, { status: 403 });
 		}
+		return changeResultResponse(locals.locale, result);
 	}
-	return new Response(null, { status: 400 });
+	return errorResponse(locals.locale, 400, 'error.missingData');
 };

@@ -7,6 +7,9 @@
 	import QuestionDialog from '$lib/sharedComponents/QuestionDialog.svelte';
 	import AvatarImage from '$lib/sharedComponents/AvatarImage.svelte';
 	import CreationChangedDate from '$lib/sharedComponents/CreationChangedDate.svelte';
+	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
+	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
+	import { request } from '$lib/utils/request';
 
 	let { whereId = '' } = $props();
 
@@ -35,9 +38,10 @@
 		e.preventDefault();
 		const form = e.target as HTMLFormElement;
 		const formData = new FormData(form);
+		const text: string = inputComment;
 		const optimisticComment: FrontendComment = {
 			id: crypto.randomUUID(),
-			comment: inputComment,
+			comment: text,
 			createdAt: new Date(),
 			updatedAt: new Date(),
 			writtenTo: whereId,
@@ -47,24 +51,29 @@
 		};
 		inputComment = '';
 		comments = [optimisticComment, ...comments];
-		const response = await fetch(whereId + '/comments', {
+		const result = await request(whereId + '/comments', {
 			method: 'POST',
 			body: formData
 		});
-		if (response.ok) {
-			comments = await response.json();
+		if (result.ok) {
+			comments = await result.response.json();
 		} else {
-			// Optimistisch eingefügten Kommentar wieder verwerfen
-			await loadComments();
+			// Optimistisch eingefügten Kommentar verwerfen, den Text aber zurückgeben –
+			// sonst ist er weg, und der Nutzer erfährt nicht einmal, warum.
+			comments = comments.filter((c) => c.id !== optimisticComment.id);
+			inputComment = text;
+			showError(result.message);
 		}
 	}
 
 	async function loadComments() {
-		const response = await fetch(whereId + '/comments', {
+		const result = await request(whereId + '/comments', {
 			method: 'GET'
 		});
-		if (response.ok) {
-			comments = await response.json();
+		if (result.ok) {
+			comments = await result.response.json();
+		} else {
+			showError(result.message);
 		}
 	}
 
@@ -75,13 +84,16 @@
 		if (questionDialogData.dialog) {
 			const onclose = async () => {
 				if (questionDialogData.answerYes) {
-					await fetch(whereId + '/comments', {
+					const result = await request(whereId + '/comments', {
 						method: 'DELETE',
 						headers: {
 							'Content-Type': 'text/plain'
 						},
 						body: commentId
 					});
+					if (!result.ok) {
+						showError(result.message);
+					}
 					await loadComments();
 				}
 				questionDialogData.dialog?.removeEventListener('close', onclose);
@@ -99,7 +111,7 @@
 			if (index !== -1) {
 				comments[index].editMode = false;
 			}
-			const response = await fetch(whereId + '/comments', {
+			const result = await request(whereId + '/comments', {
 				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json'
@@ -109,11 +121,29 @@
 					comment: comment.comment
 				})
 			});
-			if (response.ok) {
-				comments = await response.json();
+			if (result.ok) {
+				comments = await result.response.json();
+			} else {
+				// Bearbeitungsmodus wieder öffnen, damit der geänderte Text nicht verloren geht.
+				if (index !== -1) {
+					comments[index].editMode = true;
+				}
+				showError(result.message);
 			}
 		}
 	}
+
+	function showError(message: string) {
+		infoDialogData.infoDialogText = message;
+		infoDialogData.showDialog = true;
+	}
+
+	let infoDialogData: InfoDialogData = $state({
+		showDialog: false,
+		infoDialogText: '',
+		dialog: undefined,
+		answerYes: false
+	});
 
 	let questionDialogData: QuestionDialogData = $state({
 		showDialog: false,
@@ -124,6 +154,7 @@
 </script>
 
 <QuestionDialog bind:questionDialogData testId="comment-delete-dialog" />
+<InfoDialog bind:infoDialogData testId="comment-error-dialog" />
 
 <form onsubmit={handleSubmit}>
 	<label for="comment">{tr('comment.label')} </label>

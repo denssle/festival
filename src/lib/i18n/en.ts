@@ -36,6 +36,9 @@ export const en: Dictionary = {
 	'error.internal': 'Internal server error.',
 	'error.notFound': 'Not found.',
 	'error.forbidden': "You don't have permission to do that.",
+	'error.network': 'No connection to the server. Are you online?',
+	'error.tooLarge': 'That is too large.',
+	'error.tooManyRequests': 'Too many requests. Please try again in a moment.',
 
 	// Sign in and sign up
 	'auth.error.credentialsMissing': 'Nickname and/or password missing.',
@@ -149,7 +152,6 @@ export const en: Dictionary = {
 	'festival.notYours': 'This is not your event.',
 	'festival.error.deleteFailed': 'Deleting failed.',
 	'festival.error.joinFailed': 'Signing up failed: {message}',
-	'festival.error.joinNetwork': 'Network error while signing up.',
 	'festival.error.declineFailed': 'Declining failed.',
 	'festival.error.maybeFailed': 'Your “maybe” could not be saved.',
 
@@ -220,6 +222,7 @@ export const en: Dictionary = {
 	'profile.groupsEmptyOther': "This user isn't in any group.",
 	'profile.visiting.none': 'Not signed up for anything.',
 	'profile.visiting.intro': 'Signed up for:',
+	'profile.visiting.onlyFriends': 'Only friends can see what someone has signed up for.',
 	'profile.forename': 'First name:',
 	'profile.lastname': 'Last name:',
 	'profile.notProvided': 'Not provided',
@@ -238,13 +241,16 @@ export const en: Dictionary = {
 	'profile.avatar.tooLarge': 'Image too large.',
 	'profile.avatar.uploaded': 'Image uploaded and saved.',
 	'profile.avatar.failed': 'Image upload failed.',
+	'profile.avatar.error.malformed': 'This is not a readable image.',
+	'profile.avatar.error.empty': 'The image is empty.',
+	'profile.avatar.error.type': 'Image type {mime} is not supported. Allowed are PNG and JPG.',
+	'profile.avatar.error.size': 'The image is too large (at most 1 MB).',
 	'profile.avatar.upload': 'Upload image',
 
 	// Friendships
 	'friend.add': 'Add friend',
 	'friend.remove': 'Remove friend',
 	'friend.requestSent': 'Friend request sent.',
-	'friend.requestFailed': 'Request failed.',
 	'friend.removed': 'Friendship ended.',
 	'updates.heading': 'Updates',
 	'updates.received': 'Received friend requests',

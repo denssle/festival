@@ -4,33 +4,18 @@
 	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { request } from '$lib/utils/request';
 
 	let { yourFriend = false, friendId }: { yourFriend?: boolean; friendId: string } = $props();
 
 	async function addFriend(): Promise<void> {
-		try {
-			const value = await fetch(resolve('/user/[user_id]/add-friend', { user_id: friendId }), { method: 'POST' });
-			if (value.ok) {
-				openDialog(tr('friend.requestSent'), false);
-			} else {
-				openDialog(tr('friend.requestFailed'), false);
-			}
-		} catch (reason) {
-			console.error('addFriend fetch error:', reason);
-		}
+		const result = await request(resolve('/user/[user_id]/add-friend', { user_id: friendId }), { method: 'POST' });
+		openDialog(result.ok ? tr('friend.requestSent') : result.message, false);
 	}
 
 	async function removeFriend(): Promise<void> {
-		try {
-			const value = await fetch(resolve('/user/[user_id]/remove-friend', { user_id: friendId }), { method: 'POST' });
-			if (value.ok) {
-				openDialog(tr('friend.removed'), true);
-			} else {
-				openDialog(tr('friend.requestFailed'), false);
-			}
-		} catch (reason) {
-			console.error('removeFriend fetch error:', reason);
-		}
+		const result = await request(resolve('/user/[user_id]/remove-friend', { user_id: friendId }), { method: 'POST' });
+		openDialog(result.ok ? tr('friend.removed') : result.message, result.ok);
 	}
 
 	function openDialog(msg: string, reloadOnClose: boolean) {

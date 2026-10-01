@@ -1,8 +1,18 @@
 import type { RequestHandler } from './$types';
+import { errorResponse } from '$lib/controller/error-response';
+import type { TranslationKey } from '$lib/i18n';
 import { UserService } from '$lib/services/user.service';
 import { validateImageDataUri, type ImageValidationError } from '$lib/services/image.logic';
 
 /** Mappt einen Validierungsfehler auf einen passenden HTTP-Status. */
+/** Meldung je Fehlergrund. `reason` aus image.logic.ts bleibt für Logs und Tests, ist aber nur deutsch. */
+const IMAGE_ERROR_KEYS: Record<ImageValidationError, TranslationKey> = {
+	malformed: 'profile.avatar.error.malformed',
+	empty: 'profile.avatar.error.empty',
+	type: 'profile.avatar.error.type',
+	size: 'profile.avatar.error.size'
+};
+
 const STATUS_FOR_IMAGE_ERROR: Record<ImageValidationError, number> = {
 	malformed: 400,
 	empty: 400,
@@ -27,19 +37,26 @@ export const POST: RequestHandler = async ({ locals, request }): Promise<Respons
 		const base64Img: string = await blob.text();
 		const currentUser = locals.currentUser;
 		if (!currentUser) {
-			return new Response('Unauthorized', { status: 401 });
+			return errorResponse(locals.locale, 401, 'error.notAuthenticated');
 		}
 		if (base64Img) {
 			// Serverseitige Validierung (Größe/Typ) – die Client-Prüfung ist umgehbar.
 			const validation = validateImageDataUri(base64Img);
 			if (!validation.valid) {
-				return new Response(validation.reason, { status: STATUS_FOR_IMAGE_ERROR[validation.error] });
+				return errorResponse(
+					locals.locale,
+					STATUS_FOR_IMAGE_ERROR[validation.error],
+					IMAGE_ERROR_KEYS[validation.error],
+					{
+						mime: validation.mime ?? ''
+					}
+				);
 			}
 			await UserService.saveUserImage(currentUser.id, base64Img);
 			return new Response(null, { status: 200 });
 		}
 	}
-	return new Response('Bad Request', { status: 400 });
+	return errorResponse(locals.locale, 400, 'error.missingData');
 };
 
 /**
@@ -53,7 +70,7 @@ export const POST: RequestHandler = async ({ locals, request }): Promise<Respons
 export const GET: RequestHandler = async ({ locals }): Promise<Response> => {
 	const currentUser = locals.currentUser;
 	if (!currentUser) {
-		return new Response('Unauthorized', { status: 401 });
+		return errorResponse(locals.locale, 401, 'error.notAuthenticated');
 	}
 	return new Response(await UserService.getUserImage(currentUser.id), { status: 200 });
 };

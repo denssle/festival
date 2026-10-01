@@ -2,7 +2,11 @@
 	import { tr } from '$lib/i18n/tr';
 	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
 
-	let { infoDialogData = $bindable() }: { infoDialogData: InfoDialogData } = $props();
+	// testId: Liegen mehrere InfoDialogs auf einer Seite (etwa der Seite und der
+	// Kommentare), braucht jeder eine eigene, sonst gibt es in Playwright eine
+	// "strict mode violation".
+	let { infoDialogData = $bindable(), testId = 'info-dialog' }: { infoDialogData: InfoDialogData; testId?: string } =
+		$props();
 
 	$effect(() => {
 		if (infoDialogData.dialog && infoDialogData.showDialog && !infoDialogData.dialog.open) {
@@ -12,7 +16,7 @@
 </script>
 
 <dialog
-	data-testid="info-dialog"
+	data-testid={testId}
 	bind:this={infoDialogData.dialog}
 	onclose={() => {
 		infoDialogData.showDialog = false;

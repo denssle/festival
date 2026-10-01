@@ -2,7 +2,7 @@ import { FestivalEventService } from '$lib/services/festival-event.service';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { BaseGuestInformation } from '$lib/models/guestInformation/BaseGuestInformation';
 import { GuestInformationService } from '$lib/services/guest-information.service';
-import { t } from '$lib/i18n';
+import { errorResponse } from '$lib/controller/error-response';
 import { findTooLongField, GUEST_TEXT_LIMITS } from '$lib/services/text-length.logic';
 
 /**
@@ -28,9 +28,7 @@ export const POST: RequestHandler = async ({ locals, params, request }): Promise
 		const user = locals.currentUser ?? null;
 
 		if (!user) {
-			return new Response(JSON.stringify({ success: false, message: t(locals.locale, 'error.notAuthenticated') }), {
-				status: 401
-			});
+			return errorResponse(locals.locale, 401, 'error.notAuthenticated');
 		}
 
 		if (params.festival_id && baseGuestInformation) {
@@ -43,18 +41,10 @@ export const POST: RequestHandler = async ({ locals, params, request }): Promise
 				GUEST_TEXT_LIMITS
 			);
 			if (tooLong) {
-				return new Response(
-					JSON.stringify({
-						success: false,
-						message: t(locals.locale, 'error.inputTooLong', { max: tooLong.max })
-					}),
-					{ status: 422 }
-				);
+				return errorResponse(locals.locale, 422, 'error.inputTooLong', { max: tooLong.max });
 			}
 			if (!(await FestivalEventService.isVisibleTo(user.id, params.festival_id))) {
-				return new Response(JSON.stringify({ success: false, message: t(locals.locale, 'festival.error.notFound') }), {
-					status: 404
-				});
+				return errorResponse(locals.locale, 404, 'festival.error.notFound');
 			}
 			await GuestInformationService.joinFestival(user, params.festival_id, baseGuestInformation);
 			return new Response(JSON.stringify({ success: true }), { status: 200 });
@@ -64,13 +54,9 @@ export const POST: RequestHandler = async ({ locals, params, request }): Promise
 			user: !!user,
 			parsed: !!baseGuestInformation
 		});
-		return new Response(JSON.stringify({ success: false, message: t(locals.locale, 'error.missingData') }), {
-			status: 400
-		});
+		return errorResponse(locals.locale, 400, 'error.missingData');
 	} catch (e) {
 		console.error('Error joining festival:', e);
-		return new Response(JSON.stringify({ success: false, message: t(locals.locale, 'error.internal') }), {
-			status: 500
-		});
+		return errorResponse(locals.locale, 500, 'error.internal');
 	}
 };

@@ -17,7 +17,7 @@ export type ImageValidationError = 'malformed' | 'type' | 'size' | 'empty';
 
 export type ImageValidationResult =
 	| { valid: true; mime: string }
-	| { valid: false; error: ImageValidationError; reason: string };
+	| { valid: false; error: ImageValidationError; reason: string; mime?: string };
 
 /**
  * Ermittelt die dekodierte Byte-Länge eines Base64-Strings ohne ihn tatsächlich zu dekodieren.
@@ -46,7 +46,7 @@ export function validateImageDataUri(dataUri: string): ImageValidationResult {
 	const payload = match[2];
 
 	if (!(ALLOWED_IMAGE_MIME_TYPES as readonly string[]).includes(mime)) {
-		return { valid: false, error: 'type', reason: `Nicht erlaubter Bildtyp: ${mime}. Erlaubt sind PNG und JPG.` };
+		return { valid: false, error: 'type', reason: `Nicht erlaubter Bildtyp: ${mime}. Erlaubt sind PNG und JPG.`, mime };
 	}
 
 	const sizeInBytes = base64ByteLength(payload);

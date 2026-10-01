@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { request } from '$lib/utils/request';
 	import { currentLocale, tr } from '$lib/i18n/tr';
 	import { resolve } from '$app/paths';
 	import { goto, invalidateAll } from '$app/navigation';
@@ -41,14 +42,13 @@
 				dialog.showModal();
 				const onclose = async () => {
 					if (questionDialogData.answerYes) {
-						const response = await fetch(resolve('/festival/[festival_id]', { festival_id: data.festival.id }), {
+						const result = await request(resolve('/festival/[festival_id]', { festival_id: data.festival.id }), {
 							method: 'DELETE'
 						});
-						if (response.ok) {
+						if (result.ok) {
 							await goto(resolve('/'));
 						} else {
-							infoDialogData.infoDialogText = tr('festival.error.deleteFailed');
-							infoDialogData.showDialog = true;
+							showError(tr('festival.error.deleteFailed') + ' ' + result.message);
 						}
 					}
 					dialog.removeEventListener('close', onclose);
@@ -85,25 +85,14 @@
 						answer: 'yes',
 						comment: ''
 					};
-					try {
-						const response = await fetch(resolve('/festival/[festival_id]/join', { festival_id: data.festival.id }), {
-							method: 'POST',
-							body: JSON.stringify(eventData)
-						});
-						if (response.ok) {
-							await afterRequest();
-						} else {
-							const errorData = await response.json();
-							console.error('Failed to join festival:', errorData);
-							infoDialogData.infoDialogText = tr('festival.error.joinFailed', {
-								message: errorData.message || tr('error.unknown')
-							});
-							infoDialogData.showDialog = true;
-						}
-					} catch (error) {
-						console.error('Fetch error joining festival:', error);
-						infoDialogData.infoDialogText = tr('festival.error.joinNetwork');
-						infoDialogData.showDialog = true;
+					const result = await request(resolve('/festival/[festival_id]/join', { festival_id: data.festival.id }), {
+						method: 'POST',
+						body: JSON.stringify(eventData)
+					});
+					if (result.ok) {
+						await afterRequest();
+					} else {
+						showError(tr('festival.error.joinFailed', { message: result.message }));
 					}
 				}
 				dialog.removeEventListener('close', onclose);
@@ -136,15 +125,14 @@
 			dialog.showModal();
 			const onclose = async () => {
 				if (cancelInvitationDialogData.answerYes) {
-					const response = await fetch(COMMENT_ANSWER_REQUESTS[answer].url(), {
+					const result = await request(COMMENT_ANSWER_REQUESTS[answer].url(), {
 						method: 'POST',
 						body: JSON.stringify({ comment: cancelInvitationDialogData.comment })
 					});
-					if (response.ok) {
+					if (result.ok) {
 						await afterRequest();
 					} else {
-						infoDialogData.infoDialogText = tr(COMMENT_ANSWER_REQUESTS[answer].failed);
-						infoDialogData.showDialog = true;
+						showError(tr(COMMENT_ANSWER_REQUESTS[answer].failed) + ' ' + result.message);
 					}
 				}
 				dialog.removeEventListener('close', onclose);
@@ -156,6 +144,11 @@
 
 	async function afterRequest(): Promise<void> {
 		await invalidateAll();
+	}
+
+	function showError(message: string): void {
+		infoDialogData.infoDialogText = message;
+		infoDialogData.showDialog = true;
 	}
 
 	let yourAnswer = $derived(data.yourGuestInformation?.answer);

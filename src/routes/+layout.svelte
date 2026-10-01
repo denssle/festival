@@ -5,6 +5,9 @@
 	import type { Snippet } from 'svelte';
 	import { tr } from '$lib/i18n/tr';
 	import LanguageSwitcher from '$lib/sharedComponents/LanguageSwitcher.svelte';
+	import InfoDialog from '$lib/sharedComponents/InfoDialog.svelte';
+	import type { InfoDialogData } from '$lib/models/dialogData/InfoDialogData';
+	import { request } from '$lib/utils/request';
 
 	let {
 		data,
@@ -15,13 +18,28 @@
 	} = $props();
 
 	async function logout() {
-		await fetch(resolve('/logout'), {
+		const result = await request(resolve('/logout'), {
 			method: 'POST'
 		});
+		if (!result.ok) {
+			// Nicht so tun, als wäre man abgemeldet – die Sitzung besteht noch.
+			infoDialogData.infoDialogText = result.message;
+			infoDialogData.showDialog = true;
+			return;
+		}
 		await invalidateAll();
 		await goto(resolve('/login'));
 	}
+
+	let infoDialogData: InfoDialogData = $state({
+		showDialog: false,
+		infoDialogText: '',
+		dialog: undefined,
+		answerYes: false
+	});
 </script>
+
+<InfoDialog bind:infoDialogData testId="layout-error-dialog" />
 
 <header>
 	<nav>
