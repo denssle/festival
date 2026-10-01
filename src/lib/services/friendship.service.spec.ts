@@ -35,25 +35,33 @@ describe('FriendshipService', () => {
 			expect((await FriendshipService.getReceivedFriendRequests(ben)).map((r) => r.receivedFrom?.id)).toEqual([anna]);
 		});
 
+		it('meldet das Ergebnis: neu angefragt', async () => {
+			expect(await FriendshipService.createFriendRequest(anna, ben)).toBe('requested');
+		});
+
 		it('ignoriert Anfragen an sich selbst', async () => {
-			await FriendshipService.createFriendRequest(anna, anna);
+			expect(await FriendshipService.createFriendRequest(anna, anna)).toBe('self');
 			expect(await FriendRequest.count()).toBe(0);
 		});
 
-		it('legt keine zweite Anfrage an – auch nicht in Gegenrichtung', async () => {
+		it('legt keine zweite Anfrage in derselben Richtung an', async () => {
 			await FriendshipService.createFriendRequest(anna, ben);
-			await FriendshipService.createFriendRequest(anna, ben);
-			// Bestehendes Verhalten: Die Gegenanfrage wird weder angelegt noch als Annahme
-			// gewertet – Ben muss Annas Anfrage über die Updates-Seite annehmen.
-			await FriendshipService.createFriendRequest(ben, anna);
-
+			expect(await FriendshipService.createFriendRequest(anna, ben)).toBe('alreadyRequested');
 			expect(await FriendRequest.count()).toBe(1);
-			expect(await FriendshipService.areFriends(anna, ben)).toBe(false);
+		});
+
+		it('eine Anfrage in Gegenrichtung gilt als Annahme', async () => {
+			await FriendshipService.createFriendRequest(anna, ben);
+			expect(await FriendshipService.createFriendRequest(ben, anna)).toBe('accepted');
+
+			expect(await FriendshipService.areFriends(anna, ben)).toBe(true);
+			expect(await FriendRequest.count()).toBe(0);
+			expect(await Friendship.count()).toBe(1);
 		});
 
 		it('legt unter Freunden keine Anfrage an', async () => {
 			await FriendshipService.addFriend(anna, ben);
-			await FriendshipService.createFriendRequest(ben, anna);
+			expect(await FriendshipService.createFriendRequest(ben, anna)).toBe('alreadyFriends');
 			expect(await FriendRequest.count()).toBe(0);
 		});
 	});

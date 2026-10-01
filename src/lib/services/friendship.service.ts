@@ -12,6 +12,12 @@ import { FriendRequest } from '$lib/db/model/friendRequest';
 import { Friendship } from '$lib/db/model/friendship';
 import { User } from '$lib/db/model/user';
 
+/**
+ * Was ein Klick auf „Anfreunden“ bewirkt hat – der Knopf zeigt danach den passenden Text.
+ * `accepted`: Es lag schon eine Anfrage in Gegenrichtung vor, die damit angenommen ist.
+ */
+export type FriendRequestOutcome = 'requested' | 'accepted' | 'alreadyRequested' | 'alreadyFriends' | 'self';
+
 export class FriendshipService {
 	static async getFriends(userId: string): Promise<FriendAttributes[]> {
 		const model = await Friendship.findAll({
@@ -66,27 +72,38 @@ export class FriendshipService {
 		return Boolean(model);
 	}
 
-	static async createFriendRequest(senderId: string, receiverId: string): Promise<void> {
+	/**
+	 * „Anfreunden“: stellt eine Anfrage – oder nimmt eine offene Anfrage in Gegenrichtung an.
+	 * Vorher passierte im zweiten Fall gar nichts, der Knopf meldete aber „Anfrage gesendet“
+	 * (gefunden 2026-10-01).
+	 */
+	static async createFriendRequest(senderId: string, receiverId: string): Promise<FriendRequestOutcome> {
 		if (senderId === receiverId) {
-			return;
+			return 'self';
 		}
 		if (await this.areFriends(senderId, receiverId)) {
-			return;
+			return 'alreadyFriends';
 		}
-		if (!(await this.friendRequestExisting(senderId, receiverId))) {
-			try {
-				await FriendRequest.create({
-					id: crypto.randomUUID(),
-					senderId: senderId,
-					receiverId: receiverId
-				});
-			} catch (error) {
-				// Paralleler Request hat die Anfrage bereits angelegt – idempotent ignorieren
-				if (!(error instanceof UniqueConstraintError)) {
-					throw error;
-				}
+		if (await this.receivedFriendRequestExists(senderId, receiverId)) {
+			await this.acceptFriendRequest(senderId, receiverId);
+			return 'accepted';
+		}
+		if (await this.friendRequestExisting(senderId, receiverId)) {
+			return 'alreadyRequested';
+		}
+		try {
+			await FriendRequest.create({
+				id: crypto.randomUUID(),
+				senderId: senderId,
+				receiverId: receiverId
+			});
+		} catch (error) {
+			// Paralleler Request hat die Anfrage bereits angelegt – idempotent ignorieren
+			if (!(error instanceof UniqueConstraintError)) {
+				throw error;
 			}
 		}
+		return 'requested';
 	}
 
 	static async getReceivedFriendRequests(receiverId: string): Promise<FriendRequestData[]> {

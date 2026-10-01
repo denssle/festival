@@ -5,12 +5,28 @@
 	import { invalidateAll } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { request } from '$lib/utils/request';
+	import type { TranslationKey } from '$lib/i18n';
+	import type { FriendRequestOutcome } from '$lib/services/friendship.service';
+
+	/** Text je Ergebnis; bei einer (schon bestehenden) Freundschaft lädt die Seite danach neu. */
+	const OUTCOME: Record<FriendRequestOutcome, { key: TranslationKey; reload: boolean }> = {
+		requested: { key: 'friend.requestSent', reload: false },
+		accepted: { key: 'friend.accepted', reload: true },
+		alreadyRequested: { key: 'friend.alreadyRequested', reload: false },
+		alreadyFriends: { key: 'friend.alreadyFriends', reload: true },
+		self: { key: 'friend.self', reload: false }
+	};
 
 	let { yourFriend = false, friendId }: { yourFriend?: boolean; friendId: string } = $props();
 
 	async function addFriend(): Promise<void> {
 		const result = await request(resolve('/user/[user_id]/add-friend', { user_id: friendId }), { method: 'POST' });
-		openDialog(result.ok ? tr('friend.requestSent') : result.message, false);
+		if (!result.ok) {
+			openDialog(result.message, false);
+			return;
+		}
+		const { outcome }: { outcome: FriendRequestOutcome } = await result.response.json();
+		openDialog(tr(OUTCOME[outcome].key), OUTCOME[outcome].reload);
 	}
 
 	async function removeFriend(): Promise<void> {
