@@ -12,7 +12,10 @@ jobs:
   test:
     name: Run Playwright Tests
     timeout-minutes: 60
-    runs-on: ubuntu-latest
+    # Fest auf 24.04: ubuntu-latest ist seit 2026-11 Ubuntu 26.04, das kennt
+    # Playwright erst ab 1.65 ("does not support chromium on ubuntu26.04-x64").
+    # Zurueck auf ubuntu-latest erst nach dem Playwright-Update.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
